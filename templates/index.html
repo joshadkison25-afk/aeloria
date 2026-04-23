@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aeloria — The Living World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#04040a;--bg2:#070710;--surface:#0c0c18;--surface2:#111122;
+      --border:#1e1e35;--border2:#2a2a45;
+      --gold:#c9a84c;--gold-dim:#7a6232;--gold-glow:rgba(201,168,76,0.12);
+      --purple:#9b7fd4;--purple-dim:#3d2d6a;
+      --blood:#8b1a1a;--blood-dim:rgba(139,26,26,0.3);
+      --text:#ccc8be;--text-dim:#6a6a7e;
+      --rising:#4e9e6a;--stable:#4e7e9e;--declining:#b87040;--critical:#b83030;
+    }
+    html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(60,30,100,.18) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 90% 90%,rgba(100,20,20,.08) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+    /* Header */
+    header{position:relative;text-align:center;padding:28px 24px 0;z-index:10}
+    .hdr-sig{font-size:10px;letter-spacing:6px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:8px}
+    header h1{font-family:'Cinzel Decorative',serif;font-size:clamp(24px,4vw,44px);color:var(--gold);letter-spacing:5px;text-shadow:0 0 40px rgba(201,168,76,.25)}
+    .hdr-div{display:flex;align-items:center;gap:12px;margin:16px auto 0;max-width:500px;padding:0 24px}
+    .hdr-div::before,.hdr-div::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent)}
+    .hdr-div span{color:var(--gold-dim);font-size:16px}
+
+    /* Meta bar */
+    .meta{display:flex;justify-content:center;gap:28px;padding:12px 24px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);position:relative;z-index:10;flex-wrap:wrap}
+    .meta-val{font-family:'Cinzel',serif;color:var(--gold);font-size:11px}
+    .pulse{width:6px;height:6px;background:var(--rising);border-radius:50%;display:inline-block;animation:pulse 2.5s ease-in-out infinite;box-shadow:0 0 6px var(--rising);margin-right:5px}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+    /* Nav */
+    nav{display:flex;justify-content:center;flex-wrap:wrap;padding:0 12px;border-bottom:1px solid var(--border);margin-top:4px;position:relative;z-index:10;overflow-x:auto}
+    .tab{padding:12px 16px;cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+    /* Main */
+    main{max-width:1320px;margin:0 auto;padding:24px 20px 60px;position:relative;z-index:10}
+    .panel{display:none}.panel.active{display:block}
+
+    /* World date */
+    .world-banner{text-align:center;margin-bottom:28px}
+    .world-date{font-family:'Cinzel',serif;font-size:clamp(15px,2.2vw,20px);color:var(--gold);letter-spacing:2px}
+    .world-real{font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:var(--text-dim);margin-top:4px}
+
+    /* Stat row */
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+    @media(max-width:700px){.stat-row{grid-template-columns:1fr 1fr}}
+    .stat-card{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:16px;text-align:center;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent)}
+    .stat-lbl{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+    .stat-val{font-family:'Cinzel',serif;font-size:24px;color:var(--gold);line-height:1}
+    .stat-val.danger{color:var(--critical);text-shadow:0 0 20px rgba(184,48,48,.3)}
+
+    /* Card */
+    .card{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:20px 22px;margin-bottom:14px;position:relative}
+    .card-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .card-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+    .card-title{font-family:'Cinzel',serif;font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--gold-dim);white-space:nowrap}
+
+    /* Grid */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+    @media(max-width:800px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    /* Events */
+    .event-item{padding:12px 0;border-bottom:1px solid var(--border)}
+    .event-item:last-child{border-bottom:none;padding-bottom:0}
+    .event-item:first-child{padding-top:0}
+    .event-region{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:4px}
+    .event-text{font-family:'Crimson Text',serif;font-size:16px;line-height:1.5}
+
+    /* Whispers */
+    .whisper-item{padding:10px 14px;margin-bottom:8px;border-left:2px solid var(--purple-dim);background:rgba(155,127,212,.04);border-radius:0 3px 3px 0}
+    .whisper-item:last-child{margin-bottom:0}
+    .whisper-text{font-family:'Crimson Text',serif;font-style:italic;font-size:15px;color:var(--purple);line-height:1.5}
+    .whisper-region{font-size:10px;color:var(--text-dim);margin-top:3px}
+
+    /* Omens */
+    .omen-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);gap:16px}
+    .omen-item:last-child{border-bottom:none}
+    .omen-region{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);white-space:nowrap;padding-top:2px}
+    .omen-cond{font-family:'Crimson Text',serif;font-size:15px;color:var(--text);text-align:right}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:2px;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-family:'Cinzel',serif}
+    .badge::before{content:'';width:4px;height:4px;border-radius:50%}
+    .badge-Rising{background:rgba(78,158,106,.12);color:var(--rising);border:1px solid rgba(78,158,106,.25)}.badge-Rising::before{background:var(--rising);box-shadow:0 0 5px var(--rising)}
+    .badge-Stable{background:rgba(78,126,158,.12);color:var(--stable);border:1px solid rgba(78,126,158,.25)}.badge-Stable::before{background:var(--stable)}
+    .badge-Declining{background:rgba(184,112,64,.12);color:var(--declining);border:1px solid rgba(184,112,64,.25)}.badge-Declining::before{background:var(--declining)}
+    .badge-Critical{background:rgba(184,48,48,.15);color:var(--critical);border:1px solid rgba(184,48,48,.3)}.badge-Critical::before{background:var(--critical);box-shadow:0 0 6px var(--critical);animation:pulse 1.5s infinite}
+
+    /* Faction cards */
+    .faction-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+    .faction-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:14px;transition:border-color .2s}
+    .faction-card:hover{border-color:var(--border2)}
+    .faction-card.is-critical{border-color:rgba(184,48,48,.3);background:rgba(184,48,48,.03)}
+    .faction-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text);margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .faction-reason{font-family:'Crimson Text',serif;font-size:13px;color:var(--text-dim);line-height:1.4;margin-top:6px}
+
+    /* Power bars */
+    .power-bar-wrap{margin-bottom:14px}
+    .power-bar-label{display:flex;justify-content:space-between;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px}
+    .power-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:3px}
+    .power-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+
+    /* Tensions */
+    .tension-item{padding:14px 0;border-bottom:1px solid var(--border)}
+    .tension-item:last-child{border-bottom:none}
+    .tension-item:first-child{padding-top:0}
+    .tension-fac{font-family:'Cinzel',serif;font-size:10px;color:var(--declining);letter-spacing:1px;margin-bottom:5px}
+    .tension-fac::before{content:'⚔ '}
+    .tension-desc{font-family:'Crimson Text',serif;font-size:15px;color:var(--text);line-height:1.5}
+
+    /* Chronicle */
+    .chapter{margin-bottom:32px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+    .chapter:last-child{border-bottom:none}
+    .chapter-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px;margin-bottom:4px}
+    .chapter-date{font-family:'Crimson Text',serif;font-style:italic;font-size:13px;color:var(--text-dim);margin-bottom:14px}
+    .chapter-text{font-family:'Crimson Text',serif;font-size:17px;line-height:1.8;color:var(--text)}
+    .chapter-text p{margin-bottom:12px}
+    .chapter-text p:last-child{margin-bottom:0}
+
+    /* Timeline */
+    #timeline-container{overflow-x:auto;padding:20px 0;min-height:300px;position:relative}
+    .timeline-tip{position:fixed;background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--gold-dim);padding:8px 12px;border-radius:3px;font-size:12px;font-family:'Crimson Text',serif;max-width:220px;pointer-events:none;z-index:500;color:var(--text)}
+    #timeline-detail{display:none;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:20px;margin-top:14px}
+
+    /* Map */
+    #map-svg-container{position:relative;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;overflow:hidden;min-height:300px}
+    #map-tooltip{display:none;position:absolute;background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--gold-dim);padding:12px 14px;border-radius:3px;pointer-events:none;z-index:50;max-width:260px;font-size:13px}
+
+    /* Faction web */
+    #faction-web-container{position:relative;width:100%;min-height:480px;background:var(--surface2);border-radius:4px;overflow:hidden}
+
+    /* History */
+    .history-item{display:flex;align-items:flex-start;gap:18px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:padding-left .15s}
+    .history-item:hover{padding-left:8px;border-color:var(--border2)}
+    .history-item:last-child{border-bottom:none}
+    .history-item:first-child{padding-top:0}
+    .history-num{font-family:'Cinzel',serif;font-size:20px;color:var(--gold-dim);min-width:34px;text-align:center}
+    .history-date{font-family:'Crimson Text',serif;font-size:16px;color:var(--text);margin-bottom:3px}
+    .history-meta{font-size:10px;color:var(--text-dim);letter-spacing:1px}
+    #history-detail{display:none}
+    .back-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;transition:all .2s}
+    .back-btn:hover{color:var(--gold);border-color:var(--gold-dim)}
+
+    /* Talk */
+    .chat-wrap{display:flex;flex-direction:column;height:400px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+    .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+    .chat-msg{max-width:80%;padding:10px 14px;border-radius:3px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.5}
+    .chat-msg.user{align-self:flex-end;background:var(--purple-dim);color:var(--text);border:1px solid rgba(155,127,212,.2)}
+    .chat-msg.npc{align-self:flex-start;background:var(--surface);color:var(--text);border:1px solid var(--border2)}
+    .chat-msg .msg-name{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);margin-bottom:4px}
+    .chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+    .chat-input-row input{flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:3px;font-family:'Crimson Text',serif;font-size:15px;outline:none}
+    .chat-input-row input:focus{border-color:var(--purple-dim)}
+
+    /* God panel */
+    .god-wrap{max-width:720px}
+    .intervention-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    @media(max-width:600px){.intervention-grid{grid-template-columns:1fr}}
+    .intervention-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:14px;cursor:pointer;transition:all .2s}
+    .intervention-card:hover{border-color:var(--border2)}
+    .intervention-card.overt{border-left:3px solid var(--blood)}
+    .intervention-card.covert{border-left:3px solid var(--purple-dim)}
+    .iv-name{font-family:'Cinzel',serif;font-size:10px;color:var(--text);letter-spacing:1px;margin-bottom:4px}
+    .iv-desc{font-size:11px;color:var(--text-dim);line-height:1.4}
+
+    /* Strategy */
+    .strategy-faction{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:10px}
+    .strategy-fname{font-family:'Cinzel',serif;font-size:11px;color:var(--text);margin-bottom:12px;display:flex;justify-content:space-between}
+
+    /* Search */
+    .search-input-wrap{display:flex;gap:10px;margin-bottom:20px}
+    .search-input-wrap input{flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:3px;font-family:'Crimson Text',serif;font-size:16px;outline:none}
+    .search-input-wrap input:focus{border-color:var(--gold-dim)}
+    .search-result{padding:14px 0;border-bottom:1px solid var(--border)}
+    .search-result:last-child{border-bottom:none}
+    .search-tick{font-family:'Cinzel',serif;font-size:10px;color:var(--gold-dim);margin-bottom:4px}
+    .search-date{font-family:'Crimson Text',serif;font-size:15px;color:var(--text);margin-bottom:6px}
+    .search-excerpt{font-size:12px;color:var(--text-dim);font-style:italic}
+
+    /* Audio player */
+    .audio-player{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:12px 16px;margin-bottom:16px}
+    .audio-play-btn{background:var(--purple-dim);border:1px solid rgba(155,127,212,.3);color:var(--purple);border-radius:3px;padding:8px 16px;cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;transition:all .2s}
+    .audio-play-btn:hover{background:rgba(155,127,212,.2)}
+    .audio-info{font-family:'Crimson Text',serif;font-size:13px;color:var(--text-dim)}
+
+    /* Forms */
+    textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Crimson Text',serif;font-size:16px;padding:12px 14px;outline:none;transition:border-color .2s}
+    textarea{resize:vertical;min-height:110px}
+    select{cursor:pointer}
+    textarea:focus,select:focus{border-color:var(--purple-dim)}
+    textarea::placeholder{color:var(--text-dim);font-style:italic}
+    .form-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px;display:block}
+    .field{margin-bottom:12px}
+
+    /* Buttons */
+    .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .btn{padding:9px 20px;border-radius:3px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;transition:all .2s}
+    .btn-primary{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(155,127,212,.3)}.btn-primary:hover{background:rgba(155,127,212,.2)}
+    .btn-danger{background:var(--blood-dim);color:#d46060;border:1px solid rgba(139,26,26,.5)}.btn-danger:hover{background:rgba(139,26,26,.4)}
+    .btn-gold{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.3)}.btn-gold:hover{background:rgba(201,168,76,.2)}
+    .btn:disabled{opacity:.35;cursor:not-allowed}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--gold);padding:11px 18px;border-radius:3px;font-family:'Crimson Text',serif;font-size:14px;color:var(--text);opacity:0;transform:translateY(8px);transition:all .3s;z-index:999;max-width:300px}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    /* Misc */
+    .empty{text-align:center;padding:28px 20px;color:var(--text-dim);font-family:'Crimson Text',serif;font-style:italic;font-size:15px}
+    .spin{display:inline-block;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .pending-badge{display:inline-block;background:var(--purple-dim);color:var(--purple);border-radius:10px;padding:1px 7px;font-size:9px;margin-left:5px}
+    .prediction-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:4px;padding:16px;margin-top:14px;font-family:'Crimson Text',serif;font-size:16px;line-height:1.6;color:var(--text);display:none}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-sig">The Living World</div>
+  <h1>Aeloria</h1>
+  <div class="hdr-div"><span>⚔</span></div>
+</header>
+
+<div class="meta">
+  <span>Tick <span class="meta-val" id="m-tick">—</span></span>
+  <span>Tensions <span class="meta-val" id="m-tens">—</span></span>
+  <span>Factions <span class="meta-val" id="m-fac">—</span></span>
+  <span><span class="pulse"></span>Live</span>
+</div>
+
+<nav>
+  <div class="tab active" data-tab="world">World</div>
+  <div class="tab" data-tab="map">Map</div>
+  <div class="tab" data-tab="factions">Factions</div>
+  <div class="tab" data-tab="chronicle">Chronicle</div>
+  <div class="tab" data-tab="timeline">Timeline</div>
+  <div class="tab" data-tab="strategy">Strategy</div>
+  <div class="tab" data-tab="talk">Talk</div>
+  <div class="tab" data-tab="god">God Panel <span id="pending-badge" class="pending-badge" style="display:none">0</span></div>
+  <div class="tab" data-tab="search">Search</div>
+</nav>
+
+<main>
+
+<!-- ── WORLD ── -->
+<div class="panel active" id="panel-world">
+  <div class="world-banner">
+    <div class="world-date" id="w-date">Loading...</div>
+    <div class="world-real" id="w-real"></div>
+  </div>
+  <div id="audio-player-wrap"></div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-lbl">Tick</div><div class="stat-val" id="s-tick">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Active Tensions</div><div class="stat-val" id="s-tens">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Factions</div><div class="stat-val" id="s-fac">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Critical</div><div class="stat-val danger" id="s-crit">—</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-hdr"><div class="card-title">Recent Events</div></div><div id="ev-list"><div class="empty">The world is silent...</div></div></div>
+    <div>
+      <div class="card"><div class="card-hdr"><div class="card-title">Whispers</div></div><div id="wh-list"><div class="empty">No whispers heard...</div></div></div>
+      <div class="card"><div class="card-hdr"><div class="card-title">Weather &amp; Omens</div></div><div id="om-list"><div class="empty">The skies are clear...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAP ── -->
+<div class="panel" id="panel-map">
+  <div class="card" style="padding:12px;">
+    <div id="map-svg-container">
+      <div class="empty" style="padding:60px 0;">Loading map...</div>
+    </div>
+    <div id="map-tooltip"></div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-hdr"><div class="card-title">Map Legend</div></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px;">
+      <span style="color:var(--rising)">● Rising</span>
+      <span style="color:var(--stable)">● Stable</span>
+      <span style="color:var(--declining)">● Declining</span>
+      <span style="color:var(--critical)">● Critical</span>
+      <span style="color:#b83030;font-style:italic">- - - Active Tension</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── FACTIONS ── -->
+<div class="panel" id="panel-factions">
+  <div class="card"><div class="card-hdr"><div class="card-title">Faction Morale</div></div><div class="faction-grid" id="fac-grid"><div class="empty">No faction data...</div></div></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Relationship Web</div></div><div id="faction-web-container"></div></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Active Tensions</div></div><div id="tens-list"><div class="empty">An uneasy peace holds...</div></div></div>
+</div>
+
+<!-- ── CHRONICLE ── -->
+<div class="panel" id="panel-chronicle">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">The Chronicle of Aeloria</div></div>
+    <div id="chronicle-content"><div class="empty">Loading chronicle...</div></div>
+  </div>
+</div>
+
+<!-- ── TIMELINE ── -->
+<div class="panel" id="panel-timeline">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">World Timeline</div></div>
+    <div id="timeline-container"></div>
+    <div id="timeline-detail"></div>
+  </div>
+</div>
+
+<!-- ── STRATEGY ── -->
+<div class="panel" id="panel-strategy">
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Faction Power</div></div>
+      <div id="strategy-power"><div class="empty">No power data yet...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">War Prediction</div></div>
+      <div class="field"><label class="form-label">Faction A</label><select id="pred-a"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="form-label">Faction B</label><select id="pred-b"><option value="">— Select —</option></select></div>
+      <div class="btn-row"><button class="btn btn-gold" onclick="getPrediction()">⚡ Predict</button></div>
+      <div class="prediction-box" id="prediction-box"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TALK ── -->
+<div class="panel" id="panel-talk">
+  <div class="card" style="max-width:720px;">
+    <div class="card-hdr"><div class="card-title">Speak with a Character</div></div>
+    <div class="field"><label class="form-label">Character</label><select id="char-select"><option value="">— Choose who to speak with —</option></select></div>
+    <div id="chat-area" style="display:none;">
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-input-row">
+          <input id="chat-input" type="text" placeholder="Speak..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+          <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-gold" onclick="makeCanon()">📜 Make Canon</button>
+        <button class="btn" style="background:none;border:1px solid var(--border2);color:var(--text-dim);" onclick="clearChat()">Clear</button>
+      </div>
+    </div>
+    <div id="chat-select-hint" style="color:var(--text-dim);font-family:'Crimson Text',serif;font-style:italic;font-size:15px;padding:12px 0;">Select a character to begin speaking with them...</div>
+  </div>
+</div>
+
+<!-- ── GOD PANEL ── -->
+<div class="panel" id="panel-god">
+  <div class="god-wrap">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Decree to the World</div></div>
+      <div class="field"><label class="form-label">Write your decree</label><textarea id="lore-input" placeholder="Describe an event, inject a character, shift the balance of power...&#10;Your words become truth on the next tick."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="submitLore()">⚡ Decree</button>
+        <button class="btn btn-danger" id="force-btn" onclick="forceTick()">⏩ Force Tick</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Covert Interventions</div></div>
+      <div class="intervention-grid">
+        <div class="intervention-card covert" onclick="openIntervention('back_faction','covert')"><div class="iv-name">Back a Faction</div><div class="iv-desc">Secretly channel resources to a faction</div></div>
+        <div class="intervention-card covert" onclick="openIntervention('plant_rumor','covert')"><div class="iv-name">Plant a Rumor</div><div class="iv-desc">Inject a whisper into the world's rumor network</div></div>
+        <div class="intervention-card covert" onclick="openIntervention('arrange_meeting','covert')"><div class="iv-name">Arrange a Meeting</div><div class="iv-desc">Two faction leaders meet in secret</div></div>
+        <div class="intervention-card covert" onclick="openIntervention('curse_character','covert')"><div class="iv-name">Curse a Character</div><div class="iv-desc">A character begins suffering misfortune</div></div>
+        <div class="intervention-card covert" onclick="openIntervention('bless_region','covert')"><div class="iv-name">Bless a Region</div><div class="iv-desc">A region experiences unusual prosperity</div></div>
+      </div>
+      <div class="card-hdr" style="margin-top:16px;"><div class="card-title">Overt Interventions</div></div>
+      <div class="intervention-grid">
+        <div class="intervention-card overt" onclick="openIntervention('divine_omen','overt')"><div class="iv-name">Divine Omen</div><div class="iv-desc">A supernatural sign appears across Aeloria</div></div>
+        <div class="intervention-card overt" onclick="openIntervention('smite','overt')"><div class="iv-name">Smite</div><div class="iv-desc">Destroy an army, district, or character directly</div></div>
+        <div class="intervention-card overt" onclick="openIntervention('prophecy','overt')"><div class="iv-name">Prophecy</div><div class="iv-desc">Inject a prophecy that factions will react to</div></div>
+        <div class="intervention-card overt" onclick="openIntervention('raise_dead','overt')"><div class="iv-name">Raise the Dead</div><div class="iv-desc">A dead character returns, changed</div></div>
+      </div>
+    </div>
+
+    <!-- Intervention modal -->
+    <div id="iv-modal" style="display:none;" class="card" style="border-color:var(--gold-dim);">
+      <div class="card-hdr"><div class="card-title" id="iv-modal-title">Intervention</div></div>
+      <div class="field"><label class="form-label">Target (faction or character name)</label><input id="iv-target" type="text" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px;border-radius:3px;width:100%;font-family:'Crimson Text',serif;font-size:15px;outline:none;"/></div>
+      <div class="field" id="iv-detail-field"><label class="form-label">Details / Message</label><input id="iv-detail" type="text" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px;border-radius:3px;width:100%;font-family:'Crimson Text',serif;font-size:15px;outline:none;"/></div>
+      <div class="btn-row"><button class="btn btn-gold" onclick="submitIntervention()">Enact</button><button class="btn" style="background:none;border:1px solid var(--border2);color:var(--text-dim);" onclick="document.getElementById('iv-modal').style.display='none'">Cancel</button></div>
+    </div>
+
+    <div class="card"><div class="card-hdr"><div class="card-title">Pending Decrees</div></div><div id="pending-list"><div class="empty">No pending decrees...</div></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">Character Updates</div></div><div id="char-updates"><div class="empty">No updates this tick...</div></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">God Actions Log</div></div><div id="god-log"><div class="empty">No actions recorded...</div></div></div>
+  </div>
+</div>
+
+<!-- ── SEARCH ── -->
+<div class="panel" id="panel-search">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Search the Chronicle</div></div>
+    <div class="search-input-wrap">
+      <input id="search-input" type="text" placeholder="Search characters, places, factions..." onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="btn btn-gold" onclick="doSearch()">Search</button>
+    </div>
+    <div id="search-results"><div class="empty">Enter a name or place to search...</div></div>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/map.js"></script>
+<script src="/static/js/factionweb.js"></script>
+<script src="/static/js/timeline.js"></script>
+<script>
+let worldState = {};
+let currentChar = "";
+let currentIvType = "";
+let chatHistory = [];
+let tabsOpened = {};
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    const tab = t.dataset.tab;
+    document.getElementById("panel-" + tab).classList.add("active");
+    if (!tabsOpened[tab]) { tabsOpened[tab] = true; onTabOpen(tab); }
+    if (tab === "god") loadPending();
+    if (tab === "map") updateMap(worldState);
+    if (tab === "factions" && worldState.faction_morale) initFactionWeb(worldState);
+  });
+});
+
+async function onTabOpen(tab) {
+  if (tab === "chronicle") loadChronicle();
+  if (tab === "timeline") initTimeline();
+  if (tab === "strategy") renderStrategy(worldState);
+  if (tab === "talk") loadCharacters();
+  if (tab === "search") {}
+}
+
+function toast(msg, dur = 3500) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), dur);
+}
+
+function badge(status) {
+  return `<span class="badge badge-${status}">${status}</span>`;
+}
+
+// ── Render world state ─────────────────────────────────────────────────────
+function renderWorld(s) {
+  worldState = s;
+  if (!s || !s.world_date) return;
+
+  document.getElementById("w-date").textContent = s.world_date;
+  document.getElementById("m-tick").textContent = s.tick ?? "—";
+  document.getElementById("m-tens").textContent = (s.active_tensions||[]).length;
+  document.getElementById("m-fac").textContent = (s.faction_morale||[]).length;
+  document.getElementById("s-tick").textContent = s.tick ?? "—";
+  document.getElementById("s-tens").textContent = (s.active_tensions||[]).length;
+  document.getElementById("s-fac").textContent = (s.faction_morale||[]).length;
+  const crit = (s.faction_morale||[]).filter(f => f.status === "Critical").length;
+  document.getElementById("s-crit").textContent = crit;
+  if (s.real_timestamp) {
+    const d = new Date(s.real_timestamp);
+    document.getElementById("w-real").textContent = `Last updated ${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+  }
+
+  // Events
+  const evs = s.recent_events || [];
+  document.getElementById("ev-list").innerHTML = evs.length
+    ? evs.map(e => `<div class="event-item"><div class="event-region">${e.region}</div><div class="event-text">${e.text}</div></div>`).join("")
+    : "<div class='empty'>The world is silent...</div>";
+
+  // Whispers
+  const ws = s.whispers || [];
+  document.getElementById("wh-list").innerHTML = ws.length
+    ? ws.map(w => `<div class="whisper-item"><div class="whisper-text">"${w.text}"</div><div class="whisper-region">— ${w.region}</div></div>`).join("")
+    : "<div class='empty'>No whispers heard...</div>";
+
+  // Omens
+  const os = s.weather_and_omens || [];
+  document.getElementById("om-list").innerHTML = os.length
+    ? os.map(o => `<div class="omen-item"><div class="omen-region">${o.region}</div><div class="omen-cond">${o.condition}</div></div>`).join("")
+    : "<div class='empty'>The skies are clear...</div>";
+
+  // Faction grid
+  const fm = s.faction_morale || [];
+  document.getElementById("fac-grid").innerHTML = fm.length
+    ? fm.map(f => `<div class="faction-card ${f.status==="Critical"?"is-critical":""}"><div class="faction-name"><span>${f.faction}</span>${badge(f.status)}</div><div class="faction-reason">${f.reason}</div></div>`).join("")
+    : "<div class='empty'>No faction data...</div>";
+
+  // Tensions
+  const ts = s.active_tensions || [];
+  document.getElementById("tens-list").innerHTML = ts.length
+    ? ts.map(t => `<div class="tension-item"><div class="tension-fac">${t.factions}</div><div class="tension-desc">${t.description}</div></div>`).join("")
+    : "<div class='empty'>An uneasy peace holds...</div>";
+
+  // Character updates (god panel)
+  const cs = s.character_updates || [];
+  document.getElementById("char-updates").innerHTML = cs.length
+    ? cs.map(c => `<div class="event-item"><div class="event-region">${c.faction}</div><div class="event-text"><strong>${c.name}</strong> — ${c.status}</div></div>`).join("")
+    : "<div class='empty'>No updates this tick...</div>";
+
+  // Strategy power selects
+  renderStrategySelects(fm);
+  renderStrategy(s);
+
+  // Audio player
+  checkAudio();
+}
+
+// ── State fetch ────────────────────────────────────────────────────────────
+async function fetchState() {
+  try {
+    const r = await fetch("/api/state");
+    const s = await r.json();
+    if (s && s.world_date) renderWorld(s);
+  } catch(e) { console.error(e); }
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────
+async function checkAudio() {
+  try {
+    const r = await fetch("/api/audio/latest");
+    const d = await r.json();
+    const wrap = document.getElementById("audio-player-wrap");
+    if (d.url) {
+      wrap.innerHTML = `
+        <div class="audio-player">
+          <button class="audio-play-btn" onclick="toggleAudio(this)">▶ Play Narration</button>
+          <div class="audio-info">Tick ${d.tick} — Voice of Aeloria</div>
+          <audio id="tick-audio" src="${d.url}" style="display:none;"></audio>
+        </div>`;
+    } else {
+      wrap.innerHTML = "";
+    }
+  } catch(e) {}
+}
+
+function toggleAudio(btn) {
+  const audio = document.getElementById("tick-audio");
+  if (!audio) return;
+  if (audio.paused) { audio.play(); btn.textContent = "⏸ Pause"; }
+  else { audio.pause(); btn.textContent = "▶ Play Narration"; }
+  audio.onended = () => { btn.textContent = "▶ Play Narration"; };
+}
+
+// ── Chronicle ─────────────────────────────────────────────────────────────
+async function loadChronicle() {
+  document.getElementById("chronicle-content").innerHTML = "<div class='empty'>Loading chronicle...</div>";
+  try {
+    const r = await fetch("/api/chronicle");
+    const entries = await r.json();
+    if (!entries.length) {
+      document.getElementById("chronicle-content").innerHTML = "<div class='empty'>The chronicle has not yet been written...</div>";
+      return;
+    }
+    document.getElementById("chronicle-content").innerHTML = entries.map((e, i) =>
+      `<div class="chapter">
+        <div class="chapter-title">Chapter ${entries.length - i} — Tick ${e.tick}</div>
+        <div class="chapter-date">${e.world_date}</div>
+        <div class="chapter-text">${e.text.split("\n\n").map(p => `<p>${p.trim()}</p>`).join("")}</div>
+      </div>`
+    ).join("");
+  } catch(e) { document.getElementById("chronicle-content").innerHTML = "<div class='empty'>Failed to load chronicle.</div>"; }
+}
+
+// ── Strategy ──────────────────────────────────────────────────────────────
+function renderStrategySelects(morale) {
+  const factions = (morale || []).map(f => f.faction);
+  ["pred-a","pred-b"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">— Select —</option>` + factions.map(f => `<option value="${f}" ${f===cur?"selected":""}>${f}</option>`).join("");
+  });
+}
+
+function renderStrategy(s) {
+  const power = s.faction_power || [];
+  const el = document.getElementById("strategy-power");
+  if (!el || !power.length) return;
+  const colors = { military: "#b83030", political: "#c9a84c", economic: "#4e9e9e", influence: "#9b7fd4" };
+  el.innerHTML = power.map(f => `
+    <div class="strategy-faction">
+      <div class="strategy-fname"><span>${f.faction}</span>${badge((s.faction_morale||[]).find(m=>m.faction===f.faction)?.status||"Stable")}</div>
+      ${["military","political","economic","influence"].map(k => `
+        <div class="power-bar-wrap">
+          <div class="power-bar-label"><span>${k}</span><span>${f[k]}/10</span></div>
+          <div class="power-bar"><div class="power-bar-fill" style="width:${f[k]*10}%;background:${colors[k]};"></div></div>
+        </div>`).join("")}
+    </div>`).join("");
+}
+
+async function getPrediction() {
+  const a = document.getElementById("pred-a")?.value;
+  const b = document.getElementById("pred-b")?.value;
+  const box = document.getElementById("prediction-box");
+  box.style.display = "none";
+  box.textContent = "Consulting the oracle...";
+  box.style.display = "block";
+  try {
+    const r = await fetch("/api/predict", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({faction_a:a,faction_b:b}) });
+    const d = await r.json();
+    box.textContent = d.prediction || d.error;
+  } catch(e) { box.textContent = "Prediction failed."; }
+}
+
+// ── Talk ──────────────────────────────────────────────────────────────────
+async function loadCharacters() {
+  try {
+    const r = await fetch("/api/characters");
+    const chars = await r.json();
+    const sel = document.getElementById("char-select");
+    sel.innerHTML = `<option value="">— Choose who to speak with —</option>` + chars.map(c => `<option value="${c.name}">${c.name} (${c.faction})</option>`).join("");
+    sel.onchange = () => {
+      currentChar = sel.value;
+      chatHistory = [];
+      document.getElementById("chat-msgs").innerHTML = "";
+      document.getElementById("chat-area").style.display = currentChar ? "block" : "none";
+      document.getElementById("chat-select-hint").style.display = currentChar ? "none" : "block";
+      if (currentChar) loadChatHistory();
+    };
+  } catch(e) {}
+}
+
+async function loadChatHistory() {
+  try {
+    const r = await fetch(`/api/conversations/${encodeURIComponent(currentChar)}`);
+    const history = await r.json();
+    const msgs = document.getElementById("chat-msgs");
+    msgs.innerHTML = "";
+    history.forEach(m => {
+      const div = document.createElement("div");
+      div.className = "chat-msg " + (m.role === "user" ? "user" : "npc");
+      div.innerHTML = m.role === "assistant" ? `<div class="msg-name">${currentChar}</div>${m.content}` : m.content;
+      msgs.appendChild(div);
+    });
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(e) {}
+}
+
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const msg = input.value.trim();
+  if (!msg || !currentChar) return;
+  input.value = "";
+
+  const msgs = document.getElementById("chat-msgs");
+  const userDiv = document.createElement("div");
+  userDiv.className = "chat-msg user";
+  userDiv.textContent = msg;
+  msgs.appendChild(userDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const r = await fetch("/api/talk", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({character:currentChar,message:msg}) });
+    const d = await r.json();
+    if (d.error) { toast("Error: " + d.error); return; }
+    const npcDiv = document.createElement("div");
+    npcDiv.className = "chat-msg npc";
+    npcDiv.innerHTML = `<div class="msg-name">${currentChar}</div>${d.response}`;
+    msgs.appendChild(npcDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(e) { toast("Failed to get response."); }
+}
+
+async function makeCanon() {
+  if (!currentChar) return;
+  try {
+    const r = await fetch("/api/talk/make_canon", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({character:currentChar}) });
+    const d = await r.json();
+    toast("Conversation made canon: " + d.summary?.substring(0,80) + "...");
+  } catch(e) { toast("Failed to make canon."); }
+}
+
+function clearChat() {
+  document.getElementById("chat-msgs").innerHTML = "";
+  chatHistory = [];
+}
+
+// ── God Panel ─────────────────────────────────────────────────────────────
+async function submitLore() {
+  const text = document.getElementById("lore-input").value.trim();
+  if (!text) { toast("Write your decree first."); return; }
+  try {
+    const r = await fetch("/api/lore", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text}) });
+    const d = await r.json();
+    if (d.error) { toast("Error: " + d.error); return; }
+    document.getElementById("lore-input").value = "";
+    toast("Your decree has been heard.");
+    loadPending();
+  } catch(e) { toast("Failed to submit decree."); }
+}
+
+async function forceTick() {
+  const btn = document.getElementById("force-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin">⏳</span> Turning...';
+  toast("Advancing time...", 8000);
+  try {
+    const r = await fetch("/api/tick", { method:"POST" });
+    const d = await r.json();
+    if (d.error) { toast("Tick failed: " + d.error); return; }
+    toast(`Tick ${d.tick} — ${d.world_date}`);
+    await fetchState();
+    loadPending();
+    tabsOpened["chronicle"] = false;
+    tabsOpened["timeline"] = false;
+  } catch(e) { toast("Tick failed."); }
+  finally { btn.disabled = false; btn.textContent = "⏩ Force Tick"; }
+}
+
+async function loadPending() {
+  try {
+    const r = await fetch("/api/pending_lore");
+    const items = await r.json();
+    const badge = document.getElementById("pending-badge");
+    badge.style.display = items.length ? "inline-block" : "none";
+    badge.textContent = items.length;
+    document.getElementById("pending-list").innerHTML = items.length
+      ? items.map(i => `<div class="event-item"><div class="event-region">${i.source_file} · ${new Date(i.received_at).toLocaleString()}</div><div class="event-text">${i.text.substring(0,200)}${i.text.length>200?"...":""}</div></div>`).join("")
+      : "<div class='empty'>No pending decrees...</div>";
+  } catch(e) {}
+}
+
+// Interventions
+function openIntervention(type, kind) {
+  currentIvType = type;
+  const names = { back_faction:"Back a Faction", plant_rumor:"Plant a Rumor", arrange_meeting:"Arrange a Meeting", curse_character:"Curse a Character", bless_region:"Bless a Region", divine_omen:"Divine Omen", smite:"Smite", prophecy:"Prophecy", raise_dead:"Raise the Dead" };
+  const needsDetail = ["plant_rumor","arrange_meeting","divine_omen","prophecy"];
+  document.getElementById("iv-modal-title").textContent = names[type] || type;
+  document.getElementById("iv-detail-field").style.display = needsDetail.includes(type) ? "block" : "none";
+  document.getElementById("iv-target").value = "";
+  document.getElementById("iv-detail").value = "";
+  document.getElementById("iv-modal").style.display = "block";
+}
+
+async function submitIntervention() {
+  const target = document.getElementById("iv-target").value.trim();
+  const detail = document.getElementById("iv-detail").value.trim();
+  if (!target) { toast("Specify a target."); return; }
+  try {
+    const r = await fetch("/api/god/intervene", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({type:currentIvType,target,detail}) });
+    const d = await r.json();
+    if (d.error) { toast("Error: " + d.error); return; }
+    document.getElementById("iv-modal").style.display = "none";
+    toast("Intervention queued for next tick.");
+    loadPending();
+    loadGodLog();
+  } catch(e) { toast("Intervention failed."); }
+}
+
+async function loadGodLog() {
+  try {
+    const r = await fetch("/api/god/actions");
+    const actions = await r.json();
+    document.getElementById("god-log").innerHTML = actions.length
+      ? actions.slice(-10).reverse().map(a => `<div class="event-item"><div class="event-region">${a.type.replace(/_/g," ")} · ${new Date(a.timestamp).toLocaleDateString()}</div><div class="event-text">${a.lore}</div></div>`).join("")
+      : "<div class='empty'>No actions recorded...</div>";
+  } catch(e) {}
+}
+
+// ── History ───────────────────────────────────────────────────────────────
+async function loadHistory() {
+  try {
+    const r = await fetch("/api/history");
+    const ticks = await r.json();
+    document.getElementById("history-list").innerHTML = ticks.length
+      ? ticks.map(t => `<div class="history-item" onclick="openTick(${t.tick})"><div class="history-num">${t.tick}</div><div><div class="history-date">${t.world_date||"Unknown"}</div><div class="history-meta">${t.event_count||0} events · ${t.real_timestamp?new Date(t.real_timestamp).toLocaleDateString():""}</div></div></div>`).join("")
+      : "<div class='empty'>No history recorded...</div>";
+  } catch(e) {}
+}
+
+async function openTick(tick) {
+  try {
+    const r = await fetch(`/api/history/${tick}`);
+    const s = await r.json();
+    document.getElementById("history-list-view")?.style && (document.getElementById("history-list-view").style.display = "none");
+    const detail = document.getElementById("history-detail");
+    detail.style.display = "block";
+    const evs = (s.recent_events||[]).map(e => `<div class="event-item"><div class="event-region">${e.region}</div><div class="event-text">${e.text}</div></div>`).join("");
+    detail.innerHTML = `<button class="back-btn" onclick="closeHistory()">← Return</button><div class="card"><div class="card-hdr"><div class="card-title">Tick ${s.tick}</div></div><div style="font-family:Cinzel,serif;font-size:18px;color:var(--gold);margin-bottom:20px;">${s.world_date}</div>${evs||"<div class='empty'>No events.</div>"}${s.chronicle?`<div style="margin-top:20px;font-family:'Crimson Text',serif;font-size:16px;line-height:1.7;color:var(--text-dim);font-style:italic;">${s.chronicle}</div>`:""}</div>`;
+  } catch(e) {}
+}
+
+function closeHistory() {
+  const lv = document.getElementById("history-list-view");
+  if (lv) lv.style.display = "block";
+  document.getElementById("history-detail").style.display = "none";
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+async function doSearch() {
+  const q = document.getElementById("search-input").value.trim();
+  if (!q) return;
+  document.getElementById("search-results").innerHTML = "<div class='empty'>Searching...</div>";
+  try {
+    const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+    const results = await r.json();
+    document.getElementById("search-results").innerHTML = results.length
+      ? results.map(res => `<div class="search-result"><div class="search-tick">Tick ${res.tick}</div><div class="search-date">${res.world_date}</div>${res.excerpts.map(e => `<div class="search-excerpt">"${e}"</div>`).join("")}</div>`).join("")
+      : "<div class='empty'>No results found for \"" + q + "\"</div>";
+  } catch(e) { document.getElementById("search-results").innerHTML = "<div class='empty'>Search failed.</div>"; }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+fetchState();
+setInterval(fetchState, 60000);
+</script>
+</body>
+</html>

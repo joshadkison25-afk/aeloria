@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Aeloria — The Story So Far{% endblock %}
+
+{% block head %}
+<style>
+  .story-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 72px 32px 100px;
+  }
+
+  .story-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .story-title {
+    font-family: 'Crimson Text', serif;
+    font-size: 32px;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+
+  .story-date {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .story-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .story-divider::before,
+  .story-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .story-divider svg {
+    flex-shrink: 0;
+    opacity: 0.4;
+  }
+
+  .story-body {
+    font-family: 'Crimson Text', serif;
+    font-size: 19px;
+    line-height: 2;
+    color: var(--text-sec);
+  }
+
+  .story-body p + p {
+    margin-top: 28px;
+  }
+
+  .story-empty {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 80px;
+  }
+
+  .story-footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .story-skeleton {
+    background: var(--surface2);
+    border-radius: 2px;
+    animation: shimmer 1.8s ease-in-out infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes shimmer { 0%,100%{opacity:0.4} 50%{opacity:0.8} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="story-wrap">
+  <div class="story-eyebrow">The Story So Far</div>
+  <div class="story-title">Aeloria</div>
+  <div class="story-date" id="story-date">Loading…</div>
+
+  <div class="story-divider">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--gold-dim)">
+      <path d="M8 1l1.5 4.5H14l-3.75 2.75 1.5 4.5L8 10l-3.75 2.75 1.5-4.5L2 5.5h4.5z"/>
+    </svg>
+  </div>
+
+  <div class="story-body" id="story-body">
+    <div class="story-skeleton" style="height:22px;width:95%"></div>
+    <div class="story-skeleton" style="height:22px;width:80%"></div>
+    <div class="story-skeleton" style="height:22px;width:88%"></div>
+    <div class="story-skeleton" style="height:22px;width:70%"></div>
+    <br>
+    <div class="story-skeleton" style="height:22px;width:92%"></div>
+    <div class="story-skeleton" style="height:22px;width:75%"></div>
+    <div class="story-skeleton" style="height:22px;width:85%"></div>
+  </div>
+
+  <div class="story-footer" id="story-footer" style="display:none">
+    Updated each tick · Reflects the world as of the last month
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadStory() {
+  const [storyRes, stateRes] = await Promise.all([
+    fetch('/api/story'),
+    fetch('/api/state'),
+  ]);
+  const story = await storyRes.json();
+  const state = await stateRes.json();
+
+  const dateEl = document.getElementById('story-date');
+  if (state.world_date) dateEl.textContent = state.world_date;
+
+  const bodyEl = document.getElementById('story-body');
+  if (story.exists && story.text) {
+    const paras = story.text.trim().split(/\n\n+/);
+    bodyEl.innerHTML = paras.map(p => `<p>${p.trim()}</p>`).join('');
+    document.getElementById('story-footer').style.display = 'block';
+  } else {
+    bodyEl.innerHTML = '<p class="story-empty">The world has not yet told its story. Advance a tick to generate the first chapter.</p>';
+  }
+}
+
+loadStory();
+</script>
+{% endblock %}

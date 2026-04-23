@@ -1,0 +1,294 @@
+{
+  "tick": 4,
+  "world_date": "Month of the Amber Silence, Year 1 of the Hollow Accord",
+  "major_event": "Elowen's messenger returns from Frostvale bearing Caeris Thorne's personal signet \u2014 an offer of secret alliance against the Shadow Court. The Glenhaven-Thorne axis, if real, would redraw every war map in Aeloria.",
+  "recent_events": [
+    {
+      "region": "Faerwood",
+      "text": "Elowen's messenger returned from Frostvale carrying Caeris Thorne's personal signet ring. Elowen has not shown it to her war-council. She has not denied receiving it either."
+    },
+    {
+      "region": "Lostfeld",
+      "text": "Kessa Stonebraid was found at dawn standing at the sealed mine-gate below the antechamber, palm flat against the stone, symbols on her arms glowing faintly. She did not wake when spoken to."
+    },
+    {
+      "region": "Twin Cities",
+      "text": "Roderic summoned his naval advisors in private. Three Tidefall warships remain in Eldoria harbor. He has drafted \u2014 but not signed \u2014 an ultimatum demanding their withdrawal within thirty days."
+    },
+    {
+      "region": "Dreadwind Islands",
+      "text": "Pirate King Rowen launched two vessels westward under no flag. Arkenor's vanished commander was confirmed aboard one. Their heading, by last sighting, is toward the Tidefall outer shipping lanes."
+    },
+    {
+      "region": "Stonebreak",
+      "text": "The Grand Druid's Conclave concluded in closed session. The novice was removed from the scriptorium and placed in the Sealed Garden. His maps now cover its inner walls floor to ceiling."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Shadow Court vs Glenhaven Elves",
+      "description": "Elowen's receipt of Caeris's signet suggests a covert alliance forming. Lythara has informants in Frostvale \u2014 if she learns of this, Arkenor will not wait for orders."
+    },
+    {
+      "factions": "Twin Cities \u2014 Roderic vs Tidefall vs Aldric",
+      "description": "The unsigned ultimatum is a trap or a test. Aldric knows of its drafting. Tidefall ships have not moved. The harbor is now effectively an occupied position."
+    },
+    {
+      "factions": "Lostfeld Dwarves \u2014 Deep Entity vs Surface",
+      "description": "Kessa's trance at the sealed gate suggests the entity below is escalating contact. The pulse is faster. The antechamber unsealing was not a resolution \u2014 it was an invitation."
+    },
+    {
+      "factions": "Rowen + Arkenor Commander vs Tidefall Shipping Lanes",
+      "description": "Two unflagged Dreadwind ships moving toward Tidefall lanes threatens the Admiral's economic lifeline. Rowen is leveraging Arkenor's exile for his own sea-war."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Sovereign Elowen Silverleaf",
+      "faction": "Glenhaven Elves",
+      "status": "Holds Caeris's signet in private. Has begun quietly redeploying war-bands \u2014 not to the Faerwood border, but northward along the ridge paths toward Frostvale."
+    },
+    {
+      "name": "Prince Caeris Thorne",
+      "faction": "Twin Cities",
+      "status": "Still in Frostvale. His false name has cracked \u2014 the council knows who he is and has not expelled him. He has sent his signet south and is awaiting Elowen's formal reply."
+    },
+    {
+      "name": "Kessa Stonebraid",
+      "faction": "Lostfeld Dwarves (Reformers)",
+      "status": "Found in a trance at the sealed mine-gate. Symbols on forearms now extend to her neck. When she finally woke, she asked only: 'Has it opened yet?' No gate had moved."
+    },
+    {
+      "name": "King Roderic Thorne II",
+      "faction": "Twin Cities",
+      "status": "Drafted an ultimatum to Tidefall but has not signed it. He is using its existence as leverage \u2014 someone is meant to discover it before he decides whether to send it."
+    },
+    {
+      "name": "Prince Aldric Thorne",
+      "faction": "Twin Cities",
+      "status": "Learned of the ultimatum draft through a court clerk. Made no visible move. That evening he sent a coded courier north \u2014 toward Frostvale, not Tidefall. A second board is opening."
+    },
+    {
+      "name": "Pirate King Rowen",
+      "faction": "Dreadwind Islands",
+      "status": "Two ships launched under no flag toward Tidefall lanes. Rowen himself remains on the Islands, publicly visible \u2014 plausible deniability worn like a coat."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Shadow Court",
+      "status": "Stable",
+      "reason": "Lythara's court celebrates Arkenor's success but senses her attention has shifted. She is watching Frostvale with an intensity that unsettles even Clan Velorn."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "status": "Rising",
+      "reason": "The return of the messenger with Caeris's signet has filtered into rumor among the war-bands. They do not know the contents \u2014 but Elowen is moving them north, and that is enough."
+    },
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "The court knows Roderic drafted something he will not sign. Indecision at the throne fractures confidence. Aldric's silence reads as patience \u2014 or readiness."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Rising",
+      "reason": "Ships in harbor, compact dissolved on paper but not in practice. The Admiral is winning without fighting. An unsigned ultimatum is not a threat \u2014 it is an invitation to wait."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Critical",
+      "reason": "Kessa's trance and the accelerating pulse have broken something in the loyalist ranks. Three senior foremen have requested transfer to upper-level tunnels. Ironmaul refused."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Declining",
+      "reason": "The novice's confinement to the Sealed Garden has not stopped the map-etching. The Conclave ended without consensus. The Grand Druid has stopped eating."
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "status": "Rising",
+      "reason": "Rowen's gambit with Arkenor's commander electrifies the pirate fleet. Action after seasons of exile \u2014 even veiled action \u2014 is enough to restore faith in their king."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Stable",
+      "reason": "Internal investigation into the glass-dart leak has narrowed to three suspects. No one has been named. The Syndicate is still watching the orc war with careful distance."
+    }
+  ],
+  "faction_power": [
+    {
+      "faction": "Shadow Court",
+      "military": 7,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 6,
+      "economic": 5,
+      "influence": 7
+    },
+    {
+      "faction": "Twin Cities",
+      "military": 6,
+      "political": 5,
+      "economic": 8,
+      "influence": 6
+    },
+    {
+      "faction": "Tidefall",
+      "military": 8,
+      "political": 6,
+      "economic": 7,
+      "influence": 7
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "military": 4,
+      "political": 3,
+      "economic": 6,
+      "influence": 3
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "military": 4,
+      "political": 5,
+      "economic": 7,
+      "influence": 8
+    },
+    {
+      "faction": "Monastery of Druids",
+      "military": 3,
+      "political": 3,
+      "economic": 4,
+      "influence": 6
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "military": 5,
+      "political": 3,
+      "economic": 4,
+      "influence": 5
+    }
+  ],
+  "relationships": [
+    {
+      "faction_a": "Shadow Court",
+      "faction_b": "Glenhaven Elves",
+      "type": "war",
+      "intensity": 8
+    },
+    {
+      "faction_a": "Glenhaven Elves",
+      "faction_b": "Twin Cities",
+      "type": "neutral",
+      "intensity": 6
+    },
+    {
+      "faction_a": "Twin Cities",
+      "faction_b": "Tidefall",
+      "type": "rivalry",
+      "intensity": 8
+    },
+    {
+      "faction_a": "Aldric Thorne",
+      "faction_b": "Tidefall",
+      "type": "alliance",
+      "intensity": 7
+    },
+    {
+      "faction_a": "Gilgeth & Groth Orcs",
+      "faction_b": "Gilgeth & Groth Orcs",
+      "type": "war",
+      "intensity": 9
+    },
+    {
+      "faction_a": "Gloomspire Assassin Gnomes",
+      "faction_b": "Monastery of Druids",
+      "type": "alliance",
+      "intensity": 6
+    },
+    {
+      "faction_a": "Dreadwind Islands",
+      "faction_b": "Shadow Court",
+      "type": "neutral",
+      "intensity": 5
+    },
+    {
+      "faction_a": "Dreadwind Islands",
+      "faction_b": "Tidefall",
+      "type": "rivalry",
+      "intensity": 6
+    },
+    {
+      "faction_a": "Roderic Thorne II",
+      "faction_b": "Aldric Thorne",
+      "type": "rivalry",
+      "intensity": 9
+    },
+    {
+      "faction_a": "Caeris Thorne",
+      "faction_b": "Glenhaven Elves",
+      "type": "alliance",
+      "intensity": 5
+    }
+  ],
+  "whispers": [
+    {
+      "text": "Caeris's signet was not sent freely. The Frostvale council required it as collateral before they would let him leave the mountain. He is still a guest \u2014 or a hostage.",
+      "region": "Frostvale"
+    },
+    {
+      "text": "The symbols on Kessa Stonebraid's arms are not dwarven. A blind lore-keeper in Stonebreak recognized three of them \u2014 they are the same as markings on the novice's maps.",
+      "region": "Lostfeld"
+    },
+    {
+      "text": "Rowen's two ships carry no cargo and no soldiers. Only instruments. The kind used to measure sea-floor depth \u2014 someone is mapping what lies beneath the Tidefall lanes.",
+      "region": "Dreadwind Islands"
+    },
+    {
+      "text": "Aldric's courier to Frostvale carries a mirror-sealed letter. The seal is not a Thorne mark. It is a glyph associated with the Dur Khadur Dark Council.",
+      "region": "Twin Cities"
+    }
+  ],
+  "weather_and_omens": [
+    {
+      "region": "Faerwood",
+      "condition": "The twin moon-shadow has fused back into one \u2014 but it moves now independently of the moon itself. It drifts. Clan Arkenor has barred their doors three nights running."
+    },
+    {
+      "region": "Lostfeld",
+      "condition": "The pulse has reached 45 beats. The pauses have vanished entirely. It is no longer a rhythm \u2014 it is a sustained, low vibration that can be felt in the teeth."
+    },
+    {
+      "region": "Frostvale",
+      "condition": "Snow fell upward for one hour at midday. The flakes did not return. The Frostvale sentinels have begun sleeping in shifts \u2014 no one will admit why."
+    },
+    {
+      "region": "Stonebreak",
+      "condition": "The Sealed Garden's inner walls are warm to the touch despite the cold season. The novice sleeps twelve hours, wakes for two, and maps. He no longer speaks."
+    },
+    {
+      "region": "Twin Cities",
+      "condition": "A flock of starlings formed a signet-ring shape above Eldoria palace and held it for six minutes before dispersing. The court astrologer resigned the same afternoon."
+    }
+  ],
+  "absorbed_lore": [
+    "Elowen's messenger returned from Frostvale bearing Caeris Thorne's personal signet ring \u2014 a secret offer of alliance against the Shadow Court.",
+    "Elowen has begun redeploying war-bands northward along ridge paths toward Frostvale rather than toward the Faerwood border.",
+    "Caeris Thorne's false name has been seen through by the Frostvale council, who have not expelled him \u2014 his signet may have been collateral, not a gift.",
+    "Kessa Stonebraid was found in a trance at the sealed mine-gate, symbols now extending to her neck; she woke asking if the gate had opened.",
+    "The Lostfeld pulse has escalated to a continuous vibration \u2014 the countdown cadence has collapsed into sustained resonance.",
+    "Roderic drafted but did not sign a Tidefall ultimatum \u2014 using its existence as intelligence bait.",
+    "Aldric learned of the ultimatum and sent a courier to Frostvale bearing a Dur Khadur glyph seal \u2014 opening a third political board.",
+    "Rowen launched two flagless ships carrying depth-measuring instruments toward Tidefall shipping lanes \u2014 a cartographic operation, not a raid.",
+    "Arkenor's vanished commander is confirmed aboard one of Rowen's ships, cementing the Shadow Court\u2013Dreadwind covert link.",
+    "The novice at Stonebreak no longer speaks and maps continuously; the Sealed Garden walls are warm despite winter.",
+    "Kessa's forearm symbols match markings on the novice's maps \u2014 confirmed by a blind lore-keeper in Stonebreak.",
+    "The Gloomspire internal investigation into the glass-dart leak has narrowed to three suspects within the Syndicate."
+  ],
+  "real_timestamp": "2026-04-22T04:00:12.022893"
+}

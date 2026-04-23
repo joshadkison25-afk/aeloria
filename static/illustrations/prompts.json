@@ -1,0 +1,225 @@
+{
+  "style_bible": {
+    "visual_direction": "dark fantasy painted illustration, high-detail concept art, grounded realism, mythic atmosphere, cinematic lighting, weathered textures, restrained color palettes, no anime styling, no cartoon exaggeration",
+    "render_targets": [
+      "webp",
+      "png"
+    ],
+    "negative_prompt": "blurry, low detail, extra fingers, duplicate limbs, malformed hands, floating objects, text artifacts, logo artifacts, modern clothing, sci-fi props, neon cyberpunk styling, plastic skin, oversaturated colors",
+    "notes": [
+      "Keep the world visually consistent across all portraits and faction art.",
+      "Use heraldic color accents only where faction identity calls for it.",
+      "Portraits should feel painted and in-world, not photographic."
+    ]
+  },
+  "characters": [
+    {
+      "slug": "queen-lythara-the-veiled",
+      "name": "Queen Lythara the Veiled",
+      "path": "static/illustrations/characters/queen-lythara-the-veiled.webp",
+      "prompt": "Portrait of Queen Lythara the Veiled of the Shadow Court, dread elven queen, elegant and severe, veiled black silk, obsidian crown with subtle thorn motifs, pale moonlit skin, ancient intelligent eyes, regal posture, candlelit throne chamber, dark fantasy painted concept art, restrained black, silver, and crimson palette"
+    },
+    {
+      "slug": "thane-ulric-ironmaul",
+      "name": "Thane Ulric Ironmaul",
+      "path": "static/illustrations/characters/thane-ulric-ironmaul.webp",
+      "prompt": "Portrait of Thane Ulric Ironmaul, dwarven ruler of Lostfeld, scarred iron-grey beard, heavy rune-carved armor, mountain-forged crown, stern exhausted expression, forge glow and stone vault background, dark fantasy painted portrait, steel, ember, and granite tones"
+    },
+    {
+      "slug": "sovereign-elowen-silverleaf",
+      "name": "Sovereign Elowen Silverleaf",
+      "path": "static/illustrations/characters/sovereign-elowen-silverleaf.webp",
+      "prompt": "Portrait of Sovereign Elowen Silverleaf of Glenhaven, elven ruler, luminous silver-green attire, leafworked circlet, poised and sleepless expression, ancient forest court behind her, moonlight through branches, dark fantasy painted illustration, emerald, silver, and muted gold palette"
+    },
+    {
+      "slug": "king-roderic-thorne-ii",
+      "name": "King Roderic Thorne II",
+      "path": "static/illustrations/characters/king-roderic-thorne-ii.webp",
+      "prompt": "Portrait of King Roderic Thorne II of the Twin Cities, aging human king, velvet and chain regalia, careful tired eyes, brittle authority, dim royal chamber with maps and letters, dark fantasy painted realism, burgundy, brass, and parchment tones"
+    },
+    {
+      "slug": "prince-aldric-thorne",
+      "name": "Prince Aldric Thorne",
+      "path": "static/illustrations/characters/prince-aldric-thorne.webp",
+      "prompt": "Portrait of Prince Aldric Thorne, ambitious noble heir of the Twin Cities, sharp features, calculated expression, dark tailored courtwear, seal rings, city-state power broker atmosphere, dark fantasy painted portrait, muted navy, gold, and wine-red accents"
+    },
+    {
+      "slug": "prince-caeris-thorne",
+      "name": "Prince Caeris Thorne",
+      "path": "static/illustrations/characters/prince-caeris-thorne.webp",
+      "prompt": "Portrait of Prince Caeris Thorne, missing royal son, thoughtful and restless, travel cloak over court clothes, moonflower pin, sense of mystery and disappearance, palace corridor fading into shadow, dark fantasy painted portrait, silver-blue and ash tones"
+    },
+    {
+      "slug": "admiral-electorate",
+      "name": "Admiral Electorate",
+      "path": "static/illustrations/characters/admiral-electorate.webp",
+      "prompt": "Portrait of the Admiral Electorate of Tidefall, sea-worn ruler, naval ceremonial coat with weathered rank details, salt-stiffened hair, commanding expression, harbor storm light through tall windows, dark fantasy painted realism, slate, brass, and sea-green palette"
+    },
+    {
+      "slug": "pirate-king-rowen",
+      "name": "Pirate King Rowen",
+      "path": "static/illustrations/characters/pirate-king-rowen.webp",
+      "prompt": "Portrait of Pirate King Rowen of the Dreadwind Isles, charismatic dangerous corsair monarch, layered leathers, weather-beaten coat, rings and talismans, storm-dark sea and shattered mast background, dark fantasy painted concept art, deep teal, rust, and bone accents"
+    },
+    {
+      "slug": "thalor",
+      "name": "Thalor",
+      "path": "static/illustrations/characters/thalor.webp",
+      "prompt": "Portrait of Thalor, cursed blade warden of Faerwood, haunted warrior in ancient bark-dark armor, half-wild and half-knightly presence, rune-scarred sword, forest dusk and spectral mist, dark fantasy painted illustration, moss, iron, and cold blue highlights"
+    },
+    {
+      "slug": "chief-elreda-stonehook",
+      "name": "Chief Elreda Stonehook",
+      "path": "static/illustrations/characters/chief-elreda-stonehook.webp",
+      "prompt": "Portrait of Chief Elreda Stonehook of Triondil, hard-bitten coastal leader, rugged braids, hooked ceremonial weapon, sea-cliff weathered leathers, stubborn protective gaze, wave-slashed coast backdrop, dark fantasy painted realism"
+    },
+    {
+      "slug": "the-seer",
+      "name": "The Seer",
+      "path": "static/illustrations/characters/the-seer.webp",
+      "prompt": "Portrait of the Seer of Aeloria, mortal intermediary addressing an unknowable higher presence, elderly human with lined face, worn layered robes, exhausted reverent eyes, candlelit stone chamber, mysterious unseen light from above, dark fantasy painted portrait, ash, gold, and shadow palette"
+    },
+    {
+      "slug": "brammir-stonehelm",
+      "name": "Brammir Stonehelm",
+      "path": "static/illustrations/characters/brammir-stonehelm.webp",
+      "prompt": "Memorial portrait of Brammir Stonehelm, legendary founder of Lostfeld, heroic dwarven king, monumental beard and armor, carved in memory and legend, mountain citadel backdrop, dark fantasy painted heroic portrait, stone and ember palette"
+    },
+    {
+      "slug": "elenion-darkleaf",
+      "name": "Elenion Darkleaf",
+      "path": "static/illustrations/characters/elenion-darkleaf.webp",
+      "prompt": "Memorial portrait of Elenion Darkleaf, first sovereign of Glenhaven, ancient elven monarch, serene but formidable, antler-like crownwork, sacred grove and silver river backdrop, dark fantasy painted mythic portrait"
+    }
+  ],
+  "factions": [
+    {
+      "slug": "shadow-court",
+      "name": "Shadow Court",
+      "path": "static/illustrations/factions/shadow-court-banner.webp",
+      "prompt": "Faction illustration for the Shadow Court, dread elven monarchy, obsidian halls, moonlit banners, elegant cruelty, veiled nobles and silent guards, dark fantasy painted banner art"
+    },
+    {
+      "slug": "lostfeld-dwarves",
+      "name": "Lostfeld Dwarves",
+      "path": "static/illustrations/factions/lostfeld-dwarves-banner.webp",
+      "prompt": "Faction illustration for the Lostfeld Dwarves, mountain citadel, forge-fire, iron gates, embattled dwarven defenders, dark fantasy painted banner art"
+    },
+    {
+      "slug": "glenhaven-elves",
+      "name": "Glenhaven Elves",
+      "path": "static/illustrations/factions/glenhaven-elves-banner.webp",
+      "prompt": "Faction illustration for the Glenhaven Elves, deep woodland kingdom, silverleaf banners, wardens among ancient trees, graceful but war-ready, dark fantasy painted banner art"
+    },
+    {
+      "slug": "twin-cities",
+      "name": "Twin Cities",
+      "path": "static/illustrations/factions/twin-cities-banner.webp",
+      "prompt": "Faction illustration for the Twin Cities of Eresteron and Eldoria, divided urban crowns, river trade, palace spires and civic banners, political tension, dark fantasy painted banner art"
+    },
+    {
+      "slug": "tidefall",
+      "name": "Tidefall",
+      "path": "static/illustrations/factions/tidefall-banner.webp",
+      "prompt": "Faction illustration for Tidefall, maritime cliff-city, storm harbors, naval might, sea bastions, dark fantasy painted banner art"
+    },
+    {
+      "slug": "dreadwind-islands",
+      "name": "Dreadwind Islands",
+      "path": "static/illustrations/factions/dreadwind-islands-banner.webp",
+      "prompt": "Faction illustration for the Dreadwind Islands, pirate strongholds, black sails, storm-torn isles, sea raider iconography, dark fantasy painted banner art"
+    },
+    {
+      "slug": "dur-khadur",
+      "name": "Dur Khadur",
+      "path": "static/illustrations/factions/dur-khadur-banner.webp",
+      "prompt": "Faction illustration for Dur Khadur, desert dominion, domed city silhouettes, trade wealth, heat haze, disciplined banners, dark fantasy painted banner art"
+    },
+    {
+      "slug": "farrock",
+      "name": "Farrock",
+      "path": "static/illustrations/factions/farrock-banner.webp",
+      "prompt": "Faction illustration for Farrock, frontier fortress realm, open plains, hardened riders and fort walls, dark fantasy painted banner art"
+    },
+    {
+      "slug": "gilgeth-orcs",
+      "name": "Gilgeth Orcs",
+      "path": "static/illustrations/factions/gilgeth-orcs-banner.webp",
+      "prompt": "Faction illustration for the Gilgeth Orcs, northern war-clans, mountain encampments, banners in cold wind, brutal discipline, dark fantasy painted banner art"
+    },
+    {
+      "slug": "groth-orcs",
+      "name": "Groth Orcs",
+      "path": "static/illustrations/factions/groth-orcs-banner.webp",
+      "prompt": "Faction illustration for the Groth Orcs, harsh eastern warbands, scarred mountains, aggressive tribal heraldry, dark fantasy painted banner art"
+    },
+    {
+      "slug": "vilefin-goblins",
+      "name": "Vilefin Goblins",
+      "path": "static/illustrations/factions/vilefin-goblins-banner.webp",
+      "prompt": "Faction illustration for the Vilefin Goblins, cunning marsh and badland raiders, scavenged weapons, smoke and gloom, dark fantasy painted banner art"
+    },
+    {
+      "slug": "gloomspire-gnome-syndicate",
+      "name": "Gloomspire Gnome Syndicate",
+      "path": "static/illustrations/factions/gloomspire-gnome-syndicate-banner.webp",
+      "prompt": "Faction illustration for the Gloomspire Gnome Syndicate, clandestine tunnels, glass blades, alchemy and espionage, dark fantasy painted banner art"
+    },
+    {
+      "slug": "monastery-of-druids",
+      "name": "Monastery of Druids",
+      "path": "static/illustrations/factions/monastery-of-druids-banner.webp",
+      "prompt": "Faction illustration for the Monastery of Druids, stone sanctuary, ancient oaths, ritual groves and weathered monks, dark fantasy painted banner art"
+    },
+    {
+      "slug": "vampires",
+      "name": "Vampires",
+      "path": "static/illustrations/factions/vampires-banner.webp",
+      "prompt": "Faction illustration for the Vampires of Aeloria, aristocratic nocturnal power, candlelit crypt halls, predatory nobility, dark fantasy painted banner art"
+    },
+    {
+      "slug": "ice-dragons",
+      "name": "Ice Dragons",
+      "path": "static/illustrations/factions/ice-dragons-banner.webp",
+      "prompt": "Faction illustration for the Ice Dragons, colossal ancient wyrms amid glacier peaks and storm snow, terrifying majesty, dark fantasy painted banner art"
+    }
+  ],
+  "website": [
+    {
+      "slug": "home-hero-ambient",
+      "name": "Home Hero Ambient",
+      "path": "static/illustrations/ui/home-hero-ambient.webp",
+      "prompt": "Wide dark fantasy website hero illustration for Aeloria, distant citadel lights, storm clouds, candlelit mist, subtle sacred atmosphere, no characters centered, designed as immersive background art"
+    },
+    {
+      "slug": "seer-panel-backdrop",
+      "name": "Seer Panel Backdrop",
+      "path": "static/illustrations/ui/seer-panel-backdrop.webp",
+      "prompt": "Atmospheric painted backdrop for the Seer interface, candlelit stone chamber, occult desk, maps, scripture, ash-gold lighting, dark fantasy website art"
+    },
+    {
+      "slug": "codex-header",
+      "name": "Codex Header",
+      "path": "static/illustrations/ui/codex-header.webp",
+      "prompt": "Dark fantasy encyclopedia header art for the Codex of Aeloria, old tomes, sigils, carved stone, parchment and torchlight, painted website banner"
+    },
+    {
+      "slug": "factions-header",
+      "name": "Factions Header",
+      "path": "static/illustrations/ui/factions-header.webp",
+      "prompt": "Dark fantasy factions page header, battle banners in dim wind, fractured alliances, map table and heraldry, painted website banner"
+    },
+    {
+      "slug": "chronicle-header",
+      "name": "Chronicle Header",
+      "path": "static/illustrations/ui/chronicle-header.webp",
+      "prompt": "Dark fantasy chronicle page header, illuminated manuscript, ink, wax seals, steel and ash, painted website banner"
+    },
+    {
+      "slug": "sanctum-header",
+      "name": "Sanctum Header",
+      "path": "static/illustrations/ui/sanctum-header.webp",
+      "prompt": "Dark fantasy sanctum page header, ritual chamber, black stone altar, gold sigils, candle smoke, painted website banner"
+    }
+  ]
+}

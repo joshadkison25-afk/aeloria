@@ -1,0 +1,1034 @@
+{
+  "tick": 22,
+  "world_date": "Month of the Ashen Dreaming, Year 1 of the Hollow Accord, Day 22",
+  "major_event": "Day twenty-two: The iron case completes its fifth etching before dawn \u2014 the geometric figure closes into a full symbol. Kessa Stonebraid collapses at the moment of completion. In Twin Cities, the High Cleric approves the amended proclamation before noon. The Admiral breaks his silence at last.",
+  "primary_event": {
+    "name": "The Fifth Etching \u2014 The Symbol Closes, Kessa Falls",
+    "summary": "Before the garrison's dawn watch change, a fifth etching appeared on the case \u2014 a final arc completing the geometric figure into a closed symbol. At the moment Kessa touched it during her morning rune-check, she collapsed without sound. The garrison medic found no physical cause. She breathes, but does not wake. Varek stood in the doorway of the antechamber and watched without speaking. Ashveil recognized the completed symbol: it is the Sealing Glyph from the Concordance \u2014 a mark of binding between vessel and bearer.",
+    "severity": 20,
+    "stage": "peak",
+    "trend": "rising",
+    "involved": [
+      "Kessa Stonebraid",
+      "Deep Entity",
+      "Lostfeld Dwarves",
+      "Thane Ironmaul",
+      "Elder Ashveil",
+      "Grand Druid Varek",
+      "Monastery of Druids",
+      "Seer"
+    ]
+  },
+  "supporting_events": [
+    {
+      "name": "The Proclamation Passes \u2014 Caeris Regent-Designate",
+      "summary": "The High Cleric approved the amended proclamation before noon. The document was signed, sealed, and announced before the inner court by mid-afternoon. Caeris Thorne is formally declared Regent-Designate of the Twin Cities. Lord Halveth received word within the hour. The Dur Khadur stand-down order has been formally drafted and dispatched to the unit camp by fast courier.",
+      "severity": 17,
+      "stage": "resolving",
+      "trend": "declining",
+      "involved": [
+        "Caeris Thorne",
+        "Twin Cities",
+        "High Cleric",
+        "Lady Orryn",
+        "Lord Halveth",
+        "Dur Khadur"
+      ]
+    },
+    {
+      "name": "The Admiral Speaks \u2014 Tidefall's New Posture Declared",
+      "summary": "The Admiral emerged from closed session at midday and addressed the full council publicly for the first time in weeks. He declared the incapacitation protocol void on grounds of his evident capacity. He accepted the Hollow Accord letter as legitimate correspondence but reserved Tidefall's formal response. He rejected the Dur Khadur contract extension without explanation, ordering the finance desk to issue a closing payment. The prophet has still not been received.",
+      "severity": 16,
+      "stage": "resolving",
+      "trend": "declining",
+      "involved": [
+        "Admiral",
+        "Tidefall",
+        "Tidefall Council",
+        "Dur Khadur",
+        "Caeris Thorne",
+        "Vampires"
+      ]
+    },
+    {
+      "name": "Arkenor Delivers His Answer \u2014 The Shadow Court Splits",
+      "summary": "Arkenor sent simultaneous written replies to both delegations at evening: he offered Lythara his formal political backing but gave Velorn a private commercial arrangement guaranteeing his Gnome-pass routes regardless of outcome. He has purchased insurance from both sides. Neither knows about the other's arrangement. The Shadow Court now has a nominal winner \u2014 Lythara \u2014 but Velorn holds economic leverage that makes him functionally independent.",
+      "severity": 15,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Arkenor",
+        "Shadow Court",
+        "Lythara",
+        "Velorn",
+        "Gloomspire Assassin Gnomes"
+      ]
+    },
+    {
+      "name": "Rowen's Fleet Underway \u2014 Northeast into Contested Waters",
+      "summary": "The Dreadwind fleet weighed anchor at midday as ordered. By evening it had cleared the Dreadwind archipelago's northern edge and entered open water on a northeast heading. Navigator Briggs has charted the approach to the coastal shelf \u2014 two days of sailing remain. The fleet's presence in these waters will be visible to Tidefall's northern patrol ships within twenty-four hours.",
+      "severity": 13,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Rowen",
+        "Dreadwind Islands",
+        "Tidefall",
+        "Navigator Briggs",
+        "Sinking Island"
+      ]
+    }
+  ],
+  "active_events": [
+    {
+      "name": "Varek and the Iron Case \u2014 The Binding Glyph Closes",
+      "involved": [
+        "Grand Druid Varek",
+        "Thane Ironmaul",
+        "Elder Ashveil",
+        "Lostfeld Dwarves",
+        "Monastery of Druids",
+        "Kessa Stonebraid",
+        "Deep Entity",
+        "Seer"
+      ],
+      "severity": 20,
+      "stage": "peak",
+      "duration": 20,
+      "trend": "rising",
+      "summary": "The fifth etching completed the Concordance Sealing Glyph before dawn. Kessa collapsed at the moment of contact during her rune-check and has not woken. Ashveil identified the symbol in silence, then finally broke \u2014 she told Ironmaul the glyph's name and partial meaning. Ironmaul has sent an emergency rider toward the Seer's mountain road route. The Seer is two days away. Varek stands in the antechamber doorway without leaving.",
+      "consequences": "Kessa is bound to the case by the Concordance Glyph \u2014 removing her from proximity may accelerate or rupture the binding. Ashveil has finally disclosed the Concordance connection to Ironmaul, but not all of it. The council members summoned two days ago are now one day away. The emergency rider may intercept the Seer on the mountain road tomorrow."
+    },
+    {
+      "name": "The Admiral's Declaration \u2014 Tidefall Repositions",
+      "involved": [
+        "Admiral",
+        "Tidefall",
+        "Tidefall Council",
+        "Dur Khadur",
+        "Caeris Thorne",
+        "Vampires"
+      ],
+      "severity": 15,
+      "stage": "escalating",
+      "duration": 9,
+      "trend": "rising",
+      "summary": "The Admiral voided the incapacitation protocol by demonstrated capacity. He accepted the Hollow Accord as legitimate correspondence but issued no formal Tidefall response yet. He rejected the Dur Khadur contract extension and ordered a closing payment \u2014 this is a direct repudiation of the council faction that negotiated it. The council chair is in a difficult position. The prophet remains excluded.",
+      "consequences": "Rejecting the Dur Khadur extension without explanation signals the Admiral suspects something about that contract. The closing payment means Dur Khadur receives no future commercial obligation from Tidefall. The council faction that brought the contract forward faces the Admiral's quiet displeasure. Tidefall's formal position on the Hollow Accord is still unspoken."
+    },
+    {
+      "name": "Shadow Court \u2014 Arkenor's Double Arrangement",
+      "involved": [
+        "Shadow Court",
+        "Velorn",
+        "Lythara",
+        "Arkenor",
+        "Gloomspire Assassin Gnomes"
+      ],
+      "severity": 15,
+      "stage": "escalating",
+      "duration": 16,
+      "trend": "rising",
+      "summary": "Arkenor backed Lythara publicly while quietly securing his Gnome-pass routes through Velorn privately. Both sides believe they have his loyalty. The Shadow Court now has a nominal winner and a functional cold war beneath it. Neither Lythara nor Velorn yet knows about the other arrangement. When they discover it \u2014 likely within a few days \u2014 the factional tension will sharpen.",
+      "consequences": "Arkenor has bought time and security at the cost of eventual exposure. Lythara will consolidate on the strength of his backing. Velorn will use his commercial channel to quietly undercut her. The Gnomish Syndicate remains unaware it is the structural guarantee of this arrangement."
+    },
+    {
+      "name": "The Proclamation Aftermath \u2014 Caeris Consolidates",
+      "involved": [
+        "Caeris Thorne",
+        "Twin Cities",
+        "Lord Halveth",
+        "Lady Orryn",
+        "High Cleric",
+        "Dur Khadur",
+        "Glenhaven Elves"
+      ],
+      "severity": 14,
+      "stage": "resolving",
+      "duration": 21,
+      "trend": "declining",
+      "summary": "Caeris is formally Regent-Designate. The Dur Khadur stand-down order is dispatched. Lord Halveth's anxiety eased somewhat. Lady Orryn's ten-day withdrawal clause now ticks. The inner court received the announcement without visible dissent. The Glenhaven Wayfarers reported the proclamation to Elowen by encoded courier at nightfall.",
+      "consequences": "Caeris now holds formal authority but not full political trust. The ten-day withdrawal clause creates ongoing pressure. Farrock has not yet received Caeris's reply with sufficient detail to satisfy their northern concerns. The king's health remains unchanged \u2014 any recovery triggers political reversal."
+    },
+    {
+      "name": "Rowen's Fleet \u2014 Northeast Passage",
+      "involved": [
+        "Rowen",
+        "Dreadwind Islands",
+        "Tidefall",
+        "Navigator Briggs",
+        "Sinking Island"
+      ],
+      "severity": 13,
+      "stage": "escalating",
+      "duration": 13,
+      "trend": "rising",
+      "summary": "The fleet has cleared the Dreadwind archipelago and is sailing northeast in open water. Two days from the coastal shelf candidate \u2014 the second identified map point. Tidefall's northern patrol route will visually confirm the fleet's presence by tomorrow. Briggs is keeping detailed notes on the heading and the navigator's sealed charts. Rowen has said nothing to the officers about what they are looking for.",
+      "consequences": "Tidefall will know about the fleet's northeast movement within 24 hours. If they interpret it as a threat to coastal waters, the Admiral may dispatch patrol vessels. Rowen does not know the Admiral has just repositioned Tidefall's strategic posture. The fleet's morale is high from movement after long anchoring."
+    },
+    {
+      "name": "The Recall Standoff \u2014 Stand-Down Order En Route",
+      "involved": [
+        "Dur Khadur",
+        "Tidefall",
+        "Twin Cities",
+        "Caeris Thorne",
+        "Admiral"
+      ],
+      "severity": 12,
+      "stage": "resolving",
+      "duration": 9,
+      "trend": "declining",
+      "summary": "Caeris dispatched the formal Dur Khadur stand-down order by fast courier after the proclamation was announced. The courier is expected to reach the unit camp by tomorrow afternoon. The Admiral independently rejected Tidefall's Dur Khadur contract extension and ordered closing payment. Dur Khadur now receives stand-down signals from two directions. The unit is still at four miles \u2014 unchanged.",
+      "consequences": "Dur Khadur will likely begin withdrawal within 24-48 hours of receiving the stand-down, as commercially rational. The Admiral's rejection of the contract extension is a separate signal the Dark Council will need to interpret. Their commercial relationship with Tidefall is severed for now."
+    },
+    {
+      "name": "Gilgeth Test Caravan \u2014 One Day from Frostvale",
+      "involved": [
+        "Gilgeth Orcs",
+        "Groth Orcs",
+        "Frostvale",
+        "Rock Plains"
+      ],
+      "severity": 11,
+      "stage": "escalating",
+      "duration": 5,
+      "trend": "rising",
+      "summary": "The caravan is one day from Frostvale after a night of tense stability \u2014 the doubled escort watch held. Two of the three flagged crew chiefs are visibly struggling with withdrawal symptoms; one required physical restraint at the campfire before midnight but was subdued without further injury. The caravan master is exhausted. The relay rider from the elder council arrived with press-forward orders.",
+      "consequences": "Tomorrow the caravan reaches Frostvale. If the crew chiefs deteriorate further in the final stretch, the public arrival will expose Gilgeth's addiction problem to Frostvale's gatekeepers. This would be a major face loss. The elder council's press-forward decision is now locked in."
+    },
+    {
+      "name": "Vilefin Tinker \u2014 Approaching the Gnome Pass",
+      "involved": [
+        "Vilefin Goblins",
+        "Farrock",
+        "Gloomspire Assassin Gnomes",
+        "Monastery of Druids"
+      ],
+      "severity": 10,
+      "stage": "escalating",
+      "duration": 10,
+      "trend": "rising",
+      "summary": "The tinker reached the outer approach to the Gnome pass station by late afternoon. He confirmed Skrix's coded reply never reached him \u2014 it sits uncollected at Farrock's gate outbox. He will reach the pass station tomorrow morning. The Gnome station keeper has already logged the Seer's departure and will recognize the tinker as a known Vilefin commercial contact.",
+      "consequences": "At the pass station, the tinker may learn of the Seer's northward journey and the unusual traffic logged. The Gnomes may offer him the Tidefall cipher intelligence for conditional sale if he demonstrates partial knowledge. He carries information about the Gilgeth caravan tracks that may interest the Gnomes."
+    }
+  ],
+  "faction_actions": [
+    {
+      "faction": "Lostfeld Dwarves",
+      "action": "Ironmaul received Ashveil's partial Concordance disclosure about the Sealing Glyph. He immediately sent an emergency rider northeast along the mountain road to intercept the Seer before he reaches the garrison. He ordered the garrison sealed from all non-essential personnel and had Kessa moved to a guarded chamber with the case left in situ \u2014 separated by twenty feet. He does not know whether proximity matters.",
+      "reason": "Ironmaul is responding to a situation beyond his knowledge base. The emergency rider is his only way to accelerate the Seer's arrival or send information ahead. Separating Kessa from the case is precautionary \u2014 if the glyph is a binding, distance may matter.",
+      "target": "Emergency rider \u2014 dispatched northeast on mountain road; Kessa \u2014 moved to guarded chamber; garrison \u2014 sealed to non-essential personnel; Ashveil \u2014 held for further questioning"
+    },
+    {
+      "faction": "Monastery of Druids",
+      "action": "Ashveil broke her silence and gave Ironmaul the glyph's name and partial meaning: a Concordance Sealing Glyph binds a living consciousness to a vessel through a rune-resonant intermediary. She omitted that Varek may be the catalyst. She is now in a quiet crisis \u2014 she has disclosed what protects her but not what condemns her, and she is calculating whether Varek's role can remain hidden until the Seer arrives.",
+      "reason": "Ashveil has reached the point where withholding the glyph name endangers her own position \u2014 if Kessa dies and she said nothing, she is culpable. Partial disclosure preserves her as the authority while keeping Varek's catalytic role ambiguous.",
+      "target": "Ironmaul \u2014 partial disclosure made; Varek \u2014 not implicated in disclosure; personal memory-binding \u2014 updated with new Concordance notes; Stonebreak courier \u2014 still three days out"
+    },
+    {
+      "faction": "Twin Cities",
+      "action": "Caeris formally assumed Regent-Designate authority with the inner court's witnesses present. He drafted and dispatched the Dur Khadur stand-down order by fast courier. He sent a brief formal letter to Elowen of Glenhaven acknowledging the Wayfarers' observer presence as welcomed. He postponed any further action on Farrock's inquiry \u2014 he has no new information and is not willing to speculate in writing.",
+      "reason": "Caeris is consolidating the proclamation's immediate political gains before addressing peripheral matters. The Dur Khadur stand-down is the most time-sensitive remaining obligation. The Glenhaven acknowledgment is diplomatic maintenance.",
+      "target": "Dur Khadur unit \u2014 stand-down courier dispatched; Glenhaven \u2014 formal acknowledgment of Wayfarers sent; Farrock inquiry \u2014 deprioritized; inner court \u2014 formal assumption of authority witnessed"
+    },
+    {
+      "faction": "Tidefall",
+      "action": "The Admiral ordered a northern patrol vessel to log the Dreadwind fleet's position and heading without engagement. He has not yet decided whether to issue a warning or intercept. He drafted \u2014 but did not send \u2014 a formal Tidefall response to the Hollow Accord. He dismissed the council faction that negotiated the Dur Khadur contract from the finance desk committee. The prophet received a brief written note: 'Tomorrow. My office. Alone.'",
+      "reason": "The Admiral is moving deliberately and asymmetrically. He is gathering information on the Dreadwind fleet before committing. The Dur Khadur contract rejection and the committee dismissal signal he is retaking control of Tidefall's commercial relationships. Scheduling the prophet signals he has not forgotten the religious dimension.",
+      "target": "Northern patrol vessel \u2014 dispatch ordered; Dreadwind fleet \u2014 to be logged without engagement; Hollow Accord response \u2014 drafted but unsent; finance committee \u2014 Dur Khadur faction dismissed; prophet \u2014 meeting scheduled for tomorrow"
+    },
+    {
+      "faction": "Shadow Court",
+      "action": "Lythara received Arkenor's formal written backing by evening messenger and declared an internal court session for tomorrow morning to consolidate her position. She does not yet know about his parallel Velorn arrangement. She sent a carefully composed letter to Arkenor confirming her commercial reciprocity \u2014 specifically his three Gnome-pass routes will be protected under her authority.",
+      "reason": "Lythara believes she has won the immediate contest. She is moving quickly to institutionalize Arkenor's backing before Velorn can respond. The commercial reciprocity letter is meant to bind Arkenor more firmly before he can reconsider.",
+      "target": "Arkenor \u2014 commercial reciprocity letter sent; internal court session \u2014 scheduled for tomorrow; Velorn \u2014 no communication today; Gnome-pass routes \u2014 formally guaranteed in letter"
+    },
+    {
+      "faction": "Dur Khadur",
+      "action": "The Dark Council received intelligence that the Admiral rejected Tidefall's Dur Khadur contract extension and ordered a closing payment. They convened and concluded this is the Admiral reasserting control \u2014 not a hostile signal toward Dur Khadur specifically. They accepted the closing payment without protest and prepared withdrawal logistics for the unit near Twin Cities, pending receipt of the formal stand-down from Caeris.",
+      "reason": "Dur Khadur's commercial rationality means they do not escalate when exiting cleanly is an option. The Admiral's rejection is explicable as internal Tidefall politics. They are protecting their reputation for reliability and clean exits.",
+      "target": "Tidefall closing payment \u2014 accepted; unit camp near Twin Cities \u2014 withdrawal logistics prepared; Dark Council \u2014 in waiting posture; Twin Cities stand-down \u2014 awaiting formal courier"
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "action": "Elowen received the Wayfarers' encoded report of the proclamation by nightfall. She composed a formal congratulatory letter to Caeris and a private internal assessment noting that the Twin Cities' succession crisis has narrowed its attention inward \u2014 useful for Glenhaven's own border monitoring. She also upgraded the Lostfeld concern to 'active watch' and requested a second Gnome pass status inquiry.",
+      "reason": "Elowen is a long-game player. The Twin Cities proclamation is good news for regional stability but also means Caeris is occupied. She wants to know what is happening in Lostfeld because her instinct is that whatever it is, it is bigger than what she can see.",
+      "target": "Caeris \u2014 formal congratulatory letter sent; internal assessment \u2014 updated; Lostfeld concern \u2014 elevated to active watch; Gnome pass station \u2014 second status inquiry dispatched"
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "action": "The pass station keeper confirmed the Vilefin tinker approaching \u2014 he is a known contact. The syndicate council decided to offer the Tidefall cipher intelligence to the tinker conditionally tomorrow morning, using the partial-knowledge test. They also received Elowen's second status inquiry and prepared a careful reply noting only 'elevated northern movement, nature uncertain.'",
+      "reason": "The Gnomes see the tinker as a potentially profitable node \u2014 he is heading north with unknown cargo and clearly gathering information. If he passes the partial-knowledge test, he becomes a paying customer. Elowen's inquiry is worth a measured response that maintains Glenhaven's goodwill.",
+      "target": "Tinker \u2014 conditional intelligence offer prepared for tomorrow; Elowen inquiry \u2014 measured reply drafted; Seer movement \u2014 logged but not disclosed; Tidefall cipher \u2014 held as commercial asset"
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "action": "Rowen held a brief officer meeting at evening to review the day's progress and confirm the northeast heading. He told the officers only that the destination was 'a formation worth investigating' \u2014 no mention of the map or the ruin. Briggs presented updated charts showing Tidefall's northern patrol corridor intersecting their projected path in approximately 36 hours. Rowen acknowledged this and said: 'We'll be past it before they decide what to do.'",
+      "reason": "Rowen is calculating that the Admiral's current internal chaos gives him a window to pass through contested waters before Tidefall can coordinate a response. He may be correct, but his information about the Admiral's situation is two days old.",
+      "target": "Fleet \u2014 northeast heading maintained; officers \u2014 briefed without disclosing destination significance; Briggs \u2014 patrol corridor intersection acknowledged; Tidefall patrol \u2014 factored into timing"
+    },
+    {
+      "faction": "Vampires",
+      "action": "The operative filed an updated report to Lythara noting the Admiral's public declaration and his rejection of the Dur Khadur contract. The operative flagged the prophet's scheduled meeting as a new intelligence priority. Separately, the old admiralty network investigation has produced a second candidate match for the grey-cloaked figure \u2014 a former harbor factor named Elsin Dray, now listed as retired, who handled anchorage records during the previous Admiral's tenure.",
+      "reason": "The operative is a systematic intelligence professional. The prophet meeting is a new thread. Elsin Dray as a candidate is significant \u2014 a former harbor factor would have motive to resurface specific anchorage records if something from the old tenure is relevant to current events.",
+      "target": "Lythara \u2014 updated report on Admiral's declaration; prophet meeting \u2014 flagged as new intelligence priority; Elsin Dray \u2014 identified as second candidate for grey-cloaked figure"
+    },
+    {
+      "faction": "Farrock",
+      "action": "The garrison commander did not receive a satisfying reply from Caeris. He dispatched the garrison-to-garrison courier to Lostfeld through the old joint-patrol protocol \u2014 a rider who knows the back-mountain route and can reach the garrison in approximately two days. He also drafted a note to be held at the northern watchtower for any Gnome pass traffic, asking whether unusual activity has been observed in the north.",
+      "reason": "Farrock's commander is working around official channels because he doesn't trust them to be fast enough. The garrison courier is slower but discreet. The watchtower note is a cheap intelligence investment.",
+      "target": "Lostfeld Thane's Council \u2014 garrison courier dispatched via back-mountain route; northern watchtower \u2014 query note for Gnome pass traffic; Caeris reply \u2014 filed as insufficient"
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "action": "The elder council sent no further orders \u2014 their press-forward directive was final. The caravan master, for the first time, sent a private note to the council elder he trusts most \u2014 not through official relay, but hand-carried by his personal guard heading back \u2014 reading: 'I will get it there. But you must have a plan for what happens when Frostvale sees what I am carrying.' The elder received it at nightfall and has no plan.",
+      "reason": "The caravan master is a pragmatist who sees what the council does not want to see. His private note is an act of loyalty \u2014 giving the council a warning they chose not to prepare for. The elder's lack of a plan is the real consequence of the three-to-two vote.",
+      "target": "Caravan \u2014 one day from Frostvale; elder council \u2014 private warning delivered; Frostvale gatekeepers \u2014 arrival expected tomorrow; addiction exposure \u2014 no containment strategy prepared"
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "action": "The tinker set camp at the base of the Gnome pass approach, planning to reach the station at first light. He organized his mental inventory: Gilgeth caravan on unusual route, Seer movement (inferred from Monastery supply cart tracks he recognized on the road), and Farrock's obvious anxiety about the north. He composed a working hypothesis: something significant is happening in Lostfeld, and multiple parties are converging on it. He has not yet decided whether to sell this hypothesis or act on it.",
+      "reason": "The tinker is a covert intelligence actor by nature. He is building a picture faster than anyone is paying attention to him. His hypothesis is broadly correct. Whether he monetizes it or uses it depends on what he learns at the pass station tomorrow.",
+      "target": "Gnome pass station \u2014 arrival planned for dawn; mental inventory \u2014 updated and organized; working hypothesis \u2014 Lostfeld convergence; Skrix reply \u2014 still uncollected at Farrock"
+    },
+    {
+      "faction": "Seer",
+      "action": "The Seer spent the day on the mountain road \u2014 riding through fog and rock-pine country on the supply cart, the Monastery driver largely silent. He began to feel a second pressure, fainter but directional: a cold pull from the north that intensified in the afternoon. He does not interpret it as new \u2014 it feels like the same presence, only closer. He recorded his impressions in his travel journal as he rode. He is unaware of the emergency rider coming toward him from the north.",
+      "reason": "The Seer is physically on route and observationally active. The cold pull intensifying means the glyph's completion is registering at his intuitive level \u2014 he is two days away and already feeling the entity's presence strengthening. His journal is his primary tool for pattern documentation while traveling.",
+      "target": "Mountain road \u2014 day two of three; Lostfeld \u2014 destination, two days remaining; emergency rider \u2014 approaching from north, unknown to Seer; cold pull \u2014 recognized as intensifying but not yet alarming"
+    }
+  ],
+  "recent_events": [
+    {
+      "region": "Lostfeld \u2014 Sealed Garrison",
+      "text": "The fifth etching completed the Concordance Sealing Glyph before dawn. Kessa Stonebraid collapsed at the moment of contact with the case and has not woken. Ashveil finally disclosed the glyph's name to Ironmaul. An emergency rider has been sent north along the mountain road to intercept the Seer. Varek stands in the antechamber doorway and has not left since dawn."
+    },
+    {
+      "region": "Twin Cities \u2014 Regent-Designate's Office",
+      "text": "Caeris Thorne is formally proclaimed Regent-Designate before the inner court by mid-afternoon. The Dur Khadur stand-down order is dispatched by fast courier. The Glenhaven Wayfarers' observer presence has been formally acknowledged. Lady Orryn's ten-day withdrawal clause now ticks."
+    },
+    {
+      "region": "Tidefall \u2014 Admiralty Hall",
+      "text": "The Admiral publicly voided the incapacitation protocol, rejected the Dur Khadur contract extension, dismissed the council faction that negotiated it from the finance committee, and drafted \u2014 but did not send \u2014 a Hollow Accord response. He sent the prophet a single written note: 'Tomorrow. My office. Alone.'"
+    },
+    {
+      "region": "Faerwood \u2014 Arkenor's Estate",
+      "text": "Arkenor sent simultaneous replies to both delegations: formal political backing to Lythara, private commercial guarantee of Gnome-pass routes to Velorn. Neither knows about the other's arrangement. Lythara declared an internal court session for tomorrow. Velorn received his private arrangement and said nothing publicly."
+    },
+    {
+      "region": "Mountain Road \u2014 Stonebreak to Lostfeld",
+      "text": "The Seer spent his second day on the mountain road through fog and rock-pine country. A cold pull from the north intensified in the afternoon \u2014 he interprets it as the same presence drawing closer. He is unaware that an emergency rider from Lostfeld is approaching him from ahead. He is two days from arrival."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Lostfeld \u2014 Kessa Bound, Seer Two Days Away",
+      "description": "The Concordance Sealing Glyph has closed. Kessa Stonebraid is unconscious and bound to the case. Ashveil has disclosed partially but not fully. Varek is present and may be the catalyst. The emergency rider and the Seer will meet on the mountain road tomorrow. The Thane's Council members arrive in one day \u2014 into a crisis that has just become irreversible."
+    },
+    {
+      "factions": "Shadow Court \u2014 Arkenor's Double Game, Lythara Consolidates on False Ground",
+      "description": "Lythara believes she has won Arkenor's loyalty. Velorn holds a private commercial guarantee that makes him functionally independent regardless. When the double arrangement surfaces, the Shadow Court's cold war will heat rapidly. Both sides are preparing for a tomorrow that is based on incomplete information."
+    },
+    {
+      "factions": "Tidefall \u2014 Admiral Retakes Control, Factions Scramble",
+      "description": "The Admiral's declaration has reshuffled the Tidefall power structure in one day. The council faction that negotiated the Dur Khadur contract is now marginalized. The prophet is finally being received tomorrow. The Dreadwind fleet is 36 hours from the northern patrol corridor intersection. Tidefall is in rapid internal reorganization."
+    },
+    {
+      "factions": "Twin Cities \u2014 Proclamation Holds, Instability Lingers",
+      "description": "Caeris is Regent-Designate, but Lady Orryn's ten-day clause means the political foundation is provisional. Farrock's garrison courier is heading to Lostfeld unsanctioned \u2014 a signal that the northern situation is developing independent of Caeris's knowledge. The king's health unchanged."
+    }
+  ],
+  "faction_resources": [],
+  "population_state": [
+    {
+      "region": "Twin Cities",
+      "species": "Humans",
+      "culture": "Twin Cities",
+      "population": 160000,
+      "growthRate": 0.00025,
+      "capacity": 180000,
+      "health": 86,
+      "pressure": 22,
+      "activeMilitary": 5600,
+      "navalAllocation": 4,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Tidefall",
+      "species": "Humans",
+      "culture": "Tidefall",
+      "population": 160000,
+      "growthRate": 0.00028,
+      "capacity": 185000,
+      "health": 82,
+      "pressure": 32,
+      "activeMilitary": 6400,
+      "navalAllocation": 20,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Faerwood",
+      "species": "Dread Elves",
+      "culture": "Shadow Court",
+      "population": 30000,
+      "growthRate": 3e-05,
+      "capacity": 42000,
+      "health": 74,
+      "pressure": 38,
+      "activeMilitary": 1050,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Glenhaven",
+      "species": "Glenhaven Elves",
+      "culture": "Wildwood Elves",
+      "population": 35000,
+      "growthRate": 5e-05,
+      "capacity": 52000,
+      "health": 88,
+      "pressure": 18,
+      "activeMilitary": 1225,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Lostfeld",
+      "species": "Dwarves",
+      "culture": "Lostfeld Clans",
+      "population": 65000,
+      "growthRate": 8e-05,
+      "capacity": 85000,
+      "health": 81,
+      "pressure": 24,
+      "activeMilitary": 2275,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Gilgeth and Groth",
+      "species": "Orcs",
+      "culture": "Mountain Orcs",
+      "population": 100000,
+      "growthRate": 0.00022,
+      "capacity": 125000,
+      "health": 72,
+      "pressure": 43,
+      "activeMilitary": 3500,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Rock Plains",
+      "species": "Goblins",
+      "culture": "Vilefin",
+      "population": 215000,
+      "growthRate": 0.00055,
+      "capacity": 230000,
+      "health": 63,
+      "pressure": 68,
+      "activeMilitary": 7525,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Dreadwind Isles",
+      "species": "Humans",
+      "culture": "Dreadwind Pirates",
+      "population": 45000,
+      "growthRate": 0.00018,
+      "capacity": 65000,
+      "health": 67,
+      "pressure": 52,
+      "activeMilitary": 1575,
+      "navalAllocation": 16,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Dur Khadur",
+      "species": "Humans",
+      "culture": "Dur Khadur",
+      "population": 115000,
+      "growthRate": 0.00024,
+      "capacity": 155000,
+      "health": 79,
+      "pressure": 36,
+      "activeMilitary": 4025,
+      "navalAllocation": 8,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Stonebreak",
+      "species": "Druids",
+      "culture": "Monastery of Druids",
+      "population": 5500,
+      "growthRate": 2e-05,
+      "capacity": 9000,
+      "health": 91,
+      "pressure": 12,
+      "activeMilitary": 192,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Gloomspire",
+      "species": "Gnomes",
+      "culture": "Gloomspire Syndicate",
+      "population": 8500,
+      "growthRate": 0.00012,
+      "capacity": 14000,
+      "health": 76,
+      "pressure": 28,
+      "activeMilitary": 297,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    },
+    {
+      "region": "Dragonscar Peaks",
+      "species": "Ice Dragons",
+      "culture": "Dragon Clans",
+      "population": 12,
+      "growthRate": 0.0,
+      "capacity": 20,
+      "health": 94,
+      "pressure": 9,
+      "activeMilitary": 12,
+      "navalAllocation": 0,
+      "notes": "Population pressure is being tracked daily."
+    }
+  ],
+  "relationships": [],
+  "trade_routes": [],
+  "faction_identities": [],
+  "region_control": [],
+  "faction_knowledge": [],
+  "remembered_events": [],
+  "seer_state": {
+    "tone": "weary",
+    "confidence": 50,
+    "bias": "cautiously interpretive",
+    "belief_about_user": "The presence beyond the veil is not fully understood.",
+    "memory_burden": 40,
+    "voice_mode": "pattern and testimony",
+    "last_source_bias": "mixed and uncertain"
+  },
+  "seer_journey": {
+    "location": "Lostfeld \u2014 Sealed Garrison",
+    "destination": "Lostfeld \u2014 Sealed Garrison",
+    "status": "recovering",
+    "ticks_remaining": 0,
+    "purpose": "Varek and the Iron Case \u2014 The Binding Glyph Closes",
+    "last_outcome": "The fifth etching completed the Concordance Sealing Glyph before dawn. Kessa collapsed at the moment of contact during her rune-check and has not woken. Ashveil identified the symbol in silence, then finally broke \u2014 she told Ironmaul the glyph's name and partial meaning. Ironmaul has sent an emergency rider toward the Seer's mountain road route. The Seer is two days away. Varek stands in the antechamber doorway without leaving."
+  },
+  "ruler_states": [],
+  "leadership_state": [
+    {
+      "faction": "Twin Cities",
+      "currentRuler": {
+        "name": "Roderic Thorne II",
+        "title": "King",
+        "dynasty": "House Aurand",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "inheritance",
+        "causeOfEnd": "",
+        "traits": [
+          "centralizing",
+          "ailing"
+        ],
+        "notableEvents": [],
+        "portrait_image": "/static/illustrations/characters/roderic-thorne-ii.png"
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "House Aurand",
+          "founder": "Aurand the Unifier",
+          "faction": "Twin Cities",
+          "members": [
+            "Roderic Thorne II"
+          ],
+          "prestige": 78,
+          "tier": 1,
+          "status": "active"
+        },
+        {
+          "name": "House Adkison",
+          "founder": "Mara Adkison",
+          "faction": "Twin Cities",
+          "members": [
+            "Caeris Thorne"
+          ],
+          "prestige": 70,
+          "tier": 1,
+          "status": "active"
+        },
+        {
+          "name": "House Van Cleave",
+          "founder": "Ser Calven Van Cleave",
+          "faction": "Twin Cities",
+          "members": [],
+          "prestige": 66,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Gross",
+          "founder": "Edric Gross",
+          "faction": "Twin Cities",
+          "members": [],
+          "prestige": 62,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Dale",
+          "founder": "Nera Dale",
+          "faction": "Twin Cities",
+          "members": [],
+          "prestige": 42,
+          "tier": 3,
+          "status": "active"
+        },
+        {
+          "name": "House Highland",
+          "founder": "Bren Highland",
+          "faction": "Twin Cities",
+          "members": [],
+          "prestige": 45,
+          "tier": 3,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Tidefall",
+      "currentRuler": {
+        "name": "Marcellus Ver Meer",
+        "title": "Admiral-Lord",
+        "dynasty": "House Ver Meer",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "appointment",
+        "causeOfEnd": "",
+        "traits": [
+          "naval",
+          "withdrawn"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "House Ver Meer",
+          "founder": "Admiral Joren Ver Meer",
+          "faction": "Tidefall",
+          "members": [
+            "Marcellus Ver Meer"
+          ],
+          "prestige": 80,
+          "tier": 1,
+          "status": "active"
+        },
+        {
+          "name": "House Gross",
+          "founder": "Edric Gross",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 68,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Adkison",
+          "founder": "Mara Adkison",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 63,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Van Cleave",
+          "founder": "Ser Calven Van Cleave",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 58,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Fish",
+          "founder": "Old Maren Fish",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 46,
+          "tier": 3,
+          "status": "active"
+        },
+        {
+          "name": "House Binx",
+          "founder": "Tallo Binx",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 39,
+          "tier": 3,
+          "status": "active"
+        },
+        {
+          "name": "House Darkleaf",
+          "founder": "Sera Darkleaf",
+          "faction": "Tidefall",
+          "members": [],
+          "prestige": 44,
+          "tier": 3,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Dur Khadur",
+      "currentRuler": {
+        "name": "Seran Gross",
+        "title": "Trade Prince",
+        "dynasty": "House Gross",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "election",
+        "causeOfEnd": "",
+        "traits": [
+          "commercial",
+          "calculating"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "House Gross",
+          "founder": "Edric Gross",
+          "faction": "Dur Khadur",
+          "members": [
+            "Seran Gross"
+          ],
+          "prestige": 76,
+          "tier": 1,
+          "status": "active"
+        },
+        {
+          "name": "House Adkison",
+          "founder": "Mara Adkison",
+          "faction": "Dur Khadur",
+          "members": [],
+          "prestige": 64,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Van Cleave",
+          "founder": "Ser Calven Van Cleave",
+          "faction": "Dur Khadur",
+          "members": [],
+          "prestige": 59,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Binx",
+          "founder": "Tallo Binx",
+          "faction": "Dur Khadur",
+          "members": [],
+          "prestige": 41,
+          "tier": 3,
+          "status": "active"
+        },
+        {
+          "name": "House Darkleaf",
+          "founder": "Sera Darkleaf",
+          "faction": "Dur Khadur",
+          "members": [],
+          "prestige": 47,
+          "tier": 3,
+          "status": "active"
+        },
+        {
+          "name": "House Dale",
+          "founder": "Nera Dale",
+          "faction": "Dur Khadur",
+          "members": [],
+          "prestige": 38,
+          "tier": 3,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "currentRuler": {
+        "name": "Ulric Ironmaul",
+        "title": "Thane",
+        "dynasty": "Clan Ironmaul",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "inheritance",
+        "causeOfEnd": "",
+        "traits": [
+          "clan-bound",
+          "deliberate"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Clan Ironmaul",
+          "founder": "Brammir Ironmaul",
+          "faction": "Lostfeld Dwarves",
+          "members": [
+            "Thane Ulric Ironmaul",
+            "Ulric Ironmaul"
+          ],
+          "prestige": 82,
+          "tier": 1,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Shadow Court",
+      "currentRuler": {
+        "name": "Lythara the Veiled",
+        "title": "Queen",
+        "dynasty": "House Velorn",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "seizure of power",
+        "causeOfEnd": "",
+        "traits": [
+          "manipulative",
+          "patient"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "House Velorn",
+          "founder": "Velorn the First",
+          "faction": "Shadow Court",
+          "members": [
+            "Queen Lythara the Veiled",
+            "Lythara the Veiled"
+          ],
+          "prestige": 84,
+          "tier": 1,
+          "status": "active"
+        },
+        {
+          "name": "House Nythariel",
+          "founder": "Nythariel of the Black Glades",
+          "faction": "Shadow Court",
+          "members": [],
+          "prestige": 65,
+          "tier": 2,
+          "status": "active"
+        },
+        {
+          "name": "House Arkenor",
+          "founder": "Arkenor the Quiet",
+          "faction": "Shadow Court",
+          "members": [],
+          "prestige": 67,
+          "tier": 2,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "currentRuler": {
+        "name": "Elowen Silverleaf",
+        "title": "Sovereign",
+        "dynasty": "Silverleaf Line",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "election",
+        "causeOfEnd": "",
+        "traits": [
+          "council-guided",
+          "defensive"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Silverleaf Line",
+          "founder": "Elowen the Elder",
+          "faction": "Glenhaven Elves",
+          "members": [
+            "Sovereign Elowen Silverleaf",
+            "Elowen Silverleaf"
+          ],
+          "prestige": 79,
+          "tier": 1,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "currentRuler": {
+        "name": "Hargan Stonejaw",
+        "title": "First Elder",
+        "dynasty": "Council Clans",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "election",
+        "causeOfEnd": "",
+        "traits": [
+          "consensus-driven",
+          "proud"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Council Clans",
+          "founder": "First Circle",
+          "faction": "Gilgeth Orcs",
+          "members": [
+            "Hargan Stonejaw"
+          ],
+          "prestige": 61,
+          "tier": 2,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Groth Orcs",
+      "currentRuler": {
+        "name": "Morgath Bloodstone",
+        "title": "Chieftain",
+        "dynasty": "Bloodstone Clan",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "seizure of power",
+        "causeOfEnd": "",
+        "traits": [
+          "aggressive",
+          "strength-bound"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Bloodstone Clan",
+          "founder": "First Bloodstone",
+          "faction": "Groth Orcs",
+          "members": [
+            "Morgath Bloodstone"
+          ],
+          "prestige": 58,
+          "tier": 2,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "currentRuler": {
+        "name": "Skrix Cogtooth",
+        "title": "Speaker",
+        "dynasty": "Vilefin Moot",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "post-collapse emergence",
+        "causeOfEnd": "",
+        "traits": [
+          "flexible",
+          "communal"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Vilefin Moot",
+          "founder": "The First Moot",
+          "faction": "Vilefin Goblins",
+          "members": [
+            "Skrix Cogtooth"
+          ],
+          "prestige": 36,
+          "tier": 3,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "currentRuler": {
+        "name": "Rowen Blacktide",
+        "title": "Fleet Captain",
+        "dynasty": "Dreadwind Compact",
+        "startDay": 0,
+        "endDay": null,
+        "duration": 22,
+        "causeOfRise": "seizure of power",
+        "causeOfEnd": "",
+        "traits": [
+          "restless",
+          "risk-bearing"
+        ],
+        "notableEvents": [],
+        "portrait_image": ""
+      },
+      "rulerHistory": [],
+      "dynasties": [
+        {
+          "name": "Dreadwind Compact",
+          "founder": "The Exiled Crews",
+          "faction": "Dreadwind Islands",
+          "members": [
+            "Rowen Blacktide"
+          ],
+          "prestige": 52,
+          "tier": 2,
+          "status": "active"
+        }
+      ]
+    }
+  ],
+  "belief_currents": [],
+  "religious_factions": [],
+  "character_updates": [],
+  "faction_morale": [],
+  "faction_power": [],
+  "whispers": [],
+  "weather_and_omens": [],
+  "absorbed_lore": [],
+  "real_timestamp": "2026-04-23T04:59:57.124545",
+  "codex_images": {}
+}

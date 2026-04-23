@@ -1,0 +1,171 @@
+{
+  "tick": 1,
+  "world_date": "Month of the Iron Thaw, Year 1 of the Hollow Accord",
+  "recent_events": [
+    {
+      "region": "Faerwood",
+      "text": "Clan Arkenor raiders ambushed a Wayfarer patrol at the Greyveil crossing. Two elves slain, one taken. Elowen's silence finally breaks \u2014 she has summoned the War-Readers."
+    },
+    {
+      "region": "Lostfeld",
+      "text": "A reformer leader, Kessa Stonebraid, smuggled herself into the sealed lower district. She has not returned. Her torch was found at the threshold, still burning."
+    },
+    {
+      "region": "Twin Cities",
+      "text": "King Roderic Thorne II appeared at court in a litter \u2014 pale, barely speaking. His eldest son Aldric publicly called for a Regency Council. The court erupted."
+    },
+    {
+      "region": "Tidefall",
+      "text": "Three Tidefall warships entered Eldoria harbor under 'courtesy visit' pretense. They have not left. Dockworkers report weapons being offloaded after dark."
+    },
+    {
+      "region": "Rock Plains",
+      "text": "A second orc caravan \u2014 Groth-flagged \u2014 was found dead. Unlike the Gilgeth massacre, these bodies bore no blackbloom traces. Something else killed them."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Shadow Court vs Glenhaven Elves",
+      "description": "Arkenor's killing of Wayfarer scouts has forced Elowen's hand. The War-Readers convene. Open conflict is no longer unlikely \u2014 it is scheduled."
+    },
+    {
+      "factions": "Lostfeld Dwarves (Isolationists vs Reformers)",
+      "description": "Kessa Stonebraid's disappearance into the sealed district has made her a martyr symbol. Reformers are arming. Ironmaul's silence is becoming a fuse."
+    },
+    {
+      "factions": "Twin Cities vs Tidefall",
+      "description": "Tidefall warships occupy Eldoria harbor. Aldric's Regency push divides the court \u2014 half see Tidefall's ships as leverage, half as invasion. No one blinks."
+    },
+    {
+      "factions": "Gilgeth vs Groth Orcs",
+      "description": "Groth caravan deaths without blackbloom signature suggests a third party is escalating the conflict. Both orc cities now mobilizing war-bands, blaming each other."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Queen Lythara the Veiled",
+      "faction": "Shadow Court",
+      "status": "Ordered Arkenor's raid \u2014 but Clan Nythariel is whispering she did not sanction the killing. A fracture, or theater?"
+    },
+    {
+      "name": "Sovereign Elowen Silverleaf",
+      "faction": "Glenhaven Elves",
+      "status": "War-Readers summoned. The pacifist Sovereign has not wept. Those close to her say that is the most frightening thing they have ever seen."
+    },
+    {
+      "name": "Thane Ulric Ironmaul",
+      "faction": "Lostfeld Dwarves",
+      "status": "Has posted armed guards at the sealed threshold. Ordered Kessa Stonebraid declared 'lost to the deep.' Reformers call it murder by decree."
+    },
+    {
+      "name": "King Roderic Thorne II",
+      "faction": "Twin Cities",
+      "status": "Appears lucid in private, but performs frailty in public. The question is whether the performance is protection \u2014 or trap."
+    },
+    {
+      "name": "Prince Aldric Thorne",
+      "faction": "Twin Cities",
+      "status": "Newly emerged. Ambitious, sharp-tongued, and already courting Tidefall's Admiral. His younger brother Caeris has gone very quiet."
+    },
+    {
+      "name": "Pirate King Rowen",
+      "faction": "Dreadwind Islands",
+      "status": "His ship docked briefly at a Tidefall outer isle. He met with someone in a hooded cloak for under an hour. Then vanished south."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Shadow Court",
+      "status": "Stable",
+      "reason": "Arkenor's raid was bold. Fear-unity holds, but Nythariel's murmuring introduces first real internal friction."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Critical",
+      "reason": "Kessa Stonebraid's disappearance has inflamed reformers. Armed gatherings reported in upper districts. Ironmaul's grip slipping."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "status": "Rising",
+      "reason": "Grief has become purpose. The Wayfarer killing unified a fractured pacifist faction \u2014 quiet anger is more dangerous than loud."
+    },
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "Tidefall ships in harbor and open succession struggle have shattered any pretense of stability. Merchants are moving coin east."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Rising",
+      "reason": "Warships in Eldoria harbor without a sword drawn. The Admiral calls it diplomacy. Her officers call it conquest. Both are right."
+    },
+    {
+      "faction": "Gilgeth & Groth Orcs",
+      "status": "Critical",
+      "reason": "Second massacre without a clear culprit has both cities mobilizing blindly. War-bands on the Rock Plains will find each other before they find the truth."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Declining",
+      "reason": "Village unrest growing around Stonebreak. Three farmers attempted to destroy a standing stone. They were found unconscious a mile away, unharmed but changed."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Rising",
+      "reason": "Faction chaos means every party needs couriers who can cross the passes. Glass orders up 40%. Three new contracts signed in the dark."
+    }
+  ],
+  "whispers": [
+    {
+      "text": "Kessa Stonebraid is not dead. Someone inside the sealed district is sliding food under the threshold door. Ironmaul's own guard is doing it.",
+      "region": "Lostfeld"
+    },
+    {
+      "text": "The hooded figure Rowen met on the Tidefall isle wore Twin Cities court rings. Two rings \u2014 one for each city. That means the niece.",
+      "region": "Tidefall"
+    },
+    {
+      "text": "The Groth caravan wasn't killed by orcs or blackbloom. The wounds match Gloomspire glass-blades. The Gnomes are not just watching anymore.",
+      "region": "Rock Plains"
+    },
+    {
+      "text": "Elowen's War-Readers didn't just read the omens. They read Lythara's name in them \u2014 written there before the raid ever happened.",
+      "region": "Glenhaven"
+    }
+  ],
+  "weather_and_omens": [
+    {
+      "region": "Faerwood",
+      "condition": "A second moon-shadow appeared on three consecutive nights \u2014 no astronomical cause found. Clan Velorn survivors will not go outside after dusk."
+    },
+    {
+      "region": "Lostfeld",
+      "condition": "The feverish warmth in the deep stone has intensified. Ice in the lower water-channels is melting upward. Miners say the heat has a pulse."
+    },
+    {
+      "region": "Dragonscar Peaks",
+      "condition": "The three descended Frostwarden elders have not returned to their aeries. They stand in the mountain foothills, facing south, unmoving, for days."
+    },
+    {
+      "region": "Rock Plains",
+      "condition": "Dust storms have taken on a faint crimson tint. Vilefin Goblin scouts who did return speak of shapes moving beneath the dust that leave no tracks."
+    },
+    {
+      "region": "Stonebreak",
+      "condition": "Green light observed rising from the standing stones on moonless nights. The dead calm persists. A druid novice was found at the stones, speaking in a language no one recognizes."
+    }
+  ],
+  "absorbed_lore": [
+    "Clan Arkenor killed two Wayfarer elves and took one captive \u2014 Elowen has summoned War-Readers, ending Glenhaven's pacifist posture.",
+    "Reformer leader Kessa Stonebraid entered Lostfeld's sealed lower district and vanished; Ironmaul declared her 'lost to the deep,' inflaming reformers.",
+    "King Roderic may be performing his frailty deliberately; eldest son Aldric is openly courting Tidefall and pushing for a Regency Council.",
+    "A second orc caravan \u2014 Groth-flagged \u2014 was found dead with wounds consistent with Gloomspire glass-blades, not blackbloom.",
+    "Tidefall warships are docked in Eldoria harbor under 'courtesy visit' pretense; weapons offloaded after dark.",
+    "Pirate King Rowen met a hooded Twin Cities court figure (suspected: King Roderic's niece) on a Tidefall outer isle.",
+    "The three Frostwarden Ice Dragon elders remain motionless in the mountain foothills, facing south \u2014 no movement in weeks.",
+    "Gloomspire Gnomes appear to have broken from passive observation; glass-blade wounds on Groth caravan suggest active interference.",
+    "A druid novice was found at Stonebreak standing stones speaking an unrecognized language; green light rising from stones on moonless nights.",
+    "Lostfeld stone heat now has a perceived rhythmic pulse; ice melting upward in lower water-channels."
+  ],
+  "real_timestamp": "2026-04-21T19:03:50.041862"
+}

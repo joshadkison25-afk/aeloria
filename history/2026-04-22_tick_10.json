@@ -1,0 +1,641 @@
+{
+  "tick": 10,
+  "world_date": "Month of the Ashen Dreaming, Year 1 of the Hollow Accord, Day 10",
+  "major_event": "The Seer arrives at the Twin Cities gates at midday \u2014 and Rowen descends to the iron door at low tide. Two thresholds crossed on the same day. The world holds its breath in two places at once.",
+  "primary_event": {
+    "name": "The Seer Delivers at the Twin Cities",
+    "summary": "The Seer arrived at the Twin Cities gates at midday. He was escorted to Caeris Thorne's emergency council session \u2014 already in progress \u2014 and delivered his message before the assembled lords. What he said, no two witnesses will later agree upon. Caeris went pale. A Gnome agent watched from the gallery.",
+    "severity": 17,
+    "stage": "peak",
+    "trend": "rising",
+    "involved": [
+      "Seer",
+      "Twin Cities",
+      "Caeris Thorne",
+      "Tidefall",
+      "Gloomspire Assassin Gnomes",
+      "Vampires"
+    ]
+  },
+  "supporting_events": [
+    {
+      "name": "Rowen Opens the Iron Door",
+      "summary": "At low tide Rowen dove with four men to the submerged iron door. The key turned. The door opened inward into an air pocket of unknown origin. Rowen surfaced alone twenty minutes later. He has not spoken of what he found. He ordered the fleet to weigh anchor immediately.",
+      "severity": 15,
+      "stage": "peak",
+      "trend": "rising",
+      "involved": [
+        "Dreadwind Islands",
+        "Sinking Island",
+        "Tidefall"
+      ]
+    },
+    {
+      "name": "Deep Entity: The Gate Responds",
+      "summary": "Hours before dawn, the fresh-bricked gate chamber cracked from within \u2014 a single stone displaced outward, precisely, without violence. The hammering stopped. Kessa Stonebraid, in the upper halls, sat upright and spoke a single complete phrase in the Entity's language and went silent again. The guards did not understand it. One wept.",
+      "severity": 17,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Monastery of Druids"
+      ]
+    },
+    {
+      "name": "Grand Druid's Rider Reaches Lostfeld \u2014 Too Late",
+      "summary": "The Druid's emergency rider arrived at Lostfeld's upper gate by afternoon and delivered the sealed message to Ironmaul. The gate chamber's displaced stone had already been discovered. Ironmaul read the warning with the sound of settling silence behind a bricked wall. The rider's hands shook when he learned what had already happened.",
+      "severity": 13,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Monastery of Druids",
+        "Lostfeld Dwarves",
+        "Ironmaul"
+      ]
+    }
+  ],
+  "active_events": [
+    {
+      "name": "The Seer Delivers at the Twin Cities",
+      "involved": [
+        "Seer",
+        "Twin Cities",
+        "Caeris Thorne",
+        "Tidefall",
+        "Gloomspire Assassin Gnomes",
+        "Vampires"
+      ],
+      "severity": 17,
+      "stage": "peak",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "The Seer entered a live court session and delivered his message before assembled lords. No transcript was kept. Caeris went pale. The Gnome agent in the gallery was close enough to observe his expression but too far to hear every word. The Vampire-influenced lords exchanged glances.",
+      "consequences": "Caeris's response \u2014 whatever it was \u2014 is now the most contested fact in the succession. Factions will spend the next tick interpreting secondhand accounts. The regency proclamation may move. The letter of intent may be tested."
+    },
+    {
+      "name": "Deep Entity: The Gate Responds",
+      "involved": [
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Monastery of Druids"
+      ],
+      "severity": 17,
+      "stage": "escalating",
+      "duration": 8,
+      "trend": "rising",
+      "summary": "The freshly bricked gate chamber produced a single displaced stone before dawn \u2014 a precise, deliberate act. The hammering has stopped. The silence that replaced it is being described by garrison soldiers as worse. Kessa spoke a complete phrase upstairs and went still again. The guards who heard it cannot repeat it.",
+      "consequences": "The Entity has demonstrated it can move through sealed stone. The bricking was not containment \u2014 it was gesture. Ironmaul now has the Druid's warning and an already-responded gate. The Druids must decide whether to come in person."
+    },
+    {
+      "name": "Twin Cities Succession Paralysis",
+      "involved": [
+        "Caeris Thorne",
+        "King Roderic Thorne II",
+        "Twin Cities",
+        "Tidefall",
+        "Aldric Thorne"
+      ],
+      "severity": 16,
+      "stage": "peak",
+      "duration": 9,
+      "trend": "rising",
+      "summary": "The Seer's arrival mid-session has crystallized the succession crisis. The letter of intent already exists. The regency proclamation still hides under the floorboard. Caeris now holds a Seer message \u2014 its content unknown to all but witnesses \u2014 and the court is reading his face for the verdict.",
+      "consequences": "If Caeris acts on the Seer's message, he legitimizes the Seer's role in governance. If he suppresses it, the Gnome agent already has his reaction. The Vampire-influenced lords are watching for any hesitation to exploit."
+    },
+    {
+      "name": "Rowen Opens the Iron Door",
+      "involved": [
+        "Dreadwind Islands",
+        "Sinking Island",
+        "Tidefall"
+      ],
+      "severity": 15,
+      "stage": "peak",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "Rowen surfaced from the submerged chamber alone, ordered immediate departure, and has not spoken to crew or captains about what was inside. His four dive companions have said nothing either. The fleet is moving. The island's waterline dropped another half-span by the time they weighed anchor.",
+      "consequences": "Whatever Rowen found changes his trajectory. His silence is its own message. Tidefall's eastern lanes are now clear of his anchorage but his destination is unknown. The iron door is submerged beyond reaching by nightfall."
+    },
+    {
+      "name": "Grand Druid Reads the Name",
+      "involved": [
+        "Monastery of Druids",
+        "Lostfeld Dwarves",
+        "Deep Entity"
+      ],
+      "severity": 15,
+      "stage": "escalating",
+      "duration": 7,
+      "trend": "rising",
+      "summary": "The rider's delivery is confirmed. The Grand Druid now knows his warning arrived after the gate responded. The junior scholars' nocturnal reading almost certainly triggered the Entity's response. The Grand Druid has called a full Conclave emergency and is preparing to travel to Lostfeld personally.",
+      "consequences": "The Grand Druid's personal journey to Lostfeld will take 2-3 ticks. If Kessa degrades further before he arrives, no one on-site can interpret what the Entity is doing. The junior scholars are now sequestered \u2014 they cannot be questioned freely."
+    },
+    {
+      "name": "Tidefall's Offshore Coalition",
+      "involved": [
+        "Tidefall",
+        "Twin Cities",
+        "Aldric Thorne",
+        "Dur Khadur"
+      ],
+      "severity": 13,
+      "stage": "escalating",
+      "duration": 7,
+      "trend": "stable",
+      "summary": "The Admiral received word of the Seer's arrival at court. He has not yet learned what was said. His morning was spent finalizing the harbor-treaty draft with Dur Khadur's consultancy language embedded. The letter of intent may now be tested by whatever Caeris decides today.",
+      "consequences": "If Caeris uses the Seer's message to invalidate or stall the letter of intent, the Admiral will need to escalate. Dur Khadur is already positioned to provide the escalation language."
+    },
+    {
+      "name": "Velorn Detained, Shadow Court Fractures",
+      "involved": [
+        "Shadow Court",
+        "Velorn Clan",
+        "Glenhaven Elves",
+        "Arkenor",
+        "Lythara"
+      ],
+      "severity": 12,
+      "stage": "escalating",
+      "duration": 4,
+      "trend": "stable",
+      "summary": "Lythara's covert message reached the Arkenor lieutenant via the Nythariel intermediary. He has received it but not yet replied. Lythara is waiting. The Velorn clan head returned to his hall and has summoned his own council \u2014 the first time he has done so without Lythara's permission.",
+      "consequences": "The Velorn council summons is a second ceiling-test. If Nythariel reports it to Lythara, she gains evidence. If Nythariel stays silent again, the fracture deepens. Lythara's covert channel is the only thread she still holds."
+    },
+    {
+      "name": "Gnome Syndicate: The Seer's Road",
+      "involved": [
+        "Gloomspire Assassin Gnomes",
+        "Seer",
+        "Twin Cities",
+        "Tidefall"
+      ],
+      "severity": 10,
+      "stage": "escalating",
+      "duration": 5,
+      "trend": "rising",
+      "summary": "The forward Gnome agent observed Caeris's face during the Seer's delivery. The trailing agent confirmed the Seer entered the city at midday with no written materials. The Syndicate now holds a behavioral record of Caeris's reaction \u2014 a commodity of considerable value.",
+      "consequences": "The Syndicate will decide next tick whether to sell this intelligence, use it as leverage, or sit on it while the succession resolves. Every faction that learns of the Gnome presence at court will reassess their own information security."
+    }
+  ],
+  "faction_actions": [
+    {
+      "faction": "Seer",
+      "action": "Delivered his message to Caeris Thorne before the assembled emergency council. He did not perform or embellish. He spoke plainly, briefly, and withdrew to a side chamber to rest. He has not eaten in two days. A Gnome agent watched from the gallery above.",
+      "reason": "He came to deliver. He has delivered. What happens next is not his to control. His fatigue is beginning to show in his face.",
+      "target": "Caeris Thorne / Twin Cities council"
+    },
+    {
+      "faction": "Twin Cities",
+      "action": "Caeris Thorne, after the Seer's delivery, dismissed the session abruptly and retreated to the inner chamber. He retrieved the regency proclamation from beneath the floorboard. He has not signed it yet \u2014 but he is holding it.",
+      "reason": "Whatever the Seer said changed something in him. He is not ready to act publicly, but he can no longer leave the document under a board.",
+      "target": "Regency proclamation / succession legal structure"
+    },
+    {
+      "faction": "Tidefall",
+      "action": "The Admiral dispatched a fast coastal rider to his Twin Cities contacts requesting an urgent account of the Seer's arrival and Caeris's reaction. Simultaneously, he ordered the harbor-treaty document countersigned by his senior fleet officers to create a parallel legal instrument.",
+      "reason": "He does not yet know what the Seer said but understands it threatens his coalition. He needs intelligence and a fallback legal position simultaneously.",
+      "target": "Twin Cities contacts / harbor-treaty document"
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "action": "The forward agent exits the Twin Cities gallery and moves to a known Gnome safe house. A coded message is prepared summarizing Caeris's observed reaction. A third agent is tasked with determining the Seer's message content through servant-level court contacts.",
+      "reason": "Behavioral data is valuable but incomplete. Full message content is the premium intelligence product. Servant contacts are cheaper and less traceable than noble intermediaries.",
+      "target": "Twin Cities court servants / Seer message content"
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "action": "Rowen sets a course northeast, away from both Tidefall and the main sea lanes. He has sealed his private cabin and posted a loyal captain at the door. No orders have been given about the fleet's destination beyond 'northeast, three days.' His dive companions are confined to a single deck.",
+      "reason": "What he found requires solitude to understand. He will not share it until he understands the shape of what he is holding.",
+      "target": "Unknown northeastern destination / fleet cohesion"
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "action": "Ironmaul read the Druid's warning with a displaced stone already sitting at his feet. He sent the rider back to the Grand Druid with a single message: 'Come in person. Bring whatever you need to close a door that opens itself.'",
+      "reason": "The Druid's rider brought knowledge that is now confirmed obsolete. Only the Grand Druid himself can be trusted with what has happened. Ironmaul is asking, not demanding \u2014 which is itself a measure of how frightened he is.",
+      "target": "Grand Druid / Monastery of Druids"
+    },
+    {
+      "faction": "Monastery of Druids",
+      "action": "Grand Druid Varek calls a full emergency Conclave session and announces his personal departure for Lostfeld within the day. He sequestered the two junior scholars in separate cells and forbids all further reading of the pre-Accord text by anyone other than himself.",
+      "reason": "The rider returned with Ironmaul's message. The Grand Druid now understands the gate has already responded. His presence is not optional \u2014 it is the only intervention available.",
+      "target": "Lostfeld Dwarves / Deep Entity gate"
+    },
+    {
+      "faction": "Shadow Court",
+      "action": "Lythara received no reply from the Arkenor lieutenant. She dispatches a second covert message, this time with a concrete offer: immunity and a clan elevation in exchange for testimony against Velorn. She is escalating the offer because waiting is now more dangerous than moving.",
+      "reason": "The Velorn clan head's unsanctioned council summons was reported to her by a loyal Nythariel minor who owed her a debt. She now has one fact she can act on, and she is moving before Velorn consolidates.",
+      "target": "Arkenor lieutenant / Velorn clan"
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "action": "Elowen's Wayfarer network delivers a quiet intelligence report from their Twin Cities contacts: the Seer has arrived and a session occurred. Elowen convenes a small council to assess whether to send an observer to the Twin Cities or wait for the situation to clarify.",
+      "reason": "The succession's outcome affects Glenhaven's northern border stability. Elowen prefers watching to acting, but she will not be the last to know.",
+      "target": "Twin Cities / succession outcome"
+    },
+    {
+      "faction": "Vampires",
+      "action": "The two Vampires who visited the letter-of-intent lords returned before dawn with partial success: one lord is wavering, the other has retreated into religious interpretation of the red lightning and refuses further contact. The Vampires shift focus to the wavering lord, deepening the private relationship.",
+      "reason": "Half a defection is better than none. The wavering lord is the more powerful of the two. Consolidating his doubt into action is the priority.",
+      "target": "Wavering Twin Cities lord / letter of intent"
+    },
+    {
+      "faction": "Dur Khadur",
+      "action": "Dur Khadur envoys in Tidefall finalize the security-consultancy language in the harbor-treaty draft and add a quiet addendum: a retainer clause activating Dur Khadur's mercenary force upon 'coastal succession uncertainty.' They do not explain the clause to the Admiral's legal staff.",
+      "reason": "The Seer's arrival creates exactly the kind of uncertainty that triggers the clause. If the Admiral does not read it carefully, Dur Khadur has positioned itself to activate a mercenary deployment on its own terms.",
+      "target": "Tidefall / harbor-treaty retainer clause"
+    },
+    {
+      "faction": "Farrock",
+      "action": "Farrock's rider reached the Twin Cities outskirts but was held at the outer gate \u2014 the emergency court session had closed access to the city. The commander's report on the Lostfeld vibration anomaly sits undelivered at a roadside inn. The rider waits for access.",
+      "reason": "The city was locked down during the Seer's arrival. The rider has no authorization to push through. He will try again at dawn.",
+      "target": "Twin Cities gate / Caeris Thorne"
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "action": "The runner returns to the Rock Plains scout band with eight additional goblins. The band leader now leads thirteen scouts toward the Lostfeld foothills. The warmth in the earth is stronger. A scout reports the soil cracking in a line running northeast \u2014 a visible surface fracture not there a week ago.",
+      "reason": "The soil fracture is new intelligence. The band leader is alarmed enough to document it but not yet frightened enough to retreat. He wants to see the source.",
+      "target": "Lostfeld foothills / surface fracture"
+    },
+    {
+      "faction": "Farrock",
+      "action": "Farrock's garrison commander, hearing secondhand rumors of the Seer's arrival at the Twin Cities from a returning merchant, adjusts the Lostfeld report's framing \u2014 adding a sentence noting the surface warmth extends toward the Rock Plains. He wants it delivered before the Seer's message shapes how the crisis is read.",
+      "reason": "If the Seer's interpretation reaches Caeris first, Farrock's military assessment becomes footnote rather than warning. Framing matters.",
+      "target": "Twin Cities / intelligence framing"
+    }
+  ],
+  "recent_events": [
+    {
+      "region": "Twin Cities",
+      "text": "The Seer arrived at midday and was escorted directly into Caeris Thorne's emergency council session. He delivered a message before the assembled lords. Caeris dismissed the session immediately after. No official record was kept. The Gnome agent in the gallery did not stay long enough to hear the full text."
+    },
+    {
+      "region": "Sinking Island / Open Sea",
+      "text": "Rowen dove to the iron door at low tide and entered the submerged chamber. He surfaced alone twenty minutes later, ordered the fleet northeast, and sealed his cabin. His four dive companions have not spoken. The iron door is now too deep to reach."
+    },
+    {
+      "region": "Lostfeld",
+      "text": "The freshly bricked gate chamber produced a single displaced stone before dawn. The hammering had already stopped. Kessa Stonebraid spoke a complete phrase in the Entity's language from the upper halls and went still. The Druid's rider arrived hours later with a warning that described what had not yet happened \u2014 and found it already done."
+    },
+    {
+      "region": "Faerwood / Shadow Court",
+      "text": "The Velorn clan head convened his own unsanctioned council. A loyal Nythariel minor reported this to Lythara. She dispatched a second covert message to the Arkenor lieutenant with a concrete offer: immunity and clan elevation in exchange for testimony. She is no longer waiting."
+    },
+    {
+      "region": "Tidefall",
+      "text": "The Admiral learned the Seer had arrived at the Twin Cities but not what was said. He ordered the harbor-treaty countersigned by fleet officers and sent a fast rider for intelligence. Dur Khadur's envoys quietly inserted a retainer clause into the treaty draft that may activate Dur Khadur forces independently."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Twin Cities \u2014 Seer's Message vs Letter of Intent",
+      "description": "The Seer delivered. Caeris went pale and dismissed court. The letter of intent already exists. Whatever the Seer said is now the most contested fact in the succession \u2014 a fact no one outside that chamber can confirm."
+    },
+    {
+      "factions": "Lostfeld \u2014 Deep Entity vs Ironmaul's Authority",
+      "description": "The gate displaced stone through a bricked wall. The hammering has stopped \u2014 replaced by silence that the garrison finds worse. Kessa is degrading. The Grand Druid is traveling but will not arrive for 2-3 days. Every hour without interpretation is an hour the Entity acts alone."
+    },
+    {
+      "factions": "Tidefall \u2014 Dur Khadur's Hidden Retainer Clause",
+      "description": "Dur Khadur has embedded a self-activating mercenary deployment clause in the harbor-treaty draft without explaining it. If the Admiral signs without reading it carefully, Dur Khadur gains legal authority to deploy forces on its own determination of 'succession uncertainty.'"
+    },
+    {
+      "factions": "Shadow Court \u2014 Lythara vs Velorn's Unsanctioned Council",
+      "description": "Velorn summoned his own clan council without Lythara's permission. She knows. She has escalated her offer to the Arkenor lieutenant. The next move is his \u2014 and she cannot control what he decides."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Seer",
+      "faction": "Independent",
+      "status": "Resting in a side chamber at the Twin Cities palace. Has not eaten in two days. Delivered his message before the full council. Does not know what Caeris will do with it. A Gnome agent was watching from the gallery."
+    },
+    {
+      "name": "Caeris Thorne",
+      "faction": "Twin Cities",
+      "status": "Dismissed the emergency session after the Seer's delivery. Retrieved the regency proclamation from under the floorboard. Is alone in the inner chamber. Has not yet signed it. His hands are steady. His face is not."
+    },
+    {
+      "name": "Pirate King Rowen",
+      "faction": "Dreadwind Islands",
+      "status": "Sealed in his cabin, fleet heading northeast. Surfaced alone from the iron door chamber. Has not spoken of what he found. His dive companions are confined and silent. The iron door is now permanently submerged."
+    },
+    {
+      "name": "Thane Ulric Ironmaul",
+      "faction": "Lostfeld Dwarves",
+      "status": "Holding the displaced stone in his hands when the Druid's rider arrived. Sent the rider back with a single request: the Grand Druid in person. He has still not eaten. The silence behind the bricked wall is his primary companion."
+    },
+    {
+      "name": "Kessa Stonebraid",
+      "faction": "Lostfeld Dwarves (Reformers)",
+      "status": "Spoke a complete phrase in the Entity's language from the upper halls, simultaneously with the gate's stone displacement. Now sits motionless in her chair. Her palms show deepened symbols. The guards do not know whether she is sleeping or absent."
+    },
+    {
+      "name": "Queen Lythara",
+      "faction": "Shadow Court",
+      "status": "Received intelligence of Velorn's unsanctioned council from a Nythariel minor. Dispatched a second covert message to the Arkenor lieutenant escalating to immunity and clan elevation. She is running out of patience but not yet out of options."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "The Seer's arrival and Caeris's abrupt dismissal of court have deepened uncertainty. No lord knows what was said. The Vampire-influenced lord is wavering on the letter of intent. The court feels leaderless even with Caeris physically present."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Critical",
+      "reason": "The gate moved through bricked stone. The hammering has stopped. Kessa spoke again. The garrison is now openly refusing lower-level rotations. Ironmaul commands silence from soldiers who no longer believe silence is protection."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Stable",
+      "reason": "The Admiral's confidence remains, but the Seer's arrival at the Twin Cities has introduced uncertainty. The harbor-treaty countersigning has steadied fleet officers. The unread Dur Khadur clause is an invisible risk."
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "status": "Stable",
+      "reason": "Rowen's dive unified the fleet around him. His silence since surfacing has unsettled some captains, but loyalty to Rowen personally is high enough to absorb the uncertainty for now."
+    },
+    {
+      "faction": "Shadow Court",
+      "status": "Declining",
+      "reason": "Velorn's unsanctioned council is a direct authority challenge. Lythara's escalating offer to the Arkenor lieutenant signals desperation to her inner circle, even if the intent is strength."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Rising",
+      "reason": "The Grand Druid's personal departure for Lostfeld has clarified purpose and silenced internal debate. The Conclave believes they are the only institution capable of addressing what is emerging. That belief produces cohesion."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Rising",
+      "reason": "The Seer's delivery was observed. Caeris's reaction is recorded. The Syndicate holds intelligence that every major faction wants. Third agent tasked for the message's content. Leverage is accumulating rapidly."
+    },
+    {
+      "faction": "Vampires",
+      "status": "Stable",
+      "reason": "One lord is now fully in their influence orbit. The other has retreated into religious fatalism \u2014 temporarily inaccessible but not permanently lost. The Seer's arrival gives the Vampires new material to work with among frightened courtiers."
+    }
+  ],
+  "faction_power": [
+    {
+      "faction": "Shadow Court",
+      "military": 7,
+      "political": 4,
+      "economic": 5,
+      "influence": 5
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Twin Cities",
+      "military": 6,
+      "political": 2,
+      "economic": 5,
+      "influence": 3
+    },
+    {
+      "faction": "Tidefall",
+      "military": 8,
+      "political": 8,
+      "economic": 8,
+      "influence": 9
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "military": 2,
+      "political": 2,
+      "economic": 3,
+      "influence": 2
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "military": 4,
+      "political": 6,
+      "economic": 7,
+      "influence": 10
+    },
+    {
+      "faction": "Monastery of Druids",
+      "military": 3,
+      "political": 5,
+      "economic": 4,
+      "influence": 9
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "military": 6,
+      "political": 5,
+      "economic": 4,
+      "influence": 7
+    },
+    {
+      "faction": "Dur Khadur",
+      "military": 7,
+      "political": 6,
+      "economic": 6,
+      "influence": 7
+    },
+    {
+      "faction": "Farrock",
+      "military": 5,
+      "political": 3,
+      "economic": 4,
+      "influence": 4
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "military": 3,
+      "political": 2,
+      "economic": 3,
+      "influence": 4
+    },
+    {
+      "faction": "Vampires",
+      "military": 2,
+      "political": 7,
+      "economic": 5,
+      "influence": 9
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Farrock",
+      "military": 5,
+      "political": 3,
+      "economic": 4,
+      "influence": 4
+    }
+  ],
+  "faction_resources": [
+    {
+      "faction": "Shadow Court",
+      "food": 55,
+      "gold": 50,
+      "military": 70,
+      "materials": 50,
+      "influence": 50,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "food": 55,
+      "gold": 50,
+      "military": 60,
+      "materials": 50,
+      "influence": 76,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Twin Cities",
+      "food": 55,
+      "gold": 50,
+      "military": 60,
+      "materials": 50,
+      "influence": 30,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Tidefall",
+      "food": 55,
+      "gold": 72,
+      "military": 75,
+      "materials": 50,
+      "influence": 77,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "food": 48,
+      "gold": 30,
+      "military": 23,
+      "materials": 50,
+      "influence": 23,
+      "pressure": "Mounting pressure on military, influence."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "food": 55,
+      "gold": 70,
+      "military": 40,
+      "materials": 50,
+      "influence": 76,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "food": 55,
+      "gold": 40,
+      "military": 30,
+      "materials": 50,
+      "influence": 76,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "food": 55,
+      "gold": 40,
+      "military": 60,
+      "materials": 50,
+      "influence": 70,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Dur Khadur",
+      "food": 55,
+      "gold": 60,
+      "military": 70,
+      "materials": 50,
+      "influence": 64,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Farrock",
+      "food": 55,
+      "gold": 40,
+      "military": 50,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "food": 55,
+      "gold": 30,
+      "military": 30,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Vampires",
+      "food": 55,
+      "gold": 50,
+      "military": 26,
+      "materials": 50,
+      "influence": 77,
+      "pressure": "Mounting pressure on military."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "food": 55,
+      "gold": 50,
+      "military": 60,
+      "materials": 50,
+      "influence": 76,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Farrock",
+      "food": 55,
+      "gold": 40,
+      "military": 50,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    }
+  ],
+  "relationships": [],
+  "trade_routes": [],
+  "faction_identities": [],
+  "region_control": [],
+  "faction_knowledge": [],
+  "remembered_events": [],
+  "seer_state": {
+    "tone": "weary",
+    "confidence": 50,
+    "bias": "cautiously interpretive",
+    "belief_about_user": "The presence beyond the veil is not fully understood.",
+    "memory_burden": 40,
+    "voice_mode": "pattern and testimony",
+    "last_source_bias": "mixed and uncertain"
+  },
+  "seer_journey": {
+    "location": "Stonebreak",
+    "destination": "Stonebreak",
+    "status": "stationary",
+    "ticks_remaining": 0,
+    "purpose": "Observing the shifting world.",
+    "last_outcome": "No recent delivery recorded."
+  },
+  "ruler_states": [],
+  "belief_currents": [],
+  "religious_factions": [],
+  "whispers": [],
+  "weather_and_omens": [],
+  "absorbed_lore": [],
+  "real_timestamp": "2026-04-22T06:55:40.175526"
+}

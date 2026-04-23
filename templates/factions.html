@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+{% block title %}Aeloria — Factions{% endblock %}
+
+{% block head %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  .view.hidden { display: none !important; }
+
+  /* ── FACTION GRID ────────────────────────────── */
+  .faction-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 0.15s, border-left-width 0.1s;
+    position: relative;
+  }
+  .faction-card:hover {
+    border-color: var(--border2);
+    border-left: 2px solid var(--gold);
+  }
+
+  .fc-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .fc-name {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .fc-leader {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .fc-status {
+    font-size: 14px;
+    color: var(--text-sec);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .fc-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .fc-pressure {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .resource-mini {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    margin-top: 14px;
+  }
+  .resource-mini-item {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .resource-mini-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .resource-mini-track {
+    height: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .resource-mini-fill {
+    height: 100%;
+    background: var(--gold);
+  }
+
+  /* ── PROFILE VIEW ────────────────────────────── */
+  .profile-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 40px;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 40px;
+    align-items: start;
+  }
+
+  /* Left content */
+  .profile-name {
+    font-family: 'Cinzel', serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .profile-tagline {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--text-sec);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+
+  .profile-section { margin-bottom: 48px; }
+  .profile-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-prose {
+    font-family: 'Crimson Text', serif;
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--text-sec);
+  }
+  .profile-prose p + p { margin-top: 18px; }
+
+  /* Sidebar */
+  .profile-sidebar {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+  }
+  .sidebar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .sidebar-fact { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sidebar-fact:last-child { border-bottom: none; }
+  .sidebar-fact-key { color: var(--text-muted); }
+  .sidebar-fact-val { color: var(--text); text-align: right; }
+
+  /* Characters in profile */
+  .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
+  .char-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+  .char-name { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .char-title { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+  .char-desc { font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+
+  /* Relationships */
+  .rel-list { display: flex; flex-direction: column; gap: 16px; }
+  .rel-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .rel-item:last-child { border-bottom: none; }
+  .rel-info { flex: 1; }
+  .rel-faction { font-family: 'Cinzel', serif; font-size: 12px; color: var(--text); margin-bottom: 4px; }
+  .rel-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .rel-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 10px; white-space: nowrap; flex-shrink: 0;
+  }
+  .rb-alliance  { background:rgba(201,169,110,0.12); color:var(--gold);     border:1px solid rgba(201,169,110,0.25); }
+  .rb-war       { background:rgba(201,55,44,0.12);   color:var(--critical); border:1px solid rgba(201,55,44,0.25); }
+  .rb-rivalry   { background:rgba(192,128,64,0.12);  color:var(--declining);border:1px solid rgba(192,128,64,0.25); }
+  .rb-neutral   { background:var(--surface2); color:var(--text-muted); border:1px solid var(--border); }
+  .rb-complex   { background:rgba(122,90,154,0.12); color:var(--purple); border:1px solid rgba(122,90,154,0.25); }
+
+  /* Location list */
+  .loc-list { display: flex; flex-direction: column; }
+  .loc-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .loc-item:last-child { border-bottom: none; }
+  .loc-name { font-family: 'Cinzel', serif; font-size: 12px; color: var(--text); margin-bottom: 4px; }
+  .loc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .trade-list { display: flex; flex-direction: column; gap: 14px; }
+  .trade-route {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .trade-route:last-child { border-bottom: none; }
+  .trade-route-main { flex: 1; }
+  .trade-route-title {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .trade-route-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .trade-route-status {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+
+  /* Event rows in profile */
+  .event-row { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .event-row:last-child { border-bottom: none; }
+  .event-region { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .event-text { font-size: 14px; color: var(--text-sec); line-height: 1.5; }
+
+  @media (max-width: 900px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-sidebar { position: static; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- GRID VIEW -->
+<div id="grid-view" class="view">
+  <div class="page-hero">
+    <div class="container">
+      <p class="section-label">Powers of Aeloria</p>
+      <h1 class="section-title" style="font-size:48px">THE FACTIONS</h1>
+      <p class="section-subtitle">Fourteen factions. Fourteen agendas. None of them know the full truth.</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="card-grid" id="factions-grid">
+        {% for i in range(6) %}
+        <div class="faction-card">
+          <div class="skeleton" style="height:10px;width:80px;margin-bottom:10px"></div>
+          <div class="skeleton" style="height:18px;width:60%;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:12px;width:45%;margin-bottom:14px"></div>
+          <div class="skeleton" style="height:13px;width:95%;margin-bottom:6px"></div>
+          <div class="skeleton" style="height:13px;width:80%"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PROFILE VIEW -->
+<div id="profile-view" class="view hidden">
+  <div class="profile-wrap">
+    <button class="back-link" onclick="showGrid()">← All Factions</button>
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const FACTION_DATA = {
+  "Shadow Court": {
+    type:"Kingdom", leader:"Queen Lythara the Veiled",
+    tagline:"Ancient, sovereign, and unknowable — the Dread Elves of Faerwood do not rule by fear so much as by the certainty that resistance is futile.",
+    overview:["The Shadow Court is the oldest continuous power in Aeloria, predating the Fractured Age by three millennia. From the depths of Faerwood, the Dread Elves have watched empires rise and collapse like tides, outlasting them all through patience, secrecy, and a willingness to do what other factions cannot bring themselves to do.","Their society is organized into clans — Velorn, Nythariel, and Arkenor being the three great houses — each with their own territories within the dark forest and their own interpretation of the Queen's will. Clan politics are subtle and lethal.","To outsiders, the Shadow Court presents a single face: Queen Lythara's, veiled and unreadable. Behind that veil, the clans maneuver constantly, each seeking to position themselves closest to the throne when the inevitable succession comes."],
+    history:["The Dread Elves did not always dwell in Faerwood. Ancient texts speak of a great exile, a severing from the elder elven courts that drove Lythara's ancestors into the dark forest. What they were exiled for is not recorded anywhere outside Faerwood.","During the Fractured Age, the Shadow Court remained neutral through the first two civil wars, emerging each time as power brokers rather than combatants. Lythara's grandmother, Queen Seraveth, established the doctrine still followed today: Faerwood does not bleed for others' ambitions, but it always collects the debt."],
+    characters:[{name:"Queen Lythara the Veiled",title:"Queen of the Shadow Court",status:"Alive",desc:"Has ruled for four centuries. Her face has not been seen in living memory."},{name:"Thalor",title:"Blade Warden of Faerwood",status:"Alive",desc:"A cursed warrior bound to Faerwood's eastern border. His loyalty is to the forest, not the throne."}],
+    relationships:[{faction:"Glenhaven Elves",type:"war",desc:"Wayfarer war-bands have entered Faerwood's eastern fringe. Open war within weeks."},{faction:"Twin Cities",type:"complex",desc:"The Shadow Court funds certain Twin Cities merchants quietly. Political influence without visibility."},{faction:"Dreadwind Islands",type:"complex",desc:"Clan Velorn sent a figure by ship to an unknown destination. The pirates may be involved."}],
+    locations:[{name:"The Faerwood",desc:"A vast dark forest, nearly impenetrable to outsiders."},{name:"The Black Glades",desc:"The innermost region of Faerwood, where Lythara's court holds session."},{name:"The Whispering Paths",desc:"Labyrinthine trails that appear and vanish — only Dread Elves may navigate them reliably."}]
+  },
+  "Lostfeld Dwarves": {
+    type:"Kingdom", leader:"Thane Ulric Ironmaul",
+    tagline:"Built into the bones of the mountain, Lostfeld endures — though what stirs in the deep stone may test even dwarven endurance.",
+    overview:["Lostfeld is the greatest dwarven stronghold in the known world, carved into the northern mountains over eight hundred years. Its halls run miles deep, its forges have burned continuously for four centuries.","Dwarven society in Lostfeld is stratified by craft and clan, with the Thane holding absolute authority in times of crisis. Ironmaul has declared a crisis — his authority is accordingly unchecked. The reformer movement challenges this reading of the law.","The schism between Ironmaul's traditionalists and the reformers is the sharpest internal conflict Lostfeld has faced since the founding. At stake is the question of what Lostfeld owes to those sealed in its deep districts — and what is sealed beneath them."],
+    history:["Lostfeld was founded by Brammir Stonehelm, whose legend holds he led three hundred dwarves into unmapped mountains and returned three years later with a city.","The sealed districts were created during the Second Collapse, when something in the deep mines produced effects requiring permanent quarantine. The official history says it was a gas seep. The reformers say otherwise."],
+    characters:[{name:"Thane Ulric Ironmaul",title:"Thane of Lostfeld",status:"Alive",desc:"Powerful, pragmatic, and increasingly uncertain. His hesitation on the collapse order has revealed a limit no one expected."},{name:"Kessa Stonebraid",title:"Reformer Leader",status:"Alive",desc:"Trapped in the threshold antechamber. Reportedly in communication with something in the deep stone, and listening willingly."},{name:"Brammir Stonehelm",title:"Founder of Lostfeld",status:"Dead",desc:"Historical. Founded Lostfeld. His legend underpins every claim to authority Ironmaul makes."}],
+    relationships:[{faction:"Twin Cities",type:"alliance",desc:"Trade agreements provide Lostfeld with surface goods. Currently strained by Lostfeld's instability."},{faction:"Gloomspire Assassin Gnomes",type:"neutral",desc:"Lostfeld tolerates the gnome passage monopoly because the alternative is isolation."}],
+    locations:[{name:"Lostfeld",desc:"The great mountain city — miles of carved halls, forges, and sealed districts."},{name:"The Forge of Brammir",desc:"The founding forge, burning since the city's first year."},{name:"The Sealed Districts",desc:"Quarantined levels deep in the mountain. Families have lived and died within them for generations."}]
+  },
+  "Glenhaven Elves": {
+    type:"Kingdom", leader:"Sovereign Elowen Silverleaf",
+    tagline:"Patient and ancient, the Glenhaven Elves have always chosen peace — until now.",
+    overview:["Glenhaven is the elder elven court of the south, a civilization built in the canopy of vast silver-leafed forests. Where the Shadow Court embodies elven darkness, Glenhaven represents their capacity for grace — long memory, deep craft, and a philosophy of stewardship over conquest.","The Wayfarers are Glenhaven's most distinctive institution: warrior-monks who serve as scouts, diplomats, and when necessary, soldiers. Their discipline is total. Elowen has deployed three war-bands into Faerwood's eastern fringe.","Glenhaven's War-Readers have determined that the Shadow Court's raid was preordained in shadow-script. For Elowen, this is not a political judgment but a cosmological one."],
+    history:["Glenhaven was established by Elenion Darkleaf following the Sundering that separated the elder elves from their northern kin. Elenion's decision to settle the southern forests rather than attempt reclamation defined Glenhaven's character: permanence over ambition.","Glenhaven's last open war was the War with the Wildwood. The victory established a generation of relative peace. Elowen has governed since before that war ended."],
+    characters:[{name:"Sovereign Elowen Silverleaf",title:"Sovereign of Glenhaven",status:"Alive",desc:"Has not slept in six days. Reading War-Reader scrolls each dawn. Preparing for something after the war."},{name:"Elenion Darkleaf",title:"First Sovereign of Glenhaven",status:"Dead",desc:"Historical founder. Chose the southern forests. Her decisions still govern Glenhaven's philosophy."}],
+    relationships:[{faction:"Shadow Court",type:"war",desc:"War-bands deployed into Faerwood. The War-Readers have declared it preordained."},{faction:"Twin Cities",type:"alliance",desc:"Long-standing mutual defense agreement."},{faction:"Lostfeld Dwarves",type:"alliance",desc:"Allies since the War with the Wildwood. Warm by elven standards — formal and reliable."}],
+    locations:[{name:"Glenhaven",desc:"The silver-leafed canopy city, built among enormous elder trees."},{name:"The Sylvan Court",desc:"Elowen's seat of governance — an open-air hall in the highest canopy."},{name:"The Silverflow River",desc:"Defines Glenhaven's eastern border and feeds the silver-leafed forest."}]
+  },
+  "Twin Cities": {
+    type:"Kingdom", leader:"King Roderic Thorne II",
+    tagline:"Two cities, one throne, three heirs, and a court that has mistaken performance for policy.",
+    overview:["Eresteron and Eldoria sit beside each other at Aeloria's center — two cities grown so large they have merged at their edges while insisting they remain distinct. Eresteron is the older city, home to the throne. Eldoria is the commercial city, home to the merchants, the port, and increasingly, the real power.","King Roderic Thorne II has reigned for thirty years, maintaining the balance between old families and new money through a combination of genuine skill and deliberate vagueness about his intentions.","The succession question has consumed the court. Roderic has two known sons: Aldric, pragmatic and ambitious; and Caeris, who has now vanished. That Roderic has done nothing publicly in response to either suggests either paralysis or a more sophisticated game."],
+    history:["The Twin Cities began as a single settlement split by a trade dispute in the Fourth Century. The Thorne dynasty unified them under a single crown two hundred years ago — politically, if not practically.","The Tidefall Compact represents the first formal power-sharing agreement between the Twin Cities and an outside faction in three generations. It was signed by Aldric rather than the King."],
+    characters:[{name:"King Roderic Thorne II",title:"King of the Twin Cities",status:"Alive",desc:"Performing frailty or genuinely frail. No one is certain which."},{name:"Prince Aldric Thorne",title:"Crown Prince",status:"Alive",desc:"Signed the Tidefall compact without royal authorization. Now co-governs Eldoria."},{name:"Prince Caeris Thorne",title:"Second Prince",status:"Unknown",desc:"Missing. Reportedly went north with a gnome guide, carrying a letter bearing the King's true signet."}],
+    relationships:[{faction:"Tidefall",type:"complex",desc:"Aldric's compact has created a formal alliance that bypasses the throne."},{faction:"Glenhaven Elves",type:"alliance",desc:"Mutual defense. Reliable in practice."},{faction:"Lostfeld Dwarves",type:"alliance",desc:"Primary trade partner. Lostfeld's instability is causing concern in Eldoria's merchant class."}],
+    locations:[{name:"Eresteron",desc:"The elder city — seat of the throne, home to the nobility."},{name:"Eldoria",desc:"The commercial city — ports, merchants, and the real economic engine."}]
+  },
+  "Tidefall": {
+    type:"Faction", leader:"Admiral Electorate",
+    tagline:"An elected war council that governs by maritime law — and now wants the rest of Aeloria to join them.",
+    overview:["Tidefall is built on clifftops at Aeloria's southwestern coast, its towers overlooking a natural harbor that handles more tonnage than any other port in the known world. Its government — the Admiral Electorate — is a council of seven, elected from captains and merchant houses every seven years.","Tidefall's ambitions have always been larger than its territory. The compact with Prince Aldric is the latest expression of a strategy building for two decades: accumulate legal cover, cultivate internal allies in rival states, and wait for the right moment.","The Admiral Electorate's critics say Tidefall is a merchant empire dressed in democratic clothing. Its supporters say it is the only government in Aeloria that has never started a war it didn't intend to win."],
+    history:["Tidefall was established by survivors of a maritime disaster two centuries ago — a fleet that lost its home port to the sea and built a new one on the nearest cliffs.","The seven-year election cycle has produced remarkably stable governance. The current Admiral has won three consecutive elections. Each time, the opposition has become smaller."],
+    characters:[{name:"Admiral Electorate",title:"Head of the Tidefall Council",status:"Alive",desc:"Known by title rather than name. The compact with Aldric is their greatest political achievement."}],
+    relationships:[{faction:"Twin Cities",type:"complex",desc:"The compact with Aldric creates formal power-sharing. Ships now sit in Eldoria's harbor with legal cover."},{faction:"Dreadwind Islands",type:"rivalry",desc:"Both compete for maritime supremacy. The pirates raid Tidefall-adjacent shipping lanes."}],
+    locations:[{name:"Tidefall",desc:"The clifftop city — towers, harbor, and the Admiralty Hall."}]
+  },
+  "Dreadwind Islands": {
+    type:"Faction", leader:"Pirate King Rowen",
+    tagline:"A scattered archipelago of exiles and outcasts, unified by a man who claims a throne that may or may not exist.",
+    overview:["The Dreadwind Islands are four rugged islands off Aeloria's western coast. Their inhabitants — a mix of political exiles, escaped sailors, and opportunists — have developed a culture that prizes pragmatism, loyalty to crew over flag, and a deep suspicion of authority.","Pirate King Rowen arrived seven years ago and within three unified the four islands through naval victories, theatrical diplomacy, and a genealogical document claiming descent from the last king of a sunken coastal kingdom. Whether the document is genuine is debated. Whether it matters is not."],
+    history:["The Dreadwind Islands have never been formally governed. Rowen is the first to hold all four.","The claim to a sunken kingdom connects the Islands to a broader legend about coastal settlements that disappeared beneath the sea — the same event that stranded the ancestors of Tidefall on their clifftops."],
+    characters:[{name:"Pirate King Rowen",title:"Pirate King of the Dreadwind Islands",status:"Alive",desc:"Claims a throne backed by questionable documents and genuine naval power."}],
+    relationships:[{faction:"Tidefall",type:"rivalry",desc:"Maritime competitors. Rowen and the Admiral have exchanged formal insults on three occasions."},{faction:"Shadow Court",type:"complex",desc:"A Clan Velorn figure was seen boarding a ship at a Faerwood coastal inlet. Destination unknown."}],
+    locations:[{name:"Dreadwind Isles",desc:"Four rugged, storm-battered islands off the western coast."}]
+  },
+  "Dur Khadur": {
+    type:"Faction", leader:"The Dark Council",
+    tagline:"Mercenaries and forbidden scholars who align with power rather than principle.",
+    overview:["Dur Khadur sits in the far east, a city built on arid terrain most factions consider uninhabitable. It is not a kingdom, not quite a state — it is a city of contractors, governed by a rotating council of those whose contracts are currently largest.","The Dark Council sells expertise, soldiers, and silence to any faction that can pay. Its scholars work in areas other institutions will not touch. Its mercenary companies have fought on every side of the last four major conflicts."],
+    history:["Dur Khadur has existed in some form for three centuries, always governed by whoever currently holds the largest contract. Its founding is attributed to a scholar expelled from the Monastery of Druids for pursuing research the Grand Druid called 'an invitation to things that should not be invited.'"],
+    characters:[],
+    relationships:[{faction:"Farrock",type:"alliance",desc:"Farrock uses Dur Khadur mercenaries. Dur Khadur gets a steady contract."},{faction:"Monastery of Druids",type:"rivalry",desc:"Historical. The Monastery expelled Dur Khadur's founder."}],
+    locations:[{name:"Dur Khadur",desc:"The eastern city — arid, practical, home to expertise polite society will not acknowledge needing."},{name:"The Sultan's Gardens",desc:"A private district within Dur Khadur. Its purpose is not publicly discussed."}]
+  },
+  "Farrock": {
+    type:"Faction", leader:"Unknown",
+    tagline:"A fortress state that has survived by exploiting the gap between what alliances promise and what they deliver.",
+    overview:["Farrock is a fortress city in the southeast, built on a defensible plateau overlooking trade routes connecting three major factions. Its governance is opaque — records refer to a Lord-Commander, but no individual has been publicly identified in that role for two decades.","Farrock's survival strategy is transactional: favorable rates for factions it wants to cultivate, extortionate rates for those it wants to pressure."],
+    history:["Farrock appears in trade records from the Third Century as a waystation; it appears in military records from the Fourth Century as a fortified position that was notably not captured during the eastern campaigns."],
+    characters:[],
+    relationships:[{faction:"Dur Khadur",type:"alliance",desc:"Mercenary soldiers for passage rights. Both benefit. Neither trusts the other."}],
+    locations:[{name:"Farrock",desc:"The plateau fortress — high walls, controlled passes, and a Lord-Commander no one has publicly met."}]
+  },
+  "Gilgeth & Groth Orcs": {
+    type:"Faction", leader:"Various War-Chiefs",
+    tagline:"Two orc cities bound by blood and divided by ambition, now at open war over a mystery neither has solved.",
+    overview:["Gilgeth and Groth are the two great orc cities, built within a day's march of each other. They share a language, a religion, and a history — and have been rivals for supremacy for four centuries.","The opioid crisis among orc war-bands has changed the character of orc society. Caravan addiction began as a trade problem and has become a military one: war-bands are unreliable, aggressive, and incapable of patient coordination.","The killing of joint caravans at Ashmark Ridge — blamed by each city on the other — has ignited a war both war-chiefs know is premature. Neither can stop it."],
+    history:["Gilgeth was founded first, by the clan that won the original territorial dispute. Groth was founded three generations later by the losing clan, who refused to assimilate.","The War with the Wildwood was the only period when Gilgeth and Groth fought as a unified force. Their combined war-bands were the most effective offensive unit in that conflict."],
+    characters:[],
+    relationships:[{faction:"Gloomspire Assassin Gnomes",type:"rivalry",desc:"The gnomes supplied glass-blades that addicted the war-bands. The gnomes have since vanished into the passes."},{faction:"Vilefin Goblins",type:"rivalry",desc:"The goblins scavenge in orc territory. Relations have always been hostile."}],
+    locations:[{name:"Gilgeth",desc:"The older orc city — larger, more established, convinced of its primacy."},{name:"Groth",desc:"The younger orc city — hungrier, more aggressive."},{name:"Ashmark Ridge",desc:"The site of the first open battle. Forty dead. Crows that did not feed on the bodies."}]
+  },
+  "Gloomspire Assassin Gnomes": {
+    type:"Order", leader:"The Syndicate",
+    tagline:"The only faction that can cross the mountain passes — they built their empire on glass and keep it through necessity.",
+    overview:["The Gloomspire Gnome Syndicate operates in the space between all other factions, moving through mountain passes no other organization can navigate. This geographical monopoly is the foundation of all their power.","Their public business is glass — exquisite craft glass, optical instruments, and specialized glasswork healers and scholars require. The glass trade funds operations and provides a reason for their couriers to be everywhere. Their private business is considerably more varied.","The gnomes' relationship to the Monastery of Druids is the deepest open secret in Aeloria: the Syndicate is the Monastery's covert arm."],
+    history:["The Gloomspire gnomes have occupied their mountain position since before recorded history. Their founding mythology credits them with discovering the passes rather than building them.","The glass monopoly was established formally in the Third Century through trade agreements that looked, at signing, like minor commercial arrangements. By the time their significance was clear, the gnomes were too useful to remove."],
+    characters:[],
+    relationships:[{faction:"Monastery of Druids",type:"alliance",desc:"The Syndicate operates as the Monastery's covert arm."},{faction:"Gilgeth & Groth Orcs",type:"complex",desc:"The gnomes supplied glass-blades that addicted orc war-bands. The gnomes have retreated. The orcs are not satisfied."},{faction:"Twin Cities",type:"alliance",desc:"A gnome courier was seen leaving the Twin Cities palace the night Caeris disappeared."}],
+    locations:[{name:"Gloomspire",desc:"The gnome city within the mountain passes — its exact location not published in any approved map."}]
+  },
+  "Monastery of Druids": {
+    type:"Order", leader:"The Grand Druid",
+    tagline:"Nature worship, dark ritual, and a divine mandate that the Grand Druid alone interprets.",
+    overview:["The Monastery of Druids at Stonebreak occupies a position of formal neutrality and practical influence. It serves as a hospital, a library, a center of agricultural knowledge — and beneath all of this, an institution with its own agenda never fully disclosed to any secular power.","Something is happening at Stonebreak. A novice who began speaking an unknown tongue has been sequestered. The scriptorium has been locked. Scholars turned away. The standing stones pulse green at night."],
+    history:["The Monastery was founded in the First Age, predating most current political structures. Its original purpose was preservation — of knowledge, of natural sites, of the old ways before the Fractured Age made everything contingent.","The expulsion of what became Dur Khadur's founding scholar represents the Monastery's most public disciplinary action. The nature of the research that prompted it has been removed from public archive."],
+    characters:[],
+    relationships:[{faction:"Gloomspire Assassin Gnomes",type:"alliance",desc:"The Syndicate operates as the Monastery's covert arm."},{faction:"Dur Khadur",type:"rivalry",desc:"Historical. The Monastery expelled Dur Khadur's founder."}],
+    locations:[{name:"Stonebreak Monastery",desc:"The Monastery itself — scriptorium locked, standing stones pulsing green."},{name:"The Hollowstones",desc:"A ring of standing stones used in ritual practice. Currently active in undocumented ways."}]
+  },
+  "Vilefin Goblins": {
+    type:"Faction", leader:"Elder Skrix",
+    tagline:"Cunning scavengers who have survived in the margins of every political order by being too useful to eliminate.",
+    overview:["The Vilefin Goblins occupy the Rock Plains, building an intricate network of tunnels, caches, and relay points that serves their primary industry: salvage, intelligence, and the sale of both.","Goblin society is organized around extended family units called warrens, each operating semi-independently under the nominal authority of Elder Skrix. The warrens cooperate when cooperation serves everyone and compete when it doesn't."],
+    history:["The Vilefin name comes from their original territory along a fish-heavy river that was redirected by construction projects in the Third Century. The goblins adapted, as they always have."],
+    characters:[{name:"Elder Skrix",title:"Chief Negotiator",status:"Alive",desc:"Forty years of dealing with surface factions has made Skrix the most experienced political survivor in Aeloria."}],
+    relationships:[{faction:"Gilgeth & Groth Orcs",type:"rivalry",desc:"Orcs consider goblin scavenging an insult. Goblins consider orc territory full of useful things."},{faction:"Twin Cities",type:"neutral",desc:"The goblins occasionally sell intelligence to Twin Cities merchants."}],
+    locations:[{name:"Rock Plains",desc:"The flat terrain the goblins have made their own — tunnel networks beneath, warrens scattered throughout."}]
+  },
+  "Ice Dragons": {
+    type:"Faction", leader:"Frostwarden Elders",
+    tagline:"Ancient beyond reckoning, the Ice Dragons watch the north from the Dragonscar Peaks — and something has made them move.",
+    overview:["The Ice Dragons are not a faction in the political sense. They do not negotiate, trade, or seek alliance. They are a fact of the northern landscape: permanent, cold, and indifferent to the ambitions of the smaller creatures below them.","The Frostwarden Elders are the eldest of the Ice Dragon clans. They have not moved from their positions on the highest peaks in living memory. Three weeks ago, they moved one step south, in unison, after a period of total stillness."],
+    history:["The Ice Dragons' history is the history of the northern peaks, which is older than any written record.","The one documented interaction between the Ice Dragons and a political faction occurred three hundred years ago, when a Lostfeld mining expedition reached an altitude the dragons considered theirs. The expedition returned with three survivors who declined to describe what had happened."],
+    characters:[],
+    relationships:[{faction:"Lostfeld Dwarves",type:"neutral",desc:"The mining incident three centuries ago established an informal territorial boundary. Both sides observe it without discussing it."}],
+    locations:[{name:"Dragonscar Peaks",desc:"The great northern mountain range. The peaks are permanently iced and the air at their heights does not support human life."},{name:"Frostvale",desc:"A small settlement in a valley between the peaks — the closest human habitation to the dragon territories."}]
+  },
+  "Vampires": {
+    type:"Faction", leader:"Hidden",
+    tagline:"Integrated, charming, and predatory — an open secret that polite society has agreed not to examine.",
+    overview:["The vampires of Aeloria do not exist in the way that most factions exist. There is no vampire nation, no formal government. There is instead a distributed population of undead individuals inserted into the elite structures of every major faction.","The extent of vampire integration into Aeloric society is not officially known. Certain noble families in the Twin Cities have held their wealth for suspiciously long periods. Certain advisors have been described in documents spanning centuries."],
+    history:["The first written reference to vampires in Aeloria appears in Monastery archives from the Second Age, described as 'the long ones who drink.' The Monastery's subsequent response to this description has been redacted."],
+    characters:[],
+    relationships:[{faction:"Twin Cities",type:"complex",desc:"Certain noble families and advisors. The King's relationship to this presence is not publicly documented."},{faction:"Shadow Court",type:"complex",desc:"Both operate in darkness and take long views."}],
+    locations:[]
+  }
+};
+
+const MORALE_COLORS = { Rising:"#4aad6a", Stable:"#5a7aaa", Declining:"#c08040", Critical:"#c04040" };
+let worldState = null;
+
+async function loadFactions() {
+  const r = await fetch('/api/state');
+  worldState = await r.json();
+  renderCards(worldState);
+}
+
+function renderCards(state) {
+  const morale = {};
+  (state.faction_morale||[]).forEach(f => morale[f.faction]=f);
+  const power = {};
+  (state.faction_power||[]).forEach(f => power[f.faction]=f);
+  const resources = {};
+  (state.faction_resources||[]).forEach(f => resources[f.faction]=f);
+  const tensions = state.active_tensions||[];
+
+  document.getElementById('factions-grid').innerHTML = Object.keys(FACTION_DATA).map(fname => {
+    const lore = FACTION_DATA[fname];
+    const m = morale[fname];
+    const p = power[fname];
+    const r = resources[fname];
+    const ms = m ? m.status : 'Stable';
+    const ft = tensions.filter(t => t.factions.toLowerCase().includes(fname.split(' ')[0].toLowerCase()));
+
+    const bars = p ? `<div class="power-grid" style="margin-top:14px">
+      <div class="power-row"><div class="power-label">Military<span>${p.military}/10</span></div><div class="power-track"><div class="power-fill pf-mil" style="width:${p.military*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Political<span>${p.political}/10</span></div><div class="power-track"><div class="power-fill pf-pol" style="width:${p.political*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Economic<span>${p.economic}/10</span></div><div class="power-track"><div class="power-fill pf-eco" style="width:${p.economic*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Influence<span>${p.influence}/10</span></div><div class="power-track"><div class="power-fill pf-inf" style="width:${p.influence*10}%"></div></div></div>
+    </div>` : '';
+    const resourceBlock = r ? `<div class="resource-mini">
+      ${['food','gold','military','materials','influence'].map(key => `
+        <div class="resource-mini-item">
+          <div class="resource-mini-label"><span>${key[0].toUpperCase()+key.slice(1)}</span><span>${r[key]}/100</span></div>
+          <div class="resource-mini-track"><div class="resource-mini-fill" style="width:${r[key]}%"></div></div>
+        </div>
+      `).join('')}
+    </div>` : '';
+
+    return `<div class="faction-card" onclick="showProfile('${fname.replace(/'/g,"\\'")}')">
+      <div class="fc-type">${lore.type}</div>
+      <div class="fc-name">${fname}</div>
+      <div class="fc-leader">${lore.leader}</div>
+      <div class="fc-badges"><span class="badge badge-${ms}">${ms}</span></div>
+      ${m ? `<div class="fc-status">${m.reason}</div>` : ''}
+      ${r ? `<div class="fc-pressure">${r.pressure}</div>` : ''}
+      ${bars}
+      ${resourceBlock}
+      ${ft.length ? `<div style="margin-top:12px;font-size:11px;color:var(--critical)">⚔ ${ft[0].factions}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function showProfile(fname) {
+  const lore = FACTION_DATA[fname];
+  if (!lore) return;
+  const s = worldState || {};
+  const morale = {}; (s.faction_morale||[]).forEach(f => morale[f.faction]=f);
+  const power = {};  (s.faction_power||[]).forEach(f => power[f.faction]=f);
+  const resources = {}; (s.faction_resources||[]).forEach(f => resources[f.faction]=f);
+  const liveRels = {}; (s.relationships||[]).forEach(r => { liveRels[r.faction_a+'|'+r.faction_b]=r.type; liveRels[r.faction_b+'|'+r.faction_a]=r.type; });
+  const allEvents = s.recent_events||[];
+  const allTensions = s.active_tensions||[];
+  const allTrades = s.trade_routes||[];
+  const m = morale[fname];
+  const p = power[fname];
+  const r = resources[fname];
+  const ms = m ? m.status : 'Stable';
+
+  const relatedEvents = allEvents.filter(e => e.text.toLowerCase().includes(fname.split(' ')[0].toLowerCase()) || e.region.toLowerCase().includes(fname.split(' ')[0].toLowerCase())).slice(0,3);
+  const tensions = allTensions.filter(t => t.factions.toLowerCase().includes(fname.split(' ')[0].toLowerCase()));
+  const trades = allTrades.filter(t => t.from === fname || t.to === fname);
+
+  const relTypeClass = t => { const m={'alliance':'rb-alliance','war':'rb-war','rivalry':'rb-rivalry','neutral':'rb-neutral'}; return m[t]||'rb-complex'; };
+  const relTypeLabel = t => t ? t.toUpperCase() : 'COMPLEX';
+
+  const factSidebar = `<div class="sidebar-card">
+    <div class="sidebar-label">Key Facts</div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Type</span><span class="sidebar-fact-val">${lore.type}</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Leader</span><span class="sidebar-fact-val">${lore.leader}</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Morale</span><span class="sidebar-fact-val"><span class="badge badge-${ms}">${ms}</span></span></div>
+  </div>`;
+
+  const powerSidebar = p ? `<div class="sidebar-card">
+    <div class="sidebar-label">Power Index</div>
+    <div class="power-grid" style="grid-template-columns:1fr">
+      <div class="power-row"><div class="power-label">Military<span>${p.military}/10</span></div><div class="power-track"><div class="power-fill pf-mil" style="width:${p.military*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Political<span>${p.political}/10</span></div><div class="power-track"><div class="power-fill pf-pol" style="width:${p.political*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Economic<span>${p.economic}/10</span></div><div class="power-track"><div class="power-fill pf-eco" style="width:${p.economic*10}%"></div></div></div>
+      <div class="power-row"><div class="power-label">Influence<span>${p.influence}/10</span></div><div class="power-track"><div class="power-fill pf-inf" style="width:${p.influence*10}%"></div></div></div>
+    </div>
+  </div>` : '';
+  const resourceSidebar = r ? `<div class="sidebar-card">
+    <div class="sidebar-label">Resource State</div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Food</span><span class="sidebar-fact-val">${r.food}/100</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Gold</span><span class="sidebar-fact-val">${r.gold}/100</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Military</span><span class="sidebar-fact-val">${r.military}/100</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Materials</span><span class="sidebar-fact-val">${r.materials}/100</span></div>
+    <div class="sidebar-fact"><span class="sidebar-fact-key">Influence</span><span class="sidebar-fact-val">${r.influence}/100</span></div>
+    <div style="margin-top:12px;font-size:13px;color:var(--text-sec);line-height:1.5">${r.pressure}</div>
+  </div>` : '';
+
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-layout">
+      <div>
+        <div class="profile-badges">
+          <span class="badge badge-neutral">${lore.type}</span>
+          <span class="badge badge-${ms}">${ms}</span>
+        </div>
+        <h1 class="profile-name">${fname}</h1>
+        <p class="profile-tagline">${lore.tagline}</p>
+
+        <div class="profile-section">
+          <div class="profile-section-label">Overview</div>
+          <div class="profile-prose">${lore.overview.map(p=>`<p>${p}</p>`).join('')}</div>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-section-label">History & Origins</div>
+          <div class="profile-prose">${lore.history.map(p=>`<p>${p}</p>`).join('')}</div>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-section-label">Current State</div>
+          ${m ? `<div style="background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--gold);padding:16px 20px;font-family:'Crimson Text',serif;font-size:15px;color:var(--text-sec);line-height:1.6;margin-bottom:16px">${m.reason}</div>` : ''}
+          ${r ? `<div style="background:var(--surface2);border:1px solid var(--border);padding:14px 18px;font-size:14px;color:var(--text-sec);margin-bottom:12px"><strong style="color:var(--gold)">Resource Pressure</strong><br>${r.pressure}</div>` : ''}
+          ${tensions.map(t=>`<div style="background:var(--red-dim);border:1px solid rgba(201,55,44,0.2);padding:14px 18px;font-size:14px;color:var(--text-sec);margin-bottom:10px"><strong style="color:var(--critical)">⚔ ${t.factions}</strong><br>${t.description}</div>`).join('')}
+          ${relatedEvents.length ? `<div>${relatedEvents.map(e=>`<div class="event-row"><span class="event-region">${e.region}</span><span class="event-text">${e.text}</span></div>`).join('')}</div>` : ''}
+        </div>
+
+        ${lore.characters.length ? `<div class="profile-section">
+          <div class="profile-section-label">Key Characters</div>
+          <div class="char-grid">${lore.characters.map(c=>`<div class="char-card">
+            <div class="char-name">${c.name}</div>
+            <div class="char-title">${c.title}</div>
+            <span class="badge badge-neutral" style="margin-bottom:8px;display:inline-block">${c.status}</span>
+            <div class="char-desc">${c.desc}</div>
+          </div>`).join('')}</div>
+        </div>` : ''}
+
+        <div class="profile-section">
+          <div class="profile-section-label">Relationships</div>
+          <div class="rel-list">${lore.relationships.map(r => {
+            const liveType = liveRels[fname+'|'+r.faction] || r.type;
+            return `<div class="rel-item">
+              <div class="rel-info">
+                <div class="rel-faction">${r.faction}</div>
+                <div class="rel-desc">${r.desc}</div>
+              </div>
+              <span class="rel-badge ${relTypeClass(liveType)}">${relTypeLabel(liveType)}</span>
+            </div>`;
+          }).join('')}</div>
+        </div>
+
+        ${trades.length ? `<div class="profile-section">
+          <div class="profile-section-label">Trade Routes</div>
+          <div class="trade-list">${trades.map(t => {
+            const counterpart = t.from === fname ? t.to : t.from;
+            return `<div class="trade-route">
+              <div class="trade-route-main">
+                <div class="trade-route-title">${counterpart}</div>
+                <div class="trade-route-desc">${t.exchange || ''}${t.effect ? ` ${t.effect}` : ''}</div>
+              </div>
+              <span class="trade-route-status">${t.status}</span>
+            </div>`;
+          }).join('')}</div>
+        </div>` : ''}
+
+        ${lore.locations.length ? `<div class="profile-section">
+          <div class="profile-section-label">Notable Locations</div>
+          <div class="loc-list">${lore.locations.map(l=>`<div class="loc-item"><div class="loc-name">${l.name}</div><div class="loc-desc">${l.desc}</div></div>`).join('')}</div>
+        </div>` : ''}
+      </div>
+
+      <div class="profile-sidebar">
+        ${factSidebar}
+        ${powerSidebar}
+        ${resourceSidebar}
+      </div>
+    </div>`;
+
+  document.getElementById('grid-view').classList.add('hidden');
+  document.getElementById('profile-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+function showGrid() {
+  document.getElementById('profile-view').classList.add('hidden');
+  document.getElementById('grid-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+loadFactions();
+setInterval(loadFactions, 60000);
+</script>
+{% endblock %}

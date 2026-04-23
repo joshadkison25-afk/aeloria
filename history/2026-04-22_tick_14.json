@@ -1,0 +1,658 @@
+{
+  "tick": 14,
+  "world_date": "Month of the Ashen Dreaming, Year 1 of the Hollow Accord, Day 14",
+  "major_event": "The Admiral of Tidefall woke before dawn in a cold sweat, shaking, unable to describe the dream to his chamberlain beyond the words 'the gnome came for me.' He summoned no one. By morning he sat in council visibly diminished, eyes red, listening to his prophet's eclipse interpretation without responding. The Seer packed his writing materials and departed the Twin Cities by the southern harbor road before the second bell, heading for Tidefall. The world did not pause for him.",
+  "primary_event": {
+    "name": "Seer Departs for Tidefall \u2014 The Admiral's Dream Precedes Him",
+    "summary": "The Seer left the Twin Cities before dawn, heading south on the harbor road toward Tidefall. In the same night, the Admiral dreamed of a gnome of impossible proportions who asked him to join his master. He woke in terror and has not spoken of it. The Seer does not yet know the content of the dream \u2014 only that he must go.",
+    "severity": 15,
+    "stage": "emerging",
+    "trend": "rising",
+    "involved": [
+      "Seer",
+      "Tidefall",
+      "Admiral",
+      "Gloomspire Assassin Gnomes",
+      "Twin Cities"
+    ]
+  },
+  "supporting_events": [
+    {
+      "name": "Varek Still Below \u2014 The Silence Deepens",
+      "summary": "Varek has now been below the sealed level for over a full day. The guards at the threshold have heard nothing. Kessa Stonebraid has not moved. Ironmaul has twice approached the door and twice turned back without knocking. The eclipse news waits on a folded parchment at the threshold.",
+      "severity": 18,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Monastery of Druids",
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Grand Druid Varek"
+      ]
+    },
+    {
+      "name": "Caeris Receives Gnome Sealed Offer \u2014 Proclamation Intelligence on the Market",
+      "summary": "The Gnome Syndicate's sealed offer reached Caeris Thorne's private secretary by early morning. The secretary held it for two hours before placing it on Caeris's desk. Caeris read the outer seal's cipher and recognized the Gnome mark. He has not opened the inner document yet, but his face gave the secretary everything.",
+      "severity": 16,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Gloomspire Assassin Gnomes",
+        "Caeris Thorne",
+        "Twin Cities",
+        "Vampires"
+      ]
+    },
+    {
+      "name": "Dur Khadur Staging Unit Moves Closer \u2014 Retainer Clause Edge Approaches",
+      "summary": "The coastal advance unit completed its forward movement to a staging camp twelve miles from the Twin Cities harbor approach. The Admiral has not yet formally declared succession instability, but Dur Khadur's subtle court message is now in front of the prophet. The mechanism is primed.",
+      "severity": 15,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Dur Khadur",
+        "Tidefall",
+        "Twin Cities",
+        "Admiral"
+      ]
+    }
+  ],
+  "active_events": [
+    {
+      "name": "Deep Entity: Varek's Silence Below Lostfeld",
+      "involved": [
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Monastery of Druids",
+        "Grand Druid Varek"
+      ],
+      "severity": 19,
+      "stage": "escalating",
+      "duration": 12,
+      "trend": "rising",
+      "summary": "Varek has been below for over a full day. No sound. No emergence. Ironmaul has twice approached the sealed door and twice retreated. Eclipse news waits folded at the threshold. The dream-contagion account has now reached Rock Plains goblin leadership in full.",
+      "consequences": "The longer Varek remains below without signal, the more the garrison's composure erodes. If he does not emerge within another day or two, Ironmaul will face a decision: open the door, or seal it."
+    },
+    {
+      "name": "Twin Cities Succession \u2014 Proclamation at the Knife's Edge",
+      "involved": [
+        "Caeris Thorne",
+        "King Roderic Thorne II",
+        "Twin Cities",
+        "Tidefall",
+        "Aldric Thorne",
+        "Gloomspire Assassin Gnomes",
+        "Vampires"
+      ],
+      "severity": 17,
+      "stage": "escalating",
+      "duration": 13,
+      "trend": "rising",
+      "summary": "The Gnome sealed offer sits on Caeris's desk unopened. The Vampires already know the full picture. The eclipse has given Caeris a theological mandate he cannot refuse and cannot yet act on. The proclamation document remains untouched.",
+      "consequences": "The longer Caeris delays, the more parties acquire the intelligence independently. When he opens the Gnome letter, he will learn others know. The proclamation's secrecy is expiring."
+    },
+    {
+      "name": "Admiral Countersigns \u2014 Retainer Clause Active",
+      "involved": [
+        "Tidefall",
+        "Dur Khadur",
+        "Twin Cities",
+        "Admiral"
+      ],
+      "severity": 16,
+      "stage": "escalating",
+      "duration": 3,
+      "trend": "rising",
+      "summary": "Dur Khadur's staging unit is now twelve miles from the harbor approach. The Admiral received the subtle court pressure message. His prophet is preparing the eclipse reading. The Admiral, already shaken from the dream, may make an irrational declaration.",
+      "consequences": "If the prophet delivers a reading that calls for decisive succession action and the Admiral complies, the retainer clause triggers. A foreign mercenary force would begin autonomous movement toward the Twin Cities."
+    },
+    {
+      "name": "The Admiral's Gnome Dream \u2014 Psychological Fracture",
+      "involved": [
+        "Admiral",
+        "Tidefall",
+        "Gloomspire Assassin Gnomes",
+        "Deep Entity"
+      ],
+      "severity": 14,
+      "stage": "emerging",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "The Admiral woke before dawn from a vivid, terrifying dream of a gnome of impossible anatomy who invited him to join 'his master.' He told no one the content. He arrived at morning council visibly diminished. His prophet's eclipse reading landed on a man already shaken.",
+      "consequences": "The Admiral's psychological state is now compromised. Any decision made in the next 2 ticks carries the weight of this unspoken terror. His responses to Dur Khadur pressure, the succession question, and the prophet's reading may be irrational."
+    },
+    {
+      "name": "Rowen Opens the Iron Door \u2014 Destination Closing",
+      "involved": [
+        "Dreadwind Islands",
+        "Sinking Island",
+        "Tidefall"
+      ],
+      "severity": 14,
+      "stage": "peak",
+      "duration": 5,
+      "trend": "stable",
+      "summary": "The fleet continues east. Rowen emerged from below the morning after the navigator's report. He did not explain what he had found in the ancient document, but he ordered the fleet to alter course two degrees northward. The navigator complied without question.",
+      "consequences": "The course correction suggests Rowen found something relevant in the document. The coastal ruin is still 2-3 ticks away. He remains unaware of the eclipse's significance."
+    },
+    {
+      "name": "Seer in Transit \u2014 Twin Cities to Tidefall",
+      "involved": [
+        "Seer",
+        "Tidefall",
+        "Admiral",
+        "Gloomspire Assassin Gnomes"
+      ],
+      "severity": 13,
+      "stage": "emerging",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "The Seer departed before dawn on the southern harbor road. Travel to Tidefall takes approximately 2-3 ticks. He carries his synthesized document and no addressee. The world continues without him.",
+      "consequences": "Until he arrives, the Seer cannot deliver messages, observe events directly, or intervene. Tidefall's crisis will develop on its own timeline."
+    },
+    {
+      "name": "Velorn Clan Repositions \u2014 Shadow Court Fracture Deepens",
+      "involved": [
+        "Shadow Court",
+        "Velorn Clan",
+        "Arkenor",
+        "Lythara",
+        "Nythariel"
+      ],
+      "severity": 13,
+      "stage": "escalating",
+      "duration": 8,
+      "trend": "rising",
+      "summary": "Lythara spent the day drafting a new political approach to the Twin Cities rather than addressing Velorn. Velorn used the second full day of her distraction to secure the allegiance of a third minor house. The Arkenor lieutenant has not received any message from Lythara in two days.",
+      "consequences": "When Lythara returns her attention inward, she will find Velorn has consolidated beyond her last projection. The eclipse mandate may be real \u2014 but the throne she needs to defend first is her own."
+    },
+    {
+      "name": "Vilefin Goblins \u2014 Intelligence Synthesis Continues",
+      "involved": [
+        "Vilefin Goblins",
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Monastery of Druids"
+      ],
+      "severity": 11,
+      "stage": "emerging",
+      "duration": 2,
+      "trend": "stable",
+      "summary": "Rock Plains goblin leadership now has the fracture sketch, the dream account, and the eclipse report. Watchers on the Lostfeld road have reported one unusual detail: no supply carts have left or entered Lostfeld in two days. The silence of the mountain is being noted.",
+      "consequences": "Goblin leadership is building toward a decision. The picture is nearly complete enough to act on. Their first action will likely be intelligence monetization \u2014 who to sell to and at what price."
+    }
+  ],
+  "faction_actions": [
+    {
+      "faction": "Seer",
+      "action": "Departed Twin Cities before the second bell on the southern harbor road. Traveling light, with writing materials and the synthesized document. He told no one his destination except the palace gate guard, who recorded it as 'southward.' He will reach Tidefall in 2 ticks if the road holds.",
+      "reason": "He does not know the content of the Admiral's dream. He knows only that something draws him south \u2014 an intuition built from the eclipse, the Tidefall council chaos, and the Gnome intelligence pressure converging on the same point.",
+      "target": "Tidefall \u2014 southern harbor road transit"
+    },
+    {
+      "faction": "Tidefall",
+      "action": "The Admiral sat through his morning council in visible distress. His court prophet delivered the eclipse interpretation: 'The darkness that swallows the sun passes \u2014 and what emerges is clarified, not diminished. A leader who acts in the eclipse's wake acts with the sun behind him.' The Admiral received this in silence. He dismissed the council early and locked himself in his private study with the Dur Khadur message and the prophet's note side by side. Cost: 3 gold (prophet commission completion), 2 influence.",
+      "reason": "The Admiral is not moving yet \u2014 the dream has destabilized him more than he will admit. But the prophet's reading, the Dur Khadur pressure, and the eclipse have all converged into a single pressure column. He is close to a decision he does not fully understand.",
+      "target": "Prophet's reading / private deliberation on Dur Khadur message"
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "action": "Gnome Syndicate's courier in the Twin Cities confirmed delivery of the sealed offer to Caeris's secretary. No response yet. Simultaneously, a second coded dispatch was sent to Tidefall: partial eclipse-succession framing, not the full proclamation \u2014 a test-offer to see if the Admiral's court will pay for context before they pay for the name. Cost: 4 gold (dual courier operation), 3 influence.",
+      "reason": "The Gnomes are running a parallel auction. Whoever responds first with gold gets the full intelligence. They are applying urgency to both sides without revealing the other is also bidding.",
+      "target": "Tidefall partial intelligence test-offer / Caeris sealed offer monitoring"
+    },
+    {
+      "faction": "Vampires",
+      "action": "The Vampire operative composed a careful, anonymous letter to Caeris Thorne. Not the proclamation \u2014 just the fact that others already hold full knowledge of it and the eclipse has made the window for controlled disclosure very narrow. The letter was delivered through a trusted household servant, untraceable. Cost: 4 influence (anonymous channel activation).",
+      "reason": "The Vampires want Caeris to feel cornered into acting \u2014 toward what, they can guide once he is moving. Panic is a better tool than persuasion at this stage.",
+      "target": "Caeris Thorne \u2014 anonymous pressure letter"
+    },
+    {
+      "faction": "Caeris Thorne",
+      "action": "Caeris received the anonymous letter before the Gnome offer. He read it twice. He then opened the Gnome offer's outer seal \u2014 stopped at the inner document. He summoned his private secretary and asked a single question: 'Who else in this palace has received sealed correspondence in the last two days?' He is beginning to count the people who know. Cost: 3 influence (security audit), 2 gold.",
+      "reason": "The anonymous letter broke his paralysis \u2014 not with comfort but with urgency. He is now in motion, but motion toward defense rather than declaration.",
+      "target": "Private security audit / Gnome offer inner document \u2014 not yet opened"
+    },
+    {
+      "faction": "Dur Khadur",
+      "action": "The Dark Council received no response from the Admiral yet. They dispatched a second, more direct message \u2014 this one not to the court prophet but to the Admiral's personal chamberlain: 'Our partners note that clarity on succession questions protects all parties. Uncertainty invites worse solutions than any declaration.' Cost: 4 gold (chamberlain contact, discreet channel), 3 influence.",
+      "reason": "The Admiral's delay is acceptable but not indefinite. The Council wants the clause triggered before the Seer or anyone else can advise the Admiral against it.",
+      "target": "Admiral's personal chamberlain \u2014 direct succession pressure message"
+    },
+    {
+      "faction": "Monastery of Druids",
+      "action": "The Stonebreak monastery received the fast rider's eclipse report. The Grand Druid Council convened an emergency interpretation session. Majority reading: the eclipse and Varek's descent are cosmically synchronized \u2014 the Entity below is responding to something larger than itself. They dispatched a second rider back toward Lostfeld with a sealed instruction for Varek: 'If the iron case was opened, seal it again. Do not let it breathe a second time.' Cost: 4 gold (emergency council, fast rider), 3 influence.",
+      "reason": "The Monastery is now afraid of what Varek may have done below. The eclipse suggests forces larger than the containment protocol. The instruction may arrive too late.",
+      "target": "Lostfeld \u2014 sealed instruction rider for Varek on ascent"
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "action": "Ironmaul received no signal from below. He ordered the garrison smith to prepare a second iron door \u2014 a redundant seal for the level above the sealed level. He also sent a private rider to Farrock, the only neighbor who has documented awareness of the fracture: 'If we go silent, do not come. Send word south instead.' Cost: 5 gold (smith commission, rider to Farrock), 4 materials.",
+      "reason": "Ironmaul is preparing for a scenario he does not want to name. The second door, the instruction to Farrock \u2014 these are the actions of a man who is beginning to plan for a failure he believes may be coming.",
+      "target": "Second iron door construction / Farrock emergency protocol message"
+    },
+    {
+      "faction": "Shadow Court",
+      "action": "Lythara dispatched a diplomatic shadow-envoy toward the Twin Cities \u2014 not military, not overt. A single Nythariel clan agent carrying gifts and a sealed letter of 'fraternal concern regarding stability in the wake of the eclipse.' She is inserting herself into the Twin Cities political conversation before anyone has thought to invite her. Cost: 5 gold (shadow-envoy preparation, gifts), 4 influence.",
+      "reason": "The eclipse mandate requires visible movement. She is not ready to threaten \u2014 she wants to be seen as a potential stabilizing force, which positions her for whatever comes next in the succession.",
+      "target": "Twin Cities \u2014 Nythariel shadow-envoy diplomatic insertion"
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "action": "Rock Plains goblin leadership sent a paid informant toward Lostfeld with a specific task: confirm whether the druid entered, confirm whether he has emerged, and return with any physical evidence of unusual activity at the gate. The informant is dressed as a traveling tinker. Cost: 3 gold (informant payment, cover materials).",
+      "reason": "The goblin picture has one gap: confirmation of Varek's current status. The tinker will fill it. Then the picture is complete enough to sell.",
+      "target": "Lostfeld gate \u2014 confirmation of Varek's status, physical evidence collection"
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "action": "Elowen received her Wayfarer trader's emergency dispatch. She convened the Wayfarer Council and ordered the Twin Cities trader to withdraw to a neutral waypoint rather than return fully \u2014 gather intelligence while withdrawing. She simultaneously sent a diplomatic inquiry to Tidefall asking for their interpretation of the eclipse. Cost: 3 gold (council, inquiry dispatch), 2 influence.",
+      "reason": "Glenhaven retreats from volatility but does not go blind. The Tidefall inquiry is cover for maintaining an information channel while their Twin Cities presence contracts.",
+      "target": "Twin Cities Wayfarer withdrawal / Tidefall diplomatic inquiry"
+    },
+    {
+      "faction": "Farrock",
+      "action": "Farrock's rider finally received acknowledgment of the fracture-eclipse combined report from the Twin Cities court secretary \u2014 a brief note: 'Received. Under review.' The rider dispatched this response to Farrock leadership. Farrock's commander read both the original report and the response and decided to do nothing further. He has now documented his awareness and the capital's acknowledgment. His liability posture is satisfied. Cost: 1 gold (rider return dispatch).",
+      "reason": "Farrock acts to protect itself first. Documentation of awareness creates a future claim: we told them. The commander is satisfied and will wait.",
+      "target": "Farrock leadership \u2014 acknowledgment receipt, no further action"
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "action": "The Gilgeth shaman's bead-message reached city leadership. The city elder council convened a brief reading. Their eclipse interpretation is independent and martial: the sky god closed one eye, which means he is aiming. At what, the shaman was asked to determine. The shaman dispatched a junior apprentice toward the Twin Cities road to observe without interacting. Cost: 2 gold (apprentice dispatch, supplies).",
+      "reason": "Gilgeth does not have the sophistication to navigate the eclipse's political dimensions, but their shaman culture is consistent and genuine. They believe something is being aimed. They want to know the target.",
+      "target": "Twin Cities road \u2014 junior apprentice observation mission"
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "action": "Rowen emerged from below at mid-morning and spent two hours with his navigator over the charts. The course correction of two degrees north is confirmed. He asked the navigator a question that the navigator did not know how to answer: 'Does this chart show the depth of the ruin, or only its surface?' The fleet continues east-northeast. Cost: 1 military (reduced watch), 1 gold.",
+      "reason": "The ancient document has given Rowen something the surface chart does not show. He is navigating toward something below the waterline, not merely the coastline.",
+      "target": "Fleet navigation \u2014 course confirmed, depth-data question raised"
+    }
+  ],
+  "recent_events": [
+    {
+      "region": "Twin Cities",
+      "text": "Caeris received the anonymous Vampire letter before opening the Gnome offer. He stopped at the inner document and ordered a security audit instead. He is counting who knows. The Shadow Court's shadow-envoy is already on the road toward the city."
+    },
+    {
+      "region": "Tidefall",
+      "text": "The Admiral woke in silent terror before dawn, told no one of the dream, and sat through the prophet's eclipse reading visibly diminished. The Dur Khadur chamberlain message arrived by mid-morning. He has locked himself in his study with both documents."
+    },
+    {
+      "region": "Lostfeld",
+      "text": "Varek has been below for over a full day. No signal. No sound. Ironmaul ordered a second iron door constructed for the level above the seal. He sent Farrock a private emergency protocol. Eclipse news still waits folded at the threshold."
+    },
+    {
+      "region": "Faerwood / Shadow Court",
+      "text": "Lythara dispatched a Nythariel shadow-envoy toward the Twin Cities carrying gifts and a letter of fraternal concern. She is inserting herself into the succession conversation before being asked. Velorn secured a third minor house in her absence."
+    },
+    {
+      "region": "Open Sea / Rock Plains",
+      "text": "Rowen altered course two degrees north after consulting the ancient document \u2014 he is navigating toward something below the surface, not on it. Rock Plains goblin leadership dispatched a tinker-informant toward Lostfeld to confirm Varek's status before selling their intelligence package."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Tidefall \u2014 Admiral's Dream + Dur Khadur Pressure + Prophet Reading",
+      "description": "Three vectors have converged on the Admiral in a single morning: a night terror he cannot name, a prophet's reading calling for decisive action, and a mercenary faction pressing him to formally declare succession instability. He is one bad decision away from triggering a clause he does not know exists."
+    },
+    {
+      "factions": "Twin Cities \u2014 Caeris in the Intelligence Trap",
+      "description": "The Vampires, Gnomes, and Shadow Court are all exerting simultaneous pressure on Caeris from different directions. He is now auditing who knows rather than acting. The proclamation's secrecy is nearly expired and he has not yet decided to speak first."
+    },
+    {
+      "factions": "Lostfeld \u2014 Varek's Silence and the Second Door",
+      "description": "Ironmaul's decision to build a second iron door above the sealed level signals he is no longer certain the first will hold. The Monastery instruction rider is en route but may arrive after whatever Varek has done below already has consequences."
+    },
+    {
+      "factions": "Shadow Court \u2014 Lythara's External Mandate vs Velorn's Internal Consolidation",
+      "description": "Lythara is playing the eclipse as an outward mandate while Velorn consolidates inward. She is building toward a throne she does not yet hold in a court that is quietly slipping from her while she looks elsewhere."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Seer",
+      "faction": "Independent",
+      "status": "Departed Twin Cities before dawn on the harbor road south. Traveling to Tidefall, estimated arrival in 2 ticks. Carries his synthesized document. Does not yet know the Admiral's dream content."
+    },
+    {
+      "name": "Admiral (Tidefall)",
+      "faction": "Tidefall",
+      "status": "Woke in silent terror from the gnome dream. Has not described it to anyone. Sat through prophet's eclipse reading without responding. Now alone in his study with the Dur Khadur chamberlain message and the prophet's note. Psychologically fragile."
+    },
+    {
+      "name": "Caeris Thorne",
+      "faction": "Twin Cities",
+      "status": "Received anonymous Vampire pressure letter. Stopped at Gnome inner document. Ordered private security audit. Is counting who knows. Not yet in motion toward declaration \u2014 moving toward defensive intelligence instead."
+    },
+    {
+      "name": "Grand Druid Varek",
+      "faction": "Monastery of Druids",
+      "status": "Still below the sealed level after more than a full day. No signal, no sound. Eclipse news and a second Monastery instruction await him on ascent. No one knows what he has done with the iron case."
+    },
+    {
+      "name": "Thane Ironmaul",
+      "faction": "Lostfeld Dwarves",
+      "status": "Ordered second iron door construction above sealed level. Sent Farrock emergency protocol. Waiting at the threshold of a decision he has not yet named but is clearly preparing for."
+    },
+    {
+      "name": "Queen Lythara",
+      "faction": "Shadow Court",
+      "status": "Dispatched Nythariel shadow-envoy toward Twin Cities with gifts and a diplomatic letter. Is focused on eclipse mandate and external positioning. Velorn has now secured three minor houses in the days of her distraction."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "Caeris received two separate pressure documents in one morning and responded by auditing rather than acting. The palace reads his stillness as uncertainty. The proclamation's weight is becoming visible in his face."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Critical",
+      "reason": "The Admiral is psychologically compromised by the dream, receiving mercenary pressure through his personal chamberlain, and has locked himself away from council. The prophet's hopeful reading landed on a man who could not receive hope."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Critical",
+      "reason": "A second iron door is being built. Varek has not emerged. The garrison knows what a second door means even if the order was given quietly. No one is sleeping well."
+    },
+    {
+      "faction": "Shadow Court",
+      "status": "Stable",
+      "reason": "Lythara's outward movement gives the court a sense of purpose. The fracture with Velorn is invisible to most. Stable morale borrowed against a debt still accumulating."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Rising",
+      "reason": "The dual auction is running. Both Caeris and Tidefall are now receiving Gnome intelligence pressure. Whoever bids first wins, and the Gnomes win either way."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Declining",
+      "reason": "The eclipse reading at Stonebreak was initially vindicating, but the emergency instruction dispatched to Varek \u2014 'seal it again, do not let it breathe twice' \u2014 signals fear replacing confidence. Something in their interpretation has shifted."
+    },
+    {
+      "faction": "Vampires",
+      "status": "Rising",
+      "reason": "The anonymous letter to Caeris worked. He is moving defensively rather than strategically. A defensive man is easier to guide. They are the most informed covert faction and the least visible."
+    },
+    {
+      "faction": "Dur Khadur",
+      "status": "Rising",
+      "reason": "The staging unit is in position. The second message reached the Admiral's own chamberlain. The mechanism is turning. The only remaining variable is the Admiral's decision, and the dream has made him vulnerable."
+    }
+  ],
+  "faction_power": [
+    {
+      "faction": "Twin Cities",
+      "military": 6,
+      "political": 3,
+      "economic": 5,
+      "influence": 3
+    },
+    {
+      "faction": "Tidefall",
+      "military": 8,
+      "political": 6,
+      "economic": 8,
+      "influence": 6
+    },
+    {
+      "faction": "Shadow Court",
+      "military": 7,
+      "political": 5,
+      "economic": 5,
+      "influence": 5
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "military": 2,
+      "political": 2,
+      "economic": 3,
+      "influence": 2
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "military": 4,
+      "political": 8,
+      "economic": 7,
+      "influence": 10
+    },
+    {
+      "faction": "Monastery of Druids",
+      "military": 3,
+      "political": 5,
+      "economic": 4,
+      "influence": 8
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "military": 6,
+      "political": 5,
+      "economic": 4,
+      "influence": 7
+    },
+    {
+      "faction": "Dur Khadur",
+      "military": 8,
+      "political": 7,
+      "economic": 6,
+      "influence": 7
+    },
+    {
+      "faction": "Farrock",
+      "military": 5,
+      "political": 3,
+      "economic": 4,
+      "influence": 4
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "military": 3,
+      "political": 3,
+      "economic": 5,
+      "influence": 5
+    },
+    {
+      "faction": "Vampires",
+      "military": 2,
+      "political": 9,
+      "economic": 5,
+      "influence": 10
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "military": 5,
+      "political": 2,
+      "economic": 3,
+      "influence": 3
+    }
+  ],
+  "faction_resources": [
+    {
+      "faction": "Twin Cities",
+      "food": 55,
+      "gold": 45,
+      "military": 60,
+      "materials": 50,
+      "influence": 35,
+      "pressure": "Declining influence from political paralysis; gold draining from security operations."
+    },
+    {
+      "faction": "Tidefall",
+      "food": 55,
+      "gold": 74,
+      "military": 80,
+      "materials": 50,
+      "influence": 65,
+      "pressure": "Gold draining from prophet commission and council operations; influence softening from Admiral's visible distress."
+    },
+    {
+      "faction": "Shadow Court",
+      "food": 55,
+      "gold": 43,
+      "military": 70,
+      "materials": 50,
+      "influence": 36,
+      "pressure": "Gold and influence spent on shadow-envoy dispatch and eclipse mandate ceremony; Velorn drain invisible but real."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "food": 55,
+      "gold": 45,
+      "military": 60,
+      "materials": 50,
+      "influence": 78,
+      "pressure": "Small gold drain from withdrawal and inquiry operations; influence holding."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "food": 55,
+      "gold": 22,
+      "military": 16,
+      "materials": 41,
+      "influence": 18,
+      "pressure": "Gold critically low; military further reduced by watch reassignments; materials draining for second iron door. Crisis threshold approaching."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "food": 55,
+      "gold": 63,
+      "military": 40,
+      "materials": 50,
+      "influence": 82,
+      "pressure": "Dual courier operations draining gold steadily; influence dominant and stable."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "food": 55,
+      "gold": 33,
+      "military": 30,
+      "materials": 50,
+      "influence": 80,
+      "pressure": "Fast riders and emergency councils draining gold; influence holding but fear-current beginning."
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "food": 54,
+      "gold": 38,
+      "military": 59,
+      "materials": 50,
+      "influence": 69,
+      "pressure": "Steady upkeep drain at sea; food beginning slow decline; on course."
+    },
+    {
+      "faction": "Dur Khadur",
+      "food": 55,
+      "gold": 52,
+      "military": 77,
+      "materials": 50,
+      "influence": 67,
+      "pressure": "Staging movement costs; courier network upkeep. Military slightly reduced from unit repositioning."
+    },
+    {
+      "faction": "Farrock",
+      "food": 55,
+      "gold": 39,
+      "military": 50,
+      "materials": 50,
+      "influence": 39,
+      "pressure": "Minimal activity; rider cost only. Stable and watching."
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "food": 55,
+      "gold": 46,
+      "military": 30,
+      "materials": 50,
+      "influence": 49,
+      "pressure": "Informant dispatch costs; stable otherwise."
+    },
+    {
+      "faction": "Vampires",
+      "food": 55,
+      "gold": 48,
+      "military": 20,
+      "materials": 50,
+      "influence": 81,
+      "pressure": "Influence spent on anonymous channel and social pressure. Gold stable. Military low but not threatening."
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "food": 55,
+      "gold": 28,
+      "military": 50,
+      "materials": 50,
+      "influence": 29,
+      "pressure": "Gold and influence low but stable. Apprentice dispatch cost minimal."
+    }
+  ],
+  "trade_routes": [
+    {
+      "from": "Gloomspire Assassin Gnomes",
+      "to": "Twin Cities",
+      "status": "active",
+      "exchange": "Intelligence commodities, glass goods",
+      "effect": "Gnomes gaining gold and influence leverage; Twin Cities receiving high-value intelligence at premium prices."
+    },
+    {
+      "from": "Tidefall",
+      "to": "Twin Cities",
+      "status": "strained",
+      "exchange": "Naval protection, harbor access fees",
+      "effect": "Strained by succession uncertainty and eclipse panic; Admiral's instability reduces reliability of naval commitments."
+    },
+    {
+      "from": "Glenhaven Elves",
+      "to": "Twin Cities",
+      "status": "strained",
+      "exchange": "Wayfarers carry luxury goods and information",
+      "effect": "Wayfarer presence contracting; trade value declining as political volatility makes the route feel dangerous."
+    },
+    {
+      "from": "Dur Khadur",
+      "to": "Farrock",
+      "status": "active",
+      "exchange": "Mercenary services, tactical support",
+      "effect": "Farrock benefits from protection; Dur Khadur extracts political loyalty and forward positioning near Twin Cities."
+    }
+  ],
+  "relationships": [],
+  "faction_identities": [],
+  "region_control": [],
+  "faction_knowledge": [],
+  "remembered_events": [],
+  "seer_state": {
+    "tone": "weary",
+    "confidence": 50,
+    "bias": "cautiously interpretive",
+    "belief_about_user": "The presence beyond the veil is not fully understood.",
+    "memory_burden": 40,
+    "voice_mode": "pattern and testimony",
+    "last_source_bias": "mixed and uncertain"
+  },
+  "seer_journey": {
+    "location": "Twin Cities",
+    "destination": "Twin Cities",
+    "status": "traveling",
+    "ticks_remaining": 1,
+    "purpose": "Seer in Transit \u2014 Twin Cities to Tidefall",
+    "last_outcome": "Departed Twin Cities before dawn on the harbor road south. Traveling to Tidefall, estimated arrival in 2 ticks. Carries his synthesized document. Does not yet know the Admiral's dream content."
+  },
+  "ruler_states": [],
+  "belief_currents": [],
+  "religious_factions": [],
+  "whispers": [],
+  "weather_and_omens": [],
+  "absorbed_lore": [],
+  "real_timestamp": "2026-04-22T22:06:10.787380"
+}

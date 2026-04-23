@@ -1,0 +1,632 @@
+{
+  "tick": 13,
+  "world_date": "Month of the Ashen Dreaming, Year 1 of the Hollow Accord, Day 13",
+  "major_event": "At the ninth hour of morning, the sun above the Twin Cities was swallowed whole. Total darkness fell for eleven minutes. No cloud preceded it. No wind followed. In the streets, merchants stopped mid-sentence. In the palace, Caeris Thorne stood at an open window and did not move until it was over. The Admiral's rider, halfway to the city on the harbor-treaty road, halted his horse and stared upward. Every faction that witnesses or hears of this will interpret it through the lens of what it fears most.",
+  "primary_event": {
+    "name": "The Eclipse of the Twin Cities \u2014 Omen Without Author",
+    "summary": "A total eclipse with no astronomical precedent descended on the Twin Cities at the ninth hour. Eleven minutes of complete darkness in clear sky. No natural cause visible. The palace fell silent. Street crowds dropped to their knees. Caeris Thorne watched from his window. The Seer stood in the open courtyard, arms at his sides, looking directly up until it ended.",
+    "severity": 19,
+    "stage": "peak",
+    "trend": "rising",
+    "involved": [
+      "Twin Cities",
+      "Tidefall",
+      "Gloomspire Assassin Gnomes",
+      "Vampires",
+      "Monastery of Druids",
+      "Shadow Court",
+      "Caeris Thorne",
+      "Seer"
+    ]
+  },
+  "supporting_events": [
+    {
+      "name": "Deep Entity: Varek Arrives at Lostfeld Gate",
+      "summary": "Varek arrived at first light, was admitted without delay by Ironmaul's order. He descended to the sealed level within the hour, iron case in hand. Two guards who escorted him to the threshold reported he spoke no words during the descent. Kessa Stonebraid remains motionless in the lower chamber.",
+      "severity": 18,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Monastery of Druids",
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Grand Druid Varek"
+      ]
+    },
+    {
+      "name": "Gnome Syndicate Decision \u2014 The Eclipse Reshuffles the Hand",
+      "summary": "The eclipse reached Gnome courier-relay networks within two hours as rider reports flooded in. Leadership paused their succession-intelligence deliberation. The eclipse is now the more valuable intelligence commodity. They are assessing whether to sell the proclamation now \u2014 before the eclipse interpretation market saturates \u2014 or leverage both together.",
+      "severity": 16,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Gloomspire Assassin Gnomes",
+        "Twin Cities",
+        "Tidefall",
+        "Caeris Thorne"
+      ]
+    },
+    {
+      "name": "Shadow Court \u2014 Lythara's Eclipse Reading",
+      "summary": "News of the eclipse reached Faerwood by fast rider at midday. Lythara received it in the middle of composing a third message to the Arkenor lieutenant. She stopped writing. In Shadow Court tradition, a sun-eating is a sign of a hidden throne becoming visible. She has begun reinterpreting her entire campaign through this lens.",
+      "severity": 14,
+      "stage": "escalating",
+      "trend": "rising",
+      "involved": [
+        "Shadow Court",
+        "Lythara",
+        "Velorn Clan",
+        "Arkenor"
+      ]
+    }
+  ],
+  "active_events": [
+    {
+      "name": "The Eclipse of the Twin Cities \u2014 Omen Without Author",
+      "involved": [
+        "Twin Cities",
+        "Tidefall",
+        "Gloomspire Assassin Gnomes",
+        "Vampires",
+        "Monastery of Druids",
+        "Shadow Court",
+        "Caeris Thorne",
+        "Seer"
+      ],
+      "severity": 19,
+      "stage": "peak",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "A total eclipse with no precedent fell on the Twin Cities at the ninth hour. Eleven unnatural minutes of darkness. Every witness will interpret it through their fears, ambitions, and doctrines. The Seer stood in the open and watched. Caeris did not move from his window until it ended.",
+      "consequences": "Every faction that receives word of this eclipse will reframe current events through it. Belief currents will surge. Rulers will seek divine validation or suppression. The proclamation, the treaty, the succession \u2014 all now carry the weight of an omen."
+    },
+    {
+      "name": "Deep Entity: Dream Contagion Spreads",
+      "involved": [
+        "Lostfeld Dwarves",
+        "Deep Entity",
+        "Kessa Stonebraid",
+        "Vilefin Goblins",
+        "Monastery of Druids"
+      ],
+      "severity": 18,
+      "stage": "escalating",
+      "duration": 11,
+      "trend": "rising",
+      "summary": "Varek has entered Lostfeld and descended to the sealed level. The dream account from the goblin scout is traveling toward Rock Plains leadership. The Entity's influence radius continues to widen independent of containment efforts.",
+      "consequences": "Varek's descent is the most significant development in the containment effort to date. But the dream has already escaped. Whatever Varek finds below will determine whether this is a turning point or a delay."
+    },
+    {
+      "name": "Twin Cities Succession \u2014 Dual Instruments",
+      "involved": [
+        "Caeris Thorne",
+        "King Roderic Thorne II",
+        "Twin Cities",
+        "Tidefall",
+        "Aldric Thorne"
+      ],
+      "severity": 16,
+      "stage": "escalating",
+      "duration": 12,
+      "trend": "rising",
+      "summary": "The eclipse struck in the middle of the succession's most dangerous window. Caeris saw it. The Admiral's rider saw it on the road. Both will interpret it differently. The proclamation is still secret but the pressure to declare it is now existential.",
+      "consequences": "The eclipse has given Caeris a theological mandate he did not seek and may not be able to refuse. If court theologians or street prophets attach the eclipse to the succession, every delay in declaring the proclamation becomes politically costly."
+    },
+    {
+      "name": "Admiral Countersigns \u2014 Retainer Clause Active",
+      "involved": [
+        "Tidefall",
+        "Dur Khadur",
+        "Twin Cities"
+      ],
+      "severity": 15,
+      "stage": "peak",
+      "duration": 2,
+      "trend": "rising",
+      "summary": "The retainer clause is active. Dur Khadur's advance unit is at readiness. The eclipse has now introduced an additional interpretation vector: if the Admiral's court prophets read the eclipse as a sign of succession instability, the Admiral may feel pressure to formally declare it himself \u2014 triggering the very clause he does not understand.",
+      "consequences": "The eclipse may cause the Admiral to accelerate his succession declaration, unknowingly triggering autonomous Dur Khadur deployment. The trigger he cannot control may be pulled by his own response to the omen."
+    },
+    {
+      "name": "Rowen Opens the Iron Door \u2014 Destination Closing",
+      "involved": [
+        "Dreadwind Islands",
+        "Sinking Island",
+        "Tidefall"
+      ],
+      "severity": 14,
+      "stage": "peak",
+      "duration": 4,
+      "trend": "stable",
+      "summary": "The fleet continues east. Rowen has been writing from the ancient document. He did not witness the eclipse but the fleet's navigator noted a brief horizon darkness to the northwest at the ninth hour and logged it as unusual atmospheric phenomenon.",
+      "consequences": "Rowen will not learn the eclipse's significance for 2-3 ticks. His arrival at the coastal ruin may coincide with the succession crisis peak \u2014 or arrive in a world already reshaped by the omen."
+    },
+    {
+      "name": "Grand Druid Varek \u2014 Descent into Lostfeld",
+      "involved": [
+        "Monastery of Druids",
+        "Lostfeld Dwarves",
+        "Gloomspire Assassin Gnomes"
+      ],
+      "severity": 14,
+      "stage": "escalating",
+      "duration": 1,
+      "trend": "rising",
+      "summary": "Varek descended to the sealed level with the iron case. The Gnome courier positioned outside Lostfeld's gate observed his admission and the urgent manner of his descent. A coded Gnome dispatch is now being prepared: the Druids were admitted to the deep levels.",
+      "consequences": "The Gnomes now know something extraordinary is below. This intelligence is now being valued against the proclamation and eclipse news \u2014 three separate high-value assets held simultaneously."
+    },
+    {
+      "name": "Velorn Clan Mobilizes \u2014 Shadow Court Fracture Deepens",
+      "involved": [
+        "Shadow Court",
+        "Velorn Clan",
+        "Arkenor",
+        "Lythara",
+        "Nythariel"
+      ],
+      "severity": 13,
+      "stage": "escalating",
+      "duration": 7,
+      "trend": "rising",
+      "summary": "Lythara paused her third message to the Arkenor lieutenant upon receiving eclipse news. She is now reinterpreting. In the pause, Velorn has gained another full day of quiet repositioning. The fracture is deepening while Lythara is distracted by theological significance.",
+      "consequences": "The eclipse has bought Velorn time Lythara does not know she gave him. When she returns to the succession-within-the-court, he will be more prepared than her escalation anticipates."
+    },
+    {
+      "name": "Caeris Thorne's Dream \u2014 Throne of Tidefall",
+      "involved": [
+        "Caeris Thorne",
+        "Twin Cities",
+        "Tidefall",
+        "Deep Entity"
+      ],
+      "severity": 11,
+      "stage": "emerging",
+      "duration": 2,
+      "trend": "rising",
+      "summary": "The dream of the empty Tidefall throne now sits beside an eclipse in Caeris's memory. He has not spoken of either but courtiers who know him well report he looks like a man who has received a message he is deciding whether to answer.",
+      "consequences": "If the dream and the eclipse are publicly connected by anyone \u2014 theologian, courtier, or rumor \u2014 Caeris becomes an omen-figure whether he wishes it or not. The political implications are severe and irreversible."
+    }
+  ],
+  "faction_actions": [
+    {
+      "faction": "Twin Cities",
+      "action": "Caeris summoned the palace theologian within minutes of the eclipse's end. He asked no direct questions \u2014 only instructed the man to 'document the event precisely and consult precedent.' He then spent two hours alone in the east wing, not drafting the conditional announcement but sitting with the proclamation document unread on his desk. Cost: 2 influence (theologian summons), 3 gold (administrative secure couriers dispatched to two trusted lords).",
+      "reason": "The eclipse has destabilized his calculated timeline. He is not moving until he understands what the omen means politically \u2014 but others are already interpreting it without him.",
+      "target": "Palace theologian / lords notification / private deliberation"
+    },
+    {
+      "faction": "Tidefall",
+      "action": "The Admiral's rider halted during the eclipse and returned to Tidefall two hours delayed, visibly shaken. The Admiral received the report and immediately convened his council. The council is divided: three members believe the eclipse signals divine sanction for the succession transfer, two believe it signals catastrophe. The Admiral ordered his court prophet to prepare a formal interpretation by morning. Cost: 4 gold (council convening, prophet commission), 3 influence.",
+      "reason": "The Admiral interprets everything through political advantage. He wants a favorable reading. Whether he gets one depends on his prophet's courage and his own willingness to hear an unfavorable truth.",
+      "target": "Tidefall council / court prophet commission"
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "action": "Syndicate leadership revised the succession-intelligence sale decision in light of the eclipse. New plan: sell the proclamation intelligence to Caeris Thorne first \u2014 for twice the original price \u2014 framing it as 'what others now know about the eclipse's political context.' The eclipse increases urgency and justifies the premium. A sealed offer is dispatched to Caeris's private secretary. Cost: 5 gold (secure courier network), 4 influence (framing operation).",
+      "reason": "The eclipse has created a buyer's fear premium. Caeris needs to know who knows about the proclamation now more than he did yesterday. The Gnomes are selling urgency, not just information.",
+      "target": "Caeris Thorne private secretary / proclamation intelligence sale"
+    },
+    {
+      "faction": "Vampires",
+      "action": "The Vampire operative recognized the eclipse immediately as an exceptional social destabilizer. While the palace was in confusion, he pressed the wavering lord for the final inference \u2014 who was in that private chamber before dawn on Day 11. The lord, shaken and spiritually vulnerable from the eclipse, gave the names. The Vampires now hold the full proclamation picture. Cost: 3 influence (social pressure during omen vulnerability).",
+      "reason": "They have been one inference away for two ticks. The eclipse created a window of psychological openness they could not pass up. Now they know everything the Gnomes know \u2014 and the Gnomes do not know this.",
+      "target": "Wavering lord / full proclamation intelligence acquisition"
+    },
+    {
+      "faction": "Monastery of Druids",
+      "action": "Varek descended to the sealed level with the iron case. He has not yet emerged. Ironmaul stationed two guards at the threshold per Varek's request \u2014 not to prevent entry, but to prevent interruption. Below, something is happening that the guards cannot hear through the door. At the surface, Monastery courier-relay received the eclipse report from a passing merchant and immediately dispatched a fast rider back toward Stonebreak: 'The sun was eaten above the Twin Cities. Varek must be informed upon ascent.' Cost: 3 gold (fast rider to Stonebreak), 2 influence (secure relay activation).",
+      "reason": "The Monastery reads the eclipse as cosmically significant and connected to the Entity below Lostfeld. They do not yet know if they are right but the coincidence of Varek's descent and the eclipse's occurrence is too large to ignore.",
+      "target": "Lostfeld sealed level / Stonebreak courier relay"
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "action": "Ironmaul received the eclipse report from a surface watch at the same hour Varek was descending. He sat down heavily and did not rise for twenty minutes. Then he ordered the garrison to triple the watch on the fracture point and sent a sealed personal letter to the Thane Council in the inner halls: 'The druid is below. The sun went dark above the Twin Cities today. I do not know if these things are connected. I know I cannot pretend otherwise.' Cost: 3 gold (watch reinforcement, council letter), 4 military (watch reassignment).",
+      "reason": "Ironmaul is a pragmatist but he is not blind. The coincidence of Varek's arrival and the eclipse has cracked something in his composure. He is documenting rather than deciding because he does not yet know what to decide.",
+      "target": "Garrison fracture watch / Thane Council letter"
+    },
+    {
+      "faction": "Shadow Court",
+      "action": "Lythara abandoned the third message to the Arkenor lieutenant entirely. She convened her inner circle instead and delivered a reading of the eclipse in Shadow Court tradition: a sun-eating above a city means a hidden throne will become visible before the dark moon. She declared the eclipse a mandate. She is now redirecting her energy from eliminating Velorn to claiming what the eclipse portends \u2014 moving toward the Twin Cities politically, not militarily. Yet. Cost: 4 influence (convening, eclipse reading ceremony), 3 gold.",
+      "reason": "The eclipse has given Lythara a narrative larger than Velorn. She believes she is meant to occupy the vacuum the eclipse heralds. This interpretation is not incorrect \u2014 it is simply dangerous and premature.",
+      "target": "Shadow Court inner circle / eclipse mandate declaration"
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "action": "The Rock Plains goblin leadership received the combined dispatch: the fracture sketch and the dream account from the Lostfeld soldier. The eclipse news arrived three hours later from a caravan passing through the plains. The leadership is now sitting with three separate anomalies from the northern region in the same afternoon. They are not acting yet \u2014 only documenting and watching. Cost: 1 gold (documentation, watchers dispatched toward Lostfeld road).",
+      "reason": "Three signals in one day from the same direction is not coincidence by goblin reckoning. They are building a picture with patience and will not act until the picture is complete enough to profit from.",
+      "target": "Rock Plains intelligence synthesis / Lostfeld-road watchers"
+    },
+    {
+      "faction": "Dur Khadur",
+      "action": "The Dark Council received the eclipse report by mid-afternoon via their Twin Cities informant network. The Council convened briefly and reached consensus: the eclipse accelerates their timeline. They sent instruction to the coastal advance unit to move from readiness to staging \u2014 not deployment, but visible forward positioning. They also dispatched a subtle message to the Admiral's court suggesting 'instability at the Twin Cities may require preemptive clarification of the succession question.' Cost: 6 gold (courier network, unit movement), 4 military (staging movement).",
+      "reason": "They want the Admiral to formally declare succession uncertainty. The eclipse is the perfect cover for that pressure. They are applying it without revealing the retainer clause exists.",
+      "target": "Coastal advance unit / Admiral's court message"
+    },
+    {
+      "faction": "Seer",
+      "action": "The Seer stood in the palace courtyard during the full eleven minutes of darkness, arms at his sides, watching the eclipsed sun. He made no sound. When light returned he walked directly to his writing desk and wrote without pause for an hour. The note he had been drafting for two days was set aside. A new document \u2014 longer, more urgent \u2014 emerged. It is addressed to no one yet. It describes the eclipse, the garrison order, the dream-soldier reports he has heard secondhand, and the shape of what he believes is happening below the world's surface simultaneously. Cost: 2 influence (access to palace scriptorium for secure writing materials).",
+      "reason": "The Seer has been accumulating fragments. The eclipse did not give him answers \u2014 it gave him the courage to stop waiting for more pieces and start writing with what he has, even knowing it is incomplete.",
+      "target": "Private document / accumulated observation synthesis"
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "action": "Rowen's fleet navigator logged the northwestern horizon darkness at the ninth hour as 'unusual atmospheric event, duration approximately ten minutes, no precipitation.' Rowen was below when it occurred. The navigator mentioned it at the evening meal. Rowen asked three careful questions about the direction and duration, went below again, and did not emerge. Cost: 1 military (reduced watch).",
+      "reason": "Rowen does not have enough information to interpret what the navigator described. But he has the ancient document. He is checking something.",
+      "target": "Navigator's log / ancient document cross-reference"
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "action": "Elowen's Wayfarer trader in the Twin Cities witnessed the eclipse from the outer market district, where the crowd reaction was intense \u2014 weeping, prostration, a street prophet declaring 'the Hollow Accord is hollow no longer.' The trader sent an immediate fast dispatch back to Glenhaven: 'Eclipse above the Twin Cities, total, eleven minutes, no natural cause. Political situation volatile. Advise caution on further presence.' Cost: 3 gold (fast dispatch), 2 influence.",
+      "reason": "Glenhaven's instinct is always to withdraw from volatility and observe from safety. The eclipse has made the Twin Cities mission feel suddenly dangerous.",
+      "target": "Glenhaven / Elowen advisory dispatch"
+    },
+    {
+      "faction": "Farrock",
+      "action": "Farrock's rider, still waiting in the Twin Cities for acknowledgment of the fracture report, witnessed the eclipse from the courtyard of the court secretary's building. He immediately added a postscript to his waiting note: 'At the ninth hour, total darkness fell for eleven minutes. No cloud. No wind. I do not know if this is connected to what rises beneath the earth at Lostfeld. But I cannot pretend I am not thinking it.' Cost: 1 gold (postscript, revised note).",
+      "reason": "Farrock is self-serving but the rider is a pragmatic man. The coincidence is undeniable and now on record \u2014 which is exactly what Farrock would want if this becomes a crisis of attribution.",
+      "target": "Twin Cities court secretary / revised fracture-eclipse report"
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "action": "A Gilgeth orc camp on the southern road witnessed the eclipse while resting mid-morning. The caravan leader, partially impaired, interpreted it as a war-sign from the orc sky pantheon and issued orders for the caravan to arm itself and accelerate north. Three subordinates overruled him and the caravan returned to normal movement, but the incident was noted. The camp shaman sent a coded bead-message to Gilgeth city leadership: 'The sky god closed his eye above the human cities. Something stirs.' Cost: 2 gold (shaman dispatch).",
+      "reason": "Even impaired leadership picks up on an eclipse. The shaman's reading is culturally independent and adds a non-human interpretation stream to the already-fracturing eclipse narrative.",
+      "target": "Gilgeth city leadership / eclipse omen report"
+    }
+  ],
+  "recent_events": [
+    {
+      "region": "Twin Cities",
+      "text": "A total eclipse of eleven minutes with no natural cause fell at the ninth hour. The palace froze. Caeris summoned the theologian and spent two hours alone with the proclamation unread on his desk. The Seer stood in the courtyard and watched the whole eclipse, then wrote without pause for an hour."
+    },
+    {
+      "region": "Tidefall",
+      "text": "The Admiral's harbor-treaty rider halted during the eclipse and returned two hours late. The council convened, divided on meaning. The Admiral commissioned a formal prophet's interpretation for morning \u2014 he wants a favorable reading and may not receive one."
+    },
+    {
+      "region": "Lostfeld / Monastery of Druids",
+      "text": "Varek descended to the sealed level with the iron case. He has not emerged. Ironmaul received the eclipse report in the same hour and sat motionless for twenty minutes before ordering a tripled fracture watch. He wrote to the Thane Council: 'The druid is below. The sun went dark. I cannot pretend these are unrelated.'"
+    },
+    {
+      "region": "Faerwood / Shadow Court",
+      "text": "The eclipse reached Lythara by fast rider at midday as she was composing her third message to the Arkenor lieutenant. She stopped writing. She convened her inner circle and declared the eclipse a Shadow Court mandate: a hidden throne will become visible before the dark moon."
+    },
+    {
+      "region": "Rock Plains / Open Sea",
+      "text": "The Rock Plains goblin leadership received three simultaneous anomaly reports: the fracture sketch, the Lostfeld dream account, and the eclipse. They dispatched watchers toward the Lostfeld road but are not acting yet. At sea, Rowen's navigator logged an 'unusual horizon darkness' \u2014 Rowen went below to check something in the ancient document."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Twin Cities \u2014 Eclipse Interpretation Race",
+      "description": "Every faction with presence near the Twin Cities is now assigning meaning to the eclipse. Caeris, the Admiral, the Vampires, the Gnomes, and the Shadow Court each interpret it through their own lens. The first faction to deliver a politically decisive interpretation gains enormous influence over the succession's next move."
+    },
+    {
+      "factions": "Tidefall \u2014 Retainer Clause + Eclipse Pressure",
+      "description": "Dur Khadur has now sent a subtle message urging the Admiral to formally declare succession uncertainty. The eclipse gives the Admiral a pretext. If his prophet delivers a favorable reading that calls for decisive action, he may pull the Dur Khadur trigger without knowing what he is triggering."
+    },
+    {
+      "factions": "Lostfeld \u2014 Varek Below, Eclipse Above",
+      "description": "The coincidence of Varek's descent into the sealed level and the eclipse above the Twin Cities is now documented by multiple factions. Whether the connection is real or perceived, it is becoming a belief-forming event. The Monastery, the Gnomes, and Ironmaul himself are all treating it as potentially causal."
+    },
+    {
+      "factions": "Shadow Court \u2014 Lythara's Eclipse Mandate vs Velorn's Quiet Repositioning",
+      "description": "Lythara has redirected attention from Velorn toward the eclipse mandate. Velorn has used this pause to reposition further. When Lythara returns her focus to internal politics, she will find the clan further from her reach than her last assessment indicated."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Caeris Thorne",
+      "faction": "Twin Cities",
+      "status": "Stood at his window for the full eclipse. Summoned the palace theologian. Has not touched the proclamation document. Appears to courtiers as a man deciding whether to answer a message from something larger than himself."
+    },
+    {
+      "name": "Seer",
+      "faction": "Independent",
+      "status": "Stood in the open courtyard during the eclipse without moving. Afterward wrote a long document synthesizing the eclipse, the garrison order, secondhand dream reports, and the shape of what he believes is building below the world simultaneously. No addressee yet."
+    },
+    {
+      "name": "Grand Druid Varek",
+      "faction": "Monastery of Druids",
+      "status": "Has descended into the sealed level below Lostfeld with the iron case. Has not emerged. The guards outside the threshold have heard nothing. Eclipse news awaits him on ascent."
+    },
+    {
+      "name": "Thane Ironmaul",
+      "faction": "Lostfeld Dwarves",
+      "status": "Received the eclipse report in the same hour as Varek's descent. Sat immobile for twenty minutes. Tripled the fracture watch. Wrote a candid letter to the Thane Council that breaks from his previous containment-at-all-costs posture."
+    },
+    {
+      "name": "Queen Lythara",
+      "faction": "Shadow Court",
+      "status": "Paused mid-letter on receiving eclipse news. Declared it a mandate of the Shadow Court tradition: a hidden throne will become visible. She is now orienting toward the Twin Cities politically rather than finishing her campaign against Velorn."
+    },
+    {
+      "name": "Admiral (Tidefall)",
+      "faction": "Tidefall",
+      "status": "Council divided on eclipse meaning. Commissioned formal prophet interpretation. Also received a subtle Dur Khadur message suggesting he formally declare succession instability. He does not yet understand why Dur Khadur wants this."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "The eclipse struck at the worst possible moment. Palace is frozen. Theologian summoned. Officers who noticed the garrison order now have an eclipse to layer their unease onto. Caeris has not spoken publicly and the silence is louder than any statement."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Declining",
+      "reason": "The rider returned late and shaken. The council is divided. The Admiral wants a favorable prophet reading but his men saw what they saw. The confident morale from the treaty signing has curdled into anxiety."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Critical",
+      "reason": "Varek is below, the sun went dark, the fracture watch has been tripled. Ironmaul's letter to the council broke from containment-language for the first time. The garrison reads the Thane's composure the way ships read their captain's face in a storm."
+    },
+    {
+      "faction": "Shadow Court",
+      "status": "Stable",
+      "reason": "Lythara's eclipse-mandate declaration gave the court a narrative. Tension around Velorn is not gone but it is temporarily overlaid by purpose. Morale is borrowed against a debt she does not know she owes."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Rising",
+      "reason": "They now hold three separate high-value intelligence assets simultaneously: the proclamation, the Varek-descent confirmation, and the eclipse's political implications. They are deciding rather than reacting, which is their preferred state."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Rising",
+      "reason": "The eclipse coinciding with Varek's descent reads to the Monastery as cosmic confirmation. The fast rider to Stonebreak carries a tone of vindication. They believe they are exactly where they need to be at exactly the right moment."
+    },
+    {
+      "faction": "Vampires",
+      "status": "Rising",
+      "reason": "The eclipse created the psychological opening they needed. They now hold the full proclamation picture. They are ahead of the Gnomes in one crucial way: the Gnomes do not know this. They are now the most informed covert faction in the Twin Cities."
+    },
+    {
+      "faction": "Dur Khadur",
+      "status": "Rising",
+      "reason": "The coastal unit is now at staging. The Admiral has received the pressure message. The eclipse is accelerating the timeline in their favor. They are watching a mechanism they built begin to turn."
+    }
+  ],
+  "faction_power": [
+    {
+      "faction": "Twin Cities",
+      "military": 6,
+      "political": 4,
+      "economic": 5,
+      "influence": 4
+    },
+    {
+      "faction": "Tidefall",
+      "military": 8,
+      "political": 7,
+      "economic": 8,
+      "influence": 7
+    },
+    {
+      "faction": "Shadow Court",
+      "military": 7,
+      "political": 5,
+      "economic": 5,
+      "influence": 4
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "military": 2,
+      "political": 2,
+      "economic": 3,
+      "influence": 2
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "military": 4,
+      "political": 7,
+      "economic": 7,
+      "influence": 10
+    },
+    {
+      "faction": "Monastery of Druids",
+      "military": 3,
+      "political": 5,
+      "economic": 4,
+      "influence": 9
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "military": 6,
+      "political": 5,
+      "economic": 4,
+      "influence": 7
+    },
+    {
+      "faction": "Dur Khadur",
+      "military": 8,
+      "political": 6,
+      "economic": 6,
+      "influence": 7
+    },
+    {
+      "faction": "Farrock",
+      "military": 5,
+      "political": 3,
+      "economic": 4,
+      "influence": 4
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "military": 3,
+      "political": 3,
+      "economic": 5,
+      "influence": 5
+    },
+    {
+      "faction": "Vampires",
+      "military": 2,
+      "political": 9,
+      "economic": 5,
+      "influence": 10
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "military": 5,
+      "political": 2,
+      "economic": 3,
+      "influence": 3
+    }
+  ],
+  "faction_resources": [
+    {
+      "faction": "Twin Cities",
+      "food": 55,
+      "gold": 50,
+      "military": 60,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Tidefall",
+      "food": 55,
+      "gold": 80,
+      "military": 80,
+      "materials": 50,
+      "influence": 70,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Shadow Court",
+      "food": 55,
+      "gold": 50,
+      "military": 70,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "food": 55,
+      "gold": 50,
+      "military": 60,
+      "materials": 50,
+      "influence": 80,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "food": 55,
+      "gold": 30,
+      "military": 20,
+      "materials": 50,
+      "influence": 20,
+      "pressure": "Mounting pressure on military, influence."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "food": 55,
+      "gold": 70,
+      "military": 40,
+      "materials": 50,
+      "influence": 85,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "food": 55,
+      "gold": 40,
+      "military": 30,
+      "materials": 50,
+      "influence": 85,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Dreadwind Islands",
+      "food": 55,
+      "gold": 40,
+      "military": 60,
+      "materials": 50,
+      "influence": 70,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Dur Khadur",
+      "food": 55,
+      "gold": 60,
+      "military": 80,
+      "materials": 50,
+      "influence": 70,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Farrock",
+      "food": 55,
+      "gold": 40,
+      "military": 50,
+      "materials": 50,
+      "influence": 40,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Vilefin Goblins",
+      "food": 55,
+      "gold": 50,
+      "military": 30,
+      "materials": 50,
+      "influence": 50,
+      "pressure": "Stable, with no acute resource shortages."
+    },
+    {
+      "faction": "Vampires",
+      "food": 55,
+      "gold": 50,
+      "military": 20,
+      "materials": 50,
+      "influence": 85,
+      "pressure": "Mounting pressure on military."
+    },
+    {
+      "faction": "Gilgeth Orcs",
+      "food": 55,
+      "gold": 30,
+      "military": 50,
+      "materials": 50,
+      "influence": 30,
+      "pressure": "Stable, with no acute resource shortages."
+    }
+  ],
+  "relationships": [],
+  "trade_routes": [],
+  "faction_identities": [],
+  "region_control": [],
+  "faction_knowledge": [],
+  "remembered_events": [],
+  "seer_state": {
+    "tone": "weary",
+    "confidence": 50,
+    "bias": "cautiously interpretive",
+    "belief_about_user": "The presence beyond the veil is not fully understood.",
+    "memory_burden": 40,
+    "voice_mode": "pattern and testimony",
+    "last_source_bias": "mixed and uncertain"
+  },
+  "seer_journey": {
+    "location": "Twin Cities",
+    "destination": "Twin Cities",
+    "status": "recovering",
+    "ticks_remaining": 0,
+    "purpose": "The Eclipse of the Twin Cities \u2014 Omen Without Author",
+    "last_outcome": "Stood in the open courtyard during the eclipse without moving. Afterward wrote a long document synthesizing the eclipse, the garrison order, secondhand dream reports, and the shape of what he believes is building below the world simultaneously. No addressee yet."
+  },
+  "ruler_states": [],
+  "belief_currents": [],
+  "religious_factions": [],
+  "whispers": [],
+  "weather_and_omens": [],
+  "absorbed_lore": [],
+  "real_timestamp": "2026-04-22T13:56:13.487402"
+}

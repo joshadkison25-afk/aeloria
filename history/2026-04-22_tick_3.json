@@ -1,0 +1,294 @@
+{
+  "tick": 3,
+  "world_date": "Month of the Iron Thaw, Year 1 of the Hollow Accord",
+  "major_event": "First blood of open war between Shadow Court and Glenhaven: Clan Arkenor's counter-ambush at the Greymere Hollow kills eleven Wayfarers. Elowen's response is not grief \u2014 it is silence. The kind that precedes something irreversible.",
+  "recent_events": [
+    {
+      "region": "Faerwood",
+      "text": "Arkenor's prepared counter-ambush devastated a Wayfarer scouting band at Greymere Hollow. Eleven dead, three taken. Elowen has recalled her remaining war-bands to the tree-line \u2014 and sent no replacements."
+    },
+    {
+      "region": "Lostfeld",
+      "text": "Kessa Stonebraid passed a single written word through the crack in the lower stone: a name. Ironmaul read it, went pale, and burned the paper. He has now ordered the antechamber unsealed."
+    },
+    {
+      "region": "Twin Cities",
+      "text": "King Roderic Thorne II appeared publicly for the first time in six weeks \u2014 standing, clear-eyed, unassisted. He formally dissolved Aldric's compact with Tidefall in front of the full court. Aldric did not flinch."
+    },
+    {
+      "region": "Frostvale",
+      "text": "Prince Caeris Thorne arrived in Frostvale under a false name, escorted by a single Gloomspire gnome. He has been granted a private audience with the Frostvale council \u2014 unprecedented for a Thorne."
+    },
+    {
+      "region": "Rock Plains",
+      "text": "Groth's war-band burned a Gilgeth supply depot near the Ashmark. In the ashes, scouts found the same distinctive glass-tipped darts that killed the original caravans. Neither city made them."
+    }
+  ],
+  "active_tensions": [
+    {
+      "factions": "Shadow Court vs Glenhaven Elves",
+      "description": "Arkenor's ambush draws first blood. Elowen's silence after the recall is more alarming than her advance was. She is not regrouping \u2014 she is waiting for something to arrive."
+    },
+    {
+      "factions": "Lostfeld Dwarves (Ironmaul vs Reformers + Deep Entity)",
+      "description": "Ironmaul has unsealed the antechamber. Kessa's message \u2014 a name \u2014 broke his resolve. What she is communicating with now has leverage over the Thane himself."
+    },
+    {
+      "factions": "Twin Cities \u2014 Aldric vs Roderic vs Tidefall",
+      "description": "Roderic's public revival dissolves the compact, but Aldric's hour-long acceptance is a matter of record. Tidefall ships have not left harbor. The compact may be dead on paper only."
+    },
+    {
+      "factions": "Gloomspire Gnomes + Vilefin Goblins vs Unknown Actor",
+      "description": "Glass-tipped darts matching Gnomish craft found in orc war-ash. Vilefin goblins seen near Ashmark in the days before. Someone is manufacturing orc war \u2014 and using gnome tools to do it."
+    }
+  ],
+  "character_updates": [
+    {
+      "name": "Sovereign Elowen Silverleaf",
+      "faction": "Glenhaven Elves",
+      "status": "Recalled war-bands but issued no new orders for six days. On the seventh, she sent a single messenger north \u2014 toward Frostvale. The message was not sealed. It was memorized."
+    },
+    {
+      "name": "King Roderic Thorne II",
+      "faction": "Twin Cities",
+      "status": "Appeared vigorous and deliberate in court. Dissolved the compact with a single spoken word. He is performing recovery \u2014 or he was never as frail as he pretended. Either reading is dangerous."
+    },
+    {
+      "name": "Prince Aldric Thorne",
+      "faction": "Twin Cities",
+      "status": "Did not protest the dissolution publicly. That evening, an unmarked Tidefall skiff was seen at the Eldoria private dock. Aldric met someone aboard for two hours. No record kept."
+    },
+    {
+      "name": "Kessa Stonebraid",
+      "faction": "Lostfeld Dwarves (Reformers)",
+      "status": "Emerged from the antechamber when Ironmaul unsealed it. She is unharmed, eerily calm, and refuses to repeat the name she passed through the crack. She has begun drawing symbols on her forearms."
+    },
+    {
+      "name": "Prince Caeris Thorne",
+      "faction": "Twin Cities",
+      "status": "In Frostvale, meeting with the council under a false name. The Gloomspire gnome escort has not been seen since delivering him \u2014 they vanished into the mountain passes the same night."
+    },
+    {
+      "name": "Admiral Electorate (Tidefall)",
+      "faction": "Tidefall",
+      "status": "Received the dissolution quietly. Smiled. Has ordered three additional warships moved from open water into Eldoria harbor \u2014 citing 'contractual security' of an agreement Roderic says no longer exists."
+    }
+  ],
+  "faction_morale": [
+    {
+      "faction": "Shadow Court",
+      "status": "Rising",
+      "reason": "Arkenor's ambush succeeded. Clans read it as proof Lythara's silence was strategy. Nythariel's open questioning has quieted \u2014 for now."
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "status": "Declining",
+      "reason": "Ironmaul unsealing the antechamber is seen as capitulation. Loyalists are rattled. The name Kessa passed through the stone is spreading in whisper despite the burned paper."
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "status": "Stable",
+      "reason": "Eleven dead at Greymere Hollow. Grief returns but does not break discipline. The recall was ordered \u2014 and obeyed \u2014 without question. Elowen holds them tightly."
+    },
+    {
+      "faction": "Twin Cities",
+      "status": "Declining",
+      "reason": "Roderic's revival stabilizes the throne but fractures Aldric's faction. Loyalties are now openly divided. Court is a theater where both actors know the other is performing."
+    },
+    {
+      "faction": "Tidefall",
+      "status": "Rising",
+      "reason": "The compact is dissolved in name. The ships are still in harbor. In practice, Tidefall has already won the strategic position they sought."
+    },
+    {
+      "faction": "Gilgeth & Groth Orcs",
+      "status": "Critical",
+      "reason": "Glass-tipped darts found in Groth war-ash implicate the Gnomes \u2014 or someone using their tools. Both orc cities are being played. Neither is lucid enough to see it."
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "status": "Declining",
+      "reason": "Discovery of glass-tipped darts in orc war-ash is dangerous. If Gilgeth or Groth trace manufacture back to Gnome craft, the monopoly becomes a target, not a shield."
+    },
+    {
+      "faction": "Monastery of Druids",
+      "status": "Rising",
+      "reason": "The novice's maps have been identified by one rogue scholar as pre-Accord geography \u2014 places that should not exist yet. The Grand Druid has summoned the full Conclave."
+    }
+  ],
+  "faction_power": [
+    {
+      "faction": "Shadow Court",
+      "military": 7,
+      "political": 7,
+      "economic": 5,
+      "influence": 8
+    },
+    {
+      "faction": "Glenhaven Elves",
+      "military": 6,
+      "political": 5,
+      "economic": 5,
+      "influence": 6
+    },
+    {
+      "faction": "Twin Cities",
+      "military": 6,
+      "political": 6,
+      "economic": 8,
+      "influence": 7
+    },
+    {
+      "faction": "Tidefall",
+      "military": 7,
+      "political": 6,
+      "economic": 7,
+      "influence": 6
+    },
+    {
+      "faction": "Lostfeld Dwarves",
+      "military": 5,
+      "political": 4,
+      "economic": 6,
+      "influence": 4
+    },
+    {
+      "faction": "Gloomspire Assassin Gnomes",
+      "military": 4,
+      "political": 5,
+      "economic": 7,
+      "influence": 8
+    },
+    {
+      "faction": "Monastery of Druids",
+      "military": 3,
+      "political": 4,
+      "economic": 4,
+      "influence": 7
+    },
+    {
+      "faction": "Gilgeth & Groth Orcs",
+      "military": 5,
+      "political": 2,
+      "economic": 3,
+      "influence": 2
+    }
+  ],
+  "relationships": [
+    {
+      "faction_a": "Shadow Court",
+      "faction_b": "Glenhaven Elves",
+      "type": "war",
+      "intensity": 8
+    },
+    {
+      "faction_a": "Twin Cities",
+      "faction_b": "Tidefall",
+      "type": "rivalry",
+      "intensity": 7
+    },
+    {
+      "faction_a": "Aldric Thorne",
+      "faction_b": "Tidefall",
+      "type": "alliance",
+      "intensity": 7
+    },
+    {
+      "faction_a": "Gilgeth & Groth Orcs",
+      "faction_b": "Gilgeth & Groth Orcs",
+      "type": "war",
+      "intensity": 9
+    },
+    {
+      "faction_a": "Gloomspire Assassin Gnomes",
+      "faction_b": "Monastery of Druids",
+      "type": "alliance",
+      "intensity": 6
+    },
+    {
+      "faction_a": "Gloomspire Assassin Gnomes",
+      "faction_b": "Gilgeth & Groth Orcs",
+      "type": "rivalry",
+      "intensity": 5
+    },
+    {
+      "faction_a": "Lostfeld Dwarves",
+      "faction_b": "Monastery of Druids",
+      "type": "neutral",
+      "intensity": 3
+    },
+    {
+      "faction_a": "Caeris Thorne",
+      "faction_b": "Frostvale",
+      "type": "neutral",
+      "intensity": 4
+    },
+    {
+      "faction_a": "Shadow Court",
+      "faction_b": "Gloomspire Assassin Gnomes",
+      "type": "neutral",
+      "intensity": 3
+    },
+    {
+      "faction_a": "Roderic Thorne II",
+      "faction_b": "Aldric Thorne",
+      "type": "rivalry",
+      "intensity": 8
+    }
+  ],
+  "whispers": [
+    {
+      "text": "The name Kessa passed through the stone crack is the same name carved beneath the oldest pillar in Lostfeld \u2014 older than the dwarves' own founding records.",
+      "region": "Lostfeld"
+    },
+    {
+      "text": "Elowen's messenger to Frostvale carried no words. Only a Wayfarer death-braid \u2014 the kind woven only when a sovereign has chosen to burn something she loves.",
+      "region": "Frostvale"
+    },
+    {
+      "text": "The glass-tipped darts are Gnomish in craft but not in purpose. Someone purchased the design \u2014 or stole it. The Syndicate is looking inward for the leak.",
+      "region": "Rock Plains"
+    },
+    {
+      "text": "Arkenor's vanished commander was seen at a port on the Dreadwind Islands. He was not alone. Rowen the Pirate King was there. They shared a table for three hours.",
+      "region": "Dreadwind Islands"
+    }
+  ],
+  "weather_and_omens": [
+    {
+      "region": "Faerwood",
+      "condition": "The antlered moon-shadow split into two shapes overnight. Clan Velorn says one is a crown. Clan Nythariel says one is a noose. Both are quiet about which is which."
+    },
+    {
+      "region": "Lostfeld",
+      "condition": "The 43-beat pulse has changed. It is now 44 beats \u2014 and the pause between cycles has shortened by half. Whatever is counting down, it is accelerating."
+    },
+    {
+      "region": "Frostvale",
+      "condition": "An unseasonal warm wind came from the south \u2014 the first in eleven years. The Frostvale council took it as an omen of a visitor bringing fire, not comfort."
+    },
+    {
+      "region": "Stonebreak",
+      "condition": "The novice's maps have begun appearing outside the scriptorium \u2014 scratched into windowsills, floor stones, bread loaves. He does not remember doing it."
+    },
+    {
+      "region": "Dreadwind Islands",
+      "condition": "Three ships were found drifting empty near the eastern shoals. No blood, no damage, no cargo missing. The sails were tied from the inside."
+    }
+  ],
+  "absorbed_lore": [
+    "Arkenor's counter-ambush at Greymere Hollow killed eleven Wayfarers \u2014 first blood of open war between Shadow Court and Glenhaven.",
+    "Elowen recalled war-bands to the tree-line and went silent for six days before sending a single memorized message north toward Frostvale.",
+    "Kessa Stonebraid passed a single name through the crack; Ironmaul burned the paper and unsealed the antechamber \u2014 the name broke his resolve.",
+    "Kessa emerged calm and unharmed, refuses to repeat the name, and has begun drawing symbols on her forearms.",
+    "King Roderic appeared publicly vigorous and dissolved Aldric's compact with Tidefall \u2014 his frailty may have been entirely performed.",
+    "Aldric met an unmarked Tidefall contact aboard a skiff at a private dock the same evening the compact was dissolved \u2014 no record kept.",
+    "Tidefall moved three additional warships into Eldoria harbor citing the dissolved compact as justification \u2014 a strategic foothold regardless of legality.",
+    "Prince Caeris arrived in Frostvale under a false name; his Gloomspire gnome escort vanished into the passes immediately after delivering him.",
+    "Glass-tipped darts of Gnomish craft were found in orc war-ash \u2014 suggesting an unknown actor is manufacturing the orc war using Gnome tools.",
+    "Arkenor's vanished commander was seen meeting Pirate King Rowen at a Dreadwind Islands port \u2014 Lythara's covert move connects to the exiled throne.",
+    "The novice at Stonebreak is etching his maps unconsciously across monastery surfaces \u2014 the Conclave has been summoned by the Grand Druid.",
+    "The deep pulse in Lostfeld changed from 43 to 44 beats and its cycle shortened \u2014 the cadence is accelerating."
+  ],
+  "real_timestamp": "2026-04-22T03:58:15.643405"
+}

@@ -1,0 +1,1410 @@
+{% extends "base.html" %}
+{% block title %}Aeloria — Codex{% endblock %}
+
+{% block head %}
+<style>
+  .codex-view.hidden { display: none !important; }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .filter-pill {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-sec);
+    padding: 8px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .filter-pill:hover,
+  .filter-pill.active {
+    border-color: rgba(201, 169, 110, 0.35);
+    color: var(--gold);
+    background: rgba(201, 169, 110, 0.08);
+  }
+
+  .codex-toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .codex-search {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 16px;
+    font-size: 14px;
+    outline: none;
+  }
+  .codex-search:focus { border-color: rgba(201, 169, 110, 0.3); }
+
+  .codex-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .codex-category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .codex-category-card {
+    position: relative;
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, rgba(5, 5, 8, 0.1), rgba(5, 5, 8, 0.82)),
+      var(--category-image),
+      linear-gradient(180deg, rgba(25, 24, 22, 0.88), rgba(12, 12, 15, 0.96));
+    background-position: center;
+    background-size: cover;
+    border: 1px solid var(--border);
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+  }
+
+  .codex-category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(201, 169, 110, 0.12);
+    background:
+      radial-gradient(circle at 72% 16%, rgba(201, 169, 110, 0.16), transparent 30%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.72));
+    pointer-events: none;
+  }
+
+  .codex-category-card:hover {
+    border-color: rgba(201, 169, 110, 0.4);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    transform: translateY(-3px);
+  }
+
+  .category-count {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(201, 169, 110, 0.32);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    margin-bottom: 28px;
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .category-name {
+    position: relative;
+    z-index: 1;
+    font-family: 'Cinzel', serif;
+    font-size: 25px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .category-summary {
+    position: relative;
+    z-index: 1;
+    color: var(--text-sec);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .category-open {
+    margin-top: 18px;
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .codex-category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    background: rgba(22, 22, 24, 0.72);
+  }
+
+  .category-back {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--gold);
+    padding: 10px 13px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .category-back:hover {
+    border-color: rgba(201, 169, 110, 0.42);
+    background: rgba(201, 169, 110, 0.08);
+  }
+
+  .entry-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .entry-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .entry-thumb {
+    height: 170px;
+    margin: -22px -22px 18px;
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 20%, rgba(201,169,110,0.12), transparent 34%),
+      linear-gradient(180deg, rgba(20,20,24,0.78), rgba(8,8,12,0.94));
+    overflow: hidden;
+  }
+
+  .entry-thumb img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    filter: saturate(1.06) contrast(1.04) brightness(0.9);
+  }
+
+  .entry-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .entry-name {
+    font-family: 'Cinzel', serif;
+    font-size: 19px;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+
+  .entry-summary {
+    color: var(--text-sec);
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 18px;
+  }
+
+  .entry-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .entry-live {
+    display: inline-flex;
+    margin-left: 8px;
+    padding: 3px 7px;
+    border: 1px solid rgba(201, 169, 110, 0.28);
+    color: var(--gold);
+    background: rgba(201, 169, 110, 0.08);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  .detail-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 28px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .detail-back:hover { color: var(--gold); }
+
+  .detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
+    gap: 34px;
+    align-items: start;
+  }
+
+  .detail-title {
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    line-height: 1.1;
+    margin: 10px 0 12px;
+    color: var(--text);
+  }
+
+  .detail-subtitle {
+    font-family: 'Crimson Text', serif;
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text-sec);
+    margin-bottom: 28px;
+  }
+
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .detail-section {
+    margin-bottom: 40px;
+  }
+
+  .detail-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-prose {
+    font-family: 'Crimson Text', serif;
+    font-size: 18px;
+    line-height: 1.9;
+    color: var(--text-sec);
+  }
+  .detail-prose p + p { margin-top: 18px; }
+
+  .detail-sidebar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .character-portrait {
+    min-height: 320px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.72)),
+      radial-gradient(circle at 50% 28%, rgba(201,169,110,0.16), transparent 34%),
+      var(--surface);
+    display: grid;
+    place-items: end stretch;
+    overflow: hidden;
+  }
+
+  .codex-detail-image {
+    min-height: 260px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 20%, rgba(201,169,110,0.14), transparent 34%),
+      linear-gradient(180deg, rgba(20,20,24,0.9), rgba(8,8,12,0.96));
+    overflow: hidden;
+  }
+
+  .codex-detail-image img {
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .character-portrait img {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .portrait-placeholder {
+    padding: 20px;
+    color: var(--text-sec);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .portrait-placeholder strong {
+    display: block;
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .sidebar-card-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .facts-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .fact-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .fact-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .fact-label { color: var(--text-muted); }
+  .fact-value { color: var(--text); text-align: right; }
+
+  .related-pills,
+  .timeline-list,
+  .status-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .related-pill {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text-sec);
+    background: var(--surface2);
+  }
+
+  .detail-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .detail-list-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+
+  .detail-list-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+    align-items: baseline;
+  }
+
+  .detail-list-name {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .detail-list-text {
+    font-size: 14px;
+    color: var(--text-sec);
+    line-height: 1.6;
+  }
+
+  .status-chip {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-sec);
+    font-size: 11px;
+  }
+
+  @media (max-width: 880px) {
+    .codex-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .codex-search { max-width: none; }
+    .detail-layout { grid-template-columns: 1fr; }
+    .codex-category-grid { grid-template-columns: 1fr; }
+    .codex-category-header { align-items: flex-start; flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="codex-grid-view" class="codex-view">
+  <div class="page-hero">
+    <div class="container">
+      <p class="section-label">The Codex of Aeloria</p>
+      <h1 class="section-title" style="font-size:48px">ALL THAT IS KNOWN</h1>
+      <p class="section-subtitle">All that is believed. All that has been recorded. Search the living record and open any entry in full.</p>
+      <div class="filter-row" id="codex-filters"></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="codex-toolbar">
+        <input id="codex-search" class="codex-search" type="text" placeholder="Search names, places, factions, histories..." />
+        <div class="codex-count" id="codex-count">Loading entries...</div>
+      </div>
+      <div class="card-grid" id="codex-grid">
+        {% for i in range(6) %}
+        <div class="entry-card">
+          <div class="skeleton" style="height:12px;width:84px;margin-bottom:14px"></div>
+          <div class="skeleton" style="height:20px;width:70%;margin-bottom:10px"></div>
+          <div class="skeleton" style="height:14px;width:100%;margin-bottom:6px"></div>
+          <div class="skeleton" style="height:14px;width:88%;margin-bottom:18px"></div>
+          <div class="skeleton" style="height:12px;width:58%"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="codex-detail-view" class="codex-view hidden">
+  <div class="detail-wrap">
+    <button class="detail-back" onclick="showCodexGrid()">← Codex</button>
+    <div id="codex-detail-content"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CODEX_CATEGORIES = [
+  {
+    name: "Kingdoms",
+    summary: "Crowns, courts, realms, and the powers that claim sovereignty.",
+    image: "/static/illustrations/ui/codex-category-kingdoms.png"
+  },
+  {
+    name: "Factions",
+    summary: "Orders, crews, republics, exiles, and organized powers beneath the crown-line.",
+    image: "/static/illustrations/ui/codex-category-factions.png"
+  },
+  {
+    name: "Characters",
+    summary: "Rulers, heirs, witnesses, and dangerous people shaping the age.",
+    image: "/static/illustrations/ui/codex-category-characters.png"
+  },
+  {
+    name: "Places",
+    summary: "Forests, peaks, monasteries, holds, and roads where history gathers.",
+    image: "/static/illustrations/ui/codex-category-places.png"
+  },
+  {
+    name: "Lore",
+    summary: "Mysteries, ages, old wounds, and records that explain the world beneath the world.",
+    image: "/static/illustrations/ui/codex-category-lore.png"
+  }
+];
+
+const CODEX_ENTRIES = [
+  {
+    id: "shadow-court",
+    name: "Shadow Court",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "The oldest continuous power in Aeloria, ruling Faerwood through patience, secrecy, and the certainty of consequence.",
+    subtitle: "Ancient sovereigns of Faerwood, older than the current age and far less interested in being understood than obeyed.",
+    facts: { Leader: "Queen Lythara the Veiled", Base: "The Black Glades", Status: "Enduring", Type: "Kingdom" },
+    body: [
+      "The Shadow Court is less a court than a continuity of rule. Dynasties elsewhere fall apart under pressure; the Dread Elves withdraw, adapt, and emerge with their ledgers balanced. Their power rests on memory, on old bargains, and on the knowledge that Faerwood always seems to know more than outsiders intended to reveal.",
+      "Clan politics define the daily shape of power. Velorn, Nythariel, and Arkenor each carry distinct ambitions, and Queen Lythara's genius lies in keeping those ambitions productive rather than catastrophic. The result is a kingdom that appears still from outside while moving constantly within.",
+      "To the rest of Aeloria, the Shadow Court represents a nightmare and a necessity. No faction trusts them. Almost every faction still prefers having them in the world to imagining what might fill the void if they vanished."
+    ],
+    sidebar: { LiveFaction: "Shadow Court", Related: ["Faerwood", "Queen Lythara the Veiled", "Glenhaven Elves", "Thalor"] }
+  },
+  {
+    id: "lostfeld-dwarves",
+    name: "Lostfeld Dwarves",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "A mountain kingdom built on craft, endurance, and a deep problem that has finally begun to speak back.",
+    subtitle: "The great dwarven holdfast of the north, now facing the first crisis in centuries that cannot be solved with iron alone.",
+    facts: { Leader: "Thane Ulric Ironmaul", Base: "Lostfeld", Status: "Besieged from below", Type: "Kingdom" },
+    body: [
+      "Lostfeld is the architectural answer to dwarven psychology: layered, disciplined, magnificent, and suspicious of waste. Every corridor exists for a reason. Every forge remembers the hands that fed it. Even its rituals carry the logic of engineering.",
+      "That order now trembles. The sealed districts have ceased to behave like history and have begun to behave like prophecy. Reformers, loyalists, and the nameless thing beneath the stone all claim some version of the future, and Ironmaul can no longer keep them separated.",
+      "Among surface powers, Lostfeld has always been the ally you wanted in a crisis. The terror of the current moment is that Lostfeld itself has become the crisis."
+    ],
+    sidebar: { LiveFaction: "Lostfeld Dwarves", Related: ["Thane Ulric Ironmaul", "Kessa Stonebraid", "Forge of Brammir", "Stonebreak Monastery"] }
+  },
+  {
+    id: "glenhaven-elves",
+    name: "Glenhaven Elves",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "A silver-canopied realm whose grace has hardened into military precision without entirely losing its sorrow.",
+    subtitle: "The green kingdom of the south-east, where memory and discipline now prepare themselves for a war no one can stop by pretending it has not begun.",
+    facts: { Leader: "Sovereign Elowen Silverleaf", Base: "Glenhaven", Status: "Mobilizing", Type: "Kingdom" },
+    body: [
+      "Glenhaven's elegance often misleads outsiders into thinking it is soft. It is not. Its beauty is cultivated the way a sword edge is honed: deliberately, repeatedly, and for a purpose. The realm's ceremonial grace conceals an astonishing capacity for endurance.",
+      "Sovereign Elowen's court is shaped by ritual, omen-reading, and a political culture that prizes restraint over spectacle. That restraint has become ominous in recent months, as war-bands move with little public declaration and even the silence of the court begins to feel weaponized.",
+      "If the Shadow Court is feared for secrecy, Glenhaven is feared for conviction. Once its elders agree on meaning, they rarely pause to ask whether the rest of the world is ready for the consequences."
+    ],
+    sidebar: { LiveFaction: "Glenhaven Elves", Related: ["Sovereign Elowen Silverleaf", "Faerwood", "Silverflow River", "Twin Cities"] }
+  },
+  {
+    id: "twin-cities",
+    name: "Twin Cities",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "A single crown ruling two cities that no longer agree on what loyalty should cost.",
+    subtitle: "Eresteron and Eldoria, joined politically and split by appetite, succession, and the increasingly dangerous intelligence of their own heirs.",
+    facts: { Leader: "King Roderic Thorne II", Base: "Eresteron & Eldoria", Status: "Fracturing", Type: "Kingdom" },
+    body: [
+      "The Twin Cities are the most visibly civilized power in Aeloria and perhaps the least internally coherent. Eresteron contains the old throne, the old houses, and the old manners. Eldoria contains the money, the maritime ambition, and a growing impatience with inherited slowness.",
+      "King Roderic has held the machine together by allowing every faction at court to believe he sees farther than he admits. That worked while his sons remained manageable. It works less well now that one has begun negotiating like a second king and another has vanished into the north carrying questions no courtier can answer.",
+      "The kingdom still looks stable from a distance. Up close, every corridor is full of listeners."
+    ],
+    sidebar: { LiveFaction: "Twin Cities", Related: ["King Roderic Thorne II", "Prince Aldric Thorne", "Prince Caeris Thorne", "Tidefall"] }
+  },
+  {
+    id: "tidefall",
+    name: "Tidefall",
+    category: "Factions",
+    kind: "Settlement",
+    summary: "A cliff-built maritime republic whose political confidence grows every time a monarchy hesitates.",
+    subtitle: "Harbor towers, elected admirals, and a government that believes sea power is simply a clearer form of truth.",
+    facts: { Leader: "Admiral Electorate", Base: "Tidefall", Status: "Positioned", Type: "Settlement" },
+    body: [
+      "Tidefall is governed by captains, merchants, and those rare people capable of being both. Its republican mythology is sincere, though not innocent. Every election is also a consolidation of fleets, contracts, and quiet obligations stretching far beyond the harbor cliffs.",
+      "The city thinks in shipping lanes, provisions, and leverage. While inland courts argue over legitimacy, Tidefall asks who can actually move grain, steel, and soldiers when weather turns ugly. The answer is usually Tidefall.",
+      "Its recent entanglement with the Twin Cities is not an aberration. It is the result of decades of waiting for someone inside the throne room to mistake access for control."
+    ],
+    sidebar: { LiveFaction: "Tidefall", Related: ["Admiral Electorate", "Twin Cities", "Dreadwind Islands"] }
+  },
+  {
+    id: "dreadwind-islands",
+    name: "Dreadwind Islands",
+    category: "Factions",
+    kind: "Faction",
+    summary: "A pirate kingdom made of exiles, storms, and a ruler whose silences matter more than most kings' speeches.",
+    subtitle: "The western isles, assembled by Rowen into something halfway between an accident of history and a deliberate state.",
+    facts: { Leader: "Pirate King Rowen", Base: "Dreadwind Isles", Status: "Watching the sea floor", Type: "Faction" },
+    body: [
+      "The Dreadwind Islands survive by refusing to become predictable. Their crews prize improvisation, local loyalty, and the ability to convert catastrophe into an opportunity before anyone else has named the catastrophe yet.",
+      "Rowen imposed coherence without ruining the archipelago's instincts. That is his particular genius. He can unify raiders without asking them to stop being raiders, and he can turn fragments of legend into something sturdy enough for people to die under willingly.",
+      "Now that the islands have found something old beneath the water near Tidefall, their greatest challenge is no longer unification. It is deciding whether knowledge is worth more as treasure, threat, or proof."
+    ],
+    sidebar: { LiveFaction: "Dreadwind Islands", Related: ["Pirate King Rowen", "Tidefall", "Sinking Island"] }
+  },
+  {
+    id: "queen-lythara",
+    name: "Queen Lythara the Veiled",
+    category: "Characters",
+    kind: "Character",
+    summary: "The hidden sovereign of the Shadow Court, whose restraint has outlived empires.",
+    subtitle: "A queen never seen plainly, and therefore imagined constantly.",
+    facts: { Faction: "Shadow Court", Status: "Alive", Location: "Faerwood", Type: "Character" },
+    body: [
+      "Lythara governs through opacity. Her power comes not only from what she knows, but from the discipline with which she refuses to confirm what others desperately want to believe about her.",
+      "For centuries, rivals have mistaken her stillness for passivity. Almost all of them are dead. The rest now advise caution in tones they wish they had learned younger.",
+      "The current war footing inside Faerwood has placed unusual pressure on her authority. That does not mean she is losing control. It means she has chosen not to display where control actually resides."
+    ],
+    sidebar: { LiveCharacter: "Queen Lythara the Veiled", Related: ["Shadow Court", "Faerwood", "Thalor"] }
+  },
+  {
+    id: "ulric-ironmaul",
+    name: "Thane Ulric Ironmaul",
+    category: "Characters",
+    kind: "Character",
+    summary: "A ruler forged for siege now discovering that endurance alone cannot govern revelation.",
+    subtitle: "The dwarf who kept Lostfeld rigid long enough to survive, and perhaps rigid enough to crack.",
+    facts: { Faction: "Lostfeld Dwarves", Status: "Alive", Location: "Lostfeld", Type: "Character" },
+    body: [
+      "Ironmaul is what every frightened city asks for before it understands the bill. He is disciplined, unsentimental, and capable of making decisions others call cruel until they later admit those decisions probably saved them.",
+      "He became Thane because Lostfeld needed certainty. The tragedy of the present hour is that certainty has become counterfeit. The gate opened anyway. The bar bent anyway. Men who once trusted the rhythm of his orders now watch his face for signs that he has started imagining failure.",
+      "He has not broken. He has merely run out of believable lies."
+    ],
+    sidebar: { LiveCharacter: "Thane Ulric Ironmaul", Related: ["Lostfeld Dwarves", "Kessa Stonebraid", "Forge of Brammir"] }
+  },
+  {
+    id: "elowen-silverleaf",
+    name: "Sovereign Elowen Silverleaf",
+    category: "Characters",
+    kind: "Character",
+    summary: "A sovereign whose grief has become discipline, and whose restraint feels increasingly deliberate.",
+    subtitle: "The ruler of Glenhaven, reading omens like military dispatches.",
+    facts: { Faction: "Glenhaven Elves", Status: "Alive", Location: "Glenhaven", Type: "Character" },
+    body: [
+      "Elowen governs with the composure of someone who has already accepted the worst and continued anyway. That makes her frightening. Panic can be manipulated. Conviction rarely can.",
+      "Her court reads shadow-script, listens to War-Readers, and interprets the land with theological seriousness. Yet Elowen is not abstract. She sees clearly the cost of war and moves toward it only when convinced that delay will cost more.",
+      "Reports from recent ticks suggest exhaustion without collapse. She is not fraying. She is narrowing."
+    ],
+    sidebar: { LiveCharacter: "Sovereign Elowen Silverleaf", Related: ["Glenhaven Elves", "Faerwood", "Frostvale"] }
+  },
+  {
+    id: "caeris-thorne",
+    name: "Prince Caeris Thorne",
+    category: "Characters",
+    kind: "Character",
+    summary: "The absent prince whose disappearance has made him politically larger than he ever was in court.",
+    subtitle: "Northbound, letter-bearing, and increasingly central to questions the throne would prefer remain hypothetical.",
+    facts: { Faction: "Twin Cities", Status: "Unknown", Location: "Frostvale", Type: "Character" },
+    body: [
+      "Caeris was once easy to underestimate. He had all the surface features of a secondary prince: charming, unplaced, useful as leverage and little more. That interpretation ended the moment he vanished.",
+      "His route north, the courier tied to his departure, and the signet-ring rumors surrounding his mission have elevated him from court ornament to narrative fault line. Every faction now asks not merely where he is, but whose future he has gone to authorize.",
+      "Whatever answer emerges, it will not be a small one."
+    ],
+    sidebar: { LiveCharacter: "Prince Caeris Thorne", Related: ["Twin Cities", "Frostvale", "Gloomspire Assassin Gnomes"] }
+  },
+  {
+    id: "faerwood",
+    name: "Faerwood",
+    category: "Places",
+    kind: "Place",
+    summary: "The dark forest at the center of too many prophecies to count as scenery any longer.",
+    subtitle: "Ancient woodland, political instrument, and defensive intelligence in the shape of terrain.",
+    facts: { Region: "West", Control: "Shadow Court", Danger: "Deadly", Type: "Place" },
+    body: [
+      "The Faerwood refuses the ordinary language of geography. Roads change. Paths appear where no one remembers cutting them. Certain groves produce silence so complete that travelers begin speaking louder just to prove they still exist.",
+      "The Shadow Court's long survival is inseparable from the forest itself. Outsiders argue over whether the Court merely knows Faerwood intimately or whether the forest actively collaborates. Those distinctions matter mostly to people not yet lost in it.",
+      "Recent mobilization along its eastern fringe has turned Faerwood from background threat into immediate strategic reality."
+    ],
+    sidebar: { Related: ["Shadow Court", "Queen Lythara the Veiled", "Thalor", "Glenhaven Elves"] }
+  },
+  {
+    id: "dragonscar-peaks",
+    name: "Dragonscar Peaks",
+    category: "Places",
+    kind: "Place",
+    summary: "The northern mountains where altitude, weather, and myth all become indistinguishable.",
+    subtitle: "Ice, stone, and the nearest thing Aeloria has to immortal witnesses.",
+    facts: { Region: "North", Control: "Ice Dragons", Danger: "Deadly", Type: "Place" },
+    body: [
+      "The Dragonscar Peaks define northern imagination. For most people they are border, warning, and legend at once. Maps mark them. Few people meaningfully know them.",
+      "The Ice Dragons occupying the range have done little to clarify matters. Their stillness has always been interpreted as indifference right up until the moment it ceases to be stillness.",
+      "Every omen traveling south from the Peaks arrives half translated and twice feared."
+    ],
+    sidebar: { Related: ["Ice Dragons", "Frostvale", "Northern Watchtowers"] }
+  },
+  {
+    id: "stonebreak-monastery",
+    name: "Stonebreak Monastery",
+    category: "Places",
+    kind: "Place",
+    summary: "A neutral sanctuary whose archives and rituals increasingly look like the front edge of a buried emergency.",
+    subtitle: "The druidic seat of healing, preservation, secrecy, and whatever is now waking beneath its oldest stones.",
+    facts: { Region: "Center", Control: "Monastery of Druids", Danger: "Uneasy", Type: "Place" },
+    body: [
+      "Stonebreak presents itself as a place where the world can be studied without being worsened by that study. Its halls preserve texts, herbs, rites, and memories other factions would gladly simplify into doctrine or profit.",
+      "Neutrality has made the monastery useful. Secrecy has made it powerful. Recent developments suggest those two gifts are no longer comfortably separable.",
+      "When the Grand Druid ends a fast suddenly, people notice. When a scriptorium closes and the stones begin pulsing, people start praying their neighbors noticed too."
+    ],
+    sidebar: { Related: ["Monastery of Druids", "Lostfeld Dwarves", "The Hollowstones"] }
+  },
+  {
+    id: "fractured-age",
+    name: "The Fractured Age",
+    category: "Lore",
+    kind: "History",
+    summary: "The age born from civil collapse, inherited division, and the habit of treating survival as a temporary substitute for peace.",
+    subtitle: "The current era of Aeloria: politically crowded, historically wounded, and permanently vulnerable to old debts resurfacing in new clothing.",
+    facts: { Category: "History", Scope: "Aeloria-wide", Status: "Ongoing", Type: "Lore" },
+    body: [
+      "The Fractured Age is not one war remembered collectively. It is the aftermath of many wars remembered selectively. Kingdoms cite different beginnings because admitting the true beginning would mean admitting the first betrayal mattered more than the official victory.",
+      "Borders hardened, then softened, then hardened again. Alliances became hereditary myths. Entire regions learned to think of instability as normal weather.",
+      "The present crisis is best understood not as an interruption of the Fractured Age but as one of its more honest chapters."
+    ],
+    sidebar: { Related: ["Twin Cities", "Lostfeld Dwarves", "Shadow Court", "The Chronicle of Aeloria"] }
+  },
+  {
+    id: "sinking-island",
+    name: "The Sinking Island",
+    category: "Lore",
+    kind: "Mystery",
+    summary: "A vanished place still exerting pressure on charts, myths, and the ambitions of everyone who thinks the sea keeps secrets permanently.",
+    subtitle: "Known in whispers, mapped poorly, and tied to old claims no one can quite afford to dismiss.",
+    facts: { Category: "Mystery", Scope: "Western Sea", Status: "Unresolved", Type: "Lore" },
+    body: [
+      "Stories of the Sinking Island shift depending on who tells them. In some, it was a kingdom judged. In others, a city that bargained incorrectly. In a few, the island did not sink at all but moved somewhere depth cannot quite explain.",
+      "Modern political interest in the legend has sharpened as maritime powers discover more anomalies beneath the western approaches. Once treasure hunters arrive, sober historians are never far behind, and neither are opportunists.",
+      "The danger of mysteries like this is that eventually they stop being metaphors."
+    ],
+    sidebar: { Related: ["Dreadwind Islands", "Tidefall", "Pirate King Rowen"] }
+  }
+];
+
+let codexState = {};
+let activeCategory = "";
+let searchTerm = "";
+const categoryAlias = {
+  rulers: "Characters",
+  dynasties: "Kingdoms",
+  battles: "Lore",
+  religion: "Lore",
+  population: "Places",
+  artifacts: "Lore",
+  lore: "Lore",
+  characters: "Characters",
+  factions: "Factions",
+  kingdoms: "Kingdoms",
+  places: "Places"
+};
+
+function esc(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function normalize(text) {
+  return String(text || "").toLowerCase();
+}
+
+function slugify(text) {
+  return normalize(text)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "entry";
+}
+
+function compactText(text, fallback = "The living world has recorded this, but no fuller account has been written yet.") {
+  const value = String(text || "").trim();
+  if (!value) return fallback;
+  return value.length > 240 ? `${value.slice(0, 237)}...` : value;
+}
+
+function isKnownStaticName(name) {
+  const target = normalize(name);
+  return CODEX_ENTRIES.some(entry => {
+    const source = normalize(entry.name);
+    return source === target || source.includes(target) || target.includes(source);
+  });
+}
+
+function uniqueByName(items) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = `${item.category}:${normalize(item.name)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function findFactionMorale(name) {
+  return (codexState.faction_morale || []).find(item => item.faction === name);
+}
+
+function findFactionPower(name) {
+  return (codexState.faction_power || []).find(item => item.faction === name);
+}
+
+function findCharacterStatus(name) {
+  return (codexState.character_updates || []).find(item => item.name === name) || findLeadershipCharacter(name)?.ruler || null;
+}
+
+function displayRulerName(ruler) {
+  const title = String(ruler?.title || "").trim();
+  const name = String(ruler?.name || "").trim();
+  if (!title || name.toLowerCase().startsWith(`${title.toLowerCase()} `)) return name;
+  return `${title} ${name}`.trim();
+}
+
+function findLeadershipCharacter(name) {
+  const needle = normalize(name);
+  return (codexState.leadership_state || []).map(row => ({
+    faction: row.faction,
+    ruler: row.currentRuler || {},
+    dynasties: row.dynasties || [],
+    rulerHistory: row.rulerHistory || []
+  })).find(item => {
+    const rulerName = normalize(item.ruler.name);
+    const displayName = normalize(displayRulerName(item.ruler));
+    return needle && (needle === rulerName || needle === displayName);
+  });
+}
+
+function codexWorldStamp() {
+  return codexState.world_date || `Day ${codexState.tick || "?"}`;
+}
+
+function relevantEvents(entry) {
+  const haystacks = [entry.name, ...(entry.sidebar?.Related || [])].map(normalize);
+  return (codexState.recent_events || []).filter(event => {
+    const source = `${event.region} ${event.text}`.toLowerCase();
+    return haystacks.some(token => token && source.includes(token));
+  }).slice(0, 4);
+}
+
+function relatedTensions(entry) {
+  const haystacks = [entry.name, ...(entry.sidebar?.Related || [])].map(normalize);
+  return (codexState.active_tensions || []).filter(item => {
+    const source = `${item.factions} ${item.description}`.toLowerCase();
+    return haystacks.some(token => token && source.includes(token));
+  }).slice(0, 3);
+}
+
+function proceduralCodexEntries() {
+  const entries = [];
+
+  (codexState.character_updates || []).forEach(character => {
+    if (!character.name || isKnownStaticName(character.name)) return;
+    entries.push({
+      id: `live-character-${slugify(character.name)}`,
+      name: character.name,
+      category: "Characters",
+      kind: "Living Character",
+      summary: compactText(character.status),
+      subtitle: `${character.name} has emerged in the current simulation record.`,
+      facts: {
+        Faction: character.faction || "Unknown",
+        Dynasty: character.dynasty || "Unknown Dynasty",
+        "Date of birth": character.date_of_birth || "Unknown",
+        Age: character.age || "Unknown",
+        Race: character.race || "Unknown",
+        Height: character.height || "Unknown",
+        Weight: character.weight || "Unknown",
+        Morality: character.morality ?? "Unknown",
+        Ambition: character.ambition ?? "Unknown",
+        Loyalty: character.loyalty ?? "Unknown",
+        Intelligence: character.intelligence ?? "Unknown",
+        Bias: character.bias || "Unknown",
+        Intelligence: character.intelligence ?? "Unknown",
+        Influence: character.influenceScore ?? "Unknown",
+        "Influence tier": character.influenceTier || "Unknown",
+        "Intelligence tier": character.intelligenceTier || "Unknown",
+        Status: "Active",
+        Source: codexWorldStamp(),
+        Type: "Procedural"
+      },
+      body: [
+        character.status || "No full character account has been written yet.",
+        character.appearance ? `Appearance: ${character.appearance}` : "",
+        character.recentActions?.length ? `Recent actions: ${character.recentActions.join("; ")}` : "",
+        character.portrait_prompt ? `Portrait prompt: ${character.portrait_prompt}` : ""
+      ].filter(Boolean),
+      sidebar: { LiveCharacter: character.name, Related: [character.faction].filter(Boolean) },
+      portrait: {
+        image: character.portrait_image || "",
+        prompt: character.portrait_prompt || "",
+        appearance: character.appearance || ""
+      },
+      procedural: true
+    });
+  });
+
+  (codexState.house_characters || []).forEach(character => {
+    if (!character.name || isKnownStaticName(character.name)) return;
+    entries.push({
+      id: `house-character-${slugify(character.faction)}-${slugify(character.house)}-${slugify(character.name)}`,
+      name: character.name,
+      category: "Characters",
+      kind: "House Character",
+      summary: compactText(`${character.role || "House actor"} of ${character.house || "Unknown House"} in ${character.faction || "Unknown faction"}.`),
+      subtitle: `${character.name} is part of the active political bench and can become involved in future actions.`,
+      facts: {
+        Faction: character.faction || "Unknown",
+        House: character.house || "Unknown",
+        "Core role": character.coreRole || "Secondary",
+        Role: character.role || "Unknown",
+        Race: character.race || "Unknown",
+        Age: character.age || "Unknown",
+        Influence: character.influenceScore ?? "Unknown",
+        Morality: character.morality ?? "Unknown",
+        Ambition: character.ambition ?? "Unknown",
+        Loyalty: character.loyalty ?? "Unknown",
+        Bias: character.bias || "Unknown",
+        Status: character.status || "Available",
+        Type: "House roster",
+        Source: codexWorldStamp()
+      },
+      body: [
+        character.currentGoal || `${character.name} currently serves ${character.house || "their house"} within ${character.faction || "Aeloria"}.`,
+        `Political profile: influence ${character.influenceScore ?? "unknown"}, morality ${character.morality ?? "unknown"}, ambition ${character.ambition ?? "unknown"}, loyalty ${character.loyalty ?? "unknown"}, intelligence ${character.intelligence ?? "unknown"}, bias ${character.bias || "unknown"}.`,
+        (character.recentActions || []).length ? `Recent actions: ${character.recentActions.join("; ")}` : "No recent actions have been recorded yet."
+      ],
+      sidebar: { LiveCharacter: character.name, Related: [character.faction, character.house].filter(Boolean) },
+      portrait: {
+        image: "",
+        prompt: `Dark fantasy political portrait of ${character.name}, ${character.role || "noble figure"} of ${character.house || "a noble house"}, ${character.faction || "Aeloria"}, no text, no watermark.`,
+        appearance: ""
+      },
+      procedural: true
+    });
+  });
+
+  (codexState.leadership_state || []).forEach(row => {
+    const ruler = row.currentRuler || {};
+    const name = displayRulerName(ruler);
+    if (!name || isKnownStaticName(name)) return;
+    const dynasty = (row.dynasties || []).find(item => item.name === ruler.dynasty) || {};
+    entries.push({
+      id: `live-ruler-${slugify(name)}`,
+      name,
+      category: "Characters",
+      kind: "Ruler",
+      summary: compactText(`${name} currently rules ${row.faction} as ${ruler.title || "ruler"} of ${ruler.dynasty || "an unknown dynasty"}.`),
+      subtitle: `${name} is the active ruler of ${row.faction}, recorded in the living political ledger.`,
+      facts: {
+        Faction: row.faction || "Unknown",
+        Title: ruler.title || "Unknown",
+        Dynasty: ruler.dynasty || "Unknown",
+        Age: ruler.age || "Unknown",
+        "Reign began": ruler.startDay != null ? `Day ${ruler.startDay}` : "Unknown",
+        "Reign duration": ruler.duration != null ? `${ruler.duration} days` : "Unknown",
+        "Cause of rise": ruler.causeOfRise || "Unknown",
+        "Dynasty prestige": dynasty.prestige ?? "Unknown",
+        "Dynasty tier": dynasty.tier ? `Tier ${dynasty.tier}` : "Unknown",
+        "Dynasty status": dynasty.status || "Unknown",
+        Source: codexWorldStamp(),
+        Type: "Ruler"
+      },
+      body: [
+        `${name} holds authority over ${row.faction}. The reign began on day ${ruler.startDay ?? "unknown"} through ${ruler.causeOfRise || "an unrecorded rise to power"}.`,
+        `${ruler.dynasty || "The ruling line"} currently carries ${dynasty.prestige ?? "unknown"} prestige and is recorded as ${dynasty.status || "active"} within ${row.faction}.`,
+        (ruler.traits || []).length ? `Recorded traits: ${ruler.traits.join(", ")}.` : "",
+        (ruler.notableEvents || []).length ? `Notable reign events: ${ruler.notableEvents.join("; ")}.` : "No major reign events have been attached to this ruler yet.",
+        (row.rulerHistory || []).length
+          ? `Previous rulers: ${row.rulerHistory.map(reign => `${displayRulerName(reign)} (${reign.duration} days, ended by ${reign.causeOfEnd || "unknown"})`).join("; ")}.`
+          : "No prior reigns have been recorded in this era yet."
+      ].filter(Boolean),
+      sidebar: {
+        LiveCharacter: ruler.name,
+        Related: [row.faction, ruler.dynasty, ...(row.dynasties || []).slice(0, 4).map(item => item.name)].filter(Boolean)
+      },
+      portrait: {
+        image: ruler.portrait_image || "",
+        prompt: `Dark fantasy ruler portrait of ${name}, ${row.faction}, ${ruler.dynasty || "noble dynasty"}, lore accurate Aeloria aesthetic, no text, no watermark.`,
+        appearance: ""
+      },
+      procedural: true
+    });
+  });
+
+  const factionNames = new Set();
+  (codexState.faction_morale || []).forEach(item => item.faction && factionNames.add(item.faction));
+  (codexState.faction_actions || []).forEach(item => item.faction && factionNames.add(item.faction));
+
+  factionNames.forEach(name => {
+    if (isKnownStaticName(name)) return;
+    const morale = (codexState.faction_morale || []).find(item => item.faction === name);
+    const action = (codexState.faction_actions || []).find(item => item.faction === name);
+    entries.push({
+      id: `live-faction-${slugify(name)}`,
+      name,
+      category: "Factions",
+      kind: "Living Faction",
+      summary: compactText(morale?.reason || action?.reason || action?.action),
+      subtitle: `${name} is currently active in the world simulation.`,
+      facts: {
+        Status: morale?.status || "Active",
+        Target: action?.target || "Unknown",
+        Source: codexWorldStamp(),
+        Type: "Procedural"
+      },
+      body: [
+        action?.action || morale?.reason || "No full faction account has been written yet.",
+        action?.reason || ""
+      ].filter(Boolean),
+      sidebar: { LiveFaction: name, Related: [] },
+      visual: {
+        image: codexState.codex_images?.[`Factions:${name}`] || "",
+        prompt: `Faction illustration for ${name}: ${morale?.reason || action?.reason || ""}`
+      },
+      procedural: true
+    });
+  });
+
+  (codexState.recent_events || []).forEach(event => {
+    const place = String(event.region || "").split("—")[0].trim();
+    if (!place || isKnownStaticName(place)) return;
+    entries.push({
+      id: `live-place-${slugify(place)}`,
+      name: place,
+      category: "Places",
+      kind: "Living Place",
+      summary: compactText(event.text),
+      subtitle: `${place} has become relevant in the latest world record.`,
+      facts: {
+        Region: event.region || place,
+        Source: codexWorldStamp(),
+        Type: "Procedural"
+      },
+      body: [event.text || "No full place account has been written yet."],
+      sidebar: { Related: [] },
+      visual: {
+        image: codexState.codex_images?.[`Places:${place}`] || "",
+        prompt: `Location illustration for ${place}: ${event.text || ""}`
+      },
+      procedural: true
+    });
+  });
+
+  const eventSources = [
+    codexState.primary_event,
+    ...(codexState.supporting_events || []),
+    ...(codexState.active_events || []).filter(event => Number(event.severity || 0) >= 15)
+  ].filter(event => event && event.name);
+
+  eventSources.forEach(event => {
+    entries.push({
+      id: `live-event-${slugify(event.name)}`,
+      name: event.name,
+      category: "Lore",
+      kind: "Living Event",
+      summary: compactText(event.summary || codexState.major_event),
+      subtitle: `A major event recorded on ${codexWorldStamp()}.`,
+      facts: {
+        Severity: event.severity || "Unknown",
+        Stage: event.stage || "Unknown",
+        Trend: event.trend || "Unknown",
+        Source: codexWorldStamp()
+      },
+      body: [
+        event.summary || codexState.major_event || "No full event account has been written yet.",
+        event.consequences || ""
+      ].filter(Boolean),
+      sidebar: { Related: event.involved || [] },
+      visual: {
+        image: codexState.codex_images?.[`Lore:${event.name}`] || "",
+        prompt: `Major lore event illustration for ${event.name}: ${event.summary || ""}`
+      },
+      procedural: true
+    });
+  });
+
+  return uniqueByName(entries);
+}
+
+function allCodexEntries() {
+  return uniqueByName([...CODEX_ENTRIES, ...proceduralCodexEntries()]);
+}
+
+function entryImage(entry) {
+  return entry.portrait?.image || entry.visual?.image || "";
+}
+
+function buildFilters() {
+  const wrap = document.getElementById("codex-filters");
+  if (!activeCategory) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  wrap.innerHTML = `
+    <button class="filter-pill active" onclick="showCategoryIndex()">All Categories</button>
+    <button class="filter-pill active">${esc(activeCategory)}</button>
+  `;
+}
+
+function filteredEntries() {
+  return allCodexEntries().filter(entry => {
+    const inCategory = activeCategory && entry.category === activeCategory;
+    if (!inCategory) return false;
+    if (!searchTerm) return true;
+    const haystack = [
+      entry.name,
+      entry.summary,
+      entry.subtitle,
+      ...(entry.body || []),
+      ...Object.values(entry.facts || {}),
+      ...(entry.sidebar?.Related || [])
+    ].join(" ").toLowerCase();
+    return haystack.includes(searchTerm);
+  });
+}
+
+function categoryCount(category) {
+  return allCodexEntries().filter(entry => entry.category === category).length;
+}
+
+function renderCategoryIndex() {
+  buildFilters();
+  document.getElementById("codex-count").textContent = "Choose a category";
+  document.getElementById("codex-grid").innerHTML = `
+    <div class="codex-category-grid" style="grid-column:1 / -1">
+      ${CODEX_CATEGORIES.map(category => `
+        <article
+          class="codex-category-card"
+          style="--category-image:url('${category.image}')"
+          onclick="setCategory('${category.name}')"
+        >
+          <div class="category-count">${categoryCount(category.name)}</div>
+          <h2 class="category-name">${esc(category.name)}</h2>
+          <p class="category-summary">${esc(category.summary)}</p>
+          <div class="category-open">Open category</div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderCodexGrid() {
+  if (!activeCategory) {
+    renderCategoryIndex();
+    return;
+  }
+
+  buildFilters();
+  const entries = filteredEntries();
+  document.getElementById("codex-count").textContent = `${activeCategory} · ${entries.length} entries`;
+
+  const grid = document.getElementById("codex-grid");
+  if (!entries.length) {
+    grid.innerHTML = `<div class="card" style="grid-column:1 / -1;color:var(--text-muted);font-style:italic">No entries match this search.</div>`;
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="codex-category-header" style="grid-column:1 / -1">
+      <div>
+        <div class="entry-category">${esc(activeCategory)}</div>
+        <div class="entry-name" style="margin-bottom:0">Open an entry</div>
+      </div>
+      <button class="category-back" type="button" onclick="showCategoryIndex()">Back to categories</button>
+    </div>
+  ` + entries.map(entry => `
+    <div class="entry-card" onclick="openEntry('${entry.id}')">
+      ${entryImage(entry) ? `<div class="entry-thumb"><img src="${esc(entryImage(entry))}" alt="Illustration for ${esc(entry.name)}"></div>` : ""}
+      <div class="entry-category">${esc(entry.category)} · ${esc(entry.kind)}</div>
+      <div class="entry-name">${esc(entry.name)}${entry.procedural ? `<span class="entry-live">Live</span>` : ""}</div>
+      <div class="entry-summary">${esc(entry.summary)}</div>
+      <div class="entry-meta">
+        <span>${esc(entry.facts.Leader || entry.facts.Faction || entry.facts.Region || entry.facts.Category || entry.kind)}</span>
+        <span>Open entry →</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openEntry(id) {
+  const entry = allCodexEntries().find(item => item.id === id);
+  if (!entry) return;
+
+  const morale = entry.sidebar?.LiveFaction ? findFactionMorale(entry.sidebar.LiveFaction) : null;
+  const power = entry.sidebar?.LiveFaction ? findFactionPower(entry.sidebar.LiveFaction) : null;
+  const char = entry.sidebar?.LiveCharacter ? findCharacterStatus(entry.sidebar.LiveCharacter) : null;
+  const events = relevantEvents(entry);
+  const tensions = relatedTensions(entry);
+  const facts = { ...(entry.facts || {}) };
+
+  if (morale) facts["Morale"] = morale.status;
+  if (char) facts["Current status"] = char.status;
+
+  const bodyHtml = (entry.body || []).map(p => `<p>${esc(p)}</p>`).join("");
+  const factRows = Object.entries(facts).map(([key, value]) => `
+    <div class="fact-row"><span class="fact-label">${esc(key)}</span><span class="fact-value">${esc(value)}</span></div>
+  `).join("");
+
+  const relatedHtml = (entry.sidebar?.Related || []).length
+    ? (entry.sidebar.Related || []).map(name => `<span class="related-pill">${esc(name)}</span>`).join("")
+    : `<span class="fact-value">None listed</span>`;
+
+  const portraitHtml = entry.category === "Characters" ? `
+    <div class="character-portrait">
+      ${entry.portrait?.image
+        ? `<img src="${esc(entry.portrait.image)}" alt="Portrait of ${esc(entry.name)}">`
+        : `<div class="portrait-placeholder">
+            <strong>Portrait Needed</strong>
+            ${esc(entry.portrait?.prompt || "Generate a lore-accurate dark fantasy portrait for this character.")}
+          </div>`}
+    </div>
+  ` : "";
+
+  const visualHtml = entry.category !== "Characters" && entry.visual ? `
+    <div class="codex-detail-image">
+      ${entry.visual.image
+        ? `<img src="${esc(entry.visual.image)}" alt="Codex illustration for ${esc(entry.name)}">`
+        : `<div class="portrait-placeholder">
+            <strong>Image Needed</strong>
+            ${esc(entry.visual.prompt || "Generate a lore-accurate dark fantasy Codex illustration for this entry.")}
+          </div>`}
+    </div>
+  ` : "";
+
+  const powerHtml = power ? `
+    <div class="detail-sidebar-card">
+      <div class="sidebar-card-title">Power</div>
+      <div class="facts-grid">
+        <div class="fact-row"><span class="fact-label">Military</span><span class="fact-value">${power.military}/10</span></div>
+        <div class="fact-row"><span class="fact-label">Political</span><span class="fact-value">${power.political}/10</span></div>
+        <div class="fact-row"><span class="fact-label">Economic</span><span class="fact-value">${power.economic}/10</span></div>
+        <div class="fact-row"><span class="fact-label">Influence</span><span class="fact-value">${power.influence}/10</span></div>
+      </div>
+    </div>
+  ` : "";
+
+  const eventsHtml = events.length ? `
+    <div class="detail-list">
+      ${events.map(event => `
+        <div class="detail-list-item">
+          <div class="detail-list-head">
+            <div class="detail-list-name">${esc(event.region)}</div>
+          </div>
+          <div class="detail-list-text">${esc(event.text)}</div>
+        </div>
+      `).join("")}
+    </div>
+  ` : `<div class="detail-list-text">No recent matching events are recorded in the current state.</div>`;
+
+  const tensionsHtml = tensions.length ? `
+    <div class="detail-list">
+      ${tensions.map(item => `
+        <div class="detail-list-item">
+          <div class="detail-list-head"><div class="detail-list-name">${esc(item.factions)}</div></div>
+          <div class="detail-list-text">${esc(item.description)}</div>
+        </div>
+      `).join("")}
+    </div>
+  ` : "";
+
+  document.getElementById("codex-detail-content").innerHTML = `
+    <div class="detail-layout">
+      <div>
+        <div class="detail-badges">
+          <span class="badge badge-neutral">${esc(entry.category)}</span>
+          <span class="badge badge-neutral">${esc(entry.kind)}</span>
+          ${entry.procedural ? `<span class="badge badge-neutral">Live Codex</span>` : ""}
+          ${morale ? `<span class="badge badge-${esc(morale.status)}">${esc(morale.status)}</span>` : ""}
+        </div>
+        <h1 class="detail-title">${esc(entry.name)}</h1>
+        <p class="detail-subtitle">${esc(entry.subtitle)}</p>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Overview</div>
+          <div class="detail-prose">${bodyHtml}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Recent World Events</div>
+          ${eventsHtml}
+        </div>
+
+        ${tensionsHtml ? `
+          <div class="detail-section">
+            <div class="detail-section-title">Related Tensions</div>
+            ${tensionsHtml}
+          </div>
+        ` : ""}
+      </div>
+
+      <div>
+        ${portraitHtml}
+        ${visualHtml}
+        <div class="detail-sidebar-card">
+          <div class="sidebar-card-title">Key Facts</div>
+          <div class="facts-grid">${factRows}</div>
+        </div>
+
+        ${powerHtml}
+
+        <div class="detail-sidebar-card">
+          <div class="sidebar-card-title">Related Entries</div>
+          <div class="related-pills">${relatedHtml}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("codex-grid-view").classList.add("hidden");
+  document.getElementById("codex-detail-view").classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+
+function showCodexGrid() {
+  document.getElementById("codex-detail-view").classList.add("hidden");
+  document.getElementById("codex-grid-view").classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+
+function setCategory(category) {
+  activeCategory = category;
+  searchTerm = "";
+  document.getElementById("codex-search").value = "";
+  renderCodexGrid();
+}
+
+function showCategoryIndex() {
+  activeCategory = "";
+  searchTerm = "";
+  document.getElementById("codex-search").value = "";
+  renderCodexGrid();
+}
+
+async function loadCodexState() {
+  try {
+    const response = await fetch("/api/state");
+    codexState = await response.json();
+  } catch (error) {
+    codexState = {};
+  }
+  applyCategoryFromUrl();
+  renderCodexGrid();
+}
+
+function applyCategoryFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = (params.get("category") || "").trim();
+  if (!raw) return;
+  const mapped = categoryAlias[raw.toLowerCase()] || raw;
+  const match = CODEX_CATEGORIES.find(item => item.name.toLowerCase() === mapped.toLowerCase());
+  if (match) activeCategory = match.name;
+}
+
+document.getElementById("codex-search").addEventListener("input", (event) => {
+  searchTerm = event.target.value.trim().toLowerCase();
+  if (!activeCategory) return;
+  renderCodexGrid();
+});
+
+loadCodexState();
+setInterval(loadCodexState, 60000);
+</script>
+{% endblock %}

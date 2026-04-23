@@ -1,0 +1,1453 @@
+{% extends "base.html" %}
+{% block title %}Aeloria - God Panel{% endblock %}
+
+{% block head %}
+<style>
+  .god-hero {
+    background:
+      radial-gradient(circle at 20% 0%, rgba(201, 169, 110, 0.12), transparent 28%),
+      radial-gradient(circle at 85% 10%, rgba(201, 55, 44, 0.10), transparent 34%),
+      linear-gradient(180deg, #121216 0%, #0d0d12 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 76px 0 42px;
+  }
+
+  .god-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .god-sidebar {
+    position: sticky;
+    top: calc(var(--nav-h) + 20px);
+    border: 1px solid var(--border);
+    background: rgba(22, 22, 24, 0.88);
+    padding: 14px;
+  }
+
+  .god-tab {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-sec);
+    padding: 12px 13px;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .god-tab:hover,
+  .god-tab.active {
+    border-color: var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .god-count {
+    color: var(--gold);
+    font-size: 12px;
+  }
+
+  .god-panel {
+    display: none;
+  }
+
+  .god-panel.active {
+    display: block;
+  }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .status-card,
+  .data-card,
+  .ritual-form,
+  .force-panel {
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.025), transparent),
+      var(--surface);
+  }
+
+  .status-card {
+    padding: 18px;
+    min-height: 112px;
+  }
+
+  .status-label,
+  .card-label,
+  .ritual-label {
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .status-value {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    line-height: 1.15;
+    margin-top: 8px;
+  }
+
+  .status-detail {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 8px;
+  }
+
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+
+  .panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .panel-subtitle {
+    color: var(--text-sec);
+    font-size: 14px;
+    max-width: 660px;
+  }
+
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .data-grid.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .data-card {
+    padding: 18px;
+    min-width: 0;
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .overview-card {
+    position: relative;
+    min-height: 210px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(201,169,110,0.10), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,0.025), transparent),
+      var(--surface);
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .overview-card::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    bottom: -58px;
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(201,169,110,0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .overview-card.wide {
+    grid-column: span 2;
+  }
+
+  .overview-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .overview-number {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .overview-list {
+    display: grid;
+    gap: 9px;
+    margin-top: 13px;
+  }
+
+  .overview-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 9px;
+    color: var(--text-sec);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .overview-line strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .overview-kpi {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .overview-kpi div {
+    border: 1px solid var(--border);
+    background: rgba(10,10,14,0.36);
+    padding: 10px;
+  }
+
+  .overview-kpi span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .overview-kpi b {
+    display: block;
+    margin-top: 3px;
+    color: var(--text);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+  }
+
+  .character-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    background: rgba(10,10,14,0.34);
+  }
+
+  .character-select {
+    background: #121217;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    min-width: 220px;
+  }
+
+  .house-block {
+    margin-bottom: 22px;
+  }
+
+  .house-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.025);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .character-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .character-stat-card {
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 8% 0%, rgba(201,169,110,0.08), transparent 32%),
+      var(--surface);
+    padding: 16px;
+  }
+
+  .character-stat-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .character-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .character-fact {
+    border: 1px solid var(--border);
+    background: rgba(10,10,14,0.32);
+    padding: 8px 9px;
+  }
+
+  .character-fact span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .character-fact b {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .faction-browser-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .faction-button-card {
+    text-align: left;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 18% 0%, rgba(201,169,110,0.10), transparent 34%),
+      rgba(22,22,24,0.86);
+    color: inherit;
+    padding: 18px;
+    min-height: 150px;
+    cursor: pointer;
+    transition: transform 0.16s, border-color 0.16s, background 0.16s;
+  }
+
+  .faction-button-card:hover,
+  .faction-button-card.active {
+    border-color: rgba(201,169,110,0.42);
+    background:
+      radial-gradient(circle at 18% 0%, rgba(201,169,110,0.15), transparent 38%),
+      rgba(30,30,36,0.94);
+    transform: translateY(-2px);
+  }
+
+  .faction-button-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    line-height: 1.2;
+    color: var(--text);
+    margin: 8px 0 10px;
+  }
+
+  .faction-button-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+  }
+
+  .data-title {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    margin: 6px 0 8px;
+  }
+
+  .data-text {
+    color: var(--text-sec);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 112px 1fr 42px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    color: var(--text-sec);
+    font-size: 12px;
+  }
+
+  .bar {
+    height: 7px;
+    background: #101014;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--red-dark), var(--gold));
+  }
+
+  .table-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th,
+  .data-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+    color: var(--text-sec);
+    font-size: 13px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .data-table th {
+    color: var(--text-muted);
+    background: var(--surface2);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--gold);
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-split {
+    border-top: 1px solid var(--border);
+    margin-top: 42px;
+    padding-top: 42px;
+  }
+
+  .ritual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .ritual-form,
+  .force-panel {
+    padding: 22px;
+  }
+
+  .ritual-field,
+  .ritual-select {
+    width: 100%;
+    background: #121217;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 16px;
+    outline: none;
+  }
+
+  .ritual-select {
+    margin: 12px 0;
+  }
+
+  .ritual-field {
+    min-height: 145px;
+    resize: vertical;
+    font-family: 'Crimson Text', serif;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .queue-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .queue-item {
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    padding: 13px;
+  }
+
+  .queue-time {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 8px;
+  }
+
+  .empty {
+    border: 1px dashed var(--border2);
+    color: var(--text-muted);
+    padding: 20px;
+    font-style: italic;
+  }
+
+  @media (max-width: 980px) {
+    .god-shell,
+    .data-grid,
+    .data-grid.three,
+    .overview-grid,
+    .character-stat-grid,
+    .faction-browser-grid,
+    .ritual-grid,
+    .status-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .overview-card.wide {
+      grid-column: span 1;
+    }
+
+    .god-sidebar {
+      position: static;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="god-hero">
+  <div class="container">
+    <p class="section-label">God Panel</p>
+    <h1 class="section-title" style="font-size:52px">THE WORLD UNDER THE SKIN</h1>
+    <p class="section-subtitle">A command view for the living simulation: population, resources, pressure, character traits, faction knowledge, relationships, religion, events, and image generation.</p>
+    <div id="status-grid" class="status-grid"></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="god-shell">
+      <aside class="god-sidebar" id="god-tabs"></aside>
+      <main>
+        <div id="panel-overview" class="god-panel active"></div>
+        <div id="panel-factions" class="god-panel"></div>
+        <div id="panel-leadership" class="god-panel"></div>
+        <div id="panel-population" class="god-panel"></div>
+        <div id="panel-events" class="god-panel"></div>
+        <div id="panel-knowledge" class="god-panel"></div>
+        <div id="panel-religion" class="god-panel"></div>
+        <div id="panel-images" class="god-panel"></div>
+        <div id="panel-controls" class="god-panel"></div>
+      </main>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const tabs = [
+  ['overview', 'Overview'],
+  ['factions', 'Factions'],
+  ['leadership', 'Leadership'],
+  ['population', 'Population'],
+  ['events', 'Events'],
+  ['knowledge', 'Fog of War'],
+  ['religion', 'Religion'],
+  ['images', 'Images'],
+  ['controls', 'Controls']
+];
+
+let panelData = null;
+
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function num(value) {
+  return Number.isFinite(Number(value)) ? Number(value) : 0;
+}
+
+function fmt(value) {
+  return num(value).toLocaleString();
+}
+
+function pct(value) {
+  return Math.max(0, Math.min(100, num(value)));
+}
+
+function metric(label, value) {
+  return `
+    <div class="metric-row">
+      <div>${esc(label)}</div>
+      <div class="bar"><span style="width:${pct(value)}%"></span></div>
+      <div>${pct(value)}</div>
+    </div>
+  `;
+}
+
+function rulerDisplayName(ruler) {
+  const title = String(ruler?.title || 'Ruler').trim();
+  const name = String(ruler?.name || 'Unknown').trim();
+  if (!title || name.toLowerCase().startsWith(`${title.toLowerCase()} `)) {
+    return name;
+  }
+  return `${title} ${name}`;
+}
+
+function panelHead(title, subtitle) {
+  return `
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">${esc(title)}</h2>
+        <p class="panel-subtitle">${esc(subtitle)}</p>
+      </div>
+      <button class="btn btn-secondary" onclick="loadPanel()">Refresh</button>
+    </div>
+  `;
+}
+
+function empty(text) {
+  return `<div class="empty">${esc(text)}</div>`;
+}
+
+function worldDayLabel(state) {
+  return state?.tick != null ? `Day ${state.tick}` : 'Day --';
+}
+
+function worldDayStamp(state) {
+  return state?.world_date || worldDayLabel(state);
+}
+
+function renderTabs(state) {
+  const counts = {
+    overview: state.tick ?? 0,
+    factions: new Set([...(state.faction_resources || []).map(x => x.faction), ...(state.house_characters || []).map(x => x.faction), ...(state.leadership_state || []).map(x => x.faction)].filter(Boolean)).size,
+    leadership: (state.leadership_state || []).length,
+    population: (state.population_state || []).length,
+    events: (state.active_events || []).length,
+    knowledge: (state.faction_knowledge || []).length,
+    religion: (state.belief_currents || []).length + (state.religious_factions || []).length,
+    images: '',
+    controls: (panelData.pending_interventions || []).length
+  };
+
+  document.getElementById('god-tabs').innerHTML = tabs.map(([id, label]) => `
+    <button class="god-tab ${id === 'overview' ? 'active' : ''}" onclick="showPanel('${id}')">
+      <span>${esc(label)}</span>
+      <span class="god-count">${esc(counts[id])}</span>
+    </button>
+  `).join('');
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.god-panel').forEach(panel => panel.classList.remove('active'));
+  document.querySelectorAll('.god-tab').forEach(tab => tab.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+  const index = tabs.findIndex(tab => tab[0] === id);
+  document.querySelectorAll('.god-tab')[index].classList.add('active');
+}
+
+function renderStatus(state) {
+  const primary = state.primary_event || {};
+  const population = (state.population_state || []).reduce((sum, row) => sum + num(row.population), 0);
+  const avgPressure = (state.population_state || []).length
+    ? Math.round((state.population_state || []).reduce((sum, row) => sum + num(row.pressure), 0) / state.population_state.length)
+    : 0;
+
+  document.getElementById('status-grid').innerHTML = [
+    ['Current Day', worldDayLabel(state), state.world_date || 'No date recorded'],
+    ['Primary Event', primary.severity ? `Severity ${primary.severity}` : 'Unrated', primary.name || 'No primary event'],
+    ['Tracked Population', fmt(population), `Average pressure ${avgPressure}/100`],
+    ['Pending Inputs', (panelData.pending_interventions || []).length, 'Omens, dreams, and interventions waiting']
+  ].map(([label, value, detail]) => `
+    <div class="status-card">
+      <div class="status-label">${esc(label)}</div>
+      <div class="status-value">${esc(value)}</div>
+      <div class="status-detail">${esc(detail)}</div>
+    </div>
+  `).join('');
+}
+
+function renderOverview(state) {
+  const primary = state.primary_event || {};
+  const seer = state.seer_state || {};
+  const journey = state.seer_journey || {};
+  const resources = state.faction_resources || [];
+  const population = state.population_state || [];
+  const leadership = state.leadership_state || [];
+  const activeEvents = state.active_events || [];
+  const characters = [...(state.character_updates || []), ...(state.house_characters || [])];
+  const knowledge = state.faction_knowledge || [];
+  const relationships = state.relationships || [];
+  const beliefCurrents = state.belief_currents || [];
+  const religiousFactions = state.religious_factions || [];
+  const image = panelData.image_generation || {};
+  const pending = panelData.pending_interventions || [];
+  const totalPopulation = population.reduce((sum, row) => sum + num(row.population), 0);
+  const avgPopPressure = population.length ? Math.round(population.reduce((sum, row) => sum + num(row.pressure), 0) / population.length) : 0;
+  const highestPressure = population.slice().sort((a, b) => num(b.pressure) - num(a.pressure))[0] || {};
+  const avgFood = resources.length ? Math.round(resources.reduce((sum, row) => sum + num(row.food), 0) / resources.length) : 0;
+  const avgGold = resources.length ? Math.round(resources.reduce((sum, row) => sum + num(row.gold), 0) / resources.length) : 0;
+  const criticalResources = resources.filter(row => [row.food, row.gold, row.military, row.materials, row.influence].some(value => num(value) < 30));
+  const topDynasty = leadership.flatMap(row => row.dynasties || []).sort((a, b) => num(b.prestige) - num(a.prestige))[0] || {};
+  const topCharacter = characters.slice().sort((a, b) => num(b.influenceScore) - num(a.influenceScore))[0] || {};
+  const highestSeverity = activeEvents.slice().sort((a, b) => num(b.severity) - num(a.severity))[0] || primary;
+  const hostileRelations = relationships.filter(row => row.type === 'war' || num(row.hostility) >= 65);
+  const imageQueued = num(image.portrait_jobs?.queued) + num(image.codex_jobs?.queued);
+  const imageDone = num(image.portrait_jobs?.completed) + num(image.codex_jobs?.completed);
+
+  document.getElementById('panel-overview').innerHTML = `
+    ${panelHead('Overview', 'A quick command-board readout of every major God Panel category.')}
+    <div class="overview-grid">
+      <div class="overview-card wide">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Events</div>
+            <h3 class="data-title">${esc(primary.name || highestSeverity.name || 'No primary event')}</h3>
+          </div>
+          <div class="overview-number">${esc(primary.severity || highestSeverity.severity || 0)}</div>
+        </div>
+        <p class="data-text">${esc(compact(primary.summary || highestSeverity.summary || state.major_event || 'No surfaced event yet.', 260))}</p>
+        <div class="overview-kpi">
+          <div><span>Active events</span><b>${activeEvents.length}</b></div>
+          <div><span>Tensions</span><b>${(state.active_tensions || []).length}</b></div>
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Seer</div>
+            <h3 class="data-title">${esc(journey.status || 'Unknown')}</h3>
+          </div>
+          <div class="overview-number">${pct(seer.confidence || 0)}</div>
+        </div>
+        <p class="data-text">${esc(journey.location || 'Unknown')} -> ${esc(journey.destination || 'Unknown')}</p>
+        ${metric('Confidence', seer.confidence || 0)}
+        ${metric('Memory', seer.memory_burden || 0)}
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Factions</div>
+            <h3 class="data-title">${resources.length || 'No'} tracked</h3>
+          </div>
+          <div class="overview-number">${criticalResources.length}</div>
+        </div>
+        <p class="data-text">${criticalResources.length ? `${criticalResources.length} faction resource profiles have at least one low value.` : 'No critical resource profiles are visible.'}</p>
+        ${metric('Avg food', avgFood)}
+        ${metric('Avg gold', avgGold)}
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Leadership</div>
+            <h3 class="data-title">${esc(topDynasty.name || 'No dynasty')}</h3>
+          </div>
+          <div class="overview-number">${leadership.length}</div>
+        </div>
+        <p class="data-text">${esc(topDynasty.name ? `${topDynasty.name} leads prestige at ${topDynasty.prestige}.` : 'No dynasty ledger is visible yet.')}</p>
+        <div class="overview-list">
+          ${leadership.slice(0, 3).map(row => `<div class="overview-line"><strong>${esc(row.faction)}</strong><span>${esc(rulerDisplayName(row.currentRuler || {}))}</span></div>`).join('') || empty('No rulers recorded.')}
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Population</div>
+            <h3 class="data-title">${fmt(totalPopulation)}</h3>
+          </div>
+          <div class="overview-number">${avgPopPressure}</div>
+        </div>
+        <p class="data-text">Highest pressure: ${esc(highestPressure.region || 'Unknown')} ${highestPressure.pressure != null ? `(${highestPressure.pressure}/100)` : ''}</p>
+        ${metric('Avg pressure', avgPopPressure)}
+        ${metric('Health risk', 100 - (population.length ? Math.round(population.reduce((sum, row) => sum + num(row.health), 0) / population.length) : 100))}
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Characters</div>
+            <h3 class="data-title">${esc(topCharacter.name || 'No live character')}</h3>
+          </div>
+          <div class="overview-number">${characters.length}</div>
+        </div>
+        <p class="data-text">${esc(topCharacter.name ? `${topCharacter.name} has the highest recorded influence among live character updates.` : 'Ruler entries live in the Leadership tab; no emergent characters are visible yet.')}</p>
+        ${metric('Top influence', topCharacter.influenceScore || 0)}
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Fog Of War</div>
+            <h3 class="data-title">${knowledge.length} knowledge records</h3>
+          </div>
+          <div class="overview-number">${hostileRelations.length}</div>
+        </div>
+        <p class="data-text">${hostileRelations.length ? `${hostileRelations.length} hostile relationship threads need watching.` : 'No high-hostility relationships are visible.'}</p>
+        <div class="overview-kpi">
+          <div><span>Relationships</span><b>${relationships.length}</b></div>
+          <div><span>Trade routes</span><b>${(state.trade_routes || []).length}</b></div>
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Religion</div>
+            <h3 class="data-title">${beliefCurrents.length + religiousFactions.length} records</h3>
+          </div>
+          <div class="overview-number">${beliefCurrents.reduce((sum, row) => sum + num(row.followers), 0).toLocaleString()}</div>
+        </div>
+        <p class="data-text">${beliefCurrents[0]?.name ? `${beliefCurrents[0].name}: ${beliefCurrents[0].stage}` : 'No belief current has organized yet.'}</p>
+        <div class="overview-kpi">
+          <div><span>Currents</span><b>${beliefCurrents.length}</b></div>
+          <div><span>Factions</span><b>${religiousFactions.length}</b></div>
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Images</div>
+            <h3 class="data-title">${imageDone} completed</h3>
+          </div>
+          <div class="overview-number">${imageQueued}</div>
+        </div>
+        <p class="data-text">Last attempt: ${esc(image.daily_state?.name || 'None')} ${image.daily_state?.status ? `(${image.daily_state.status})` : ''}</p>
+        <div class="overview-kpi">
+          <div><span>Queued</span><b>${imageQueued}</b></div>
+          <div><span>Failed</span><b>${num(image.portrait_jobs?.failed) + num(image.codex_jobs?.failed)}</b></div>
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-top">
+          <div>
+            <div class="card-label">Controls</div>
+            <h3 class="data-title">Pending inputs</h3>
+          </div>
+          <div class="overview-number">${pending.length}</div>
+        </div>
+        <p class="data-text">${pending[0]?.text ? esc(compact(pending[0].text, 180)) : 'No omens, dreams, or interventions are waiting.'}</p>
+        <div class="overview-kpi">
+          <div><span>God actions</span><b>${(panelData.god_actions || []).length}</b></div>
+          <div><span>Day</span><b>${esc(state.tick || 0)}</b></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function compact(text, limit = 180) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim();
+  return value.length > limit ? `${value.slice(0, limit - 3)}...` : value;
+}
+
+function renderSmallList(title, items, mapper) {
+  return `
+    <div class="data-card">
+      <div class="card-label">${esc(title)}</div>
+      ${(items || []).length ? items.slice(0, 5).map(item => `<p class="data-text" style="margin-top:12px">${mapper(item)}</p>`).join('') : empty('No entries recorded.')}
+    </div>
+  `;
+}
+
+function renderFactions(state) {
+  const resources = state.faction_resources || [];
+  const actions = state.faction_actions || [];
+  const morale = state.faction_morale || [];
+  const leadership = state.leadership_state || [];
+  const characters = [
+    ...(state.character_updates || []).map(row => ({ ...row, source: 'Major Character', house: row.dynasty || 'Independent', role: row.status || 'Active figure' })),
+    ...(state.house_characters || []).map(row => ({ ...row, source: 'House Roster' }))
+  ];
+  const factionNames = [...new Set([
+    ...resources.map(row => row.faction),
+    ...actions.map(row => row.faction),
+    ...morale.map(row => row.faction),
+    ...leadership.map(row => row.faction),
+    ...characters.map(row => row.faction)
+  ].filter(Boolean))].sort();
+
+  window.__factionDepth = window.__factionDepth || 'factions';
+  const selectedFaction = window.__selectedFaction;
+  const factionCharacters = characters.filter(row => (row.faction || 'Unknown') === selectedFaction);
+  const houses = [...new Set(factionCharacters.map(row => row.house || row.dynasty || 'Independent'))].sort();
+  const selectedHouse = window.__selectedHouse;
+  const resource = resources.find(row => row.faction === selectedFaction) || {};
+  const action = actions.find(row => row.faction === selectedFaction) || {};
+  const moraleRow = morale.find(row => row.faction === selectedFaction) || {};
+  const leader = leadership.find(row => row.faction === selectedFaction) || {};
+  const houseCharacters = selectedHouse
+    ? factionCharacters.filter(row => (row.house || row.dynasty || 'Independent') === selectedHouse)
+    : factionCharacters;
+
+  const factionGrid = `
+    <div class="faction-browser-grid">
+      ${factionNames.map(name => {
+        const count = characters.filter(row => row.faction === name).length;
+        const houseCount = new Set(characters.filter(row => row.faction === name).map(row => row.house || row.dynasty || 'Independent')).size;
+        const ruler = leadership.find(row => row.faction === name)?.currentRuler;
+        return `
+          <button class="faction-button-card ${name === selectedFaction ? 'active' : ''}" type="button" data-faction-choice="${esc(name)}">
+            <div class="card-label">Faction</div>
+            <div class="faction-button-title">${esc(name)}</div>
+            <p class="data-text">${ruler ? `Ruled by ${esc(rulerDisplayName(ruler))}` : 'No ruler recorded'}</p>
+            <div class="faction-button-meta">
+              <span class="pill">${count} characters</span>
+              <span class="pill">${houseCount} houses</span>
+            </div>
+          </button>
+        `;
+      }).join('') || empty('No factions recorded.')}
+    </div>
+  `;
+
+  const factionDetail = `
+    <div class="data-grid">
+      <div class="data-card">
+        <div class="card-label">Selected Faction</div>
+        <h3 class="data-title">${esc(selectedFaction || 'No faction selected')}</h3>
+        <p class="data-text">${esc(action.reason || moraleRow.reason || 'No current faction summary recorded.')}</p>
+        ${resource.faction ? `
+          ${metric('Food', resource.food)}
+          ${metric('Gold', resource.gold)}
+          ${metric('Military', resource.military)}
+          ${metric('Materials', resource.materials)}
+          ${metric('Influence', resource.influence)}
+        ` : '<p class="data-text">No resource profile recorded.</p>'}
+      </div>
+      <div class="data-card">
+        <div class="card-label">Leadership And Action</div>
+        <h3 class="data-title">${esc(rulerDisplayName(leader.currentRuler || {}))}</h3>
+        <p class="data-text"><b>Morale:</b> ${esc(moraleRow.status || 'Unknown')}</p>
+        <p class="data-text"><b>Action:</b> ${esc(action.action || 'No daily action recorded.')}</p>
+        <p class="data-text"><b>Target:</b> ${esc(action.target || 'Unknown')}</p>
+      </div>
+    </div>
+  `;
+
+  const houseGrid = `
+    <div class="section-split">
+      <div class="house-heading">
+        <div>
+          <div class="card-label">Houses In ${esc(selectedFaction || 'Faction')}</div>
+          <h3 class="data-title" style="margin:4px 0 0">Choose a house</h3>
+        </div>
+        <span class="pill">${houses.length} houses</span>
+      </div>
+      <div class="faction-browser-grid">
+        ${houses.map(house => `
+          <button class="faction-button-card" type="button" data-house-choice="${esc(house)}">
+            <div class="card-label">House</div>
+            <div class="faction-button-title">${esc(house)}</div>
+            <p class="data-text">${factionCharacters.filter(row => (row.house || row.dynasty || 'Independent') === house).length} active characters</p>
+          </button>
+        `).join('') || empty('This faction has no house roster.')}
+      </div>
+    </div>
+  `;
+
+  const characterGrid = `
+    <div class="section-split">
+      <div class="house-heading">
+        <div>
+          <div class="card-label">${esc(selectedFaction || 'Faction')} / ${esc(selectedHouse || 'House')}</div>
+          <h3 class="data-title" style="margin:4px 0 0">Active Characters</h3>
+        </div>
+        <span class="pill">${houseCharacters.length} characters</span>
+      </div>
+      <div class="character-stat-grid">
+        ${houseCharacters.sort((a, b) => num(b.influenceScore) - num(a.influenceScore)).map(row => `
+          <div class="character-stat-card">
+            <div class="character-stat-head">
+              <div>
+                <div class="card-label">${esc(row.coreRole || row.role || row.source || 'Active')}</div>
+                <h3 class="data-title">${esc(row.name)}</h3>
+              </div>
+              <span class="pill">${esc(row.bias || 'unknown')}</span>
+            </div>
+            <p class="data-text">${esc(row.currentGoal || row.status || 'No current goal recorded.')}</p>
+            <div class="character-facts">
+              <div class="character-fact"><span>Core Role</span><b>${esc(row.coreRole || 'Secondary')}</b></div>
+              <div class="character-fact"><span>Position</span><b>${esc(row.role || 'Unknown')}</b></div>
+              <div class="character-fact"><span>House</span><b>${esc(row.house || row.dynasty || 'Independent')}</b></div>
+              <div class="character-fact"><span>Status</span><b>${esc(row.status || 'Active')}</b></div>
+              <div class="character-fact"><span>Race</span><b>${esc(row.race || row.species || 'Unknown')}</b></div>
+              <div class="character-fact"><span>Age</span><b>${esc(row.age || 'Unknown')}</b></div>
+              <div class="character-fact"><span>Source</span><b>${esc(row.source || 'Character')}</b></div>
+              <div class="character-fact"><span>Bias</span><b>${esc(row.bias || 'Unknown')}</b></div>
+            </div>
+            ${metric('Influence', row.influenceScore)}
+            ${metric('Morality', row.morality)}
+            ${metric('Ambition', row.ambition)}
+            ${metric('Loyalty', row.loyalty)}
+            ${metric('Intelligence', row.intelligence)}
+            ${(row.recentActions || []).length ? `<p class="data-text" style="margin-top:10px"><b>Recent:</b> ${(row.recentActions || []).map(esc).join('; ')}</p>` : ''}
+          </div>
+        `).join('') || empty('No characters recorded for this house.')}
+      </div>
+    </div>
+  `;
+
+  let body = factionGrid;
+  let breadcrumb = 'Choose a faction';
+  let backButtons = '';
+  if (window.__factionDepth === 'houses' && selectedFaction) {
+    breadcrumb = `${selectedFaction} -> choose a house`;
+    backButtons = `<button class="category-back" type="button" data-faction-back="factions">Back to factions</button>`;
+    body = `${factionDetail}${houseGrid}`;
+  }
+  if (window.__factionDepth === 'characters' && selectedFaction && selectedHouse) {
+    breadcrumb = `${selectedFaction} -> ${selectedHouse} -> characters`;
+    backButtons = `
+      <button class="category-back" type="button" data-faction-back="houses">Back to houses</button>
+      <button class="category-back" type="button" data-faction-back="factions">Back to factions</button>
+    `;
+    body = `${factionDetail}${characterGrid}`;
+  }
+
+  document.getElementById('panel-factions').innerHTML = `
+    ${panelHead('Factions', 'Open a faction, then a house, then the active characters who can take action.')}
+    <div class="codex-category-header">
+      <div>
+        <div class="entry-category">Drilldown</div>
+        <div class="entry-name" style="margin-bottom:0">${esc(breadcrumb)}</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${backButtons}</div>
+    </div>
+    ${body}
+  `;
+  bindFactionBrowser();
+}
+
+function bindFactionBrowser() {
+  document.querySelectorAll('[data-faction-choice]').forEach(button => {
+    button.addEventListener('click', () => {
+      window.__selectedFaction = button.dataset.factionChoice;
+      window.__selectedHouse = '';
+      window.__factionDepth = 'houses';
+      renderFactions(panelData.state || {});
+    });
+  });
+
+  document.querySelectorAll('[data-house-choice]').forEach(button => {
+    button.addEventListener('click', () => {
+      window.__selectedHouse = button.dataset.houseChoice;
+      window.__factionDepth = 'characters';
+      renderFactions(panelData.state || {});
+    });
+  });
+
+  document.querySelectorAll('[data-faction-back]').forEach(button => {
+    button.addEventListener('click', () => {
+      window.__factionDepth = button.dataset.factionBack;
+      if (window.__factionDepth === 'factions') {
+        window.__selectedFaction = '';
+        window.__selectedHouse = '';
+      }
+      if (window.__factionDepth === 'houses') {
+        window.__selectedHouse = '';
+      }
+      renderFactions(panelData.state || {});
+    });
+  });
+}
+
+function renderLeadership(state) {
+  const rows = state.leadership_state || [];
+  document.getElementById('panel-leadership').innerHTML = `
+    ${panelHead('Leadership', 'Rulers, reign history, dynasties, prestige, succession pressure, and noble house power.')}
+    <div class="data-grid">
+      ${rows.map(row => {
+        const ruler = row.currentRuler || {};
+        const dynasties = row.dynasties || [];
+        const history = row.rulerHistory || [];
+        return `
+          <div class="data-card">
+            <div class="card-label">${esc(row.faction || 'Unknown faction')}</div>
+            <h3 class="data-title">${esc(rulerDisplayName(ruler))}</h3>
+            <p class="data-text"><b>Dynasty:</b> ${esc(ruler.dynasty || 'Unknown')}</p>
+            <p class="data-text"><b>Age:</b> ${esc(ruler.age || 'Unknown')}</p>
+            <p class="data-text"><b>Reign:</b> Day ${esc(ruler.startDay ?? 0)} to present, ${esc(ruler.duration ?? 0)} days</p>
+            <p class="data-text"><b>Rise:</b> ${esc(ruler.causeOfRise || 'Unknown')}</p>
+            <p class="data-text"><b>Traits:</b> ${(ruler.traits || []).map(esc).join(', ') || 'None recorded'}</p>
+            <p class="data-text"><b>Notable events:</b> ${(ruler.notableEvents || []).map(esc).join('; ') || 'No reign events recorded yet.'}</p>
+            <div style="margin-top:14px">
+              ${(dynasties || []).slice(0, 6).map(dynasty => `
+                <div class="metric-row">
+                  <div>${esc(dynasty.name)}</div>
+                  <div class="bar"><span style="width:${pct(dynasty.prestige)}%"></span></div>
+                  <div>T${esc(dynasty.tier)}</div>
+                </div>
+                <p class="data-text" style="font-size:12px;margin:3px 0 8px">Prestige ${esc(dynasty.prestige)} | ${esc(dynasty.status)} | Members: ${(dynasty.members || []).map(esc).join(', ') || 'None listed'}</p>
+              `).join('')}
+            </div>
+            ${history.length ? `
+              <div style="margin-top:14px">
+                <div class="card-label">Ruler History</div>
+                ${history.slice().reverse().slice(0, 4).map(reign => `
+                  <p class="data-text" style="margin-top:8px"><b>${esc(rulerDisplayName(reign))}</b>, ${esc(reign.dynasty)}<br>Day ${esc(reign.startDay)}-${esc(reign.endDay)} (${esc(reign.duration)} days), ended by ${esc(reign.causeOfEnd)}</p>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('') || empty('No leadership state recorded yet.')}
+    </div>
+  `;
+}
+
+function renderPopulation(state) {
+  const rows = state.population_state || [];
+  document.getElementById('panel-population').innerHTML = `
+    ${panelHead('Population', 'Biology, culture, capacity, pressure, health, military scaling, and naval investment.')}
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>Region</th><th>Culture</th><th>Population</th><th>Capacity</th><th>Health</th><th>Pressure</th><th>Military</th><th>Naval</th></tr></thead>
+        <tbody>
+          ${rows.map(row => `
+            <tr>
+              <td><b>${esc(row.region)}</b><br>${esc(row.species)}</td>
+              <td>${esc(row.culture)}<br><span class="data-text">${esc(row.notes)}</span></td>
+              <td>${fmt(row.population)}</td>
+              <td>${fmt(row.capacity)}</td>
+              <td>${pct(row.health)}</td>
+              <td>${pct(row.pressure)}</td>
+              <td>${fmt(row.activeMilitary)}</td>
+              <td>${pct(row.navalAllocation)}%</td>
+            </tr>
+          `).join('') || `<tr><td colspan="8">${empty('No population state recorded yet.')}</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderCharacters(state) {
+  const rows = [
+    ...(state.character_updates || []).map(row => ({ ...row, source: 'Major Character', house: row.dynasty || 'Independent', role: row.status || 'Active figure' })),
+    ...(state.house_characters || []).map(row => ({ ...row, source: 'House Roster' }))
+  ];
+  const factions = [...new Set(rows.map(row => row.faction || 'Unknown'))].sort();
+  const selected = window.__characterFaction || factions[0] || '';
+  window.__characterFaction = selected;
+  const filtered = selected ? rows.filter(row => (row.faction || 'Unknown') === selected) : rows;
+  const grouped = filtered.reduce((acc, row) => {
+    const key = row.house || row.dynasty || 'Independent';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+  document.getElementById('panel-characters').innerHTML = `
+    ${panelHead('Characters', 'Active house rosters and major figures, grouped cleanly with readable stats.')}
+    <div class="character-toolbar">
+      <div>
+        <div class="card-label">Faction Filter</div>
+        <p class="data-text">${rows.length} active character records across ${factions.length} factions.</p>
+      </div>
+      <select class="character-select" onchange="window.__characterFaction=this.value; renderCharacters(panelData.state || {})">
+        ${factions.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}
+      </select>
+    </div>
+    ${Object.entries(grouped).map(([house, members]) => `
+      <div class="house-block">
+        <div class="house-heading">
+          <div>
+            <div class="card-label">${esc(selected || 'All factions')}</div>
+            <h3 class="data-title" style="margin:4px 0 0">${esc(house)}</h3>
+          </div>
+          <span class="pill">${members.length} characters</span>
+        </div>
+        <div class="character-stat-grid">
+          ${members.sort((a, b) => num(b.influenceScore) - num(a.influenceScore)).map(row => `
+            <div class="character-stat-card">
+              <div class="character-stat-head">
+                <div>
+                  <div class="card-label">${esc(row.role || row.source || 'Active')}</div>
+                  <h3 class="data-title">${esc(row.name)}</h3>
+                </div>
+                <span class="pill">${esc(row.bias || 'unknown')}</span>
+              </div>
+              <p class="data-text">${esc(row.currentGoal || row.status || 'No current goal recorded.')}</p>
+              <p class="data-text" style="margin-top:8px">${esc(row.race || row.species || 'Unknown')} | Age ${esc(row.age || 'Unknown')} | ${esc(row.source || 'Character')}</p>
+              ${metric('Influence', row.influenceScore)}
+              ${metric('Morality', row.morality)}
+              ${metric('Ambition', row.ambition)}
+              ${metric('Loyalty', row.loyalty)}
+              ${(row.recentActions || []).length ? `<p class="data-text" style="margin-top:10px"><b>Recent:</b> ${(row.recentActions || []).map(esc).join('; ')}</p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('') || empty('No character roster recorded yet.')}
+  `;
+}
+
+function renderEvents(state) {
+  const active = state.active_events || [];
+  const remembered = state.remembered_events || [];
+  document.getElementById('panel-events').innerHTML = `
+    ${panelHead('Events', 'Multi-day events, combat progression, consequences, and memory.')}
+    <div class="data-grid">
+      ${active.map(event => `
+        <div class="data-card">
+          <div class="card-label">Severity ${esc(event.severity)} | ${esc(event.stage)} | ${esc(event.trend)}</div>
+          <h3 class="data-title">${esc(event.name)}</h3>
+          <p class="data-text">${esc(event.summary)}</p>
+          <p class="data-text" style="margin-top:10px"><b>Consequences:</b> ${esc(event.consequences)}</p>
+          <p class="data-text"><b>Involved:</b> ${(event.involved || []).map(esc).join(', ')}</p>
+        </div>
+      `).join('') || empty('No active events recorded.')}
+    </div>
+    <div class="section-split">
+      ${renderSmallList('Remembered Events', remembered, item => `<b>${esc(item.event)}</b><br>${esc(item.framing)}<br>Remembered by: ${(item.remembered_by || []).map(esc).join(', ')}`)}
+    </div>
+  `;
+}
+
+function renderKnowledge(state) {
+  const knowledge = state.faction_knowledge || [];
+  const relationships = state.relationships || [];
+  const routes = state.trade_routes || [];
+  document.getElementById('panel-knowledge').innerHTML = `
+    ${panelHead('Fog Of War', 'What factions know, misunderstand, fear, trust, and trade through.')}
+    <div class="data-grid">
+      ${knowledge.map(row => `
+        <div class="data-card">
+          <div class="card-label">${esc(row.faction)}</div>
+          <h3 class="data-title">Known Information</h3>
+          <p class="data-text"><b>Known:</b> ${(row.known_events || []).map(esc).join('; ') || 'None'}</p>
+          <p class="data-text"><b>Rumors:</b> ${(row.rumors || []).map(esc).join('; ') || 'None'}</p>
+          <p class="data-text"><b>Blind spots:</b> ${(row.blind_spots || []).map(esc).join('; ') || 'None'}</p>
+        </div>
+      `).join('') || empty('No fog-of-war records yet.')}
+    </div>
+    <div class="section-split data-grid">
+      ${renderSmallList('Relationships', relationships, item => `<b>${esc(item.faction_a)} / ${esc(item.faction_b)}</b> <span class="pill">${esc(item.type)}</span><br>Trust ${esc(item.trust)} | Hostility ${esc(item.hostility)} | Intensity ${esc(item.intensity)}`)}
+      ${renderSmallList('Trade Routes', routes, item => `<b>${esc(item.from)} -> ${esc(item.to)}</b> <span class="pill">${esc(item.status)}</span><br>${esc(item.exchange)}<br>${esc(item.effect)}`)}
+    </div>
+  `;
+}
+
+function renderReligion(state) {
+  const currents = state.belief_currents || [];
+  const factions = state.religious_factions || [];
+  document.getElementById('panel-religion').innerHTML = `
+    ${panelHead('Religion', 'Belief currents, splinter factions, zeal, doctrine, followers, and stance toward the Seer.')}
+    <div class="data-grid">
+      ${currents.map(row => `
+        <div class="data-card">
+          <div class="card-label">${esc(row.stage)}</div>
+          <h3 class="data-title">${esc(row.name)}</h3>
+          <p class="data-text">${esc(row.interpretation)}</p>
+          <p class="data-text">Followers: ${fmt(row.followers)} | Regions: ${(row.regions || []).map(esc).join(', ')}</p>
+        </div>
+      `).join('') || empty('No belief currents recorded.')}
+      ${factions.map(row => `
+        <div class="data-card">
+          <div class="card-label">Religious Faction</div>
+          <h3 class="data-title">${esc(row.name)}</h3>
+          <p class="data-text">${(row.core_beliefs || []).map(esc).join('; ')}</p>
+          ${metric('Doctrine', row.doctrine_strength)}
+          ${metric('Organization', row.organization_level)}
+          ${metric('Zeal', row.zeal)}
+          <p class="data-text">Followers: ${fmt(row.followers)} | Seer stance: ${esc(row.stance_toward_seer)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderImages(data) {
+  const image = data.image_generation || {};
+  const recent = image.recent_jobs || [];
+  document.getElementById('panel-images').innerHTML = `
+    ${panelHead('Images', 'Daily image throttle, character portrait priority, faction/place/lore image queues.')}
+    <div class="data-grid three">
+      <div class="data-card"><div class="card-label">Character Portraits</div><h3 class="data-title">${esc(JSON.stringify(image.portrait_jobs || {}))}</h3></div>
+      <div class="data-card"><div class="card-label">Codex Images</div><h3 class="data-title">${esc(JSON.stringify(image.codex_jobs || {}))}</h3></div>
+      <div class="data-card"><div class="card-label">Daily Throttle</div><p class="data-text">${esc(JSON.stringify(image.daily_state || {}, null, 2))}</p></div>
+    </div>
+    <div class="section-split">
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Kind</th><th>Status</th><th>Image</th><th>Error</th></tr></thead>
+          <tbody>
+            ${recent.map(job => `
+              <tr>
+                <td>${esc(job.name || job.key)}</td>
+                <td>${esc(job.kind || 'portrait')}</td>
+                <td><span class="pill">${esc(job.status || 'unknown')}</span></td>
+                <td>${job.static_path ? `<a href="${esc(job.static_path)}">open</a>` : ''}</td>
+                <td>${esc(job.error || '')}</td>
+              </tr>
+            `).join('') || `<tr><td colspan="5">${empty('No image jobs recorded yet.')}</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderControls(data) {
+  const pending = data.pending_interventions || [];
+  document.getElementById('panel-controls').innerHTML = `
+    ${panelHead('Controls', 'Inject omens, send dreams, review pending interventions, or advance one Aeloria day.')}
+    <div class="ritual-grid">
+      <div class="ritual-form">
+        <div class="ritual-label">Send An Omen</div>
+        <textarea id="omen-text" class="ritual-field" placeholder="A blood moon rises over Faerwood for three nights..."></textarea>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="sendOmen()">Release this omen -></button>
+      </div>
+      <div class="ritual-form">
+        <div class="ritual-label">Send A Dream</div>
+        <select id="dream-char" class="ritual-select">
+          <option value="">Choose a soul...</option>
+          ${(data.state.character_updates || []).map(c => `<option value="${esc(c.name)}">${esc(c.name)} (${esc(c.faction)})</option>`).join('')}
+        </select>
+        <textarea id="dream-text" class="ritual-field" placeholder="They stand in a ruined court and hear a voice from beneath the floor..."></textarea>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="sendDream()">Send this dream -></button>
+      </div>
+    </div>
+    <div class="section-split data-grid">
+      <div class="data-card">
+        <div class="card-label">Pending Interventions</div>
+        <div class="queue-list" style="margin-top:14px">
+          ${pending.length ? pending.map((item, index) => `
+            <div class="queue-item">
+              <p class="data-text">${esc((item.text || '').slice(0, 260))}${(item.text || '').length > 260 ? '...' : ''}</p>
+              <div class="queue-time">${esc(formatTime(item))} <button class="queue-remove" onclick="removePending(${index})">remove</button></div>
+            </div>
+          `).join('') : empty('Nothing is waiting.')}
+        </div>
+      </div>
+      <div class="force-panel">
+        <div class="card-label">Advance The World</div>
+        <h3 class="data-title">Advance One Day</h3>
+        <p class="data-text">This runs one Aeloria day immediately. It may take a few minutes because the simulation and image queue both run.</p>
+        <button id="force-btn" class="btn btn-primary" style="margin-top:14px" onclick="forceTick()">Turn the world now -></button>
+      </div>
+    </div>
+  `;
+}
+
+function formatTime(item) {
+  const stamp = item.received_at || item.timestamp || item.created_at;
+  if (!stamp) return 'Unknown time';
+  const date = new Date(stamp);
+  return Number.isNaN(date.getTime()) ? stamp : date.toLocaleString();
+}
+
+async function removePending(index) {
+  const response = await fetch('/api/pending_lore');
+  const items = await response.json();
+  items.splice(index, 1);
+  await fetch('/api/pending_lore/set', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(items)
+  });
+  showToast('Intervention removed');
+  loadPanel();
+}
+
+async function sendOmen() {
+  const text = document.getElementById('omen-text').value.trim();
+  if (!text) return showToast('Write the omen first');
+  await fetch('/api/god/intervene', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'divine_omen', target: 'Aeloria', detail: text })
+  });
+  showToast('Omen released');
+  loadPanel();
+}
+
+async function sendDream() {
+  const name = document.getElementById('dream-char').value.trim();
+  const text = document.getElementById('dream-text').value.trim();
+  if (!name || !text) return showToast('Choose a soul and describe the dream');
+  await fetch('/api/lore', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: `${name} dreams: ${text}` })
+  });
+  showToast('Dream sent');
+  loadPanel();
+}
+
+async function forceTick() {
+  const btn = document.getElementById('force-btn');
+  if (!confirm('Turn the world now?')) return;
+  btn.disabled = true;
+  btn.textContent = 'Turning...';
+  try {
+    const response = await fetch('/api/tick', { method: 'POST' });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    showToast(`${worldDayLabel(data)} complete`);
+    loadPanel();
+  } catch (error) {
+    showToast(`Day advance failed: ${error.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Turn the world now ->';
+  }
+}
+
+async function loadPanel() {
+  const response = await fetch('/api/god/panel');
+  panelData = await response.json();
+  const state = panelData.state || {};
+  renderTabs(state);
+  renderStatus(state);
+  renderOverview(state);
+  renderFactions(state);
+  renderLeadership(state);
+  renderPopulation(state);
+  renderEvents(state);
+  renderKnowledge(state);
+  renderReligion(state);
+  renderImages(panelData);
+  renderControls(panelData);
+}
+
+loadPanel().catch(() => {
+  document.getElementById('panel-overview').innerHTML = empty('The God Panel could not load.');
+});
+</script>
+{% endblock %}

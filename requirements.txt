@@ -1,0 +1,8 @@
+anthropic
+flask
+apscheduler
+watchdog
+python-dotenv
+requests
+pdfplumber
+gunicorn

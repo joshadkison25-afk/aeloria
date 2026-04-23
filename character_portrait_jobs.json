@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Roderic Thorne II",
+    "faction": "Twin Cities",
+    "prompt": "Dark fantasy ruler portrait of King Roderic Thorne II, Twin Cities, House Aurand, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\roderic-thorne-ii.png",
+    "static_path": "/static/illustrations/characters/roderic-thorne-ii.png",
+    "status": "completed",
+    "created_tick": 22,
+    "created_at": "2026-04-23T04:59:57.127061",
+    "last_attempt_at": "2026-04-23T05:00:41.906014",
+    "error": ""
+  },
+  {
+    "name": "Marcellus Ver Meer",
+    "faction": "Tidefall",
+    "prompt": "Dark fantasy ruler portrait of Admiral-Lord Marcellus Ver Meer, Tidefall, House Ver Meer, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\marcellus-ver-meer.png",
+    "static_path": "/static/illustrations/characters/marcellus-ver-meer.png",
+    "status": "completed",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.907170",
+    "last_attempt_at": "2026-04-23T05:09:23.537404",
+    "error": ""
+  },
+  {
+    "name": "Seran Gross",
+    "faction": "Dur Khadur",
+    "prompt": "Dark fantasy ruler portrait of Trade Prince Seran Gross, Dur Khadur, House Gross, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\seran-gross.png",
+    "static_path": "/static/illustrations/characters/seran-gross.png",
+    "status": "completed",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.918551",
+    "last_attempt_at": "2026-04-23T05:13:46.050564",
+    "error": ""
+  },
+  {
+    "name": "Ulric Ironmaul",
+    "faction": "Lostfeld Dwarves",
+    "prompt": "Dark fantasy ruler portrait of Thane Ulric Ironmaul, Lostfeld Dwarves, Clan Ironmaul, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\ulric-ironmaul.png",
+    "static_path": "/static/illustrations/characters/ulric-ironmaul.png",
+    "status": "completed",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.918938",
+    "last_attempt_at": "2026-04-23T14:21:57.857176",
+    "error": ""
+  },
+  {
+    "name": "Lythara the Veiled",
+    "faction": "Shadow Court",
+    "prompt": "Dark fantasy ruler portrait of Queen Lythara the Veiled, Shadow Court, House Velorn, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\lythara-the-veiled.png",
+    "static_path": "/static/illustrations/characters/lythara-the-veiled.png",
+    "status": "completed",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.919196",
+    "last_attempt_at": "2026-04-23T19:11:11.773835",
+    "error": ""
+  },
+  {
+    "name": "Elowen Silverleaf",
+    "faction": "Glenhaven Elves",
+    "prompt": "Dark fantasy ruler portrait of Sovereign Elowen Silverleaf, Glenhaven Elves, Silverleaf Line, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\elowen-silverleaf.png",
+    "static_path": "/static/illustrations/characters/elowen-silverleaf.png",
+    "status": "queued",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.919419"
+  },
+  {
+    "name": "Hargan Stonejaw",
+    "faction": "Gilgeth Orcs",
+    "prompt": "Dark fantasy ruler portrait of First Elder Hargan Stonejaw, Gilgeth Orcs, Council Clans, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\hargan-stonejaw.png",
+    "static_path": "/static/illustrations/characters/hargan-stonejaw.png",
+    "status": "queued",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.919622"
+  },
+  {
+    "name": "Morgath Bloodstone",
+    "faction": "Groth Orcs",
+    "prompt": "Dark fantasy ruler portrait of Chieftain Morgath Bloodstone, Groth Orcs, Bloodstone Clan, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\morgath-bloodstone.png",
+    "static_path": "/static/illustrations/characters/morgath-bloodstone.png",
+    "status": "queued",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.919854"
+  },
+  {
+    "name": "Skrix Cogtooth",
+    "faction": "Vilefin Goblins",
+    "prompt": "Dark fantasy ruler portrait of Speaker Skrix Cogtooth, Vilefin Goblins, Vilefin Moot, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\skrix-cogtooth.png",
+    "static_path": "/static/illustrations/characters/skrix-cogtooth.png",
+    "status": "queued",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.920163"
+  },
+  {
+    "name": "Rowen Blacktide",
+    "faction": "Dreadwind Islands",
+    "prompt": "Dark fantasy ruler portrait of Fleet Captain Rowen Blacktide, Dreadwind Islands, Dreadwind Compact, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\rowen-blacktide.png",
+    "static_path": "/static/illustrations/characters/rowen-blacktide.png",
+    "status": "queued",
+    "created_tick": 22,
+    "created_at": "2026-04-23T05:00:41.920446"
+  }
+]
