@@ -5,11 +5,40 @@
 <style>
   .home-screen {
     position: relative;
-    width: 100vw;
-    height: calc(100vh - var(--nav-h));
+    width: 100%;
     min-height: calc(100vh - var(--nav-h));
     overflow: hidden;
-    background: transparent;
+    background:
+      radial-gradient(circle at 50% 24%, rgba(52, 40, 20, 0.18), transparent 32%),
+      linear-gradient(180deg, #040507 0%, #090b10 54%, #060709 100%);
+  }
+
+  .home-command-stage {
+    position: relative;
+    z-index: 1;
+    width: min(88vw, 1680px);
+    height: clamp(620px, 74vh, 920px);
+    margin: 80px auto 90px;
+    display: grid;
+    grid-template-columns: minmax(180px, 16vw) minmax(0, 1fr) minmax(200px, 14vw);
+    gap: clamp(16px, 1.5vw, 28px);
+    align-items: stretch;
+  }
+
+  .home-map-stage {
+    position: relative;
+    min-width: 0;
+    height: 100%;
+    border: 1px solid rgba(255,215,150,0.2);
+    border-radius: 12px;
+    background:
+      linear-gradient(180deg, rgba(4,6,9,0.96), rgba(7,9,12,0.92)),
+      rgba(8,10,14,0.96);
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.6),
+      0 0 30px rgba(0,0,0,0.5),
+      0 26px 64px rgba(0,0,0,0.34);
+    overflow: hidden;
   }
 
   .home-map-background {
@@ -20,6 +49,7 @@
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
+    background: rgba(5, 7, 10, 0.96);
   }
 
   .home-ui-layer {
@@ -37,29 +67,11 @@
   }
 
   .home-ui-content {
-    position: absolute;
-    inset: 0;
-    z-index: 13;
-    width: 100%;
-    margin: 0;
-    padding: 16px 18px 96px;
-    pointer-events: none;
+    display: none;
   }
 
   .world-strip {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    gap: 14px;
-    align-items: center;
-    width: min(720px, calc(100vw - 520px));
-    margin: 0 auto 0 calc(50% - 360px);
-    padding: 12px 16px;
-    border: 1px solid rgba(255,215,150,0.1);
-    border-radius: 16px;
-    background: rgba(8,10,14,0.42);
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.015);
-    pointer-events: auto;
+    display: none;
   }
 
   .world-kicker,
@@ -131,22 +143,15 @@
       linear-gradient(180deg, rgba(26,32,40,0.08), transparent 28%, transparent 70%, rgba(14,18,24,0.14));
   }
 
-  .home-intel-rail {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(236px, calc(100% - 20px));
-    z-index: 8;
-    pointer-events: auto;
-  }
-
+  .home-intel-rail,
   .home-codex-rail {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(204px, calc(100% - 20px));
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    height: 100%;
     z-index: 8;
     pointer-events: auto;
   }
@@ -157,14 +162,16 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: 14px 14px 12px 16px;
-    border-right: 1px solid rgba(255,215,150,0.15);
+    padding: 16px 16px 14px 18px;
+    border: 1px solid rgba(255,215,150,0.15);
+    border-radius: 12px;
     background:
       linear-gradient(90deg, rgba(0,0,0,0.14), transparent 72%),
-      linear-gradient(90deg, rgba(10,10,10,0.64), rgba(10,10,10,0.55));
+      linear-gradient(90deg, rgba(10,10,10,0.58), rgba(10,10,10,0.55));
     backdrop-filter: blur(12px);
     box-shadow:
       inset -24px 0 48px rgba(0,0,0,0.16),
+      0 18px 40px rgba(0,0,0,0.24),
       inset 0 0 0 1px rgba(255,255,255,0.01);
   }
 
@@ -353,14 +360,16 @@
     display: grid;
     grid-template-rows: auto auto auto minmax(0, 1fr);
     gap: 0;
-    padding: 14px 14px 12px 12px;
-    border-left: 1px solid rgba(255,215,150,0.1);
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(255,215,150,0.12);
+    border-radius: 12px;
     background:
       linear-gradient(270deg, rgba(0,0,0,0.14), transparent 72%),
-      linear-gradient(180deg, rgba(10,10,10,0.6), rgba(10,10,10,0.52));
+      linear-gradient(180deg, rgba(10,10,10,0.56), rgba(10,10,10,0.5));
     backdrop-filter: blur(10px);
     box-shadow:
       inset 24px 0 48px rgba(0,0,0,0.14),
+      0 18px 40px rgba(0,0,0,0.22),
       inset 0 0 0 1px rgba(255,255,255,0.01);
   }
 
@@ -534,10 +543,10 @@
     position: absolute;
     inset: 0;
     display: none;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 28px 24px;
-    background: radial-gradient(circle at 50% 42%, rgba(0,0,0,0.18), rgba(0,0,0,0.62));
+    padding: 24px;
+    background: radial-gradient(circle at 50% 42%, rgba(0,0,0,0.06), rgba(0,0,0,0.24));
     z-index: 6;
     pointer-events: auto;
   }
@@ -548,9 +557,9 @@
 
   .center-event-modal {
     position: relative;
-    width: min(560px, calc(100vw - 420px));
-    max-width: 560px;
-    max-height: calc(100vh - var(--nav-h) - 84px);
+    width: min(520px, calc(100% - 48px));
+    max-width: 520px;
+    max-height: calc(100% - 48px);
     overflow: auto;
     padding: 18px 18px 14px;
     border: 1px solid rgba(201,169,110,0.42);
@@ -1053,10 +1062,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
-    filter: saturate(0.96) contrast(1.08) brightness(0.78);
-    transform: scale(1.02);
+    filter: saturate(0.96) contrast(1.04) brightness(0.8);
   }
 
   .home-atlas-markers {
@@ -1464,29 +1472,28 @@
   }
 
   .command-bar {
-    position: fixed;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    width: min(90%, 1000px);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
     z-index: 20;
     pointer-events: auto;
   }
 
   .command-bar-frame {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: space-between;
     gap: 18px;
-    padding: 12px 16px;
-    border: 1px solid rgba(201,169,110,0.28);
-    border-radius: 18px;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(12px);
-    box-shadow:
-      0 18px 40px rgba(0,0,0,0.34),
-      0 0 24px rgba(201,169,110,0.08),
-      inset 0 0 0 1px rgba(255,255,255,0.02);
+    width: 100%;
+    height: 100%;
+    padding: 0 22px;
+    border-top: 1px solid rgba(255,215,150,0.15);
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .command-bar-influence {
@@ -1579,26 +1586,26 @@
 
   .command-bar-actions {
     display: flex;
-    align-items: stretch;
-    justify-content: center;
-    gap: 16px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
     flex: 1 1 auto;
   }
 
   .command-action {
-    min-width: 188px;
+    min-width: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 12px 14px 11px;
+    gap: 8px;
+    padding: 8px 12px;
     text-decoration: none;
-    text-align: center;
+    text-align: left;
     color: rgba(235,223,198,0.92);
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(201,169,110,0.2);
-    border-radius: 12px;
+    background: transparent;
+    border: 1px solid rgba(201,169,110,0.22);
+    border-radius: 999px;
     cursor: pointer;
     transition:
       transform 0.16s ease,
@@ -1609,11 +1616,11 @@
   }
 
   .command-action:hover {
-    transform: scale(1.06);
+    transform: translateY(-1px);
     color: #f1dfbc;
-    border-color: rgba(201,169,110,0.45);
-    background: rgba(255,255,255,0.045);
-    box-shadow: 0 0 20px rgba(201,169,110,0.12);
+    border-color: rgba(201,169,110,0.46);
+    background: rgba(255,255,255,0.02);
+    box-shadow: 0 0 16px rgba(201,169,110,0.12);
   }
 
   .command-action-icon {
@@ -1695,10 +1702,7 @@
   }
 
   .command-action-subtext {
-    display: block;
-    font-size: 12px;
-    color: rgba(218,205,180,0.76);
-    line-height: 1.25;
+    display: none;
   }
 
   .toast {
@@ -1722,57 +1726,42 @@
   }
 
   @media (max-width: 1180px) {
-    .home-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .seer-panel {
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-    }
-
-    .seer-art {
-      min-height: auto;
-    }
-
-    .home-intel-rail {
-      width: 244px;
-    }
-
-    .command-bar {
-      width: min(calc(100% - 24px), 920px);
+    .home-command-stage {
+      width: min(92vw, 1400px);
+      grid-template-columns: minmax(170px, 18vw) minmax(0, 1fr) minmax(190px, 18vw);
+      gap: 16px;
     }
 
     .command-bar-frame {
-      flex-direction: column;
       gap: 12px;
+      padding: 0 16px;
     }
 
     .command-bar-influence {
-      min-width: 0;
-      width: 100%;
+      min-width: 180px;
     }
 
     .command-bar-actions {
-      width: 100%;
-      gap: 12px;
-    }
-
-    .command-action {
-      min-width: 0;
-      flex: 1 1 0;
+      gap: 8px;
     }
   }
 
   @media (max-width: 760px) {
-    .home-ui-content {
-      width: 100%;
-      padding: 12px 12px 90px;
+    .home-screen {
+      padding-bottom: 74px;
+    }
+
+    .home-command-stage {
+      width: calc(100% - 24px);
+      height: auto;
+      min-height: calc(100vh - var(--nav-h) - 180px);
+      margin: 20px auto 20px;
+      grid-template-columns: 1fr;
     }
 
     .center-event-modal {
-      width: min(100%, calc(100vw - 24px));
-      max-height: calc(100vh - var(--nav-h) - 24px);
+      width: min(100%, calc(100% - 24px));
+      max-height: calc(100% - 24px);
       padding: 18px 14px 14px;
     }
 
@@ -1780,20 +1769,18 @@
       grid-template-columns: 1fr;
     }
 
-    .world-strip,
-    .seer-panel {
-      grid-template-columns: 1fr;
+    .home-map-stage {
+      min-height: 44vh;
     }
 
-    .world-strip {
-      width: auto;
-      margin: 0 12px 0 12px;
-    }
-
+    .home-codex-rail,
     .home-intel-rail {
-      inset: auto 12px 12px 12px;
-      width: auto;
-      max-height: 58%;
+      height: auto;
+    }
+
+    .home-intel-frame,
+    .home-codex-frame {
+      min-height: 0;
     }
 
     .home-intel-frame {
@@ -1825,19 +1812,24 @@
       padding: 12px 18px;
     }
 
-    .command-bar {
-      bottom: 10px;
-      width: calc(100% - 16px);
-    }
-
     .command-bar-frame {
-      padding: 10px 12px;
-      border-radius: 14px;
+      height: auto;
+      min-height: 60px;
+      padding: 8px 12px;
+      align-items: flex-start;
+      flex-direction: column;
     }
 
     .command-bar-actions {
-      flex-direction: column;
-      gap: 10px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .command-action {
+      flex: 1 1 calc(50% - 8px);
+      justify-content: flex-start;
     }
   }
 </style>
@@ -1845,11 +1837,71 @@
 
 {% block content %}
 <main class="home-screen">
-  <div class="home-map-background" aria-hidden="true">
-    <div class="home-atlas-frame">
-      <img class="home-atlas-map" src="/static/illustrations/ui/aeloria-lore-map-labeled.png" alt="Lore-labeled map of Aeloria">
-      <div class="home-atlas-tone-layer"></div>
-      <div class="home-atlas-markers">
+  <div class="home-command-stage">
+    <aside class="home-codex-rail" aria-label="Codex navigation">
+              <div class="home-codex-frame">
+                <div class="home-codex-title">Codex</div>
+                <div class="home-codex-divider" aria-hidden="true"></div>
+                <nav class="home-codex-nav">
+                  <a class="home-codex-link" href="/codex?category=Characters">
+                    <span class="home-codex-icon" data-icon="rulers" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Rulers</span>
+                      <span class="home-codex-meta">Open Characters</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Kingdoms">
+                    <span class="home-codex-icon" data-icon="dynasties" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Dynasties</span>
+                      <span class="home-codex-meta">Open Kingdoms</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Lore">
+                    <span class="home-codex-icon" data-icon="battles" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Battles</span>
+                      <span class="home-codex-meta">Open Lore</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Lore">
+                    <span class="home-codex-icon" data-icon="religion" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Religion</span>
+                      <span class="home-codex-meta">Open Lore</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Places">
+                    <span class="home-codex-icon" data-icon="population" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Population</span>
+                      <span class="home-codex-meta">Open Places</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Lore">
+                    <span class="home-codex-icon" data-icon="artifacts" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Artifacts</span>
+                      <span class="home-codex-meta">Open Lore</span>
+                    </span>
+                  </a>
+                  <a class="home-codex-link" href="/codex?category=Lore">
+                    <span class="home-codex-icon" data-icon="lore" aria-hidden="true"></span>
+                    <span class="home-codex-text">
+                      <span class="home-codex-label">Lore</span>
+                      <span class="home-codex-meta">Open Lore</span>
+                    </span>
+                  </a>
+                </nav>
+              </div>
+    </aside>
+
+    <section class="home-map-stage" aria-label="World map canvas">
+      <div class="home-map-background" aria-hidden="true">
+        <div class="home-atlas-frame">
+          <img class="home-atlas-map" src="/static/illustrations/ui/aeloria-lore-map-labeled.png" alt="Lore-labeled map of Aeloria">
+          <div class="home-atlas-tone-layer"></div>
+          <div class="home-atlas-markers">
                 <div class="home-atlas-marker" data-tone="forest" style="left: 17%; top: 39%;">
                   <div class="home-atlas-sigil-marker"></div>
                 </div>
@@ -1886,70 +1938,140 @@
                 <div class="home-atlas-marker" data-tone="violet" style="left: 45.2%; top: 95.2%;">
                   <div class="home-atlas-sigil-marker"></div>
                 </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="home-ui-layer">
-    <div class="home-ui-overlay" aria-label="Map interface overlay">
-      <aside class="home-codex-rail" aria-label="Codex navigation">
-                <div class="home-codex-frame">
-                  <div class="home-codex-title">Codex</div>
-                  <div class="home-codex-divider" aria-hidden="true"></div>
-                  <nav class="home-codex-nav">
-                    <a class="home-codex-link" href="/codex?category=Characters">
-                      <span class="home-codex-icon" data-icon="rulers" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Rulers</span>
-                        <span class="home-codex-meta">Open Characters</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Kingdoms">
-                      <span class="home-codex-icon" data-icon="dynasties" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Dynasties</span>
-                        <span class="home-codex-meta">Open Kingdoms</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Lore">
-                      <span class="home-codex-icon" data-icon="battles" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Battles</span>
-                        <span class="home-codex-meta">Open Lore</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Lore">
-                      <span class="home-codex-icon" data-icon="religion" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Religion</span>
-                        <span class="home-codex-meta">Open Lore</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Places">
-                      <span class="home-codex-icon" data-icon="population" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Population</span>
-                        <span class="home-codex-meta">Open Places</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Lore">
-                      <span class="home-codex-icon" data-icon="artifacts" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Artifacts</span>
-                        <span class="home-codex-meta">Open Lore</span>
-                      </span>
-                    </a>
-                    <a class="home-codex-link" href="/codex?category=Lore">
-                      <span class="home-codex-icon" data-icon="lore" aria-hidden="true"></span>
-                      <span class="home-codex-text">
-                        <span class="home-codex-label">Lore</span>
-                        <span class="home-codex-meta">Open Lore</span>
-                      </span>
-                    </a>
-                  </nav>
+      <div class="home-ui-layer">
+        <div class="home-ui-overlay" aria-label="Map interface overlay">
+          <div class="center-event-backdrop is-open" id="center-event-backdrop" aria-hidden="false">
+            <section class="center-event-modal" id="seer-interface" role="dialog" aria-modal="true" aria-labelledby="center-event-title">
+              <button class="center-event-close" type="button" id="center-event-close" aria-label="Close event window">×</button>
+              <div class="center-event-head">
+                <div class="center-event-kicker">Current Audience</div>
+                <h2 class="center-event-title" id="center-event-title">The Seer Arrives</h2>
+                <div class="center-event-rule" aria-hidden="true"><span>✦</span></div>
+              </div>
+
+              <div class="center-event-stats">
+                <div class="center-event-stat">
+                  <div class="center-event-stat-label">Location</div>
+                  <div class="center-event-stat-value" id="seer-location">Unknown</div>
                 </div>
-      </aside>
-      <aside class="home-intel-rail" aria-label="World Intel">
+                <div class="center-event-stat">
+                  <div class="center-event-stat-label">Status</div>
+                  <div class="center-event-stat-value" id="seer-status">Waiting</div>
+                </div>
+                <div class="center-event-stat">
+                  <div class="center-event-stat-label">Destination</div>
+                  <div class="center-event-stat-value" id="seer-destination">None</div>
+                </div>
+              </div>
+
+              <div class="center-event-copy" id="conversation">
+                <div class="message">
+                  <div class="message-label">Seer</div>
+                  <div class="center-event-paragraph" id="seer-primary">I am gathering what I can see.</div>
+                </div>
+                <div class="message">
+                  <div class="message-label">What I am unsure of</div>
+                  <div class="center-event-paragraph secondary" id="seer-secondary">Not every report has reached me yet.</div>
+                </div>
+                <blockquote class="center-event-quote" id="seer-quote">"The world has not finished speaking."</blockquote>
+              </div>
+
+              <div class="center-event-consult">
+                <div class="center-event-consult-title">Consult The Seer</div>
+                <div class="center-event-intents intent-grid">
+                  <button class="intent-btn active" type="button" data-intent="continue">Continue</button>
+                  <button class="intent-btn" type="button" data-intent="clarify">Clarify</button>
+                  <button class="intent-btn" type="button" data-intent="inspect">Inspect Region</button>
+                  <button class="intent-btn" type="button" data-intent="expand">Expand Event</button>
+                  <button class="intent-btn" type="button" data-intent="send">Send Seer</button>
+                </div>
+
+                <div class="intent-form" id="intent-form">
+                  <input class="intent-input" id="intent-input" type="text" placeholder="Name the region, event, or destination...">
+                  <button class="intent-submit" type="button" id="intent-submit">Send Intent</button>
+                </div>
+              </div>
+
+              <div class="center-event-actions">
+                <div class="center-action-group">
+                  <button class="center-action-card" type="button" id="modal-omen-action">
+                    <span class="center-action-icon" data-icon="omen" aria-hidden="true"></span>
+                    <span class="center-action-copy">
+                      <span class="center-action-title">Send An Omen</span>
+                      <span class="center-action-description">Cast a sign into the world.</span>
+                    </span>
+                    <span class="center-action-arrow" aria-hidden="true">›</span>
+                  </button>
+                  <div class="center-action-panel" id="modal-omen-panel">
+                    <div class="center-action-panel-copy">Release one sign into Aeloria. The world will interpret it in its own language.</div>
+                    <textarea id="modal-omen-text" class="center-action-field" placeholder="A blood moon rises over Faerwood for three nights, and wolves howl in patterns that sound almost like words..."></textarea>
+                    <button class="center-action-submit" type="button" id="modal-omen-submit">Release This Omen</button>
+                  </div>
+                </div>
+
+                <div class="center-action-group">
+                  <button class="center-action-card" type="button" id="modal-dream-action">
+                    <span class="center-action-icon" data-icon="dream" aria-hidden="true"></span>
+                    <span class="center-action-copy">
+                      <span class="center-action-title">Send A Dream</span>
+                      <span class="center-action-description">Shape the unseen.</span>
+                    </span>
+                    <span class="center-action-arrow" aria-hidden="true">›</span>
+                  </button>
+                  <div class="center-action-panel" id="modal-dream-panel">
+                    <div class="center-action-panel-copy">Choose one soul and place a vision in their sleep.</div>
+                    <select id="modal-dream-char" class="center-action-select">
+                      <option value="">Choose a soul...</option>
+                    </select>
+                    <textarea id="modal-dream-text" class="center-action-field" placeholder="She stands in a burning throne room, crown melting in her hands, a child's voice asking why..."></textarea>
+                    <button class="center-action-submit" type="button" id="modal-dream-submit">Send This Dream</button>
+                  </div>
+                </div>
+
+                <div class="center-action-group">
+                  <button class="center-action-card" type="button" id="modal-seer-action">
+                    <span class="center-action-icon" data-icon="seer" aria-hidden="true"></span>
+                    <span class="center-action-copy">
+                      <span class="center-action-title">Send The Seer</span>
+                      <span class="center-action-description">Move her presence into the world.</span>
+                    </span>
+                    <span class="center-action-arrow" aria-hidden="true">›</span>
+                  </button>
+                  <div class="center-action-panel" id="modal-seer-panel">
+                    <div class="center-action-panel-copy">Set a destination and intent. The road still takes time.</div>
+                    <input id="modal-seer-input" class="center-action-input" type="text" placeholder="Go to Lostfeld and investigate the pressure around the intermediary...">
+                    <button class="center-action-submit" type="button" id="modal-seer-submit">Send The Seer</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="home-ui-content">
+          <section class="world-strip">
+            <div>
+              <div class="world-kicker">Living World Interface</div>
+              <h1 class="world-title">Aeloria</h1>
+            </div>
+            <div class="world-meta">
+              <span class="world-meta-label">World Date</span>
+              <span class="world-meta-value" id="world-date">Loading...</span>
+            </div>
+            <div class="world-meta">
+              <span class="world-meta-label">Current Day</span>
+              <span class="world-meta-value" id="world-tick">--</span>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <aside class="home-intel-rail" aria-label="World Intel">
                 <div class="home-intel-frame">
                   <section class="home-intel-section">
                     <div class="home-intel-title">World Intel</div>
@@ -1989,133 +2111,7 @@
                     </div>
                   </section>
                 </div>
-      </aside>
-
-      <div class="center-event-backdrop is-open" id="center-event-backdrop" aria-hidden="false">
-        <section class="center-event-modal" id="seer-interface" role="dialog" aria-modal="true" aria-labelledby="center-event-title">
-          <button class="center-event-close" type="button" id="center-event-close" aria-label="Close event window">×</button>
-          <div class="center-event-head">
-            <div class="center-event-kicker">Current Audience</div>
-            <h2 class="center-event-title" id="center-event-title">The Seer Arrives</h2>
-            <div class="center-event-rule" aria-hidden="true"><span>✦</span></div>
-          </div>
-
-          <div class="center-event-stats">
-            <div class="center-event-stat">
-              <div class="center-event-stat-label">Location</div>
-              <div class="center-event-stat-value" id="seer-location">Unknown</div>
-            </div>
-            <div class="center-event-stat">
-              <div class="center-event-stat-label">Status</div>
-              <div class="center-event-stat-value" id="seer-status">Waiting</div>
-            </div>
-            <div class="center-event-stat">
-              <div class="center-event-stat-label">Destination</div>
-              <div class="center-event-stat-value" id="seer-destination">None</div>
-            </div>
-          </div>
-
-          <div class="center-event-copy" id="conversation">
-            <div class="message">
-              <div class="message-label">Seer</div>
-              <div class="center-event-paragraph" id="seer-primary">I am gathering what I can see.</div>
-            </div>
-            <div class="message">
-              <div class="message-label">What I am unsure of</div>
-              <div class="center-event-paragraph secondary" id="seer-secondary">Not every report has reached me yet.</div>
-            </div>
-            <blockquote class="center-event-quote" id="seer-quote">"The world has not finished speaking."</blockquote>
-          </div>
-
-          <div class="center-event-consult">
-            <div class="center-event-consult-title">Consult The Seer</div>
-            <div class="center-event-intents intent-grid">
-              <button class="intent-btn active" type="button" data-intent="continue">Continue</button>
-              <button class="intent-btn" type="button" data-intent="clarify">Clarify</button>
-              <button class="intent-btn" type="button" data-intent="inspect">Inspect Region</button>
-              <button class="intent-btn" type="button" data-intent="expand">Expand Event</button>
-              <button class="intent-btn" type="button" data-intent="send">Send Seer</button>
-            </div>
-
-            <div class="intent-form" id="intent-form">
-              <input class="intent-input" id="intent-input" type="text" placeholder="Name the region, event, or destination...">
-              <button class="intent-submit" type="button" id="intent-submit">Send Intent</button>
-            </div>
-          </div>
-
-          <div class="center-event-actions">
-            <div class="center-action-group">
-              <button class="center-action-card" type="button" id="modal-omen-action">
-                <span class="center-action-icon" data-icon="omen" aria-hidden="true"></span>
-                <span class="center-action-copy">
-                  <span class="center-action-title">Send An Omen</span>
-                  <span class="center-action-description">Cast a sign into the world.</span>
-                </span>
-                <span class="center-action-arrow" aria-hidden="true">›</span>
-              </button>
-              <div class="center-action-panel" id="modal-omen-panel">
-                <div class="center-action-panel-copy">Release one sign into Aeloria. The world will interpret it in its own language.</div>
-                <textarea id="modal-omen-text" class="center-action-field" placeholder="A blood moon rises over Faerwood for three nights, and wolves howl in patterns that sound almost like words..."></textarea>
-                <button class="center-action-submit" type="button" id="modal-omen-submit">Release This Omen</button>
-              </div>
-            </div>
-
-            <div class="center-action-group">
-              <button class="center-action-card" type="button" id="modal-dream-action">
-                <span class="center-action-icon" data-icon="dream" aria-hidden="true"></span>
-                <span class="center-action-copy">
-                  <span class="center-action-title">Send A Dream</span>
-                  <span class="center-action-description">Shape the unseen.</span>
-                </span>
-                <span class="center-action-arrow" aria-hidden="true">›</span>
-              </button>
-              <div class="center-action-panel" id="modal-dream-panel">
-                <div class="center-action-panel-copy">Choose one soul and place a vision in their sleep.</div>
-                <select id="modal-dream-char" class="center-action-select">
-                  <option value="">Choose a soul...</option>
-                </select>
-                <textarea id="modal-dream-text" class="center-action-field" placeholder="She stands in a burning throne room, crown melting in her hands, a child's voice asking why..."></textarea>
-                <button class="center-action-submit" type="button" id="modal-dream-submit">Send This Dream</button>
-              </div>
-            </div>
-
-            <div class="center-action-group">
-              <button class="center-action-card" type="button" id="modal-seer-action">
-                <span class="center-action-icon" data-icon="seer" aria-hidden="true"></span>
-                <span class="center-action-copy">
-                  <span class="center-action-title">Send The Seer</span>
-                  <span class="center-action-description">Move her presence into the world.</span>
-                </span>
-                <span class="center-action-arrow" aria-hidden="true">›</span>
-              </button>
-              <div class="center-action-panel" id="modal-seer-panel">
-                <div class="center-action-panel-copy">Set a destination and intent. The road still takes time.</div>
-                <input id="modal-seer-input" class="center-action-input" type="text" placeholder="Go to Lostfeld and investigate the pressure around the intermediary...">
-                <button class="center-action-submit" type="button" id="modal-seer-submit">Send The Seer</button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <div class="home-ui-content">
-      <section class="world-strip">
-        <div>
-          <div class="world-kicker">Living World Interface</div>
-          <h1 class="world-title">Aeloria</h1>
-        </div>
-        <div class="world-meta">
-          <span class="world-meta-label">World Date</span>
-          <span class="world-meta-value" id="world-date">Loading...</span>
-        </div>
-        <div class="world-meta">
-          <span class="world-meta-label">Current Day</span>
-          <span class="world-meta-value" id="world-tick">--</span>
-        </div>
-      </section>
-
-    </div>
+    </aside>
   </div>
 
   <div class="command-bar" aria-label="World command interface">
