@@ -65,9 +65,11 @@
     "prompt": "Dark fantasy ruler portrait of Sovereign Elowen Silverleaf, Glenhaven Elves, Silverleaf Line, lore accurate Aeloria aesthetic, no text, no watermark.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\elowen-silverleaf.png",
     "static_path": "/static/illustrations/characters/elowen-silverleaf.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 22,
-    "created_at": "2026-04-23T05:00:41.919419"
+    "created_at": "2026-04-23T05:00:41.919419",
+    "last_attempt_at": "2026-04-23T21:22:31.881114",
+    "error": ""
   },
   {
     "name": "Hargan Stonejaw",
@@ -75,9 +77,11 @@
     "prompt": "Dark fantasy ruler portrait of First Elder Hargan Stonejaw, Gilgeth Orcs, Council Clans, lore accurate Aeloria aesthetic, no text, no watermark.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\hargan-stonejaw.png",
     "static_path": "/static/illustrations/characters/hargan-stonejaw.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 22,
-    "created_at": "2026-04-23T05:00:41.919622"
+    "created_at": "2026-04-23T05:00:41.919622",
+    "last_attempt_at": "2026-04-24T01:12:14.500501",
+    "error": ""
   },
   {
     "name": "Morgath Bloodstone",
@@ -85,9 +89,11 @@
     "prompt": "Dark fantasy ruler portrait of Chieftain Morgath Bloodstone, Groth Orcs, Bloodstone Clan, lore accurate Aeloria aesthetic, no text, no watermark.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\morgath-bloodstone.png",
     "static_path": "/static/illustrations/characters/morgath-bloodstone.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 22,
-    "created_at": "2026-04-23T05:00:41.919854"
+    "created_at": "2026-04-23T05:00:41.919854",
+    "last_attempt_at": "2026-04-24T01:32:32.735281",
+    "error": ""
   },
   {
     "name": "Skrix Cogtooth",
@@ -95,9 +101,11 @@
     "prompt": "Dark fantasy ruler portrait of Speaker Skrix Cogtooth, Vilefin Goblins, Vilefin Moot, lore accurate Aeloria aesthetic, no text, no watermark.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\skrix-cogtooth.png",
     "static_path": "/static/illustrations/characters/skrix-cogtooth.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 22,
-    "created_at": "2026-04-23T05:00:41.920163"
+    "created_at": "2026-04-23T05:00:41.920163",
+    "last_attempt_at": "2026-04-24T02:06:21.654224",
+    "error": ""
   },
   {
     "name": "Rowen Blacktide",
@@ -108,5 +116,37 @@
     "status": "queued",
     "created_tick": 22,
     "created_at": "2026-04-23T05:00:41.920446"
+  },
+  {
+    "name": "Grand Druid Varek",
+    "faction": "Monastery of Druids",
+    "prompt": "A lean weathered elderly human druid with grey-streaked beard, calm deep-set eyes, wearing plain druidic robes, standing in a stone cell with ritual markings scratched into the floor, dark fantasy portrait, no text",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\grand-druid-varek.png",
+    "static_path": "/static/illustrations/characters/grand-druid-varek.png",
+    "status": "failed",
+    "created_tick": 32,
+    "created_at": "2026-04-25T04:53:28.666904",
+    "last_attempt_at": "2026-04-25T04:54:04.458044",
+    "error": "OpenAI image generation failed: 500 {\n  \"error\": {\n    \"message\": \"The server had an error while processing your request. Sorry about that! You can retry your request, or contact us through our help center at help.openai.com if the error persists. (Please include the request ID req_9c0658f84869425b9b1c9a2d294336b8 in your message.)\",\n"
+  },
+  {
+    "name": "Elian Adkison",
+    "faction": "Twin Cities",
+    "prompt": "A young slight human man in treasury clerk attire, ink-stained fingers, sharp careful eyes, candlelit interior of a Twin Cities noble study, dark fantasy portrait aesthetic, no text",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\elian-adkison.png",
+    "static_path": "/static/illustrations/characters/elian-adkison.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T04:54:04.461661"
+  },
+  {
+    "name": "Elder Ashveil",
+    "faction": "Monastery of Druids",
+    "prompt": "A composed iron-grey-haired human woman in practical druidic travel vestments, calm determined gaze, seated in stone garrison quarters with parchment and a sealed letter visible, dark fantasy portrait, no text",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\elder-ashveil.png",
+    "static_path": "/static/illustrations/characters/elder-ashveil.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T04:54:04.504645"
   }
 ]

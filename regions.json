@@ -1,0 +1,144 @@
+{
+  "regions": {
+    "Faerwood": {
+      "name": "Faerwood",
+      "terrain": "dense forest",
+      "controller": null,
+      "canonical_faction": "Dread Elves",
+      "available_factions": ["Dread Elves", "Kenku", "Verdan Rootbound", "Sylthari Web Domain", "Greenveil Clans", "Ironwood Settlers", "Veilbound", "Unbound"],
+      "resources": {
+        "food": "medium",
+        "gold": "low",
+        "military": "low"
+      },
+      "stability": "medium",
+      "neighbors": ["Glenhaven", "Eresteron"]
+    },
+    "Lostfeld": {
+      "name": "Lostfeld",
+      "terrain": "mountain",
+      "controller": null,
+      "canonical_faction": "Dwarves of Lostfeld",
+      "available_factions": ["Dwarves of Lostfeld", "Roki", "Stonekin", "Kharox Clans", "Gravekin Depths", "Deepwatch"],
+      "resources": {
+        "food": "low",
+        "gold": "high",
+        "military": "high"
+      },
+      "stability": "high",
+      "neighbors": ["Eresteron", "Frostvale", "Groth", "Gilgeth"]
+    },
+    "Glenhaven": {
+      "name": "Glenhaven",
+      "terrain": "dense forest",
+      "controller": null,
+      "canonical_faction": "Elves of Glenhaven",
+      "available_factions": ["Elves of Glenhaven", "Faeborn", "Sylvan Covenant", "Centaur Tribes", "Glenhaven Rangers"],
+      "resources": {
+        "food": "high",
+        "gold": "low",
+        "military": "low"
+      },
+      "stability": "high",
+      "neighbors": ["Faerwood", "Tidefall"]
+    },
+    "Tidefall": {
+      "name": "Tidefall",
+      "terrain": "coastal",
+      "controller": null,
+      "canonical_faction": "Admiral Electorate",
+      "available_factions": ["Admiral Electorate", "Tideborn Dominion", "Tidebound Circle", "Stormwardens", "Blacktide Corsairs"],
+      "resources": {
+        "food": "medium",
+        "gold": "high",
+        "military": "medium"
+      },
+      "stability": "medium",
+      "neighbors": ["Glenhaven", "Eresteron", "Farrock"]
+    },
+    "Eresteron": {
+      "name": "Eresteron",
+      "terrain": "plains",
+      "controller": null,
+      "canonical_faction": "Twin Realms",
+      "available_factions": ["Twin Realms", "Aelorians", "Dwarven Hold", "Orc War Dominion", "Drow Dominion"],
+      "resources": {
+        "food": "high",
+        "gold": "medium",
+        "military": "medium"
+      },
+      "stability": "medium",
+      "neighbors": ["Faerwood", "Lostfeld", "Tidefall", "Frostvale", "Gilgeth", "Vilefin", "Farrock"]
+    },
+    "Frostvale": {
+      "name": "Frostvale",
+      "terrain": "frozen",
+      "controller": null,
+      "canonical_faction": null,
+      "available_factions": ["Vargai Packs", "Ursari Dominion", "Frostwraiths", "Winter Court", "Wintermark"],
+      "resources": {
+        "food": "low",
+        "gold": "low",
+        "military": "high"
+      },
+      "stability": "low",
+      "neighbors": ["Lostfeld", "Eresteron", "Groth"]
+    },
+    "Groth": {
+      "name": "Groth",
+      "terrain": "mountain",
+      "controller": null,
+      "canonical_faction": "Orcs",
+      "available_factions": ["Orcs", "Dwarves", "Kharox", "Skarren", "Stonewardens"],
+      "resources": {
+        "food": "low",
+        "gold": "medium",
+        "military": "high"
+      },
+      "stability": "low",
+      "neighbors": ["Gilgeth", "Frostvale", "Lostfeld"]
+    },
+    "Gilgeth": {
+      "name": "Gilgeth",
+      "terrain": "mountain",
+      "controller": null,
+      "canonical_faction": "Orcs",
+      "available_factions": ["Orcs", "Dwarves", "Kharox", "Skarren", "Stonewardens"],
+      "resources": {
+        "food": "low",
+        "gold": "medium",
+        "military": "high"
+      },
+      "stability": "medium",
+      "neighbors": ["Groth", "Lostfeld", "Eresteron", "Vilefin"]
+    },
+    "Vilefin": {
+      "name": "Vilefin",
+      "terrain": "stone plains",
+      "controller": null,
+      "canonical_faction": "Goblins",
+      "available_factions": ["Goblins", "Gritkin", "Scorpids", "Shaleborn", "Dustlanders"],
+      "resources": {
+        "food": "low",
+        "gold": "medium",
+        "military": "low"
+      },
+      "stability": "low",
+      "neighbors": ["Eresteron", "Gilgeth", "Farrock"]
+    },
+    "Farrock": {
+      "name": "Farrock",
+      "terrain": "rugged",
+      "controller": null,
+      "canonical_faction": "Red Banner Legion",
+      "available_factions": ["Red Banner Legion"],
+      "resources": {
+        "food": "low",
+        "gold": "high",
+        "military": "high"
+      },
+      "stability": "high",
+      "neighbors": ["Vilefin", "Eresteron", "Tidefall"]
+    }
+  }
+}

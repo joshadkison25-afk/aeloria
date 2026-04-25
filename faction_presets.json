@@ -1,0 +1,284 @@
+{
+  "presets": [
+    {
+      "id": "noble_kingdom",
+      "name": "Noble Kingdom",
+      "race": "Human",
+      "type": "Kingdom",
+      "description": "A hereditary monarchy built on land, blood, and lineage. Noble houses compete for influence beneath a crown that holds by tradition and force of will.",
+      "traits": ["Proud", "Hierarchical", "Ambitious", "Tradition-bound"],
+      "power": 60,
+      "succession": "primogeniture",
+      "ruler_title": "King",
+      "color": "#8b6914",
+      "icon": "♛",
+      "starting_ruler": {
+        "name": "King Aldric",
+        "title": "King",
+        "age": 44,
+        "traits": ["Calculating", "Proud", "Experienced"],
+        "causeOfRise": "inheritance"
+      }
+    },
+    {
+      "id": "merchant_republic",
+      "name": "Merchant Republic",
+      "race": "Human",
+      "type": "Republic",
+      "description": "A city governed by trade guilds and elected councils. Wealth is power. Deals are made in back rooms and ratified in grand halls.",
+      "traits": ["Pragmatic", "Wealthy", "Politically fluid", "Opportunistic"],
+      "power": 55,
+      "succession": "election",
+      "ruler_title": "High Magistrate",
+      "color": "#5a7a3a",
+      "icon": "⚖",
+      "starting_ruler": {
+        "name": "Magistrate Vael Corso",
+        "title": "High Magistrate",
+        "age": 51,
+        "traits": ["Shrewd", "Diplomatic", "Wealthy"],
+        "causeOfRise": "election"
+      }
+    },
+    {
+      "id": "sea_empire",
+      "name": "Sea Empire",
+      "race": "Human",
+      "type": "Empire",
+      "description": "Masters of the ocean lanes. Their fleets are their armies, their ports their fortresses. They do not conquer land — they strangle it.",
+      "traits": ["Expansionist", "Naval", "Ruthless", "Proud"],
+      "power": 65,
+      "succession": "election",
+      "ruler_title": "Admiral-King",
+      "color": "#2a5a8a",
+      "icon": "⚓",
+      "starting_ruler": {
+        "name": "Admiral-King Reth Saltborne",
+        "title": "Admiral-King",
+        "age": 58,
+        "traits": ["Iron-willed", "Feared", "Strategic"],
+        "causeOfRise": "conquest"
+      }
+    },
+    {
+      "id": "holy_order",
+      "name": "Holy Order",
+      "race": "Human",
+      "type": "Theocracy",
+      "description": "A militant religious institution that governs through faith and fear. Their god is real to them. Their crusades are a matter of divine instruction.",
+      "traits": ["Zealous", "Disciplined", "Uncompromising", "Influential"],
+      "power": 50,
+      "succession": "chosen",
+      "ruler_title": "High Inquisitor",
+      "color": "#8a4a2a",
+      "icon": "✝",
+      "starting_ruler": {
+        "name": "High Inquisitor Mael",
+        "title": "High Inquisitor",
+        "age": 63,
+        "traits": ["Pious", "Harsh", "Visionary"],
+        "causeOfRise": "appointment"
+      }
+    },
+    {
+      "id": "mountain_hold",
+      "name": "Mountain Hold",
+      "race": "Dwarf",
+      "type": "Hold",
+      "description": "A fortress carved from living rock, ruled by a lineage older than most human nations. They keep grudges in stone books and debts in iron ledgers.",
+      "traits": ["Stubborn", "Honorable", "Isolationist", "Enduring"],
+      "power": 60,
+      "succession": "primogeniture",
+      "ruler_title": "High Thane",
+      "color": "#6a5a3a",
+      "icon": "⚒",
+      "starting_ruler": {
+        "name": "High Thane Brom Ironmantle",
+        "title": "High Thane",
+        "age": 112,
+        "traits": ["Stubborn", "Honorable", "Wrathful"],
+        "causeOfRise": "inheritance"
+      }
+    },
+    {
+      "id": "forge_brotherhood",
+      "name": "Forge Brotherhood",
+      "race": "Dwarf",
+      "type": "Guild",
+      "description": "A merchant-warrior guild of master craftsmen. They do not rule a mountain — they rule the trade that flows beneath the mountains. Their weapons arm every faction on the continent.",
+      "traits": ["Mercantile", "Skilled", "Neutral", "Calculating"],
+      "power": 45,
+      "succession": "election",
+      "ruler_title": "Forge Master",
+      "color": "#8a6a2a",
+      "icon": "🔨",
+      "starting_ruler": {
+        "name": "Forge Master Durna Steelhand",
+        "title": "Forge Master",
+        "age": 88,
+        "traits": ["Precise", "Wealthy", "Respected"],
+        "causeOfRise": "election"
+      }
+    },
+    {
+      "id": "forest_court",
+      "name": "Forest Court",
+      "race": "High Elf",
+      "type": "Court",
+      "description": "An ancient council of elven nobles who remember the world before human cities existed. Slow to act, impossible to surprise, and patient beyond any mortal comprehension.",
+      "traits": ["Ancient", "Patient", "Arrogant", "Wise"],
+      "power": 55,
+      "succession": "council",
+      "ruler_title": "Archon",
+      "color": "#3a6a3a",
+      "icon": "✦",
+      "starting_ruler": {
+        "name": "Archon Sylvael",
+        "title": "Archon",
+        "age": 412,
+        "traits": ["Ancient", "Measured", "Inscrutable"],
+        "causeOfRise": "council vote"
+      }
+    },
+    {
+      "id": "shadow_court",
+      "name": "Shadow Court",
+      "race": "Dark Elf",
+      "type": "Court",
+      "description": "A hidden power that does not rule openly. They operate through intermediaries, assassinations, and blackmail. Everyone knows they exist. No one can prove it.",
+      "traits": ["Secretive", "Ruthless", "Patient", "Manipulative"],
+      "power": 50,
+      "succession": "chosen",
+      "ruler_title": "Voice of the Court",
+      "color": "#3a2a5a",
+      "icon": "◈",
+      "starting_ruler": {
+        "name": "The Voice",
+        "title": "Voice of the Court",
+        "age": 0,
+        "traits": ["Unknown", "Feared", "Patient"],
+        "causeOfRise": "unknown"
+      }
+    },
+    {
+      "id": "war_clan",
+      "name": "War Clan",
+      "race": "Orc",
+      "type": "Clan",
+      "description": "A confederation of orc warriors bound by shared blood and a warchief's iron will. They raid, they conquer, they hold — until someone stronger takes the seat.",
+      "traits": ["Aggressive", "Hierarchical", "Loyal to strength", "Expansionist"],
+      "power": 65,
+      "succession": "power",
+      "ruler_title": "Warchief",
+      "color": "#6a2a2a",
+      "icon": "⚔",
+      "starting_ruler": {
+        "name": "Warchief Gorrak Redtusk",
+        "title": "Warchief",
+        "age": 34,
+        "traits": ["Brutal", "Cunning", "Feared"],
+        "causeOfRise": "combat"
+      }
+    },
+    {
+      "id": "raider_horde",
+      "name": "Raider Horde",
+      "race": "Orc",
+      "type": "Horde",
+      "description": "A mobile force without a fixed home. They appear where they are not expected and vanish before retaliation arrives. They have no capital to besiege, no land to threaten.",
+      "traits": ["Mobile", "Unpredictable", "Feared", "Brutal"],
+      "power": 55,
+      "succession": "power",
+      "ruler_title": "Great Khan",
+      "color": "#7a3a1a",
+      "icon": "🜂",
+      "starting_ruler": {
+        "name": "Great Khan Varash",
+        "title": "Great Khan",
+        "age": 29,
+        "traits": ["Ferocious", "Tactical", "Charismatic"],
+        "causeOfRise": "combat"
+      }
+    },
+    {
+      "id": "trade_cartel",
+      "name": "Trade Cartel",
+      "race": "Goblin",
+      "type": "Cartel",
+      "description": "A sprawling criminal-commercial network run by goblin families. They control the black markets, the smuggling routes, and half the legitimate trade no one wants to ask questions about.",
+      "traits": ["Cunning", "Greedy", "Networked", "Cowardly in battle"],
+      "power": 40,
+      "succession": "election",
+      "ruler_title": "Boss",
+      "color": "#4a6a2a",
+      "icon": "◉",
+      "starting_ruler": {
+        "name": "Boss Skrix",
+        "title": "Boss",
+        "age": 41,
+        "traits": ["Greedy", "Paranoid", "Connected"],
+        "causeOfRise": "bribery"
+      }
+    },
+    {
+      "id": "arcane_conclave",
+      "name": "Arcane Conclave",
+      "race": "Human",
+      "type": "Conclave",
+      "description": "A council of mages who have withdrawn from political life — officially. In practice they advise every throne and their absence from a court is as significant as their presence.",
+      "traits": ["Knowledgeable", "Aloof", "Influential", "Unpredictable"],
+      "power": 45,
+      "succession": "chosen",
+      "ruler_title": "Archmagister",
+      "color": "#4a2a8a",
+      "icon": "✶",
+      "starting_ruler": {
+        "name": "Archmagister Vorn",
+        "title": "Archmagister",
+        "age": 77,
+        "traits": ["Brilliant", "Eccentric", "Manipulative"],
+        "causeOfRise": "appointment"
+      }
+    },
+    {
+      "id": "bandit_kingdom",
+      "name": "Bandit Kingdom",
+      "race": "Human",
+      "type": "Kingdom",
+      "description": "What started as a raider camp became a city. What became a city needed laws. What needed laws needed a king. The king is still a bandit — just a rich one with a flag.",
+      "traits": ["Lawless", "Opportunistic", "Brutal", "Surprisingly stable"],
+      "power": 40,
+      "succession": "power",
+      "ruler_title": "Bandit King",
+      "color": "#5a3a1a",
+      "icon": "⚰",
+      "starting_ruler": {
+        "name": "Bandit King Darek",
+        "title": "Bandit King",
+        "age": 38,
+        "traits": ["Ruthless", "Charismatic", "Paranoid"],
+        "causeOfRise": "conquest"
+      }
+    },
+    {
+      "id": "nomad_tribes",
+      "name": "Nomad Tribes",
+      "race": "Human",
+      "type": "Confederation",
+      "description": "A loose confederation of plains tribes united by custom, blood, and the shared memory of a homeland they may or may not have actually had. They move. They survive.",
+      "traits": ["Independent", "Resilient", "Distrustful of cities", "Fierce"],
+      "power": 45,
+      "succession": "council",
+      "ruler_title": "Elder Speaker",
+      "color": "#7a6a3a",
+      "icon": "◆",
+      "starting_ruler": {
+        "name": "Elder Speaker Kara",
+        "title": "Elder Speaker",
+        "age": 56,
+        "traits": ["Wise", "Stubborn", "Respected"],
+        "causeOfRise": "council vote"
+      }
+    }
+  ]
+}

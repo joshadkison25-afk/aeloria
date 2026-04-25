@@ -3,8 +3,9 @@ import logging
 import os
 import base64
 import re
+import shutil
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -27,6 +28,121 @@ CODEX_IMAGE_DIR = BASE_DIR / "static" / "illustrations" / "codex"
 PORTRAIT_JOBS_FILE = BASE_DIR / "character_portrait_jobs.json"
 CODEX_IMAGE_JOBS_FILE = BASE_DIR / "codex_image_jobs.json"
 IMAGE_GENERATION_STATE_FILE = BASE_DIR / "image_generation_state.json"
+
+TEST_MODE = True
+
+def safe_save_world(world: dict, previous_world: dict = None) -> None:
+    if not world or len(world.keys()) == 0:
+        logger.error("safe_save_world: refusing to save — world is empty")
+        return
+    if previous_world is None and WORLD_STATE_FILE.exists():
+        try:
+            with open(WORLD_STATE_FILE, encoding="utf-8") as _f:
+                previous_world = json.load(_f)
+        except Exception:
+            previous_world = {}
+    world = ensure_world_structure(world, previous_world or {})
+    if not is_valid_world(world):
+        logger.error("safe_save_world: refusing to save — world failed validation")
+        return
+    HISTORY_DIR.mkdir(exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    backup = HISTORY_DIR / f"world_{timestamp}.json"
+    if WORLD_STATE_FILE.exists():
+        shutil.copy2(WORLD_STATE_FILE, backup)
+    tmp = WORLD_STATE_FILE.with_name(f"world_state_{os.getpid()}_{threading.get_ident()}.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(world, f, indent=2)
+    os.replace(tmp, WORLD_STATE_FILE)  # atomic on Windows and POSIX
+    logger.info(f"World state saved (backup: {backup.name})")
+
+
+REQUIRED_WORLD_KEYS = {"tick", "world_date", "primary_event", "supporting_events", "active_events"}
+
+STRUCTURE_REQUIRED_KEYS = {
+    "tick", "world_date", "regions", "faction_identities",
+    "faction_power_state", "relationships", "primary_event",
+    "supporting_events", "active_events",
+}
+
+def is_valid_world(world: dict) -> bool:
+    if not isinstance(world, dict):
+        logger.error(f"World validation failed: expected dict, got {type(world).__name__}")
+        return False
+    missing = REQUIRED_WORLD_KEYS - world.keys()
+    if missing:
+        logger.error(f"World validation failed: missing keys {sorted(missing)}")
+        return False
+    return True
+
+
+def ensure_world_structure(world: dict, previous_world: dict) -> dict:
+    """
+    Ensure world has all structurally required keys.
+    Missing keys are copied from previous_world.
+    If world itself is invalid, return previous_world unchanged.
+    """
+    if not isinstance(world, dict) or not world:
+        logger.error("ensure_world_structure: world is invalid — returning previous world")
+        return previous_world if isinstance(previous_world, dict) and previous_world else {}
+
+    prev = previous_world if isinstance(previous_world, dict) else {}
+    for key in STRUCTURE_REQUIRED_KEYS:
+        if key not in world or world[key] is None:
+            if key in prev and prev[key] is not None:
+                world[key] = prev[key]
+                logger.warning(f"ensure_world_structure: restored missing key '{key}' from previous world")
+            else:
+                logger.error(f"ensure_world_structure: '{key}' missing and no fallback — returning previous world")
+                return prev if prev else world
+    return world
+
+
+def rollback_last_save() -> None:
+    if not HISTORY_DIR.exists():
+        logger.warning("Rollback skipped: history directory does not exist")
+        return
+    backups = sorted(
+        [f for f in os.listdir(HISTORY_DIR) if f.startswith("world_") and f.endswith(".json")],
+    )
+    if not backups:
+        logger.warning("Rollback skipped: no backup files found in history/")
+        return
+    latest = HISTORY_DIR / backups[-1]
+    shutil.copy2(latest, WORLD_STATE_FILE)
+    logger.info(f"Rollback complete: restored world_state.json from {latest.name}")
+
+
+def simulate_next_tick(world: dict) -> dict:
+    # Placeholder — replace with full simulation logic when ready
+    return world
+
+
+def run_simulation_tick() -> None:
+    logger.info("Simulation tick starting")
+    if not WORLD_STATE_FILE.exists():
+        logger.error("world_state.json not found — cannot run tick")
+        return
+
+    with open(WORLD_STATE_FILE, "r", encoding="utf-8") as f:
+        try:
+            world = json.load(f)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse world_state.json: {e}")
+            return
+
+    new_world = simulate_next_tick(world)
+
+    if is_valid_world(new_world):
+        from territory_engine import process_territorial_events
+        new_world = process_territorial_events(new_world)
+        safe_save_world(new_world)
+        from world_manager import snapshot_world
+        snapshot_world()
+        logger.info("Simulation tick complete")
+    else:
+        logger.error("Tick produced invalid world state — world_state.json not overwritten")
+
 
 _scheduler = BackgroundScheduler(timezone="UTC")
 _lock = threading.Lock()
@@ -96,7 +212,213 @@ LEADERSHIP, DYNASTY, AND NOBLE HOUSE SYSTEM:
 - Tidefall houses: major Ver Meer, Gross, Adkison, Van Cleave; minor Fish, Binx, Darkleaf
 - Dur Khadur houses: major Gross, Adkison, Van Cleave; minor Binx, Darkleaf, Dale
 - Same dynasty succession preserves or improves stability; different dynasty succession raises instability; no clear successor creates a power vacuum and possible civil war
+- Succession is determined strictly by dynasty rank (coreRole), NOT by physical location; the character with coreRole "Heir" inherits regardless of where they are in the world when succession occurs; if the Heir is traveling or in a distant region, they must journey home to claim power, which may cause instability during the interregnum
 - Human leadership is family-dynastic and politically competitive; Dreadwind is loyalty-based with frequent turnover; Dwarves are clan-stable; Dread Elves have long manipulation-based reigns; Glenhaven transitions through council; Orcs use clan/strength/consensus; Goblins have flexible low-dynasty leadership
+
+CHARACTER MOVEMENT SYSTEM:
+- Every house_character has a location (their current region), destination (region they are traveling to, empty if stationary), ticks_to_arrive (ticks until arrival, 0 if stationary), and journey_purpose (reason for travel, empty if stationary)
+- Characters may travel between regions for political missions, diplomatic visits, military assignments, spy operations, or personal ambition
+- Travel between adjacent or nearby regions takes 1-2 ticks; travel across the world takes 2-3 ticks
+- While traveling (ticks_to_arrive > 0), decrement ticks_to_arrive by 1 each tick; when it reaches 0 set location = destination and clear destination/journey_purpose
+- Characters should only travel when there is a meaningful narrative reason: a faction in crisis needs their Heir recalled, a Power Role is sent on a mission, a Wildcard defects or flees, etc.
+- Most characters remain stationary most ticks; movement should be purposeful and relatively rare
+- A traveling Heir does not delay succession — the coreRole rank determines succession regardless of travel status, but an absent Heir creates a brief power gap (1-2 ticks of instability) while they return to claim their seat
+- Do not move Leaders away from their seat of power without exceptional narrative cause; Heirs may travel for diplomacy or training; Power Roles and Wildcards move most freely
+
+CHARACTER DECISION SYSTEM:
+Every character decision passes through four checks in order. Apply all four when writing recentActions, determining outcomes, and resolving conflicts.
+
+STEP 1 — MORAL GATE (morality shapes what methods a character will use):
+- morality > 72: will not initiate assassination, torture, deliberate civilian harm, or unprovoked betrayal; may refuse orders that require it; chooses costly-but-clean methods
+- morality 35–72: pragmatic; uses harsh methods under sufficient pressure or self-interest; will compromise ethics if the stakes justify it
+- morality < 35: willing to use any method; betrayal, exploitation, and cruelty are available tools; actively pursues advantage through them
+
+STEP 2 — RISK GATE (ambition determines how much risk a character courts):
+- ambition > 72: actively pursues high-risk high-reward opportunities; may overextend; gambles on uncertain odds; pushes for offensive action
+- ambition 35–72: accepts calculated risks; prefers options with reasonable odds; won't court ruin but won't play purely safe
+- ambition < 35: avoids unnecessary risk; prefers stability, delay, and defensive posture; will pass on opportunities that feel dangerous
+
+STEP 3 — LOYALTY GATE (loyalty determines reliability to allies and susceptibility to defection):
+- loyalty > 72: honors agreements even at personal cost; will not defect unless catastrophically betrayed; defends allies proactively
+- loyalty 35–72: conditional; holds under normal pressure; may defect if loyalty is unrewarded over time or if a better offer appears
+- loyalty < 35: self-serving; actively weighs betrayal if advantageous; alliances are transactional; will defect with moderate incentive
+
+STEP 4 — INTELLIGENCE MODIFIER (intelligence scales execution quality and prediction accuracy):
+- intelligence > 72: better predictions; anticipates responses before acting; reduces unintended consequences; turns partial information into strategic advantage; actions succeed at 20% higher rate
+- intelligence 40–72: competent; acts on available information; occasional blind spots; average success rate
+- intelligence < 40: reactive; makes tactical errors; misreads motivations; may act on false information; 30% higher chance of plans backfiring
+
+SKILL EXECUTION MODIFIERS (applied when a character acts within a domain):
+- warfare skill drives military action quality: troop handling, battle preparation, siege execution, casualty management
+  · skill 0–30: poor execution, high friendly losses, coordination failures
+  · skill 31–65: competent; achieves objectives with expected costs
+  · skill 66–100: precise; minimises losses, exploits terrain and timing, may create advantage beyond the primary objective
+- diplomacy skill drives negotiation and alliance outcomes: trust-building, terms extraction, de-escalation, coalition assembly
+  · low diplomacy: agreements are brittle, terms are worse, counterparties detect weakness
+  · high diplomacy: agreements hold longer, extracts better terms, may flip hesitant parties
+- intrigue skill drives covert actions: spy operations, intelligence gathering, sabotage, assassination, rumor campaigns
+  · low intrigue: operations are detected or misattributed; intelligence is incomplete; assassinations fail or create blowback
+  · high intrigue: operations are clean; intelligence is accurate; covert actions achieve objectives with minimal trace
+- faith skill drives religious and morale actions: sermon influence, spiritual authority, blessing effects, cult loyalty
+  · low faith: religious arguments are unconvincing; morale effects are short-lived
+  · high faith: inspires genuine conviction; long-lasting morale; may convert or bind communities
+
+CHARACTER MEMORY IN DECISIONS:
+Every character carries a memory array tracking betrayals, alliances, victories, losses, honor, and threats.
+Each memory has a target (person or faction), a signed impact, and a description of what happened.
+When writing character decisions and recentActions, consult their memory:
+- Negative memories (betrayal, loss, threat) suppress cooperation, loyalty, and trust toward the target; impact below −20 makes the character actively hostile
+- Positive memories (alliance, victory, honor) reinforce cooperation, loyalty, and willingness to take risks alongside the target; impact above +20 creates genuine trust
+- Stacked memories of the same type against the same target compound: a character who has been betrayed twice remembers both
+- Memory can override trait signals: a normally high-loyalty character with a betrayal memory from an ally will hesitate to trust them again regardless of their baseline loyalty score
+- Memory can write new memory: the AI may add memory entries when significant events occur (a betrayal, a shared victory, an act of honor)
+- Memory fades over time — very old memories are weaker; the AI should not treat a faded −5 impact the same as a fresh −35 one
+- Long-lived races (elves, dwarves) carry memories for decades; short-lived races (goblins, orcs) forget more quickly
+
+RELATIONSHIP DECISION SYSTEM:
+Every character carries a relationships dict keyed by target name with trust (0–100), fear (0–100), and respect (0–100) values. These are live numbers updated each tick. Use them when writing recentActions, resolving inter-character conflicts, and determining outcomes. Each character also has a relationship_signals list that pre-computes the dominant bias — read it when available.
+
+TRUST (0–100) — willingness to cooperate and share:
+- trust > 70: character actively seeks to include this person; shares intelligence; proposes joint ventures; backs them publicly; alliance attempts have a strong chance of success
+- trust 40–70: neutral-cooperative; engages when interests align; won't go out of their way but won't block either
+- trust < 40: guarded; withholds intelligence; insists on safeguards before agreeing; alliance attempts succeed only under compelling pressure
+- trust < 20: actively suspicious; interprets actions uncharitably; may preemptively act against them; betrayal temptation rises sharply
+
+FEAR (0–100) — intimidation, avoidance, submission:
+- fear > 70: avoids direct confrontation; defers publicly even when opposed privately; unlikely to initiate aggression; may submit to unfair demands to avoid conflict; war decisions require overwhelming advantage before proceeding
+- fear 40–70: respects the target's power; calculates carefully before any hostile action; prefers indirect pressure or proxy moves
+- fear < 20: does not see the target as a serious threat; may provoke, challenge, or underestimate them; war decisions made with less caution
+
+RESPECT (0–100) — admiration and recognition of capability:
+- respect > 70: values the target's judgment; seeks their approval; honors agreements with them even at cost; likely to cooperate on shared goals; may defer to their strategic lead
+- respect 40–70: professional regard; cooperates when appropriate; no active admiration but no dismissal
+- respect < 20: dismissive of their competence; ignores their counsel; undercuts or humiliates them when possible; low respect combined with low trust = open hostility
+
+COMBINED RELATIONSHIP EFFECTS ON DECISION TYPES:
+
+Diplomacy / Alliance:
+- trust > 70 AND respect > 60 → alliance offer is probable; character makes the first move; terms are generous
+- trust > 70 AND respect < 40 → offers alliance from a position of condescension; may demand unfavorable terms
+- trust < 40 AND respect > 60 → reluctant respect; may cooperate on specific shared threats but won't formalize ties
+- trust < 30 AND respect < 30 → will not agree to alliance; if pressured, offers false agreement with no intention of honoring it
+
+War Decisions:
+- fear > 70 → will not initiate; prefers proxy war, economic pressure, or delay; if forced into war, seeks the quickest possible exit
+- fear 40–70 AND respect < 30 → may initiate war against a weaker-than-expected enemy; underestimates them
+- fear < 20 AND trust < 30 → aggressive; willing to declare war on provocation; sees this target as conquerable
+- fear < 20 AND trust < 30 AND morality < 35 → will initiate war with minimal justification
+
+Betrayal:
+- trust < 25: betrayal requires only modest incentive; character actively looks for opportunities
+- trust < 25 AND loyalty < 35: high betrayal probability each tick; will act on any reasonable offer
+- trust < 25 AND fear > 60: will betray covertly (sabotage, intelligence leak) but not openly — too afraid of direct consequences
+- trust > 65: will not betray even under pressure; if forced, experiences significant loyalty/morality cost over subsequent ticks
+
+Cooperation:
+- respect > 65 AND trust > 55 → proactive cooperation; contributes resources to shared goals; defends the alliance
+- respect > 65 AND trust < 40 → reluctant cooperation; complies with requests but does not volunteer
+- respect < 25 AND trust < 40 → passive obstruction; delays, withholds, creates bureaucratic friction without open defiance
+
+RELATIONSHIP DECISION EXAMPLES — same scenario, different relationship values:
+- Lord A proposes a trade alliance to Lord B (trust=78, fear=12, respect=71): B agrees immediately, offers additional terms, and considers A a genuine partner.
+- Lord A proposes the same to Lord C (trust=29, fear=8, respect=22): C refuses publicly, frames A as predatory, and looks for counter-leverage.
+- Warlord X considers invading Faction Y (his fear of Y=72): he delays, funds border skirmishes, and waits for Y to weaken before committing.
+- Warlord X considers the same with fear=18: he invades on minimal pretext and dismisses reports of Y's military capacity.
+- Advisor Z is offered gold to sell intelligence on their lord (trust of lord=18, loyalty=28): high betrayal probability — Z takes the gold.
+- Same offer to Advisor W (trust of lord=74, loyalty=65): W refuses, reports the approach to their lord, and names the source.
+
+COMBINED DECISION LOGIC — same situation, different characters:
+When writing what a character does this tick, combine all four steps:
+  · A high-morality low-ambition diplomat offered a chance to assassinate a rival: moral gate blocks it; they propose a legal challenge instead
+  · A low-morality high-ambition spy offered the same: moral gate passes; risk gate passes; they take it and intrigue skill determines if it succeeds cleanly or blows back
+  · A high-loyalty low-intelligence general asked to hold a defensive line against orders to retreat: loyalty holds (won't retreat); intelligence means they handle it poorly (takes unnecessary casualties)
+  · A high-intelligence low-loyalty advisor presented with a betrayal opportunity: intelligence recognises the long-term cost; if loyalty < 35 and the price is high enough, they calculate it is worth taking
+
+FACTION RELATIONSHIP SYSTEM:
+Every pair of factions has a relationship entry with three numeric axes (0–100) and a type. When writing faction actions and events, update these values to reflect what actually happened this tick.
+
+Schema per faction pair:
+- trust (0–100): diplomatic confidence; how much each side believes the other will honor agreements
+- hostility (0–100): active antagonism; military tension, border incidents, proxy conflicts
+- alliance_level (0–100): formalized cooperation; 0 = no alliance, 100 = full military pact with shared resources
+- type: "neutral" | "rivalry" | "alliance" | "war"
+
+Rules for writing relationships:
+- trust > 65: factions share intelligence, coordinate on shared threats, honor trade agreements without incentive
+- trust < 30: factions spy on each other, assume bad faith, require guarantors for any agreement
+- hostility > 70: active military pressure; border skirmishes occur without specific orders; diplomatic channels are thin
+- hostility > 85 AND type != "war": war declaration is imminent — write it this tick or next
+- alliance_level > 60: joint military operations are available; resource sharing occurs automatically
+- alliance_level < 20 AND type = "alliance": the alliance is in name only; it will collapse under any real pressure
+
+Event impacts — when you write these events, adjust the corresponding relationships:
+- War declared between A and B: hostility = max(current, 80), trust = min(current, 15), alliance_level drops 25
+- Peace treaty signed: hostility drops 30, trust rises 15, type becomes "neutral" or "rivalry"
+- Alliance formed: alliance_level rises 40, hostility drops 20, trust rises 20, type becomes "alliance"
+- Betrayal by A against B: trust drops 30–50, hostility rises 20–40, alliance_level drops 30
+- Joint military victory: trust rises 15, alliance_level rises 10
+- Trade agreement: trust rises 10, hostility drops 8
+- Diplomatic insult or broken promise: trust drops 15–25
+- Prolonged no-contact: values drift slowly toward neutral baselines (handled automatically by the engine)
+
+Leader influence: faction relationships are pulled toward what the faction's leaders actually feel toward each other. A faction led by characters who fear and distrust the other side will drift toward hostility over time even without active events. Write character recentActions that reflect and reinforce this.
+
+RELATIONSHIP EVENT TRIGGERS:
+Every character now carries an event_pressure list. Every faction pair has faction_event_pressure entries. These are pre-computed threshold flags — when they appear, you MUST write events or recentActions this tick that reflect them. Do not ignore them.
+
+CHARACTER-LEVEL EVENT PRESSURE TAGS — act on these in recentActions and active_events:
+
+betrayal_risk:<target>
+  Conditions: trust<25, loyalty<40, ambition>55, fear<55, morality<55
+  Write: the character exploits an opportunity to betray target — leaks intelligence, breaks an agreement, sides with a rival, or stabs them in the back at a critical moment. Severity scales with how far below thresholds the values are.
+
+assassination_attempt:<target>
+  Conditions: trust<15, intrigue>60, morality<40, target influenceScore>55, fear<50
+  Write: a covert kill or kidnap attempt. Intrigue skill determines success. High intrigue → clean; low intrigue → foiled, possibly traced. Always create a memory entry for both parties if it occurs.
+
+rivalry_escalation:<target>
+  Conditions: trust<30, respect<28, ambition>65, fear<40
+  Write: the character acts to damage the target's standing — publicly challenges them, undermines their project, moves against their allies, or claims contested resources. Does not require violence.
+
+alliance_approach:<target>
+  Conditions: trust>68, respect>58, fear<45, loyalty>45
+  Write: the character initiates or deepens cooperation — proposes a formal arrangement, shares resources, sends a representative, or endorses the target publicly.
+
+submission_likely:<target>
+  Conditions: fear>75, trust<35, target influenceScore>65
+  Write: the character defers, backs down from a dispute, or offers tribute to avoid confrontation. May privately resent it — write that resentment into currentGoal or memory.
+
+defection_risk:<target>
+  Conditions: loyalty<25, trust of target>60, ambition>60
+  Write: the character is actively considering switching allegiance. This tick they may take a covert step: meeting with the target's representative, withholding support from their current faction, or sending a signal of availability.
+
+intelligence_leak:<target>
+  Conditions: trust<20, intrigue>55, fear<60, morality<50
+  Write: the character passes damaging information about their own faction or another party to the target. Creates a memory entry of type "betrayal" for the original faction.
+
+assassination_suspicion:<target>
+  Conditions: target intrigue>65, trust<30, char intelligence>55
+  Write: the character suspects the target is preparing a move against them. They take defensive action — increases guard, moves allies, plants counter-intelligence. Does not require the suspicion to be correct.
+
+FACTION-LEVEL EVENT PRESSURE TRIGGERS — act on these in active_events and faction_actions:
+
+war_imminent | hostility≥82, type≠war
+  Write: a border skirmish, a mobilization order, or an ultimatum. War should be declared this tick or next. The triggering incident should feel earned, not sudden.
+
+alliance_collapse | type=alliance, trust<25 or hostility>55
+  Write: public fracture of the alliance — a broken military commitment, a diplomatic insult, a unilateral action that violated terms. The type should move to "rivalry" or "neutral".
+
+faction_betrayal | alliance_level>45, trust<20
+  Write: one faction acts openly against the other despite formal alliance — seizes a disputed asset, sells intelligence to a third party, or sabotages a joint operation.
+
+peace_overture | type=war, trust>38, hostility<60
+  Write: a faction sends terms, proposes a ceasefire, or opens back-channel diplomacy. Does not require acceptance. Hostility should decline 5–15 this tick.
+
+alliance_forming | trust>68, hostility<28, alliance_level<40, type≠alliance
+  Write: a formal meeting, treaty negotiation, or public declaration of aligned interests. Alliance_level should rise 15–30 this tick.
+
+rivalry_escalating | hostility 55–82, trust<35, type≠war
+  Write: a hostile economic action, a territorial claim, a proxy conflict, or an intelligence operation. Hostility should rise 3–8 this tick. The factions are not yet at war but are moving that way.
 
 RESOURCE AND TRADE SYSTEM:
 - Every faction tracks food, gold, military, materials, and influence on a 0-100 scale
@@ -117,6 +439,257 @@ RESOURCE AND TRADE SYSTEM:
 - Momentum ranges from -10 to +10; success increases momentum and failure reduces it, affecting confidence and aggression
 - Event fatigue matters: repeated stress in a region compounds instability and collapse risk
 - Internal pressure drives rebellion/collapse risk; external threat drives invasion/war risk
+
+FACTION POWER SYSTEM:
+Every faction has four power axes tracked in faction_power_state. Update these values when events justify it; changes are capped at ±12 per tick by the engine.
+
+- militaryPower (0–100): standing army strength, equipment quality, readiness, and command cohesion
+  · >70: can sustain offensive war; intimidates neighbors; siege capacity available
+  · 40–70: can defend and conduct limited offensives; struggles with prolonged campaigns
+  · <40: defensive posture only; avoids open conflict; vulnerable to invasion
+  · <20: forces near collapse; garrison-level only; likely to lose any engagement
+
+- economicPower (0–100): wealth, resource production, trade revenue, and financial stability
+  · >70: funds wars, bribes, and large projects without strain; trade surplus
+  · 40–70: covers expenses; occasional shortfalls under stress
+  · <40: rationing; can't fund sustained campaigns; debt or resource depletion
+  · <20: economic crisis; social unrest rising; military funding threatened
+
+- politicalInfluence (0–100): control over internal decisions, alliances, and external leverage
+  · >70: dominant voice in regional affairs; minor lords defer; laws hold
+  · 40–70: competitive; must negotiate and build coalitions; contested decisions
+  · <40: internal fragmentation; rival power centers; difficulty executing strategy
+  · <20: near-collapse of central authority; succession crises or factional civil war
+
+- religiousInfluence (0–100): spiritual authority, morale impact, and belief-based loyalty
+  · >70: clergy shapes public will; religious sanction accelerates military morale and political decisions
+  · 40–70: faith matters but does not dominate; moderate morale effects
+  · <40: secular or spiritually fractured; religious arguments fall flat; faith cannot stabilize unrest
+  · <20: faith collapsed or discredited; morale vulnerable; religious movements may form to fill the void
+
+Power interactions:
+- militaryPower × economicPower: economic collapse (economic<30) reduces military by 3–5/tick through supply failure
+- politicalInfluence × militaryPower: factional collapse (political<25) means military cannot mobilize reliably
+- religiousInfluence × political: high faith (>65) can substitute political legitimacy during succession crises
+- All four axes interact with faction relationship values — a faction with high military but low trust from all neighbors is isolated
+
+TERRITORY → POWER CONNECTION:
+The engine computes territory contribution per axis every tick using _territory_power_contribution. These values are pre-computed and visible in faction_power_state. Use them when writing faction decisions — a faction with high territory count should feel different from one with few high-value holdings.
+
+How territory type maps to power axes:
+- fortress: military +2.5× per location (highest military contribution of any type); weak economic/political
+- capital: balanced high contribution across all axes; political ×2.0 (legitimacy source)
+- city: economic ×2.0, political ×1.5; military is weakest (soft power base)
+- wild: lowest contribution across all axes; military ×0.6 (frontier buffer only)
+
+Stability gates the contribution: a location at stability 14 gives only 10% of its potential power. A location at stability 50+ gives 100%. This means:
+- A faction with 5 fortresses all in unrest effectively has the military power of 1 fortress
+- Stability loss cascades into power loss faster than territorial loss does
+
+Rebellion drain: a rebelling location flips from contributing power to draining it. Rebellion intensity scales the drain — a peak-intensity rebellion in a city drains economic and political power each tick regardless of who holds it.
+
+Write faction awareness of this: a faction watching its territory_count drop, its stability_drain rise, or a high-value location enter rebellion should react — rerouting resources, dispatching administrators, or launching suppression campaigns.
+
+POWER OUTCOMES SYSTEM:
+Each faction in faction_power_state now carries a power_modifiers dict. Read it when writing wars, diplomacy, and events. The engine pre-computes war_outcomes for every active war — you MUST use those verdicts when writing battle results.
+
+WAR OUTCOMES (read war_outcomes list before writing any battle event):
+Every active war pair has a pre-computed entry with "verdict" and "advantage" score.
+- "decisive attacker advantage" (advantage > 25): attacker wins engagements cleanly; defender takes heavy losses; territory changes hands; siege succeeds in 1–3 ticks
+- "attacker favored" (10–25): attacker wins most exchanges but at cost; defender can slow the advance; war lasts multiple ticks
+- "slight attacker edge" (3–10): contested; neither side dominates; attrition matters; outcome depends on economic staying power and coalitions
+- "evenly matched" (-3 to 3): stalemate likely unless a third factor tips it (ally joins, economic collapse, leader death, betrayal event)
+- "slight defender edge" (-3 to -10): attacker makes slow progress but bleeds; siege fails; defender can negotiate from a position of strength
+- "defender favored" (-10 to -25): attacker is repelled; counterattack becomes viable; attacker loses support of wavering lords
+- "decisive defender advantage" (< -25): attacker is routed; offensive collapses; territory may be lost; war ends this tick or next under terms
+
+The power_modifiers fields that directly modify battle writing:
+- battle_edge > 0: this faction wins individual engagements more often; describe smaller losses, better execution
+- battle_edge < 0: this faction takes heavier casualties, fails coordination, loses skirmishes
+- attrition_resist > 0: can sustain a long war; supply lines hold; gold doesn't collapse
+- attrition_resist < 0: the war is already bleeding them; write supply shortages, recruitment difficulty, desertion
+- coalition_pull > 0: minor lords rally to their banner; write additional forces joining
+- coalition_pull < 0: allies are hesitant; minor lords wait to see who wins before committing
+- morale_edge > 0: troops hold in bad situations; last stands are possible; religious fervor in difficult engagements
+- morale_edge < 0: morale breaks faster; retreats happen sooner; write routing and abandonment
+
+DIPLOMACY OUTCOMES:
+Read power_modifiers when writing treaty negotiations, ultimatums, and alliance events.
+- treaty_leverage > 0.3: faction extracts favorable terms; the other side concedes ground, resources, or rights
+- treaty_leverage < -0.3: faction accepts worse terms; agreement is one-sided; resentment builds
+- economic_leverage > 0.3: gold and trade threats are credible; bribery attempts succeed; sanctions hurt the target
+- economic_leverage < -0.3: faction cannot back economic threats; offered bribes are inadequate; ignored
+- threat_credibility > 0.3: ultimatums are taken seriously; the other side moves first to de-escalate
+- threat_credibility < -0.3: ultimatums are called as bluffs; aggression invites counter-aggression
+- oath_durability > 0.2: agreements hold under pressure; breaking them carries real cost (morale, legitimacy)
+- oath_durability < -0.2: agreements fray quickly; betrayal is cheaper; write quiet non-compliance
+
+DIPLOMACY RESOLUTION RULE: when two factions negotiate, the one with higher (treaty_leverage + economic_leverage) wins the terms. If the gap is < 0.3 combined, terms are roughly balanced. If gap > 0.8, the weaker side effectively capitulates.
+
+EVENT OUTCOMES:
+- recovery_speed > 0.3: disasters (famine, plague, siege) are overcome faster; write resilience, emergency response, rapid rebuild
+- recovery_speed < -0.3: disasters linger; secondary crises emerge; write cascading failures
+- rebellion_resistance > 0.3: internal unrest is contained; write suppression, loyal troops acting quickly, political maneuvering that defuses the spark
+- rebellion_resistance < -0.3: revolts find fertile ground; write spreading unrest, lords defecting, the center failing to hold
+- belief_spread > 0.3: religious ideas from this faction spread into neighboring populations; write conversion events, pilgrims arriving, foreign clergy gaining influence
+- belief_spread < -0.3: faith is stagnant or retreating; write heresy, loss of clergy authority, competing belief currents gaining ground
+
+COMBINED POWER EXAMPLE — reading the system correctly:
+Twin Cities (militaryPower=55, economicPower=70, politicalInfluence=65) vs Groth Clans (militaryPower=78, economicPower=32, politicalInfluence=38) at war:
+- war_outcomes verdict: "attacker favored" (Groth attacking Twin Cities) OR "slight defender edge" (Twin Cities holding)
+- Groth: battle_edge=+0.45, attrition_resist=-0.24 → wins battles but can't sustain a long campaign
+- Twin Cities: attrition_resist=+0.26, treaty_leverage=+0.23 → should play for time, not pitched battle; negotiate when Groth bleeds out
+- Write: Groth raids are effective early; Twin Cities pulls back to fortified positions; after 4–6 ticks Groth supply lines strain; Twin Cities proposes terms from a position of recovery
+
+FACTION DOMINANCE SYSTEM:
+faction_dominance is computed every tick and contains the global power ranking. Use it to shape world narrative — the dominant faction sets the political tone; rising factions are creating pressure; collapsing factions are becoming desperate.
+
+dominantFaction: the single highest-scoring faction this tick
+- Their actions carry more weight; other factions respond to them more than to each other
+- Minor lords and neutral parties drift toward them without active persuasion
+- Write their actions with consequence: what they do reshapes others' decisions
+
+risingFactions[] (trend = "rising" or "surging"):
+- These factions are gaining ground across multiple ticks — not a one-tick spike
+- They have growing confidence; write them as more assertive, making offers, pressing advantages
+- Other factions are beginning to notice; some will seek alliances before the window closes
+
+collapsingFactions[] (trend = "declining" or "collapsing"):
+- These factions are in sustained contraction — losing territory, war attrition, instability, or leadership failure
+- Write them as increasingly desperate: purging advisors, offering concessions, gambling on bold moves
+- Internal pressure rises; succession is more dangerous; rivals begin carving at the edges
+
+rank_delta: how many positions each faction moved this tick
+- rank_delta > 0: moved up in the rankings; gaining visibility and credibility
+- rank_delta < 0: dropped; write other factions noticing the weakness
+
+trend labels and what they mean for narrative:
+- "surging" (momentum > 4): write as a power on the move — military campaigns succeeding, economy booming, or political consolidation completing
+- "rising" (1.5–4): steady gains; not yet dominant but credible; rivals are recalculating
+- "gaining" (0.4–1.5): slight upward drift; stable with momentum; no dramatic events needed
+- "stable": no meaningful change — write them as maintaining their position, bureaucratic, waiting
+- "weakening" (-0.4 to -1.5): early warning signs; something is draining them; they may not have noticed yet
+- "declining" (-1.5 to -4): visible contraction; rivals are circling; internal voices pushing for change
+- "collapsing" (< -4): crisis mode; write emergency actions, failed stabilization attempts, last-ditch diplomacy
+
+TERRITORY SYSTEM:
+Locations are the canonical territory state. Each location has an id, name, owner, controller, control (0–100), stability (0–100), population, value (0–100), region_type, and adjacent list.
+
+owner vs controller:
+- owner = the faction that claims political sovereignty (whose flag flies, whose laws apply on paper)
+- controller = the faction that actually holds the location militarily and administratively
+- When owner ≠ controller, the location is contested — write this tension into events: puppet governors, resistance movements, ongoing skirmishes, tribute demands
+- A faction can own a location (historical claim, treaty right) without controlling it; they will try to reclaim it
+
+control (0–100): how firmly the controller holds the location
+- 80+: secure; garrison is reliable; taxes flow; locals are broadly compliant
+- 50–80: moderate hold; pockets of resistance; garrison stretched; loyalty uncertain
+- 30–50: contested; regular incidents; the controller administers but cannot trust the population
+- <30: nominal hold only; effective resistance; the controller is present but not governing
+- <15: the location is effectively lost — control will flip to another faction unless action is taken this tick
+
+stability (0–100): social and political stability within the location
+- 80+: peaceful; no significant unrest; economy functions; population content
+- 50–80: simmering; occasional unrest; factions have internal critics; economy under mild strain
+- 30–50: volatile; protests, riots, or armed resistance; productivity falls; garrison is taxed
+- <30: crisis; write a destabilizing event — food shortage, massacre, religious schism, purge, or open revolt
+
+value (0–100): strategic importance
+- 75+: critical location — losing it materially changes the war; holding it is worth significant cost
+- 50–75: important — contributes meaningfully to military, economy, or political legitimacy
+- 25–50: useful — provides some advantage but losing it is survivable
+- <25: minor — low strategic priority; may be abandoned under pressure
+
+region_type and what it means:
+- capital: maximum political legitimacy; losing it is existential for the owning faction
+- port: controls maritime trade and naval power; blockadeable
+- fortress: defensive multiplier; sieging requires 3–5× normal force advantage
+- mine: economic resource; losing it directly reduces economicPower
+- sacred: religiousInfluence source; losing it wounds morale and faith authority
+- wilderness: low value but buffers between factions; used for raids and flanking
+- sea: contested sea lanes; controls access between port locations
+
+When writing events involving locations:
+- Capture: controller changes, control drops to 20–40, stability drops 15–30
+- Consolidation over 3–5 ticks: control rises 5–10/tick as the new controller establishes hold
+- Siege: write attrition; control drops 3–8/tick for the besieged; stability drops; garrison morale
+- Rebellion: stability drops sharply; control drops 10–20; owner ≠ controller briefly possible even without outside force
+- Diplomatic transfer (cession): owner changes peacefully; control stays high; stability may dip 10–20 from uncertainty
+
+STABILITY MECHANICS:
+The engine computes stability changes each tick from three sources: war (handled by the war system), economy, and leadership. Each location carries unrest and rebellion_risk flags computed from thresholds.
+
+Stability drivers:
+- economicPower < 30 for the controlling faction: -2 stability/tick — economic collapse triggers food shortages, unpaid garrisons, and civil breakdown
+- economicPower < 50: -1 stability/tick — struggling economy erodes confidence and provokes unrest
+- economicPower > 70: +1 stability/tick — prosperity reinforces compliance and social order
+- ruler diplomacy > 65: +1 stability/tick — competent administration addresses grievances
+- ruler diplomacy < 35: -1 stability/tick — misrule breeds resentment and disorganization
+- warfare > 65 (when already in unrest): +1 — strong military presence suppresses open revolt
+
+Threshold flags (attached to each location each tick):
+- unrest = True when stability < 30: write civil unrest, tax refusal, militia formation, or protest events
+- rebellion_risk = True when stability < 15: a 25% per-tick chance of rebellion fires
+  - Rebellion outcome: controller flips to Rebels (or back to owner if owner ≠ controller); control drops to 15–25; stability rises slightly as initial violence ends
+  - Record as a location_event for narration; write it as a genuine popular uprising with specific cause
+
+High stability bonus:
+- stability > 80 adds +1 control/tick in peaceful territory (settled population consolidates faster)
+- unrest reduces control recovery by 1/tick (population actively resists administrative consolidation)
+
+location_events list accumulates all rebellion, unrest escalation, and stability crisis events for this tick. Read it when writing the tick's narrative — these are the ground-level events the major factions must respond to.
+
+TERRITORY TYPES:
+Every location has a territory_type (derived from region_type) that defines its strategic character and behavioral rules. The engine enforces these automatically — use them to write plausible narrative consequences.
+
+- city: dense population, economic engine, moderate defenses
+  · Losing a city cuts economicPower and drains population; sieges draw civilian suffering into the narrative
+  · Cities recover quickly under competent administrators; they collapse quickly under misrule
+  · Rebellion chance: standard (25%/tick at stability < 15)
+
+- fortress: built for war, thin population, commands surrounding terrain
+  · War pressure reduced 20% beyond normal region resistance — walls matter
+  · Rebellions are rare; garrisons are loyal by design (12% trigger chance at stability < 15)
+  · Long sieges (10+ ticks) should produce morale events: starvation, defection, sally attempts
+
+- wild: frontier, resource extraction, sparse settlement
+  · Stability decays −1/tick naturally — entropy is the default state in ungoverned land
+  · Rebellions ignite easily (45% trigger chance at stability < 15); guerrilla warfare favored over pitched battle
+  · Peace control recovery is slower by 1 (harder to build administrative reach into wilderness)
+
+- capital: the heart of a faction's identity and legitimacy
+  · Capture is existential: immediate major power loss event logged; surrounding factions react
+  · Rebellion garrisons are heavy; trigger chance halved (12%)
+  · Losing a capital without a successor location should trigger faction_collapse or succession_crisis events
+
+territory_type is derived by the engine (never write it yourself) from region_type:
+  capital → capital | city/port/sacred → city | fortress → fortress | mine/wilderness/plains/sea → wild
+
+REBELLION SYSTEM:
+A location enters in_rebellion = True when stability drops below 15 and the trigger fires (25% chance/tick). Once in rebellion the state persists until resolved. Do not overwrite in_rebellion — the engine manages it.
+
+Fields added to a rebelling location:
+- in_rebellion: true — the location is in active uprising; write it as a real, ongoing event
+- original_controller: the faction being rebelled against — this faction loses militaryPower, politicalInfluence, and economicPower each tick the rebellion continues
+- rebel_faction: "Rebels" (generic) or the owner's name if the owner is reclaiming from a foreign controller
+- rebellion_tick_started: the tick the uprising began
+- rebellion_intensity: 0–100, grows 3/tick from base 30; drives control pressure and narrative severity
+- emerging_factions[]: when a rebellion has lasted 30+ ticks at intensity ≥ 70, a new rebel faction emerges; the engine records it here with a suggested_name for you to formalize
+
+Ongoing rebellion effects (engine-computed, not AI-written):
+- control drops 3–8/tick depending on intensity
+- original_controller faction loses: militaryPower −1, politicalInfluence −2, economicPower −1 per tick
+- at control = 0: controller flips permanently to rebel_faction; control resets to 25–40; record as rebellion_victory
+
+Resolution conditions (engine-computed):
+- stability rises above 35: order restored, in_rebellion clears — write it as military suppression or negotiated amnesty
+- controller reasserts control above 60 while controller ≠ rebel_faction: uprising broken
+
+Narration rules for rebellions:
+- Give the rebellion a specific cause (food shortage, massacre, religious persecution, foreign occupation, tax crushing)
+- Track the rebellion across ticks — it should escalate, draw outside attention, force faction responses
+- New factions from emerging_factions[] should appear in faction lists as minor powers with their own goals
+- A rebellion victory is a world-changing event — write consequences for neighboring factions, trade routes, and beliefs
 
 POPULATION AND SOCIETY SYSTEM:
 - Population is a primary driver of military strength, stability, expansion, conflict, and collapse
@@ -361,7 +934,29 @@ Character recording:
 - portrait_image should be empty unless an image file already exists in static/illustrations/characters
 - Every important character belongs to a dynasty; use "Unknown Dynasty" only if the information is truly unavailable
 
-Keep all text values under 220 characters."""
+Keep all text values under 220 characters.
+
+CORE RULES:
+- world_state structure is FIXED — you may not add, remove, or rename top-level keys
+- Lore, omens, and god actions influence behavior and narrative only; they never change the schema
+- Every key that existed in the previous world_state must exist in your response
+
+CRITICAL — YOU MUST return a complete world_state:
+- tick and world_date must always be present and incremented
+- primary_event must always be a non-empty object with name, summary, severity, stage, trend, and involved
+- supporting_events, active_events, active_tensions, recent_events must always be arrays (empty if nothing active, never omitted)
+- leadership_state must always be an array with one entry per active faction
+- faction_identities, faction_power_state, faction_resources, relationships must always be objects (never null, never empty unless the world truly has no factions)
+
+YOU ARE NOT ALLOWED TO:
+- Return an empty object or partial world
+- Omit any key that was present in the previous world_state
+- Return null, undefined, or a non-object for any top-level field that holds structured data
+- Truncate arrays to zero when the previous state had entries (carry them forward or update them)
+
+FAILSAFE — if uncertain or if the simulation has no clear next event:
+- Return the previous world_state with tick incremented by 1, world_date updated, and small realistic changes applied
+- A quiet tick with minor faction actions and no primary event is valid — a missing tick is not"""
 
 WORLD_STATE_TOOL = {
     "name": "update_world_state",
@@ -786,7 +1381,7 @@ WORLD_STATE_TOOL = {
             },
             "house_characters": {
                 "type": "array",
-                "maxItems": 120,
+                "maxItems": 200,
                 "items": {
                     "type": "object",
                     "properties": {
@@ -796,16 +1391,41 @@ WORLD_STATE_TOOL = {
                         "coreRole": {"type": "string"},
                         "role": {"type": "string"},
                         "status": {"type": "string"},
-                        "age": {"type": "string"},
+                        "age": {"type": ["string", "number"]},
                         "race": {"type": "string"},
                         "influenceScore": {"type": "integer", "minimum": 0, "maximum": 100},
-                        "morality": {"type": "integer", "minimum": 0, "maximum": 100},
-                        "ambition": {"type": "integer", "minimum": 0, "maximum": 100},
-                        "loyalty": {"type": "integer", "minimum": 0, "maximum": 100},
-                        "intelligence": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "morality": {"type": "number", "minimum": 0, "maximum": 100},
+                        "ambition": {"type": "number", "minimum": 0, "maximum": 100},
+                        "loyalty": {"type": "number", "minimum": 0, "maximum": 100},
+                        "intelligence": {"type": "number", "minimum": 0, "maximum": 100},
                         "bias": {"type": "string"},
                         "currentGoal": {"type": "string"},
                         "recentActions": {"type": "array", "items": {"type": "string"}},
+                        "location": {"type": "string"},
+                        "destination": {"type": "string"},
+                        "ticks_to_arrive": {"type": "integer", "minimum": 0},
+                        "journey_purpose": {"type": "string"},
+                        "warfare": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "diplomacy": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "intrigue": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "faith": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "health": {"type": "number", "minimum": 0, "maximum": 100},
+                        "wounds": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+                        "memory": {
+                            "type": "array",
+                            "maxItems": 12,
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type":        {"type": "string", "enum": ["betrayal", "alliance", "victory", "loss", "honor", "threat"]},
+                                    "target":      {"type": "string"},
+                                    "impact":      {"type": "number"},
+                                    "tick":        {"type": "integer"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["type", "target", "impact"],
+                            },
+                        },
                     },
                     "required": ["name", "faction", "house", "coreRole", "role", "status", "age", "race", "influenceScore", "morality", "ambition", "loyalty", "intelligence", "bias", "currentGoal", "recentActions"],
                 },
@@ -908,8 +1528,16 @@ def _load_world_state():
 
 
 def _save_world_state(state):
-    with open(WORLD_STATE_FILE, "w", encoding="utf-8") as f:
+    if not state or len(state.keys()) == 0:
+        logger.error("_save_world_state: refusing to save — state is empty")
+        return
+    if not is_valid_world(state):
+        logger.error("_save_world_state: refusing to save — state failed validation")
+        return
+    tmp = WORLD_STATE_FILE.with_name(f"world_state_{os.getpid()}_{threading.get_ident()}.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2)
+    os.replace(tmp, WORLD_STATE_FILE)
 
 
 def _slugify_filename(text):
@@ -981,13 +1609,15 @@ def _generate_character_portrait(character, output_path):
     import requests
 
     prompt = character.get("portrait_prompt") or (
-        f"Dark fantasy portrait of {character.get('name', 'an Aeloria character')}, "
-        f"{character.get('faction', 'Aeloria')}, no text, no watermark."
+        f"Portrait of {character.get('name', 'an Aeloria character')}, "
+        f"{character.get('faction', 'Aeloria')}."
     )
     prompt = (
         f"{prompt}\n\n"
-        "Vertical bust portrait, painterly cinematic dark fantasy, Aeloria website aesthetic. "
-        "No text, no letters, no watermark, no logo."
+        "Medieval noble portrait, Crusader Kings 3 style, realistic painted portrait, detailed face, "
+        "cinematic lighting, dark background, soft shadows, oil painting style, ultra detailed, "
+        "3/4 view, serious expression, historically inspired clothing, muted colors, high realism, depth of field. "
+        "No text, no letters, no watermark, no UI frame, no border."
     )
 
     try:
@@ -1025,9 +1655,11 @@ def _generate_codex_image(prompt, output_path):
 
     final_prompt = (
         f"{prompt}\n\n"
-        "Cinematic painterly dark fantasy Codex illustration for Aeloria. "
+        "Style: photorealistic dark fantasy illustration, Crusader Kings / game card cinematic aesthetic. "
+        "Rich deep colours — black, dark brown, charcoal, with gold or silver accents. "
+        "Dramatic directional lighting with deep shadows. "
         "No text, no letters, no watermark, no logo. "
-        "Readable as a website lore card image with dark edges."
+        "Dark edges suitable for a lore card on a dark UI."
     )
 
     try:
@@ -1327,6 +1959,1480 @@ def _resource_pressure(resource_row):
     return "Stable, with no acute resource shortages."
 
 
+def _territory_power_contribution(faction_name, state):
+    """Compute the territory contribution to all four power axes for a given faction.
+
+    Rules:
+    - More territories: each controlled location adds to base score
+    - Higher value: value > 50 amplifies; value < 25 barely registers
+    - Unstable territories: stability gates how much of the location's potential is realized
+    - Rebelling territories: actively drain power instead of contributing
+    - Territory type: each type boosts a different axis
+
+    Returns dict: {military, economic, political, religious, territory_count,
+                   contested_count, stability_drain}
+    """
+    # Per-axis multipliers per territory_type
+    TYPE_WEIGHTS = {
+        "capital":  {"mil": 1.5, "eco": 1.5, "pol": 2.0, "rel": 1.0},
+        "city":     {"mil": 0.8, "eco": 2.0, "pol": 1.5, "rel": 0.8},
+        "fortress": {"mil": 2.5, "eco": 0.5, "pol": 0.8, "rel": 0.5},
+        "wild":     {"mil": 0.6, "eco": 0.8, "pol": 0.4, "rel": 0.6},
+    }
+
+    locations  = state.get("locations", [])
+    controlled = [loc for loc in locations if loc.get("controller") == faction_name]
+
+    mil = eco = pol = rel = 0.0
+    stability_drain = 0.0
+
+    for loc in controlled:
+        ctrl    = int(loc.get("control",    50)) / 100   # 0–1: how firmly held
+        stab    = int(loc.get("stability",  50)) / 100   # 0–1: social order
+        val     = int(loc.get("value",      50)) / 100   # 0–1: strategic importance
+        ttype   = loc.get("territory_type", "wild")
+        in_reb  = loc.get("in_rebellion",   False)
+        reb_int = int(loc.get("rebellion_intensity", 0)) / 100
+
+        w = TYPE_WEIGHTS.get(ttype, TYPE_WEIGHTS["wild"])
+
+        # Stability gate: how much of this location's potential is realised
+        if stab < 0.15:
+            stab_factor = 0.10   # garrison barely holds the population
+        elif stab < 0.30:
+            stab_factor = 0.35
+        elif stab < 0.50:
+            stab_factor = 0.65
+        else:
+            stab_factor = 1.0
+
+        # Value weight: value=50 → ×1.0; value=100 → ×1.5; value=0 → ×0.5
+        val_weight = 0.5 + val
+
+        effective = ctrl * stab_factor * val_weight
+
+        if in_reb:
+            # Rebelling territory drains resources; intensity scales the drain
+            drain = reb_int * 3.0
+            mil  -= drain * w["mil"] * 0.4
+            eco  -= drain * w["eco"] * 0.4
+            pol  -= drain * w["pol"] * 0.5
+            stability_drain += drain
+        else:
+            mil += effective * w["mil"]
+            eco += effective * w["eco"]
+            pol += effective * w["pol"]
+            rel += effective * w["rel"]
+            if stab < 0.50:
+                stability_drain += (0.50 - stab) * 4   # up to 2 pts drain per unstable loc
+
+    # Scale so 4–5 well-held high-value locations ≈ 20–28 pts at peak
+    SCALE = 3.5
+
+    return {
+        "military":        round(max(-25, min(30, mil * SCALE)), 2),
+        "economic":        round(max(-25, min(30, eco * SCALE)), 2),
+        "political":       round(max(-25, min(30, pol * SCALE)), 2),
+        "religious":       round(max(-15, min(20, rel * SCALE)), 2),
+        "territory_count": len(controlled),
+        "contested_count": sum(1 for loc in controlled if loc.get("contested")),
+        "stability_drain": round(stability_drain, 2),
+    }
+
+
+def _calculate_faction_power_dynamic(faction_name, state):
+    """Derive faction power from live territory, population, leaders, economy, and stability.
+
+    Returns {"militaryPower", "economicPower", "politicalInfluence", "religiousInfluence"} 0–100.
+    Called each tick; the result is blended with prev state and AI output in the normalizer.
+    """
+
+    # ── Territory contribution (type-weighted, value-amplified, stability-gated) ─
+    tc = _territory_power_contribution(faction_name, state)
+
+    # controlled_names drives population lookup below
+    all_locations   = state.get("locations", [])
+    controlled_locs = [loc for loc in all_locations if loc.get("controller") == faction_name]
+    controlled_names = {loc.get("name") for loc in controlled_locs}
+    if not all_locations:
+        controlled_names = {
+            r.get("region")
+            for r in state.get("region_control", [])
+            if r.get("controller") == faction_name
+        }
+
+    # ── Population ────────────────────────────────────────────────────────────
+    pop_state          = state.get("population_state", [])
+    faction_pop_rows   = [p for p in pop_state if p.get("region") in controlled_names]
+
+    total_pop       = sum(p.get("population", 0) for p in faction_pop_rows)
+    max_pop         = max((p.get("population", 0) for p in pop_state), default=1)
+    pop_score       = min(100, (total_pop / max(1, max_pop)) * 100)
+
+    avg_health      = (sum(p.get("health", 50)    for p in faction_pop_rows) / max(1, len(faction_pop_rows))) if faction_pop_rows else 50
+    avg_pressure    = (sum(p.get("pressure", 50)  for p in faction_pop_rows) / max(1, len(faction_pop_rows))) if faction_pop_rows else 50
+    active_military = sum(p.get("activeMilitary", 0) for p in faction_pop_rows)
+    max_military    = max((p.get("activeMilitary", 1) for p in pop_state), default=1)
+    military_pop_score = min(100, (active_military / max(1, max_military)) * 100)
+
+    # Population stability: high pressure = unrest = power drain
+    pop_stability_penalty = max(0, (avg_pressure - 40) * 0.35)
+
+    # ── Leader skills ─────────────────────────────────────────────────────────
+    LEADER_ROLES = {"Leader", "Heir", "Power Role"}
+    chars   = state.get("house_characters", [])
+    leaders = [
+        c for c in chars
+        if c.get("faction") == faction_name
+        and c.get("coreRole") in LEADER_ROLES
+        and not str(c.get("status", "")).lower().startswith("deceased")
+    ]
+
+    if leaders:
+        def _avg(field, default=50):
+            return sum(int(l.get(field, default)) for l in leaders) / len(leaders)
+        avg_warfare  = _avg("warfare")
+        avg_diplo    = _avg("diplomacy")
+        avg_intrigue = _avg("intrigue")
+        avg_faith    = _avg("faith", 20)
+        avg_infl_sc  = _avg("influenceScore")
+        # Depth bonus: having multiple capable leaders adds resilience
+        depth_bonus  = min(15, (len(leaders) - 1) * 3)
+    else:
+        avg_warfare = avg_diplo = avg_intrigue = avg_infl_sc = 45
+        avg_faith   = 20
+        depth_bonus = 0
+
+    # ── Economy / Resources ───────────────────────────────────────────────────
+    res_map = {r.get("faction"): r for r in state.get("faction_resources", [])}
+    res     = res_map.get(faction_name, {})
+    gold        = int(res.get("gold",      50))
+    food        = int(res.get("food",      50))
+    military_res = int(res.get("military", 50))
+    materials   = int(res.get("materials", 50))
+    infl_res    = int(res.get("influence", 50))
+
+    # Starvation penalty: food < 30 means military can't sustain itself
+    starvation_penalty = max(0, (30 - food) * 0.8) if food < 30 else 0
+
+    # ── External hostility (being at war drains economy + political capital) ──
+    faction_rels = [
+        r for r in state.get("relationships", [])
+        if r.get("faction_a") == faction_name or r.get("faction_b") == faction_name
+    ]
+    avg_ext_hostility = (
+        sum(r.get("hostility", 20) for r in faction_rels) / len(faction_rels)
+        if faction_rels else 20
+    )
+    war_drain = max(0, (avg_ext_hostility - 40) * 0.20)  # 0 at ≤40, up to 12 drain at 100
+
+    # ── Religious belief currents ─────────────────────────────────────────────
+    belief_bonus = 0
+    for b in state.get("belief_currents", []):
+        if faction_name.lower() in str(b.get("origin_faction", "")).lower():
+            followers = int(b.get("followers", 0))
+            belief_bonus += min(8, followers / 5000)
+    belief_bonus = min(20, belief_bonus)
+
+    # ── Compute four axes ─────────────────────────────────────────────────────
+    def _clamp(v):
+        return max(0, min(100, round(v)))
+
+    military_power = _clamp(
+        tc["military"]          +          # fortresses, capitals amplify; wild contributes little
+        military_pop_score * 0.14 +
+        avg_warfare        * 0.32 +        # leader warfare skill dominates raw military output
+        military_res       * 0.18 +
+        depth_bonus        * 0.8  -
+        pop_stability_penalty * 0.6 -
+        starvation_penalty -
+        war_drain          * 0.5  -
+        tc["stability_drain"] * 0.30       # aggregate instability drains supply lines
+    )
+
+    economic_power = _clamp(
+        tc["economic"]          +          # cities, ports, capitals drive economy
+        gold               * 0.28 +
+        food               * 0.18 +
+        materials          * 0.20 +
+        pop_score          * 0.10 +
+        avg_health         * 0.08 +
+        avg_diplo          * 0.12 -        # diplomats extract better trade terms
+        pop_stability_penalty * 0.5 -
+        war_drain          * 0.80 -        # war is the largest economic drain
+        tc["stability_drain"] * 0.22
+    )
+
+    political_influence = _clamp(
+        tc["political"]         +          # capitals, cities = political reach; wild = none
+        avg_intrigue       * 0.25 +
+        avg_infl_sc        * 0.25 +
+        infl_res           * 0.18 -
+        pop_stability_penalty * 0.8 -
+        war_drain          * 0.5  -
+        tc["stability_drain"] * 0.42       # instability destroys political legitimacy fastest
+    )
+
+    religious_influence = _clamp(
+        tc["religious"]         +          # sacred sites, stable cities amplify faith authority
+        avg_faith          * 0.42 +
+        belief_bonus       +
+        (100 - avg_pressure) * 0.18 +
+        avg_infl_sc        * 0.08 -
+        tc["stability_drain"] * 0.15
+    )
+
+    return {
+        "militaryPower":      military_power,
+        "economicPower":      economic_power,
+        "politicalInfluence": political_influence,
+        "religiousInfluence": religious_influence,
+    }
+
+
+def _normalize_faction_power_state(prev_state, new_state):
+    """Normalise the faction_power_state list — four 0-100 power axes per faction.
+
+    Schema per faction:
+      militaryPower       (0-100) — war strength: troops, equipment, readiness
+      economicPower       (0-100) — wealth and resource base
+      politicalInfluence  (0-100) — control over internal and external decisions
+      religiousInfluence  (0-100) — belief authority and morale
+    """
+    FACTION_SEEDS = {
+        "Twin Cities":     {"militaryPower": 55, "economicPower": 70, "politicalInfluence": 65, "religiousInfluence": 40},
+        "Tidefall":        {"militaryPower": 60, "economicPower": 65, "politicalInfluence": 50, "religiousInfluence": 25},
+        "Gilded Exchange": {"militaryPower": 30, "economicPower": 88, "politicalInfluence": 60, "religiousInfluence": 20},
+        "Dur Khadur":      {"militaryPower": 75, "economicPower": 62, "politicalInfluence": 55, "religiousInfluence": 50},
+        "Shadow Court":    {"militaryPower": 45, "economicPower": 55, "politicalInfluence": 72, "religiousInfluence": 35},
+        "Glenhaven":       {"militaryPower": 58, "economicPower": 50, "politicalInfluence": 60, "religiousInfluence": 55},
+        "Gilgeth Clans":   {"militaryPower": 70, "economicPower": 38, "politicalInfluence": 42, "religiousInfluence": 48},
+        "Groth Clans":     {"militaryPower": 78, "economicPower": 32, "politicalInfluence": 38, "religiousInfluence": 60},
+        "Vilefin":         {"militaryPower": 35, "economicPower": 45, "politicalInfluence": 40, "religiousInfluence": 30},
+        "Dreadwind":       {"militaryPower": 50, "economicPower": 48, "politicalInfluence": 45, "religiousInfluence": 28},
+    }
+
+    prev_rows = {
+        row.get("faction"): row
+        for row in prev_state.get("faction_power_state", [])
+        if row.get("faction")
+    }
+    incoming = {
+        row.get("faction"): row
+        for row in new_state.get("faction_power_state", [])
+        if row.get("faction")
+    }
+
+    AXES = ("militaryPower", "economicPower", "politicalInfluence", "religiousInfluence")
+
+    rows = []
+    seen: set = set()
+    all_factions = set(FACTION_SEEDS) | set(prev_rows) | set(incoming)
+
+    for faction in all_factions:
+        if faction in seen:
+            continue
+        seen.add(faction)
+
+        seed = FACTION_SEEDS.get(faction, {ax: 50 for ax in AXES})
+        prev = prev_rows.get(faction, {})
+        ai   = incoming.get(faction, {})
+
+        # Dynamic calculation from live state (territory, population, leaders, economy, stability)
+        dyn = _calculate_faction_power_dynamic(faction, new_state)
+
+        entry = {"faction": faction}
+        for ax in AXES:
+            seed_val = int(seed.get(ax, 50))
+            prev_val = int(prev.get(ax, seed_val))
+            ai_val   = int(ai.get(ax,   prev_val))
+            dyn_val  = int(dyn.get(ax,  prev_val))
+
+            # Blend: dynamic calculation 45%, AI narrative 30%, prev state 25%
+            # Dynamic grounds the value in actual state; AI narrative captures events the sim knows about
+            blended = round(dyn_val * 0.45 + ai_val * 0.30 + prev_val * 0.25)
+
+            # Hard cap: no axis moves more than ±12 per tick regardless of blend
+            val = max(prev_val - 12, min(prev_val + 12, blended))
+            val = max(0, min(100, val))
+            entry[ax] = val
+
+        rows.append(entry)
+
+    new_state["faction_power_state"] = rows
+
+    # Attach outcome modifiers — computed after all axes are final
+    for entry in new_state["faction_power_state"]:
+        entry["power_modifiers"] = _compute_power_outcome_modifiers(entry["faction"], new_state)
+
+
+def _compute_power_outcome_modifiers(faction_name, state):
+    """Translate raw power axes into labeled outcome modifiers Claude uses when writing events.
+
+    Returns a flat dict of named modifiers with a numeric value and a human-readable label.
+    Stored on each faction entry so Claude reads English labels, not raw numbers.
+    """
+    power = next(
+        (p for p in state.get("faction_power_state", []) if p.get("faction") == faction_name),
+        {}
+    )
+    mil = int(power.get("militaryPower",      50))
+    eco = int(power.get("economicPower",      50))
+    pol = int(power.get("politicalInfluence", 50))
+    rel = int(power.get("religiousInfluence", 50))
+
+    def _label(val, thresholds):
+        # thresholds: list of (cutoff, label) from highest to lowest
+        for cutoff, label in thresholds:
+            if val >= cutoff:
+                return label
+        return thresholds[-1][1]
+
+    WAR_LABELS = [(80,"dominant"),(65,"strong"),(50,"moderate"),(35,"weak"),(0,"poor")]
+    ECO_LABELS  = [(80,"thriving"),(65,"stable"),(50,"adequate"),(35,"strained"),(0,"failing")]
+    POL_LABELS  = [(80,"commanding"),(65,"firm"),(50,"contested"),(35,"fragile"),(0,"collapsing")]
+    REL_LABELS  = [(75,"devout"),(60,"faithful"),(45,"lukewarm"),(0,"secular")]
+
+    # War outcome modifiers
+    # battle_edge: advantage per engagement vs a baseline-50 opponent
+    battle_edge      = round((mil - 50) * 0.016, 2)
+    attrition_resist = round((eco - 50) * 0.013, 2)  # how long war can be sustained
+    coalition_pull   = round((pol - 50) * 0.011, 2)  # minor lords + allies joining
+    morale_edge      = round((rel - 50) * 0.010, 2)  # troop resolve under pressure
+
+    # Diplomacy outcome modifiers
+    treaty_leverage   = round((pol - 50) * 0.015, 2)  # quality of terms extracted
+    economic_leverage = round((eco - 50) * 0.013, 2)  # bribery, trade threats, offers
+    threat_credibility = round((mil - 50) * 0.013, 2) # whether ultimatums are believed
+    oath_durability   = round((rel - 50) * 0.010, 2)  # agreements hold; breaking costs more
+
+    # Event outcome modifiers
+    recovery_speed       = round((eco - 50) * 0.016, 2) # bounce-back from disasters
+    rebellion_resistance = round((pol - 50) * 0.014, 2) # revolts harder to sustain
+    belief_spread        = round((rel - 50) * 0.015, 2) # faith expands into neighbor pops
+
+    return {
+        # War
+        "military_posture":   _label(mil, WAR_LABELS),
+        "battle_edge":        battle_edge,
+        "attrition_resist":   attrition_resist,
+        "coalition_pull":     coalition_pull,
+        "morale_edge":        morale_edge,
+        # Diplomacy
+        "economic_posture":   _label(eco, ECO_LABELS),
+        "political_posture":  _label(pol, POL_LABELS),
+        "treaty_leverage":    treaty_leverage,
+        "economic_leverage":  economic_leverage,
+        "threat_credibility": threat_credibility,
+        "oath_durability":    oath_durability,
+        # Events
+        "recovery_speed":     recovery_speed,
+        "rebellion_resistance": rebellion_resistance,
+        "belief_spread":      belief_spread,
+        "faith_posture":      _label(rel, REL_LABELS),
+    }
+
+
+def _resolve_war_advantage(attacker_name, defender_name, state):
+    """Compute the net advantage score for an active military conflict.
+
+    Positive = attacker advantage; negative = defender advantage.
+    The defender gets a structural bonus (holding ground is easier than taking it).
+    Result is stored in war_outcomes so Claude reads a pre-computed verdict.
+    """
+    def _pw(name):
+        return next(
+            (p for p in state.get("faction_power_state", []) if p.get("faction") == name),
+            {}
+        )
+
+    att = _pw(attacker_name)
+    dft = _pw(defender_name)
+
+    mil_diff = int(att.get("militaryPower",      50)) - int(dft.get("militaryPower",      50))
+    eco_diff = int(att.get("economicPower",      50)) - int(dft.get("economicPower",      50))
+    pol_diff = int(att.get("politicalInfluence", 50)) - int(dft.get("politicalInfluence", 50))
+    rel_diff = int(att.get("religiousInfluence", 50)) - int(dft.get("religiousInfluence", 50))
+
+    # Defender terrain/fortification bonus — attacking is always harder
+    DEFENDER_BONUS = 12
+
+    raw = (
+        mil_diff * 0.52 +   # military is the primary driver of battle outcomes
+        eco_diff * 0.20 +   # economy sustains campaigns; low eco = attrition loss
+        pol_diff * 0.17 +   # political stability = reliable mobilization
+        rel_diff * 0.11     # faith morale under pressure
+    ) - DEFENDER_BONUS
+
+    advantage = round(raw, 1)
+
+    if advantage > 25:
+        verdict = "decisive attacker advantage"
+    elif advantage > 10:
+        verdict = "attacker favored"
+    elif advantage > 3:
+        verdict = "slight attacker edge"
+    elif advantage > -3:
+        verdict = "evenly matched"
+    elif advantage > -10:
+        verdict = "slight defender edge"
+    elif advantage > -25:
+        verdict = "defender favored"
+    else:
+        verdict = "decisive defender advantage"
+
+    return {"advantage": advantage, "verdict": verdict,
+            "attacker": attacker_name, "defender": defender_name}
+
+
+def _compute_active_war_outcomes(state):
+    """For every active war in relationships, compute the current power advantage.
+
+    Stored in state["war_outcomes"] so Claude can reference it when writing battle events.
+    Each war pair gets one entry — the faction listed first in the relationship is treated
+    as the initiating aggressor for labeling only; the advantage score handles the rest.
+    """
+    outcomes = []
+    for rel in state.get("relationships", []):
+        if rel.get("type") != "war":
+            continue
+        a = rel.get("faction_a", "")
+        b = rel.get("faction_b", "")
+        if not a or not b:
+            continue
+        outcome = _resolve_war_advantage(a, b, state)
+        # Also include economic attrition: whichever side has lower eco burns faster
+        eco_a = next((p.get("economicPower", 50) for p in state.get("faction_power_state", []) if p.get("faction") == a), 50)
+        eco_b = next((p.get("economicPower", 50) for p in state.get("faction_power_state", []) if p.get("faction") == b), 50)
+        if eco_a < 30:
+            outcome["attrition_warning"] = f"{a} economy critical — cannot sustain war beyond a few ticks"
+        elif eco_b < 30:
+            outcome["attrition_warning"] = f"{b} economy critical — cannot sustain war beyond a few ticks"
+        outcomes.append(outcome)
+    return outcomes
+
+
+def _apply_power_shifts(prev_state, new_state):
+    """Apply event-driven deltas to faction_power_state each tick.
+
+    Four shift sources run in order:
+      1. Territory — regions gained/lost this tick
+      2. War outcomes — battle verdicts from war_outcomes
+      3. Instability — population pressure and unhealthy regions drain power
+      4. Leadership — strong leaders slowly lift their dominant axis
+
+    All deltas are small per tick. The combined effect accumulates meaningfully
+    over 10–30 ticks without causing single-tick collapses.
+    """
+
+    power_map = {e["faction"]: e for e in new_state.get("faction_power_state", [])}
+    if not power_map:
+        return
+
+    # ── 1. TERRITORY SHIFTS ───────────────────────────────────────────────────
+    # Prefer locations (richer schema) over region_control for territory detection
+    prev_control: dict = {}
+    _prev_src = prev_state.get("locations") or prev_state.get("region_control", [])
+    for r in _prev_src:
+        ctrl = r.get("controller", "")
+        key  = r.get("id") or r.get("name") or r.get("region", "")
+        if ctrl and key:
+            prev_control.setdefault(ctrl, set()).add(key)
+
+    curr_control: dict = {}
+    _curr_src = new_state.get("locations") or new_state.get("region_control", [])
+    for r in _curr_src:
+        ctrl = r.get("controller", "")
+        key  = r.get("id") or r.get("name") or r.get("region", "")
+        if ctrl and key:
+            curr_control.setdefault(ctrl, set()).add(key)
+
+    all_factions_in_control = set(prev_control) | set(curr_control)
+    for faction in all_factions_in_control:
+        if faction not in power_map:
+            continue
+        prev_regions = prev_control.get(faction, set())
+        curr_regions = curr_control.get(faction, set())
+        lost   = len(prev_regions - curr_regions)
+        gained = len(curr_regions - prev_regions)
+
+        deltas = {"militaryPower": 0, "economicPower": 0, "politicalInfluence": 0, "religiousInfluence": 0}
+
+        if lost > 0:
+            deltas["militaryPower"]      -= 3 + lost        # frontline shrinks, garrisons lost
+            deltas["politicalInfluence"] -= 4 + lost * 2    # loss of territory = loss of legitimacy
+            deltas["economicPower"]      -= 2 + lost        # tax base and resources lost
+        if gained > 0:
+            deltas["militaryPower"]      += 2 * gained
+            deltas["politicalInfluence"] += 3 * gained
+            deltas["economicPower"]      += 1 * gained
+
+        # Weakly-held or contested locations drain political influence
+        _loc_src = new_state.get("locations") or new_state.get("region_control", [])
+        faction_regions_detail = [r for r in _loc_src if r.get("controller") == faction]
+        # locations use "control"; region_control uses "influence_level"
+        weak_holds = sum(
+            1 for r in faction_regions_detail
+            if int(r.get("control", r.get("influence_level", 50))) < 40
+        )
+        if weak_holds:
+            deltas["politicalInfluence"] -= min(5, weak_holds * 1.5)
+
+        _merge_power_deltas(power_map[faction], deltas)
+
+    # ── 2. WAR OUTCOME SHIFTS ─────────────────────────────────────────────────
+    for outcome in new_state.get("war_outcomes", []):
+        adv     = float(outcome.get("advantage", 0))
+        att_name = outcome.get("attacker", "")
+        dft_name = outcome.get("defender", "")
+        att = power_map.get(att_name)
+        dft = power_map.get(dft_name)
+
+        # Attacker winning: gains tempo, costs economy
+        # Defender winning: holds ground, morale + political boost
+        if adv > 10:        # attacker clearly winning
+            if att:
+                _merge_power_deltas(att, {"militaryPower": 2, "politicalInfluence": 2, "economicPower": -2})
+            if dft:
+                _merge_power_deltas(dft, {"militaryPower": -3, "politicalInfluence": -3, "economicPower": -2, "religiousInfluence": -1})
+        elif adv > 3:       # slight attacker edge
+            if att:
+                _merge_power_deltas(att, {"militaryPower": 1, "economicPower": -1})
+            if dft:
+                _merge_power_deltas(dft, {"militaryPower": -1, "politicalInfluence": -1, "economicPower": -1})
+        elif adv < -10:     # defender clearly winning
+            if dft:
+                _merge_power_deltas(dft, {"militaryPower": 2, "politicalInfluence": 3, "religiousInfluence": 1})
+            if att:
+                _merge_power_deltas(att, {"militaryPower": -3, "politicalInfluence": -2, "economicPower": -3})
+        elif adv < -3:      # slight defender edge
+            if dft:
+                _merge_power_deltas(dft, {"militaryPower": 1, "politicalInfluence": 1})
+            if att:
+                _merge_power_deltas(att, {"militaryPower": -1, "economicPower": -2})
+        else:               # evenly matched — both pay attrition
+            for name in (att_name, dft_name):
+                if name in power_map:
+                    _merge_power_deltas(power_map[name], {"economicPower": -1})
+
+        # Attrition warning: critical economy during war accelerates collapse
+        if "attrition_warning" in outcome:
+            warning_faction = att_name if att_name in outcome["attrition_warning"] else dft_name
+            if warning_faction in power_map:
+                _merge_power_deltas(power_map[warning_faction],
+                                    {"militaryPower": -2, "economicPower": -3})
+
+    # ── 3. INSTABILITY SHIFTS ─────────────────────────────────────────────────
+    # Build per-faction aggregates from population_state
+    faction_pop: dict = {}
+    for p in new_state.get("population_state", []):
+        # Match by culture/species to faction — use region_control as bridge
+        region = p.get("region", "")
+        ctrl   = next(
+            (r.get("controller", "") for r in new_state.get("region_control", [])
+             if r.get("region") == region),
+            ""
+        )
+        if ctrl:
+            faction_pop.setdefault(ctrl, []).append(p)
+
+    for faction, pop_rows in faction_pop.items():
+        if faction not in power_map:
+            continue
+        avg_pressure = sum(p.get("pressure", 50) for p in pop_rows) / len(pop_rows)
+        avg_health   = sum(p.get("health",   70) for p in pop_rows) / len(pop_rows)
+
+        deltas: dict = {}
+        if avg_pressure > 70:
+            deltas = {"militaryPower": -2, "politicalInfluence": -3, "economicPower": -1}
+        elif avg_pressure > 55:
+            deltas = {"militaryPower": -1, "politicalInfluence": -2}
+        elif avg_pressure < 25:
+            deltas = {"politicalInfluence": 1}  # stable society slowly strengthens governance
+
+        if avg_health < 50:
+            deltas["economicPower"]  = deltas.get("economicPower",  0) - 1
+            deltas["militaryPower"]  = deltas.get("militaryPower",  0) - 1
+
+        if deltas:
+            _merge_power_deltas(power_map[faction], deltas)
+
+    # ── 4. LEADERSHIP SHIFTS ──────────────────────────────────────────────────
+    # Strong leaders slowly lift their dominant axis; dead/absent leadership stagnates
+    LEADER_ROLES = {"Leader", "Heir", "Power Role"}
+    faction_leaders_map: dict = {}
+    for c in new_state.get("house_characters", []):
+        if (c.get("coreRole") in LEADER_ROLES
+                and not str(c.get("status", "")).lower().startswith("deceased")
+                and float(c.get("health", 80)) > 20):
+            faction_leaders_map.setdefault(c.get("faction", ""), []).append(c)
+
+    for faction, leaders in faction_leaders_map.items():
+        if faction not in power_map:
+            continue
+
+        def _avg(field, default=50):
+            return sum(int(l.get(field, default)) for l in leaders) / len(leaders)
+
+        avg_warfare  = _avg("warfare")
+        avg_diplo    = _avg("diplomacy")
+        avg_intrigue = _avg("intrigue")
+        avg_faith    = _avg("faith", 20)
+
+        deltas: dict = {}
+        # Each axis only shifts when leader skill is clearly above baseline (65 threshold)
+        if avg_warfare  > 65: deltas["militaryPower"]      = deltas.get("militaryPower",      0) + round((avg_warfare  - 65) * 0.025)
+        if avg_diplo    > 65: deltas["economicPower"]      = deltas.get("economicPower",      0) + round((avg_diplo    - 65) * 0.020)
+        if avg_diplo    > 65: deltas["politicalInfluence"] = deltas.get("politicalInfluence", 0) + round((avg_diplo    - 65) * 0.020)
+        if avg_intrigue > 65: deltas["politicalInfluence"] = deltas.get("politicalInfluence", 0) + round((avg_intrigue - 65) * 0.018)
+        if avg_faith    > 65: deltas["religiousInfluence"] = deltas.get("religiousInfluence", 0) + round((avg_faith    - 65) * 0.025)
+
+        # Depth bonus: more than 2 capable leaders = small resilience bonus
+        capable = sum(1 for l in leaders if int(l.get("influenceScore", 0)) > 55)
+        if capable >= 3:
+            for ax in ("militaryPower", "politicalInfluence"):
+                deltas[ax] = deltas.get(ax, 0) + 1
+
+        if deltas:
+            _merge_power_deltas(power_map[faction], deltas)
+
+    # ── Reattach modified entries and regenerate power_modifiers ─────────────
+    for entry in new_state["faction_power_state"]:
+        entry["power_modifiers"] = _compute_power_outcome_modifiers(entry["faction"], new_state)
+
+
+def _dominance_score(power_entry):
+    """Weighted composite of the four power axes into a single 0–100 dominance score.
+
+    Military and political carry more weight — they translate most directly to
+    geopolitical control. Economic sustains long-term position. Religious shapes
+    soft power and morale but rarely determines outcomes alone.
+    """
+    mil = int(power_entry.get("militaryPower",      50))
+    eco = int(power_entry.get("economicPower",      50))
+    pol = int(power_entry.get("politicalInfluence", 50))
+    rel = int(power_entry.get("religiousInfluence", 50))
+    return round(mil * 0.32 + pol * 0.30 + eco * 0.25 + rel * 0.13, 2)
+
+
+def _compute_faction_dominance(prev_state, new_state):
+    """Build the full dominance ranking from live faction_power_state.
+
+    Returns a dict with:
+      rankings[]          — all factions sorted by score, highest first
+      dominantFaction     — single leader entry
+      risingFactions[]    — sustained upward momentum (trend_momentum > 1.5)
+      collapsingFactions[]— sustained downward momentum (trend_momentum < -1.5)
+
+    trend_momentum is a rolling value: 60% of last tick's momentum + 40% of this tick's delta.
+    This smooths out single-tick noise — a faction must rise/fall across multiple ticks
+    before being labeled rising or collapsing.
+    """
+    current_power = {e["faction"]: e for e in new_state.get("faction_power_state", [])}
+    if not current_power:
+        return {"dominantFaction": None, "risingFactions": [], "collapsingFactions": [], "rankings": []}
+
+    # Previous scores and momentum (carried from last tick's dominance state)
+    prev_dominance  = prev_state.get("faction_dominance", {})
+    prev_rankings   = {r["faction"]: r for r in prev_dominance.get("rankings", [])}
+    prev_power_map  = {e["faction"]: e for e in prev_state.get("faction_power_state", [])}
+
+    rankings = []
+    for faction, entry in current_power.items():
+        score = _dominance_score(entry)
+
+        # Delta vs last tick
+        prev_entry  = prev_power_map.get(faction, {})
+        prev_score  = _dominance_score(prev_entry) if prev_entry else score
+        tick_delta  = round(score - prev_score, 2)
+
+        # Rolling momentum: dampened carry + this tick's signal
+        prev_momentum = float(prev_rankings.get(faction, {}).get("trend_momentum", 0.0))
+        trend_momentum = round(prev_momentum * 0.60 + tick_delta * 0.40, 3)
+
+        # Trend label from momentum
+        if trend_momentum > 4.0:
+            trend = "surging"
+        elif trend_momentum > 1.5:
+            trend = "rising"
+        elif trend_momentum > 0.4:
+            trend = "gaining"
+        elif trend_momentum < -4.0:
+            trend = "collapsing"
+        elif trend_momentum < -1.5:
+            trend = "declining"
+        elif trend_momentum < -0.4:
+            trend = "weakening"
+        else:
+            trend = "stable"
+
+        rankings.append({
+            "faction":        faction,
+            "score":          score,
+            "tick_delta":     tick_delta,
+            "trend_momentum": trend_momentum,
+            "trend":          trend,
+            "militaryPower":  entry.get("militaryPower",      50),
+            "economicPower":  entry.get("economicPower",      50),
+            "politicalInfluence": entry.get("politicalInfluence", 50),
+            "religiousInfluence": entry.get("religiousInfluence", 50),
+        })
+
+    rankings.sort(key=lambda r: r["score"], reverse=True)
+
+    # Assign rank position
+    for i, r in enumerate(rankings):
+        r["rank"] = i + 1
+        # Track rank change vs last tick
+        prev_rank = prev_rankings.get(r["faction"], {}).get("rank")
+        if prev_rank is not None:
+            r["rank_delta"] = prev_rank - r["rank"]  # positive = moved up
+        else:
+            r["rank_delta"] = 0
+
+    dominant    = rankings[0] if rankings else None
+    rising      = [r for r in rankings if r["trend"] in ("rising", "surging")]
+    collapsing  = [r for r in rankings if r["trend"] in ("declining", "collapsing")]
+
+    return {
+        "dominantFaction":    dominant,
+        "risingFactions":     rising,
+        "collapsingFactions": collapsing,
+        "rankings":           rankings,
+    }
+
+
+def _plan_war_targets(locations, at_war_with, war_advantage):
+    """Determine which locations each attacking faction is actively targeting this tick.
+
+    Priority order for target selection:
+      1. Adjacent to attacker's own territory (on the active border)
+      2. High strategic value (capital, port, mine, fortress)
+      3. Already low control (nearly flipped — finish the job)
+      4. Any location controlled by the enemy (distant pressure)
+
+    Returns: {loc_id → {attacker, pressure_bonus, is_primary_target, target_reason}}
+    Also returns: war_targets list for state storage (Claude-readable).
+    """
+    loc_by_name  = {loc["name"]: loc for loc in locations}
+    loc_by_id    = {loc["id"]:   loc for loc in locations}
+
+    # Which locations each faction controls
+    faction_locs: dict = {}
+    for loc in locations:
+        ctrl = loc.get("controller", "")
+        if ctrl:
+            faction_locs.setdefault(ctrl, set()).add(loc.get("name", ""))
+
+    target_map: dict = {}   # loc_id → best attacker entry
+    war_targets_list = []   # state storage, readable by Claude
+
+    for attacker, defenders in at_war_with.items():
+        attacker_territory = faction_locs.get(attacker, set())
+
+        for defender in defenders:
+            if attacker >= defender:
+                continue   # process each pair once
+
+            adv = war_advantage.get((attacker, defender), 0)
+            def_locations = [loc for loc in locations if loc.get("controller") == defender]
+
+            for loc in def_locations:
+                loc_id    = loc.get("id", "")
+                adj       = set(loc.get("adjacent", []))
+                rtype     = loc.get("region_type", "wilderness")
+                value     = int(loc.get("value", 50))
+                control   = int(loc.get("control", 50))
+
+                # Is this location on the active border?
+                border_adjacent = bool(adj & attacker_territory)
+
+                # Target priority score
+                priority  = 0
+                reason    = "background pressure"
+
+                if border_adjacent:
+                    priority += 40
+                    reason    = "active border"
+
+                # High-value types are always priority targets
+                if rtype == "capital":
+                    priority += 30
+                    reason    = "capital assault" if border_adjacent else "capital siege"
+                elif rtype in ("fortress", "port", "mine"):
+                    priority += 15
+                    reason    = f"{rtype} assault" if border_adjacent else f"{rtype} pressure"
+
+                # Strategic value weighting
+                priority += value // 5
+
+                # Low-control locations: near-flip, worth pushing
+                if control <= 25:
+                    priority += 20
+                    reason    = "near-capture push"
+
+                # Attacker advantage multiplies pressure on priority targets
+                pressure_bonus = 0.0
+                if adv > 20:   pressure_bonus = 4.0
+                elif adv > 10: pressure_bonus = 2.5
+                elif adv > 3:  pressure_bonus = 1.0
+                elif adv < -10: pressure_bonus = -1.5  # losing side can't push hard
+
+                is_primary = priority >= 40
+
+                entry = {
+                    "attacker":       attacker,
+                    "defender":       defender,
+                    "priority":       priority,
+                    "pressure_bonus": pressure_bonus,
+                    "is_primary":     is_primary,
+                    "reason":         reason,
+                }
+
+                # Only keep the highest-priority attacker per location
+                prev = target_map.get(loc_id)
+                if prev is None or priority > prev["priority"]:
+                    target_map[loc_id] = entry
+
+                if is_primary:
+                    war_targets_list.append({
+                        "location":   loc.get("name", ""),
+                        "attacker":   attacker,
+                        "defender":   defender,
+                        "reason":     reason,
+                        "control":    control,
+                    })
+
+    return target_map, war_targets_list
+
+
+def _update_location_control(new_state):
+    """Apply per-tick control changes driven by war targeting and peace recovery.
+
+    War path:
+      Conquest is intentionally slow — losing a well-held territory should take
+      many ticks of sustained pressure.  Three factors gate how fast control falls:
+
+        1. Region resistance (RESISTANCE table) — fortresses and capitals hold;
+           open plains and sea routes fall faster.
+        2. Stability resistance — a well-supplied, stable garrison fights harder.
+           High stability cuts incoming damage; crumbling stability multiplies it.
+        3. Value resistance — strategically important locations have better
+           infrastructure, supply lines, and garrison quality.  High-value
+           territories take longer to capture than low-value wilderness.
+
+      Base pressures have been reduced from the previous version so that even
+      a sustained primary assault on open terrain takes 30–50 ticks, not 13.
+
+    Peace path:
+      Stability gates recovery speed.  Stable regions consolidate faster;
+      unstable newly-occupied territory recovers slowly.
+
+    Flip:
+      At control ≤ 0, the attacker takes over at control 20–35 (weaker foothold
+      than before), and stability drops an additional 20.  The new controller
+      starts fragile and must invest ticks of consolidation to secure the gain.
+    """
+    import random
+
+    locations = new_state.get("locations", [])
+    if not locations:
+        return
+
+    # ── War graph ─────────────────────────────────────────────────────────────
+    at_war_with: dict = {}
+    for rel in new_state.get("relationships", []):
+        if rel.get("type") == "war":
+            a, b = rel.get("faction_a", ""), rel.get("faction_b", "")
+            if a and b:
+                at_war_with.setdefault(a, set()).add(b)
+                at_war_with.setdefault(b, set()).add(a)
+
+    war_advantage: dict = {}
+    for wo in new_state.get("war_outcomes", []):
+        a, d = wo.get("attacker", ""), wo.get("defender", "")
+        adv  = float(wo.get("advantage", 0))
+        if a and d:
+            war_advantage[(a, d)] =  adv
+            war_advantage[(d, a)] = -adv
+
+    target_map, war_targets_list = _plan_war_targets(locations, at_war_with, war_advantage)
+    new_state["war_targets"] = war_targets_list
+
+    loc_by_name = {loc["name"]: loc for loc in locations}
+
+    # ── Additive control-drop model ───────────────────────────────────────────
+    #
+    # drop = base + region_mod + stability_mod + value_mod + advantage_mod
+    #
+    # Each factor is a bounded additive adjustment rather than a multiplier.
+    # Prevents extreme multiplicative stacking on well-defended high-value
+    # territories that collapsed all scenarios to a 1-per-tick floor.
+    #
+    # Reference timings (ticks from control=90 under sustained assault):
+    #   Plains,  stable garrison,   avg value    ~30-45 ticks
+    #   Plains,  crumbling garrison, avg value   ~15-22 ticks
+    #   Capital, stable, high-value              90+   ticks  (30+ real days)
+    #   Capital, crumbling, dominant attacker    ~30   ticks
+    #   Fortress, stable                         90+   ticks  (siege required)
+    #   Fortress, crumbling, dominating foe      ~25-35 ticks
+
+    BASE_ACTIVE_PRIMARY = 3.0   # full assault on adjacent primary target
+    BASE_SIEGE_PRIMARY  = 1.5   # primary target, no adjacent enemy territory yet
+    BASE_BACKGROUND     = 0.8   # at war but not an explicit target
+
+    # Region: negative = harder to take (fortified); positive = easier
+    REGION_MOD = {
+        "fortress":   -1.5,
+        "capital":    -1.2,
+        "sacred":     -0.9,
+        "city":       -0.6,
+        "mine":       -0.4,
+        "port":       -0.4,
+        "plains":      0.0,
+        "wilderness":  0.2,
+        "sea":         0.4,
+    }
+
+    location_events = list(new_state.get("location_events", []))
+    tick = int(new_state.get("tick", 0))
+
+    updated = []
+    for loc in locations:
+        loc_id         = loc.get("id", "")
+        controller     = loc.get("controller", "")
+        owner          = loc.get("owner", "")
+        control        = int(loc.get("control",   50))
+        stability      = int(loc.get("stability", 50))
+        rtype          = loc.get("region_type", "wilderness")
+        territory_type = loc.get("territory_type", "wild")
+        adjacent       = loc.get("adjacent", [])
+        value          = int(loc.get("value", 50))
+
+        enemies         = at_war_with.get(controller, set())
+        target_entry    = target_map.get(loc_id)
+        active_fighting = False
+
+        if enemies:
+            # ── Active-fighting check ─────────────────────────────────────────
+            for adj_name in adjacent:
+                adj_loc = loc_by_name.get(adj_name)
+                if adj_loc and adj_loc.get("controller") in enemies:
+                    active_fighting = True
+                    break
+
+            # ── Base drop from tactical situation ─────────────────────────────
+            if target_entry:
+                attacker = target_entry["attacker"]
+                if target_entry["is_primary"]:
+                    base = BASE_ACTIVE_PRIMARY if active_fighting else BASE_SIEGE_PRIMARY
+                else:
+                    base = BASE_BACKGROUND
+                adv_bonus = target_entry["pressure_bonus"]
+            else:
+                attacker  = next(iter(enemies), None)
+                base      = BASE_BACKGROUND * 0.75
+                adv_bonus = 0.0
+
+            # ── Region modifier ───────────────────────────────────────────────
+            region_mod = REGION_MOD.get(rtype, 0.0)
+            if territory_type == "fortress":
+                region_mod -= 0.5   # stacks with region_type
+
+            # ── Stability modifier (key mechanic: high stab = slower loss) ────
+            if stability >= 70:   stab_mod = -1.2   # disciplined, well-supplied
+            elif stability >= 50: stab_mod = -0.5
+            elif stability >= 30: stab_mod =  0.0
+            elif stability >= 15: stab_mod = +0.9   # morale breaking
+            else:                 stab_mod = +1.7   # near-collapse
+
+            # ── Value modifier (high value = better defended) ─────────────────
+            if value >= 80:   val_mod = -0.6
+            elif value >= 60: val_mod = -0.3
+            else:             val_mod =  0.0
+
+            # ── Attacker advantage ────────────────────────────────────────────
+            adv_mod = min(1.5, max(-1.0, adv_bonus * 0.35))
+
+            # ── Final drop ────────────────────────────────────────────────────
+            drop = max(1, round(base + region_mod + stab_mod + val_mod + adv_mod))
+
+            control   = max(0, control   - drop)
+            stability = max(0, stability - (2 if active_fighting else 1))
+
+            # ── CONTROL FLIP ─────────────────────────────────────────────────
+            if control <= 0 and attacker:
+                prev_controller = controller
+                controller      = attacker
+                control         = random.randint(20, 32)   # fragile foothold
+                stability       = max(0, stability - 20)
+                active_fighting = False
+                location_events.append({
+                    "type":        "territory_captured",
+                    "location":    loc.get("name", ""),
+                    "region_type": rtype,
+                    "captured_by": attacker,
+                    "lost_by":     prev_controller,
+                    "tick":        tick,
+                })
+                if territory_type == "capital":
+                    location_events.append({
+                        "type":        "capital_captured",
+                        "location":    loc.get("name", ""),
+                        "captured_by": attacker,
+                        "lost_by":     prev_controller,
+                        "tick":        tick,
+                    })
+
+        else:
+            # ── PEACE: stability-gated consolidation ──────────────────────────
+            if stability >= 70:   recovery = 4
+            elif stability >= 50: recovery = 3
+            elif stability >= 30: recovery = 2
+            else:                 recovery = 1   # fragile occupation — slow
+
+            if owner == controller:                          recovery += 1
+            if rtype in ("capital", "fortress", "city"):    recovery += 1
+            if territory_type == "wild":                    recovery = max(0, recovery - 1)
+
+            control   = min(100, control   + recovery)
+            stability = min(100, stability + 1)
+
+        contested = active_fighting or (owner != controller) or (control < 40)
+
+        updated.append({
+            **loc,
+            "controller":      controller,
+            "control":         max(0, min(100, control)),
+            "stability":       max(0, min(100, stability)),
+            "contested":       contested,
+            "active_fighting": active_fighting,
+        })
+
+    new_state["locations"]       = updated
+    new_state["location_events"] = location_events
+
+
+def _update_location_stability(new_state):
+    """Apply economy and leadership modifiers to stability, then evaluate unrest/rebellion thresholds.
+
+    Economy (per controller's faction_power_state):
+      economicPower < 30  → -2/tick   collapse: unpaid garrisons, food shortages
+      economicPower < 50  → -1/tick   struggling economy erodes confidence
+      economicPower > 70  → +1/tick   prosperity reinforces social order
+
+    Leadership (per controller's ruler skills):
+      diplomacy > 65  → +1/tick   competent administration addresses grievances
+      diplomacy < 35  → -1/tick   misrule breeds resentment
+      warfare > 65 AND unrest zone → +1   military presence suppresses open revolt
+
+    Thresholds:
+      stability < 30  → unrest = True; control recovery reduced by 1
+      stability < 15  → rebellion_risk = True; 25% chance of rebellion fires if not already in rebellion
+      stability > 80  → +1 control/tick in peaceful territory
+
+    Rebellion trigger stamps: in_rebellion, original_controller, rebel_faction, rebellion_tick_started.
+    Ongoing rebellion effects (rapid drop, power loss, faction emergence) handled by _process_rebellions.
+    """
+    import random
+
+    locations   = new_state.get("locations", [])
+    current_tick = int(new_state.get("tick", 0))
+    if not locations:
+        return
+
+    eco_by_faction = {
+        fp.get("faction"): int(fp.get("economicPower", 50))
+        for fp in new_state.get("faction_power_state", [])
+        if fp.get("faction")
+    }
+
+    diplo_by_faction   = {}
+    warfare_by_faction = {}
+    for entry in new_state.get("leadership_state", []):
+        faction = entry.get("faction", "")
+        ruler   = entry.get("currentRuler", {})
+        if faction and ruler:
+            diplo_by_faction[faction]   = int(ruler.get("diplomacy", 50))
+            warfare_by_faction[faction] = int(ruler.get("warfare",   50))
+
+    location_events = list(new_state.get("location_events", []))
+
+    updated = []
+    for loc in locations:
+        controller      = loc.get("controller", "")
+        owner           = loc.get("owner", "")
+        stability       = int(loc.get("stability", 50))
+        control         = int(loc.get("control",   50))
+        name            = loc.get("name", "")
+        active_fighting = loc.get("active_fighting", False)
+        already_rebel   = loc.get("in_rebellion", False)
+        territory_type  = loc.get("territory_type", "wild")
+
+        # ── WILD ENTROPY ──────────────────────────────────────────────────────
+        # Frontier and ungoverned land is naturally unstable
+        if territory_type == "wild" and not already_rebel:
+            stability = max(0, stability - 1)
+
+        # ── ECONOMY MODIFIER ─────────────────────────────────────────────────
+        eco = eco_by_faction.get(controller, 50)
+        if eco < 30:
+            stability -= 2
+        elif eco < 50:
+            stability -= 1
+        elif eco > 70:
+            stability += 1
+
+        # ── LEADERSHIP MODIFIER ───────────────────────────────────────────────
+        diplo   = diplo_by_faction.get(controller, 50)
+        warfare = warfare_by_faction.get(controller, 50)
+
+        if diplo > 65:
+            stability += 1
+        elif diplo < 35:
+            stability -= 1
+
+        stability = max(0, min(100, stability))
+
+        if stability < 30 and warfare > 65:
+            stability = min(100, stability + 1)
+
+        # ── THRESHOLD FLAGS ───────────────────────────────────────────────────
+        unrest         = stability < 30
+        rebellion_risk = stability < 15
+
+        # ── REBELLION TRIGGER ─────────────────────────────────────────────────
+        # Only fires if not already in rebellion; _process_rebellions handles ongoing effects
+        # Territory type controls how easily a garrison can be overwhelmed
+        REBEL_CHANCE = {"wild": 0.45, "city": 0.25, "fortress": 0.12, "capital": 0.12}
+        trigger_chance = REBEL_CHANCE.get(territory_type, 0.25)
+
+        rebellion_fields = {}
+        if rebellion_risk and not already_rebel and random.random() < trigger_chance:
+            original_controller = controller
+            rebel_faction       = owner if (owner and owner != controller) else "Rebels"
+            rebellion_fields = {
+                "in_rebellion":            True,
+                "original_controller":     original_controller,
+                "rebel_faction":           rebel_faction,
+                "rebellion_tick_started":  current_tick,
+                "rebellion_intensity":     30,
+            }
+            controller = rebel_faction
+            control    = random.randint(15, 25)
+            stability  = min(100, stability + 5)
+            location_events.append({
+                "type":                 "rebellion_triggered",
+                "location":             name,
+                "from_controller":      original_controller,
+                "to_controller":        rebel_faction,
+                "stability_at_trigger": stability,
+                "tick":                 current_tick,
+            })
+
+        # ── STABILITY-DRIVEN CONTROL ADJUSTMENTS (peace only) ────────────────
+        if not active_fighting and not already_rebel:
+            if stability > 80:
+                control = min(100, control + 1)
+            if unrest:
+                control = max(0, control - 1)
+
+        contested = active_fighting or already_rebel or (owner != controller) or (control < 40)
+
+        updated.append({
+            **loc,
+            **rebellion_fields,
+            "controller":     controller,
+            "control":        max(0, min(100, control)),
+            "stability":      stability,
+            "unrest":         unrest,
+            "rebellion_risk": rebellion_risk,
+            "contested":      contested,
+        })
+
+    new_state["locations"]       = updated
+    new_state["location_events"] = location_events
+
+
+def _process_rebellions(new_state):
+    """Apply ongoing per-tick effects for every location with in_rebellion = True.
+
+    Each rebelling location:
+      - Grows rebellion_intensity by 3/tick (base 30 → cap 100)
+      - Control drops max(3, round(intensity × 0.07)) per tick
+      - original_controller faction loses: militaryPower -1, politicalInfluence -2, economicPower -1
+      - After 30 ticks at intensity ≥ 70: a new rebel faction is logged in emerging_factions[]
+      - At control = 0: controller flips to rebel_faction (rebellion_victory)
+
+    Resolution:
+      - stability > 35: order restored → in_rebellion clears (rebellion_suppressed)
+      - control > 60 while controller ≠ rebel_faction: uprising broken → in_rebellion clears
+    """
+    import random
+
+    locations    = new_state.get("locations", [])
+    current_tick = int(new_state.get("tick", 0))
+    if not locations:
+        return
+
+    # Mutable power lookup so we can drain the losing faction in-place
+    power_by_faction = {
+        fp.get("faction"): fp
+        for fp in new_state.get("faction_power_state", [])
+        if fp.get("faction")
+    }
+
+    emerging_factions = list(new_state.get("emerging_factions", []))
+    already_emerging  = {ef.get("location") for ef in emerging_factions}
+    location_events   = list(new_state.get("location_events", []))
+
+    updated = []
+    for loc in locations:
+        if not loc.get("in_rebellion"):
+            updated.append(loc)
+            continue
+
+        controller          = loc.get("controller", "")
+        owner               = loc.get("owner", "")
+        original_controller = loc.get("original_controller", controller)
+        rebel_faction       = loc.get("rebel_faction", "Rebels")
+        rebellion_start     = int(loc.get("rebellion_tick_started", current_tick))
+        control             = int(loc.get("control",   30))
+        stability           = int(loc.get("stability", 10))
+        name                = loc.get("name", "")
+        active_fighting     = loc.get("active_fighting", False)
+
+        tick_age  = max(0, current_tick - rebellion_start)
+        intensity = min(100, 30 + tick_age * 3)
+
+        # ── CONTROL DROP ──────────────────────────────────────────────────────
+        drop    = max(3, round(intensity * 0.07))
+        control = max(0, control - drop)
+
+        # ── FACTION POWER DRAIN ────────────────────────────────────────────────
+        losing = original_controller if original_controller != rebel_faction else owner
+        fp = power_by_faction.get(losing)
+        if fp:
+            fp["militaryPower"]      = max(0, int(fp.get("militaryPower",      50)) - 1)
+            fp["politicalInfluence"] = max(0, int(fp.get("politicalInfluence", 50)) - 2)
+            fp["economicPower"]      = max(0, int(fp.get("economicPower",      50)) - 1)
+
+        # ── NEW FACTION EMERGENCE ─────────────────────────────────────────────
+        if tick_age >= 30 and intensity >= 70 and name not in already_emerging:
+            already_emerging.add(name)
+            suggested = f"Free {name} Movement"
+            emerging_factions.append({
+                "location":       name,
+                "origin_faction": original_controller,
+                "tick_emerged":   current_tick,
+                "intensity":      intensity,
+                "suggested_name": suggested,
+            })
+            location_events.append({
+                "type":     "faction_emergence",
+                "location": name,
+                "detail":   (
+                    f"The rebellion in {name} has persisted for {tick_age} ticks at intensity {intensity}. "
+                    f"An organized rebel faction — tentatively called '{suggested}' — is crystallizing "
+                    f"from the uprising against {original_controller}."
+                ),
+                "tick": current_tick,
+            })
+
+        # ── FULL CONTROL FLIP ─────────────────────────────────────────────────
+        if control <= 0:
+            controller = rebel_faction
+            control    = random.randint(25, 40)
+            location_events.append({
+                "type":            "rebellion_victory",
+                "location":        name,
+                "new_controller":  rebel_faction,
+                "lost_by":         original_controller,
+                "tick_age":        tick_age,
+                "tick":            current_tick,
+            })
+
+        # ── RESOLUTION CHECK ─────────────────────────────────────────────────
+        in_rebellion = True
+        if stability > 35:
+            in_rebellion = False
+            location_events.append({
+                "type":     "rebellion_suppressed",
+                "location": name,
+                "tick_age": tick_age,
+                "tick":     current_tick,
+            })
+        elif control > 60 and controller != rebel_faction:
+            in_rebellion = False
+
+        contested = active_fighting or in_rebellion or (owner != controller) or (control < 40)
+
+        updated.append({
+            **loc,
+            "controller":            controller,
+            "control":               max(0, min(100, control)),
+            "in_rebellion":          in_rebellion,
+            "rebel_faction":         rebel_faction if in_rebellion else loc.get("rebel_faction", ""),
+            "rebellion_tick_started": rebellion_start if in_rebellion else None,
+            "original_controller":   original_controller,
+            "rebellion_intensity":   intensity if in_rebellion else 0,
+            "contested":             contested,
+        })
+
+    new_state["locations"]         = updated
+    new_state["emerging_factions"] = emerging_factions
+    new_state["location_events"]   = location_events
+
+
+def _merge_power_deltas(entry, deltas):
+    """Apply a delta dict to a faction power entry, clamping each axis to 0–100."""
+    AXES = ("militaryPower", "economicPower", "politicalInfluence", "religiousInfluence")
+    for ax in AXES:
+        if ax in deltas:
+            entry[ax] = max(0, min(100, int(entry.get(ax, 50)) + int(deltas[ax])))
+
+
+def _default_locations():
+    """Seed data for all known locations. owner/controller start as the same faction."""
+    return [
+        # id, name, owner, controller, control, stability, population, value, region_type, adjacent[]
+        ("twin-cities",     "Twin Cities",     "Twin Cities",       "Twin Cities",       82, 74, 160000, 88, "capital",   ["Tidefall", "Dur Khadur", "Faerwood"]),
+        ("tidefall",        "Tidefall",        "Tidefall",          "Tidefall",          78, 68, 160000, 82, "port",      ["Twin Cities", "Dreadwind Isles"]),
+        ("dur-khadur",      "Dur Khadur",      "Dur Khadur",        "Dur Khadur",        80, 72, 115000, 75, "fortress",  ["Twin Cities", "Gilgeth and Groth", "Lostfeld"]),
+        ("lostfeld",        "Lostfeld",        "Dur Khadur",        "Dur Khadur",        64, 42, 65000,  70, "mine",      ["Dur Khadur", "Gilgeth and Groth", "Stonebreak"]),
+        ("faerwood",        "Faerwood",        "Shadow Court",      "Shadow Court",      76, 55, 30000,  65, "fortress",  ["Twin Cities", "Glenhaven"]),
+        ("glenhaven",       "Glenhaven",       "Glenhaven",         "Glenhaven",         74, 80, 35000,  62, "wilderness",["Faerwood", "Frostvale Ridge"]),
+        ("frostvale-ridge", "Frostvale Ridge", "Glenhaven",         "Glenhaven",         52, 58, 8000,   55, "wilderness",["Glenhaven", "Lostfeld"]),
+        ("gilgeth",         "Gilgeth",         "Gilgeth Clans",     "Gilgeth Clans",     72, 50, 60000,  58, "fortress",  ["Groth Highlands", "Dur Khadur", "Lostfeld"]),
+        ("groth-highlands", "Groth Highlands", "Groth Clans",       "Groth Clans",       68, 46, 40000,  52, "wilderness",["Gilgeth", "Rock Plains"]),
+        ("rock-plains",     "Rock Plains",     "Vilefin",           "Vilefin",           58, 38, 215000, 48, "plains",    ["Groth Highlands", "Dreadwind Isles"]),
+        ("dreadwind-isles", "Dreadwind Isles", "Dreadwind",         "Dreadwind",         62, 45, 45000,  60, "port",      ["Tidefall", "Rock Plains"]),
+        ("stonebreak",      "Stonebreak",      "Monastery of Druids","Monastery of Druids",88, 90, 5500, 58, "sacred",    ["Lostfeld", "Glenhaven"]),
+        ("gloomspire",      "Gloomspire",      "Gloomspire Syndicate","Gloomspire Syndicate",70,65, 8500, 50, "city",     ["Faerwood", "Twin Cities"]),
+        ("dragonscar-peaks","Dragonscar Peaks","Dragon Clans",      "Dragon Clans",       95, 88, 12,    72, "wilderness",["Lostfeld", "Groth Highlands"]),
+        ("open-sea",        "Open Sea",        "Tidefall",          "Dreadwind",          35, 30, 0,     70, "sea",       ["Tidefall", "Dreadwind Isles", "Rock Plains"]),
+    ]
+
+
+def _normalize_locations(prev_state, new_state):
+    """Unified territory state — merges region_control and population_state concepts.
+
+    Schema per location:
+      id             — stable slug identifier
+      name           — display name
+      owner          — faction claiming political sovereignty
+      controller     — faction with actual military/administrative hold
+      control        — 0–100: how firmly the controller holds it
+      stability      — 0–100: social and political stability
+      population     — integer headcount
+      value          — 0–100: strategic importance (trade, fortress, sacred, resources)
+      region_type    — capital | port | fortress | mine | wilderness | plains | sea | sacred | city
+      territory_type — city | fortress | wild | capital  (derived from region_type; drives behavioral rules)
+      adjacent       — list of neighboring location names
+      contested      — bool: owner != controller OR control < 40
+    """
+    REGION_TO_TERRITORY = {
+        "capital":    "capital",
+        "city":       "city",
+        "port":       "city",
+        "sacred":     "city",
+        "fortress":   "fortress",
+        "mine":       "wild",
+        "wilderness": "wild",
+        "plains":     "wild",
+        "sea":        "wild",
+    }
+
+    prev_rows = {r.get("id"): r for r in prev_state.get("locations", []) if r.get("id")}
+
+    # Also index AI output by id or by name for matching
+    incoming_by_id   = {r.get("id"):   r for r in new_state.get("locations", []) if r.get("id")}
+    incoming_by_name = {r.get("name"): r for r in new_state.get("locations", []) if r.get("name")}
+
+    # Pull live population from population_state for accuracy
+    pop_by_region = {p.get("region"): int(p.get("population", 0))
+                     for p in new_state.get("population_state", [])}
+
+    rows = []
+    seen = set()
+
+    for (lid, name, owner_seed, ctrl_seed, ctrl_val, stab_val,
+         pop_seed, value_seed, rtype, adjacent) in _default_locations():
+
+        if lid in seen:
+            continue
+        seen.add(lid)
+
+        prev = prev_rows.get(lid, {})
+        ai   = incoming_by_id.get(lid) or incoming_by_name.get(name) or {}
+
+        # Owner and controller — prefer AI update, then prev, then seed
+        owner      = (ai.get("owner")      or prev.get("owner")      or owner_seed).strip()
+        controller = (ai.get("controller") or prev.get("controller") or ctrl_seed).strip()
+
+        # Numeric fields — clamp and cap single-tick change at ±10
+        def _merge(field, ai_val, prev_val, seed_val, cap=10):
+            raw = int(ai.get(field, ai_val) if field in ai else (prev.get(field, prev_val) if field in prev else seed_val))
+            raw = max(0, min(100, raw))
+            pv  = int(prev.get(field, seed_val))
+            return max(pv - cap, min(pv + cap, raw))
+
+        control    = _merge("control",   ctrl_val, ctrl_val, ctrl_val)
+        stability  = _merge("stability", stab_val, stab_val, stab_val)
+        value      = int(ai.get("value", prev.get("value", value_seed)))
+        value      = max(0, min(100, value))
+
+        # Population: prefer live population_state, then AI, then prev, then seed
+        population = (pop_by_region.get(name)
+                      or int(ai.get("population", prev.get("population", pop_seed))))
+
+        # Contested: owner ≠ controller or control < 40
+        contested = (owner != controller) or (control < 40)
+
+        resolved_rtype = ai.get("region_type", prev.get("region_type", rtype))
+        rows.append({
+            "id":             lid,
+            "name":           name,
+            "owner":          owner,
+            "controller":     controller,
+            "control":        control,
+            "stability":      stability,
+            "population":     population,
+            "value":          value,
+            "region_type":    resolved_rtype,
+            "territory_type": (ai.get("territory_type")
+                               or prev.get("territory_type")
+                               or REGION_TO_TERRITORY.get(resolved_rtype, "wild")),
+            "adjacent":       ai.get("adjacent", prev.get("adjacent", adjacent)),
+            "contested":      contested,
+        })
+
+    # Accept AI-created locations not in the seed (newly discovered, named in events)
+    existing_names = {r["name"] for r in rows}
+    for ai_row in new_state.get("locations", []):
+        if ai_row.get("name") in existing_names or not ai_row.get("name"):
+            continue
+        lid = ai_row.get("id") or ai_row["name"].lower().replace(" ", "-")
+        rows.append({
+            "id":          lid,
+            "name":        ai_row["name"],
+            "owner":       ai_row.get("owner", "Unknown"),
+            "controller":  ai_row.get("controller", ai_row.get("owner", "Unknown")),
+            "control":     max(0, min(100, int(ai_row.get("control", 50)))),
+            "stability":   max(0, min(100, int(ai_row.get("stability", 50)))),
+            "population":     max(0, int(ai_row.get("population", 0))),
+            "value":          max(0, min(100, int(ai_row.get("value", 40)))),
+            "region_type":    ai_row.get("region_type", "wilderness"),
+            "territory_type": (ai_row.get("territory_type")
+                               or REGION_TO_TERRITORY.get(ai_row.get("region_type", "wilderness"), "wild")),
+            "adjacent":       ai_row.get("adjacent", []),
+            "contested":      (ai_row.get("owner", "") != ai_row.get("controller", ""))
+                              or int(ai_row.get("control", 50)) < 40,
+        })
+
+    new_state["locations"] = rows[:40]
+
+
 def _normalize_faction_resources(prev_state, new_state):
     prev_rows = {
         row.get("faction"): row
@@ -1433,57 +3539,124 @@ def _normalize_trade_routes(new_state):
 
 
 def _normalize_relationships(prev_state, new_state):
-    prev_rows = {}
+    VALID_TYPES = {"alliance", "rivalry", "neutral", "war"}
+
+    prev_rows: dict = {}
     for row in prev_state.get("relationships", []):
         a = row.get("faction_a")
         b = row.get("faction_b")
         if a and b:
             prev_rows[tuple(sorted((a, b)))] = row
 
+    # Build a lookup of each faction's leaders from prev_state house_characters
+    # (prev_state is stable; new_state chars are still being processed downstream)
+    LEADER_ROLES = {"Leader", "Heir", "Power Role"}
+    faction_leaders: dict = {}
+    for c in prev_state.get("house_characters", []):
+        if c.get("coreRole") in LEADER_ROLES and not str(c.get("status", "")).lower().startswith("deceased"):
+            faction_leaders.setdefault(c.get("faction", ""), []).append(c)
+
+    def _leader_relationship_signal(faction_a, faction_b):
+        """Average trust/fear/respect of faction_a leaders toward faction_b leaders."""
+        leaders_a = faction_leaders.get(faction_a, [])
+        leaders_b = {c["name"] for c in faction_leaders.get(faction_b, []) if c.get("name")}
+        if not leaders_a or not leaders_b:
+            return None
+        t_vals, f_vals, r_vals = [], [], []
+        for leader in leaders_a:
+            rels = leader.get("relationships") or {}
+            for name in leaders_b:
+                rel = rels.get(name)
+                if rel:
+                    t_vals.append(float(rel.get("trust",   40)))
+                    f_vals.append(float(rel.get("fear",    20)))
+                    r_vals.append(float(rel.get("respect", 35)))
+        if not t_vals:
+            return None
+        return {
+            "trust":   sum(t_vals) / len(t_vals),
+            "fear":    sum(f_vals) / len(f_vals),
+            "respect": sum(r_vals) / len(r_vals),
+        }
+
     normalized = []
-    seen = set()
+    seen: set = set()
     for row in new_state.get("relationships", []):
         a = (row.get("faction_a") or "").strip()
         b = (row.get("faction_b") or "").strip()
         if not a or not b or a == b:
             continue
-
         key = tuple(sorted((a, b)))
         if key in seen:
             continue
         seen.add(key)
 
         prev = prev_rows.get(key, {})
-        trust = int(row.get("trust", prev.get("trust", 50)))
-        hostility = int(row.get("hostility", prev.get("hostility", 20)))
-        trust = max(0, min(100, trust))
-        hostility = max(0, min(100, hostility))
+
+        # ── Base values: clamp AI output and cap single-tick change at ±15 ──
+        trust         = max(0, min(100, int(row.get("trust",         prev.get("trust",         50)))))
+        hostility     = max(0, min(100, int(row.get("hostility",     prev.get("hostility",     20)))))
+        alliance_level = max(0, min(100, int(row.get("alliance_level", prev.get("alliance_level", 0)))))
 
         if isinstance(prev.get("trust"), int):
-            trust = max(prev["trust"] - 15, min(prev["trust"] + 15, trust))
+            trust         = max(prev["trust"]         - 15, min(prev["trust"]         + 15, trust))
         if isinstance(prev.get("hostility"), int):
-            hostility = max(prev["hostility"] - 15, min(prev["hostility"] + 15, hostility))
+            hostility     = max(prev["hostility"]     - 15, min(prev["hostility"]     + 15, hostility))
+        if isinstance(prev.get("alliance_level"), int):
+            alliance_level = max(prev["alliance_level"] - 10, min(prev["alliance_level"] + 10, alliance_level))
 
-        relation_type = row.get("type", "neutral")
+        relation_type = row.get("type", prev.get("type", "neutral"))
+        if relation_type not in VALID_TYPES:
+            relation_type = "neutral"
+
+        # ── Hard event impacts ────────────────────────────────────────────────
         if relation_type == "war":
-            hostility = max(hostility, 75)
-            trust = min(trust, 20)
+            hostility     = max(hostility, 75)
+            trust         = min(trust, 20)
+            alliance_level = max(0, alliance_level - 20)
         elif relation_type == "alliance":
-            trust = max(trust, 60)
-            hostility = min(hostility, 35)
+            trust         = max(trust, 60)
+            hostility     = min(hostility, 35)
+            alliance_level = max(alliance_level, 55)
 
-        normalized.append(
-            {
-                "faction_a": a,
-                "faction_b": b,
-                "type": relation_type if relation_type in {"alliance", "rivalry", "neutral", "war"} else "neutral",
-                "intensity": max(1, min(10, int(row.get("intensity", prev.get("intensity", 5))))),
-                "trust": trust,
-                "hostility": hostility,
-            }
-        )
+        # ── Leader-relationship influence (blended at 25% weight) ───────────
+        sig = _leader_relationship_signal(a, b) or _leader_relationship_signal(b, a)
+        if sig:
+            leader_trust   = sig["trust"]
+            leader_fear    = sig["fear"]
+            leader_respect = sig["respect"]
+            # Trust: leader trust pulls faction trust toward it
+            trust      = round(trust      * 0.75 + leader_trust   * 0.25)
+            # Hostility: high leader fear suppresses hostility; low leader respect raises it
+            fear_suppression = (leader_fear - 20) * 0.10   # fear of other side → avoid conflict
+            disrespect_drive = max(0, (35 - leader_respect) * 0.08)
+            hostility  = round(max(0, min(100, hostility - fear_suppression + disrespect_drive)))
+            # Alliance level: high leader trust + high respect → stronger alliance pull
+            alliance_pull = ((leader_trust - 40) * 0.08) + ((leader_respect - 35) * 0.05)
+            alliance_level = round(max(0, min(100, alliance_level + alliance_pull)))
 
-    new_state["relationships"] = normalized[:20]
+        # ── Decay toward neutral (unreinforced relations drift back) ─────────
+        # Neutral baselines: trust→50, hostility→20, alliance_level→0
+        trust          = round(trust          + (50 - trust)          * 0.015)
+        hostility      = round(hostility      + (20 - hostility)      * 0.012)
+        alliance_level = round(alliance_level + (0  - alliance_level) * 0.010)
+
+        # ── Clamp finals ─────────────────────────────────────────────────────
+        trust          = max(0, min(100, trust))
+        hostility      = max(0, min(100, hostility))
+        alliance_level = max(0, min(100, alliance_level))
+
+        normalized.append({
+            "faction_a":     a,
+            "faction_b":     b,
+            "type":          relation_type,
+            "intensity":     max(1, min(10, int(row.get("intensity", prev.get("intensity", 5))))),
+            "trust":         trust,
+            "hostility":     hostility,
+            "alliance_level": alliance_level,
+        })
+
+    new_state["relationships"] = normalized[:30]
 
 
 def _normalize_faction_identities(new_state):
@@ -1620,7 +3793,7 @@ def _infer_seer_journey(new_state):
         "Faerwood",
         "Glenhaven",
         "Frostvale",
-        "Dreadwind Islands",
+        "Dreadwind",
         "Farrock",
         "Dur Khadur",
         "Rock Plains",
@@ -1826,7 +3999,11 @@ def _default_leadership_state():
             "faction": "Lostfeld Dwarves",
             "currentRuler": ruler("Ulric Ironmaul", "Thane", "Clan Ironmaul", 173, "inheritance", ["clan-bound", "deliberate"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Clan Ironmaul", "Lostfeld Dwarves", 1, 82, "Brammir Ironmaul", ["Thane Ulric Ironmaul"])],
+            "dynasties": [
+                dynasty("Clan Ironmaul", "Lostfeld Dwarves", 1, 82, "Brammir Ironmaul", ["Thane Ulric Ironmaul", "Ulric Ironmaul"]),
+                dynasty("Runewardens Clan", "Lostfeld Dwarves", 2, 68, "Dhorin Runewarden"),
+                dynasty("Goldfinger-Duke Clan", "Lostfeld Dwarves", 2, 64, "Orik Goldfinger-Duke"),
+            ],
         },
         {
             "faction": "Shadow Court",
@@ -1839,34 +4016,34 @@ def _default_leadership_state():
             ],
         },
         {
-            "faction": "Glenhaven Elves",
+            "faction": "Glenhaven",
             "currentRuler": ruler("Elowen Silverleaf", "Sovereign", "Silverleaf Line", 286, "election", ["council-guided", "defensive"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Silverleaf Line", "Glenhaven Elves", 1, 79, "Elowen the Elder", ["Sovereign Elowen Silverleaf"])],
+            "dynasties": [dynasty("Silverleaf Line", "Glenhaven", 1, 79, "Elowen the Elder", ["Sovereign Elowen Silverleaf"])],
         },
         {
-            "faction": "Gilgeth Orcs",
+            "faction": "Gilgeth Clans",
             "currentRuler": ruler("Hargan Stonejaw", "First Elder", "Council Clans", 44, "election", ["consensus-driven", "proud"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Council Clans", "Gilgeth Orcs", 2, 61, "First Circle", ["Hargan Stonejaw"])],
+            "dynasties": [dynasty("Council Clans", "Gilgeth Clans", 2, 61, "First Circle", ["Hargan Stonejaw"])],
         },
         {
-            "faction": "Groth Orcs",
+            "faction": "Groth Clans",
             "currentRuler": ruler("Morgath Bloodstone", "Chieftain", "Bloodstone Clan", 36, "seizure of power", ["aggressive", "strength-bound"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Bloodstone Clan", "Groth Orcs", 2, 58, "First Bloodstone", ["Morgath Bloodstone"])],
+            "dynasties": [dynasty("Bloodstone Clan", "Groth Clans", 2, 58, "First Bloodstone", ["Morgath Bloodstone"])],
         },
         {
-            "faction": "Vilefin Goblins",
+            "faction": "Vilefin",
             "currentRuler": ruler("Skrix Cogtooth", "Speaker", "Vilefin Moot", 19, "post-collapse emergence", ["flexible", "communal"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Vilefin Moot", "Vilefin Goblins", 3, 36, "The First Moot", ["Skrix Cogtooth"])],
+            "dynasties": [dynasty("Vilefin Moot", "Vilefin", 3, 36, "The First Moot", ["Skrix Cogtooth"])],
         },
         {
-            "faction": "Dreadwind Islands",
+            "faction": "Dreadwind",
             "currentRuler": ruler("Rowen Blacktide", "Fleet Captain", "Dreadwind Compact", 41, "seizure of power", ["restless", "risk-bearing"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Dreadwind Compact", "Dreadwind Islands", 2, 52, "The Exiled Crews", ["Rowen Blacktide"])],
+            "dynasties": [dynasty("Dreadwind Compact", "Dreadwind", 2, 52, "The Exiled Crews", ["Rowen Blacktide"])],
         },
     ]
 
@@ -1922,17 +4099,35 @@ def _normalize_reign(row, current_tick, active=True):
     }
 
 
+_FACTION_ALIASES = {
+    "Dreadwind Islands": "Dreadwind",
+    "Gilgeth Orcs":      "Gilgeth Clans",
+    "Glenhaven Elves":   "Glenhaven",
+    "Groth Orcs":        "Groth Clans",
+    "Vilefin Goblins":   "Vilefin",
+}
+
 def _normalize_leadership_state(prev_state, new_state):
     current_tick = int(new_state.get("tick", prev_state.get("tick", 0) if prev_state else 0))
     defaults = {row["faction"]: row for row in _default_leadership_state()}
+
+    def _alias_rows(rows):
+        out = []
+        for row in rows:
+            name = row.get("faction", "")
+            if name in _FACTION_ALIASES:
+                row = {**row, "faction": _FACTION_ALIASES[name]}
+            out.append(row)
+        return out
+
     prev_rows = {
         row.get("faction"): row
-        for row in prev_state.get("leadership_state", [])
+        for row in _alias_rows(prev_state.get("leadership_state", []))
         if row.get("faction")
     }
     incoming_rows = {
         row.get("faction"): row
-        for row in new_state.get("leadership_state", [])
+        for row in _alias_rows(new_state.get("leadership_state", []))
         if row.get("faction")
     }
     factions = list(dict.fromkeys([*defaults.keys(), *prev_rows.keys(), *incoming_rows.keys()]))
@@ -2024,25 +4219,108 @@ def _default_house_characters():
             "House Darkleaf": [("Nalia Darkleaf", "Covert negotiator", 44, 39, 80, 33, "paranoid"), ("Vale Darkleaf", "Pass watcher", 37, 42, 70, 40, "defensive"), ("Isern Darkleaf", "Silent partner", 35, 36, 77, 30, "opportunistic"), ("Nyra Darkleaf", "Ledger spy", 27, 33, 72, 31, "paranoid")],
             "House Dale": [("Heth Dale", "Grain investor", 34, 67, 48, 64, "defensive"), ("Mora Dale", "Water rights broker", 29, 62, 53, 59, "opportunistic"), ("Corra Dale", "Storehouse auditor", 26, 69, 41, 68, "honorable"), ("Tavin Dale", "Farmstead envoy", 24, 71, 38, 72, "honorable")],
         },
+        "Lostfeld Dwarves": {
+            "Clan Ironmaul": [("Ulric Ironmaul", "Thane", 83, 71, 48, 88, "defensive"), ("Bera Ironmaul", "First heir", 68, 76, 44, 84, "honorable"), ("Korin Ironmaul", "Forge marshal", 61, 63, 58, 80, "defensive"), ("Dagna Ironmaul", "Hall steward", 55, 78, 36, 86, "honorable")],
+            "Runewardens Clan": [("Dhorin Runewarden", "Runekeeper elder", 66, 74, 41, 79, "defensive"), ("Mira Runewarden", "Vault archivist", 58, 82, 34, 83, "honorable"), ("Torvek Runewarden", "Seal engineer", 54, 69, 45, 76, "defensive"), ("Helja Runewarden", "Deep record keeper", 49, 77, 31, 81, "honorable")],
+            "Goldfinger-Duke Clan": [("Orik Goldfinger-Duke", "Coin-duke claimant", 64, 52, 72, 57, "opportunistic"), ("Sanna Goldfinger-Duke", "Treasury assessor", 56, 61, 64, 63, "opportunistic"), ("Brum Goldfinger-Duke", "Mint captain", 52, 55, 59, 60, "defensive"), ("Kelda Goldfinger-Duke", "Contract keeper", 47, 67, 48, 69, "honorable")],
+        },
+        # Shadow Court: 2 houses — small and secretive; only the inner veil-court matters politically
+        "Shadow Court": {
+            "House Shadowveil": [("Lythara the Veiled", "Shadow Queen", 88, 22, 75, 42, "paranoid"), ("Vayne Shadowveil", "Shadow Heir", 68, 24, 78, 48, "paranoid"), ("Selith Shadowveil", "Court Interrogator", 62, 18, 72, 55, "aggressive"), ("Mira Shadowveil", "Veil Defector", 48, 38, 76, 28, "opportunistic")],
+            "House Nightborn": [("Draveth Nightborn", "Shadow General", 74, 20, 70, 65, "aggressive"), ("Selis Nightborn", "Ritual Keeper", 60, 25, 65, 58, "paranoid"), ("Ryss Nightborn", "Assassin Captain", 56, 16, 74, 52, "aggressive"), ("Veth Nightborn", "Disgraced Spy", 44, 32, 72, 24, "opportunistic")],
+        },
+        # Glenhaven: 3 houses — council dynamics need at least 3 factions for interesting votes; one is Darkleaf per user
+        "Glenhaven": {
+            "House Silverleaf": [("Elowen Silverleaf", "Sovereign", 85, 76, 52, 80, "honorable"), ("Taelis Silverleaf", "Sovereign's Heir", 66, 72, 48, 78, "honorable"), ("Miren Silverleaf", "War-Reader", 62, 68, 55, 74, "defensive"), ("Alara Silverleaf", "Forest Envoy", 52, 74, 44, 72, "honorable")],
+            "House Darkleaf": [("Verath Darkleaf", "Shadow Councillor", 72, 42, 70, 55, "opportunistic"), ("Sylra Darkleaf", "Darkleaf Heir", 60, 45, 68, 50, "opportunistic"), ("Erith Darkleaf", "Forest Spy", 58, 38, 72, 48, "paranoid"), ("Nael Darkleaf", "Border Hunter", 50, 44, 65, 44, "aggressive")],
+            "House Moonwhisper": [("Cael Moonwhisper", "Elder Delegate", 68, 80, 42, 85, "honorable"), ("Lysse Moonwhisper", "Council Heir", 54, 76, 38, 82, "honorable"), ("Faen Moonwhisper", "Grove Keeper", 52, 78, 36, 80, "defensive"), ("Iorel Moonwhisper", "Memory Singer", 46, 82, 32, 76, "honorable")],
+        },
+        # Gilgeth Clans: 3 clans — the elder council needs enough clans to debate and outvote each other
+        "Gilgeth Clans": {
+            "Clan Stonejaw": [("Hargan Stonejaw", "First Elder", 83, 62, 55, 75, "defensive"), ("Broga Stonejaw", "Elder's Heir", 66, 58, 60, 70, "defensive"), ("Kreth Stonejaw", "Clan Champion", 62, 44, 74, 62, "aggressive"), ("Ulva Stonejaw", "Raider Captain", 55, 38, 78, 50, "aggressive")],
+            "Clan Ironhide": [("Vorg Ironhide", "Clan Warlord", 74, 38, 78, 58, "aggressive"), ("Grak Ironhide", "Warlord's Son", 62, 34, 76, 52, "aggressive"), ("Shura Ironhide", "Shield Maiden", 58, 42, 68, 64, "defensive"), ("Durz Ironhide", "Ambush Hunter", 50, 32, 72, 44, "aggressive")],
+            "Clan Ashfang": [("Griss Ashfang", "Smoke Elder", 70, 52, 62, 68, "opportunistic"), ("Nalla Ashfang", "Elder's Daughter", 58, 50, 64, 62, "opportunistic"), ("Krug Ashfang", "Fire Keeper", 54, 44, 70, 55, "aggressive"), ("Orra Ashfang", "Scout Mistress", 48, 48, 66, 58, "defensive")],
+        },
+        # Groth Clans: 2 clans — warlord culture; the ruling clan dominates, one rival clan creates tension
+        "Groth Clans": {
+            "Clan Bloodstone": [("Morgath Bloodstone", "Chieftain", 86, 28, 82, 45, "aggressive"), ("Vrakka Bloodstone", "Warchief Heir", 70, 26, 80, 48, "aggressive"), ("Droth Bloodstone", "Berserker Lord", 64, 22, 84, 40, "aggressive"), ("Shara Bloodstone", "Blood Shaman", 58, 35, 72, 42, "paranoid")],
+            "Clan Redtusk": [("Brak Redtusk", "Battle Elder", 72, 30, 78, 52, "aggressive"), ("Urka Redtusk", "Tusk Heir", 60, 28, 76, 48, "aggressive"), ("Ghal Redtusk", "Siege Master", 56, 24, 74, 44, "aggressive"), ("Vrenna Redtusk", "War Drummer", 48, 32, 70, 50, "defensive")],
+        },
+        # Vilefin: 2 clans — goblins are fractious but the speaker system keeps it to 2 competing blocs
+        "Vilefin": {
+            "Clan Cogtooth": [("Skrix Cogtooth", "Speaker", 80, 36, 82, 38, "opportunistic"), ("Nix Cogtooth", "Speaker's Kin", 62, 32, 78, 42, "opportunistic"), ("Vrax Cogtooth", "Trap Master", 58, 28, 80, 35, "aggressive"), ("Pella Cogtooth", "Info Broker", 52, 35, 75, 30, "paranoid")],
+            "Clan Rustfang": [("Grix Rustfang", "Clan Boss", 68, 28, 80, 35, "opportunistic"), ("Skit Rustfang", "Boss's Runt", 55, 25, 76, 38, "opportunistic"), ("Mekka Rustfang", "Scavenger Chief", 52, 22, 78, 30, "aggressive"), ("Drip Rustfang", "Poison Brewer", 46, 18, 74, 28, "paranoid")],
+        },
+        # Dreadwind: 3 captaincy houses — election system needs enough rival captains to make votes contested
+        "Dreadwind": {
+            "House Blacktide": [("Rowen Blacktide", "Fleet Captain", 84, 48, 72, 55, "aggressive"), ("Sarra Blacktide", "Captain's Heir", 66, 44, 70, 58, "opportunistic"), ("Kel Blacktide", "Master Gunner", 62, 40, 68, 62, "aggressive"), ("Dune Blacktide", "Harbormaster", 54, 52, 58, 68, "defensive")],
+            "House Stormvane": [("Mira Stormvane", "Admiral", 72, 42, 74, 52, "aggressive"), ("Joss Stormvane", "Quartermaster Heir", 60, 38, 70, 55, "opportunistic"), ("Cael Stormvane", "Boarding Captain", 56, 36, 72, 48, "aggressive"), ("Una Stormvane", "Navigator", 50, 46, 62, 60, "defensive")],
+            "House Saltbreach": [("Torren Saltbreach", "Privateer Lord", 68, 44, 76, 46, "opportunistic"), ("Yvara Saltbreach", "Privateer Heir", 56, 40, 72, 50, "opportunistic"), ("Rinn Saltbreach", "Siege Corsair", 52, 36, 74, 44, "aggressive"), ("Brix Saltbreach", "Powder Master", 46, 42, 68, 52, "defensive")],
+        },
     }
     rows = []
+    faction_home = {
+        "Twin Cities": "Twin Cities",
+        "Tidefall": "Tidefall",
+        "Dur Khadur": "Dur Khadur",
+        "Lostfeld Dwarves": "Lostfeld",
+        "Shadow Court": "Faerwood",
+        "Glenhaven": "Glenhaven",
+        "Gilgeth Clans": "Gilgeth and Groth",
+        "Groth Clans": "Gilgeth and Groth",
+        "Vilefin": "Rock Plains",
+        "Dreadwind": "Dreadwind Isles",
+    }
+    faction_race = {
+        "Lostfeld Dwarves": "Dwarf",
+        "Shadow Court": "Dark Elf",
+        "Glenhaven": "High Elf",
+        "Gilgeth Clans": "Orc",
+        "Groth Clans": "Orc",
+        "Vilefin": "Goblin",
+    }
+    faction_ages = {
+        # (index0, index1, index2, index3+)
+        "Lostfeld Dwarves": (173, 141, 118, 92),
+        "Shadow Court":     (280, 210, 165, 120),
+        "Glenhaven":        (320, 245, 190, 145),
+        "Gilgeth Clans":    (52, 36, 44, 29),
+        "Groth Clans":      (48, 34, 40, 26),
+        "Vilefin":          (38, 26, 32, 20),
+    }
     core_roles = ["Leader", "Heir", "Power Role", "Wildcard"]
     for faction, houses in specs.items():
         for house, members in houses.items():
             for index, (name, role, influence, morality, ambition, loyalty, bias) in enumerate(members):
-                if index == 0:
-                    age = 46
-                elif index == 1:
-                    age = 32
-                elif index == 2:
-                    age = 38
-                else:
-                    age = 27
+                ages = faction_ages.get(faction, (46, 32, 38, 27))
+                age = ages[min(index, 3)]
                 role_lower = role.lower()
                 if "elder" in role_lower:
-                    age = max(age, 43)
+                    age = max(age, ages[0] - 20)
                 if "cousin" in role_lower or "magistrate" in role_lower or "minister" in role_lower:
                     age += 4
+                intel = max(35, min(90, int((influence + ambition + loyalty) / 3)))
+                rl = role.lower()
+                # warfare: ambition + ruthlessness, boosted for military roles
+                _war = int(ambition * 0.5 + (100 - morality) * 0.3 + influence * 0.2)
+                if any(x in rl for x in ["marshal","captain","warlord","champion","commander","garrison","raider","berserker","boarding","siege","gunner","shield","scout","hunter","cavalry","soldier"]):
+                    _war = int(_war * 1.25 + 8)
+                warfare_seed = max(5, min(95, _war))
+                # diplomacy: intelligence + loyalty, boosted for envoy/legal/council roles
+                _dip = int(intel * 0.4 + loyalty * 0.4 + morality * 0.2)
+                if any(x in rl for x in ["envoy","advocate","diplomat","mediator","lawyer","broker","judge","councillor","delegate","representative","elect","factor","treasurer","steward","liaison","magistrate","minister"]):
+                    _dip = int(_dip * 1.25 + 8)
+                diplomacy_seed = max(5, min(95, _dip))
+                # intrigue: ambition + inverse-loyalty, boosted for spy/shadow/criminal roles
+                _int = int(ambition * 0.4 + (100 - loyalty) * 0.35 + intel * 0.25)
+                if any(x in rl for x in ["spy","agent","assassin","cipher","informant","courier","shadow","covert","quiet","rumor","smuggl","defector","disgraced","poison","runner","handler","watcher"]):
+                    _int = int(_int * 1.25 + 8)
+                intrigue_seed = max(5, min(95, _int))
+                # faith: morality + passivity, boosted for ritual/keeper/shaman/singer roles
+                _fth = int(morality * 0.55 + (100 - ambition) * 0.25 + 8)
+                if any(x in rl for x in ["druid","priest","ritual","shaman","faith","keeper","memory","singer","elder","sacred","rune","archivist","record"]):
+                    _fth = int(_fth * 1.25 + 8)
+                faith_seed = max(5, min(95, _fth))
                 rows.append({
                     "name": name,
                     "faction": faction,
@@ -2050,21 +4328,902 @@ def _default_house_characters():
                     "coreRole": core_roles[index] if index < len(core_roles) else "Secondary",
                     "role": role,
                     "status": "Available for political action",
-                    "age": str(age),
-                    "race": "Human",
+                    "age": float(age),
+                    "race": faction_race.get(faction, "Human"),
                     "influenceScore": influence,
                     "morality": morality,
                     "ambition": ambition,
                     "loyalty": loyalty,
-                    "intelligence": max(35, min(90, int((influence + ambition + loyalty) / 3))),
+                    "intelligence": intel,
                     "bias": bias,
                     "currentGoal": f"Advance {house}'s position in {faction}.",
                     "recentActions": [],
+                    "location": faction_home.get(faction, faction),
+                    "destination": "",
+                    "ticks_to_arrive": 0,
+                    "journey_purpose": "",
+                    "warfare": warfare_seed,
+                    "diplomacy": diplomacy_seed,
+                    "intrigue": intrigue_seed,
+                    "faith": faith_seed,
+                    "health": 100.0,
+                    "wounds": [],
+                    "memory": [],
                 })
     return rows
 
 
+# ── CHARACTER LIFECYCLE ────────────────────────────────────────────────────────
+
+RACE_LIFESPAN = {
+    #              natural lifespan  hard max  (years)
+    "Human":    {"natural": 72, "max": 92},
+    "Dwarf":    {"natural": 285, "max": 360},
+    "High Elf": {"natural": 620, "max": 790},
+    "Dark Elf": {"natural": 530, "max": 670},
+    "Orc":      {"natural": 54, "max": 68},
+    "Goblin":   {"natural": 40, "max": 52},
+}
+
+
+def _parse_age_float(val) -> float:
+    """Return age as a float year value; fall back to 30.0 if unparseable."""
+    try:
+        return float(str(val).strip())
+    except (ValueError, TypeError):
+        return 30.0
+
+
+def _advance_age(char: dict) -> float:
+    """
+    Advance a character's age by one tick (one day = 1/365 years).
+    Returns the new age as a float.
+    """
+    return _parse_age_float(char.get("age", 30)) + (1.0 / 365.0)
+
+
+def _natural_death_chance(age: float, race: str) -> float:
+    """
+    Return the per-tick (per-day) probability of natural death for a character.
+
+    Death probability is zero below the natural lifespan threshold, then rises
+    along a cubic curve, reaching ~1.5 % per day at the hard max lifespan and
+    capping at 40 % per day beyond it.
+
+    Examples (Human, natural=72, max=92):
+        age 70  → 0.00 %   (below threshold, no natural death)
+        age 80  → 0.19 %   (t=0.40 → moderate elder risk)
+        age 86  → 0.85 %   (t=0.70 → significant risk)
+        age 92  → 1.50 %   (t=1.00 → high; expected survival ~46 more days)
+        age 95+ → 40.00 %  (hard cap; near-certain death within days)
+    """
+    span = RACE_LIFESPAN.get(race, RACE_LIFESPAN["Human"])
+    natural = span["natural"]
+    max_age = span["max"]
+
+    if age < natural:
+        return 0.0
+
+    t = (age - natural) / (max_age - natural)   # 0.0 at natural, 1.0 at max
+    t = min(t, 1.5)                              # allow slight overshoot
+    return min(t ** 3 * 0.015, 0.40)            # cubic ramp, cap at 40 %
+
+
+# ── CHARACTER HEALTH ───────────────────────────────────────────────────────────
+
+def _apply_damage(char: dict, amount: float, wound_desc: str = "") -> dict:
+    """
+    Reduce a character's health by amount and optionally record a wound.
+    Returns a new dict — does not mutate the original.
+
+    amount      : health points to remove (positive number)
+    wound_desc  : short description of the injury; omit for pure health drain
+
+    Wounds are capped at 6 active entries; oldest wound is dropped when full.
+    Health is clamped to [0, 100].
+    """
+    new_health = max(0.0, min(100.0, float(char.get("health", 100)) - amount))
+    wounds = list(char.get("wounds") or [])
+    if wound_desc:
+        wounds.append(wound_desc)
+        wounds = wounds[-6:]          # keep most-recent 6
+    return {**char, "health": round(new_health, 2), "wounds": wounds}
+
+
+def _recover_health(char: dict) -> float:
+    """
+    Calculate one tick of passive health recovery and return the new health value.
+
+    Recovery rules:
+        base rate : +0.5 health per tick (full recovery from 0 in ~200 ticks / 7 months)
+        each wound: -0.08 per tick (6 wounds halves the base rate to +0.02)
+        floor     : 0.05 per tick minimum (body always tries to heal)
+        ceiling   : health never exceeds max_health, which equals 100 minus a
+                    penalty that kicks in for characters beyond their natural lifespan
+                    (elderly bodies cannot fully restore themselves)
+
+    Returns the new health as a float clamped to [current_health, max_health].
+    """
+    current   = float(char.get("health", 100))
+    wounds    = list(char.get("wounds") or [])
+    race      = char.get("race", "Human")
+    age       = _parse_age_float(char.get("age", 30))
+
+    span      = RACE_LIFESPAN.get(race, RACE_LIFESPAN["Human"])
+    natural   = span["natural"]
+    max_age   = span["max"]
+
+    # Max health declines for elderly characters (cannot heal beyond diminished cap)
+    if age <= natural:
+        max_health = 100.0
+    else:
+        t = min((age - natural) / (max_age - natural), 1.0)
+        max_health = max(40.0, 100.0 - t * 40.0)   # 100 → 60 across the danger zone
+
+    if current >= max_health:
+        return current
+
+    rate = max(0.05, 0.50 - len(wounds) * 0.08)
+    return min(max_health, round(current + rate, 2))
+
+
+def _health_death_modifier(health: float) -> float:
+    """
+    Multiplier applied to the age-based natural death chance when health is low.
+
+    health ≥ 80  → 1.0×   (no modification)
+    health = 50  → 1.5×
+    health = 20  → 3.0×
+    health =  0  → 10.0×
+
+    Also returns a small base death chance for critically wounded characters
+    regardless of age, as a second return value.
+    """
+    if health >= 80:
+        return 1.0
+    if health >= 50:
+        return 1.0 + (80 - health) / 60.0
+    if health >= 20:
+        return 1.5 + (50 - health) / 20.0
+    return 3.0 + (20 - health) * 0.35
+
+
+def _critical_health_death_chance(health: float) -> float:
+    """
+    Per-tick death chance from critical health alone, independent of age.
+    Zero above 20 health. Rises to 2 % per tick at 0 health.
+    """
+    if health >= 20:
+        return 0.0
+    if health >= 10:
+        return (20 - health) / 10.0 * 0.002
+    return 0.002 + (10 - health) / 10.0 * 0.018
+
+
+# ── CHARACTER MEMORY ───────────────────────────────────────────────────────────
+
+# Base impact decay per tick for each memory type.
+# Actual decay = base × _trait_evolution_rate(age, race), so long-lived races
+# (ancient elves, dwarves) remember far longer than short-lived ones (goblins, young humans).
+MEMORY_DECAY_RATE = {
+    "betrayal": 0.08,   # slowest — betrayal scars are deep and lasting
+    "alliance": 0.12,   # slow — trusted bonds fade gradually
+    "loss":     0.14,   # medium-slow — defeats sting
+    "victory":  0.18,   # medium — triumphs buoy, then recede
+    "honor":    0.18,   # medium — respect fades without renewal
+    "threat":   0.24,   # faster — threats feel less urgent with time
+}
+
+
+def _add_memory(char: dict, mem_type: str, target: str, impact: float,
+                description: str = "", tick: int = 0) -> dict:
+    """
+    Add a new memory entry to a character and return the updated dict.
+
+    mem_type    : one of MEMORY_DECAY_RATE keys
+    target      : name of the character, faction, or event this memory is about
+    impact      : signed float — negative for bad memories, positive for good ones
+                  Typical ranges: betrayal −20 to −40, victory +10 to +25,
+                  alliance +10 to +20, loss −10 to −25, honor +5 to +15, threat −5 to −15
+    description : short prose note; optional
+    tick        : world tick when the memory formed; optional
+
+    Memories are capped at 12.  When full, the lowest-|impact| memory is evicted
+    to make room, preserving the most significant ones.
+    """
+    memories = list(char.get("memory") or [])
+    entry = {
+        "type":        mem_type,
+        "target":      target,
+        "impact":      round(float(impact), 2),
+        "tick":        tick,
+        "description": description,
+    }
+
+    # Merge with existing memory of the same type+target (compound effect, not duplicate)
+    for m in memories:
+        if m.get("type") == mem_type and m.get("target") == target:
+            m["impact"] = round(max(-100.0, min(100.0, m["impact"] + impact * 0.5)), 2)
+            m["description"] = description or m.get("description", "")
+            m["tick"] = tick or m.get("tick", 0)
+            return {**char, "memory": memories}
+
+    memories.append(entry)
+
+    # Evict lowest-impact memory when over capacity
+    if len(memories) > 12:
+        memories.sort(key=lambda m: abs(m.get("impact", 0)))
+        memories = memories[1:]   # drop the least significant
+
+    return {**char, "memory": memories}
+
+
+def _fade_memories(char: dict) -> list:
+    """
+    Apply one tick of memory decay and return the updated memory list.
+
+    Each memory's impact moves toward zero at a rate scaled by the character's
+    life-stage rate modifier — long-lived elder races forget far more slowly.
+    Memories whose |impact| drops below 0.5 are discarded.
+    """
+    memories = list(char.get("memory") or [])
+    if not memories:
+        return []
+
+    age  = _parse_age_float(char.get("age", 30))
+    race = char.get("race", "Human")
+    rate = _trait_evolution_rate(age, race)   # lower = slower decay for elders
+
+    surviving = []
+    for m in memories:
+        base_decay = MEMORY_DECAY_RATE.get(m.get("type", "threat"), 0.18)
+        decay      = base_decay * rate
+        impact     = float(m.get("impact", 0))
+
+        if impact > 0:
+            impact = max(0.0, impact - decay)
+        else:
+            impact = min(0.0, impact + decay)
+
+        if abs(impact) >= 0.5:
+            surviving.append({**m, "impact": round(impact, 2)})
+
+    return surviving
+
+
+# ── PERSONALITY EVOLUTION ──────────────────────────────────────────────────────
+
+def _trait_evolution_rate(age: float, race: str) -> float:
+    """
+    Scale factor for how fast traits evolve, based on how far the character
+    is through their natural lifespan.
+
+    Young characters are still forming — traits shift readily.
+    Ancient characters have spent centuries becoming who they are — change is slow.
+
+    Life-stage brackets (as fraction of natural lifespan):
+        < 20 %  : 1.5×  (formative — volatile, easily shaped)
+          20–60 %: 1.0×  (active life — standard rate)
+          60–80 %: 0.6×  (mature — increasingly set in their ways)
+        > 80 %  : 0.3×  (elder — personality is crystallised)
+    """
+    span    = RACE_LIFESPAN.get(race, RACE_LIFESPAN["Human"])
+    natural = span["natural"]
+    frac    = age / natural if natural > 0 else 1.0
+
+    if frac < 0.20:
+        return 1.5
+    if frac < 0.60:
+        return 1.0
+    if frac < 0.80:
+        return 0.6
+    return 0.3
+
+
+def _evolve_traits(char: dict) -> dict:
+    """
+    Apply one tick of personality evolution.
+
+    Evolution sources, applied in order:
+        1. Event signals  — most-recent recentAction scanned for keywords; each
+                            matching signal produces a one-off trait delta.
+        2. Passive drift  — slow ongoing shifts driven by current trait values,
+                            health, wounds, and age.
+
+    All deltas are multiplied by _trait_evolution_rate() so long-lived races
+    change far more slowly than short-lived ones.
+
+    Traits are returned as floats; the normalizer clamps them to [0, 100]
+    and rounds for storage.
+    """
+    morality     = float(char.get("morality",    50))
+    ambition     = float(char.get("ambition",    50))
+    loyalty      = float(char.get("loyalty",     50))
+    intelligence = float(char.get("intelligence",50))
+    health       = float(char.get("health",      100))
+    age          = _parse_age_float(char.get("age", 30))
+    race         = char.get("race", "Human")
+    wounds       = list(char.get("wounds") or [])
+
+    rate = _trait_evolution_rate(age, race)
+
+    # Most-recent action only — avoids re-applying old events
+    recent = char.get("recentActions") or []
+    signal = ((recent[-1] if recent else "") + " " + (char.get("status") or "")).lower()
+
+    dm = da = dl = di = 0.0   # deltas
+
+    # ── EVENT SIGNALS ──────────────────────────────────────────────────────
+    if any(w in signal for w in ["betray", "deceiv", "backstab", "lied to", "manipulated"]):
+        dl -= 2.5    # betrayal scars loyalty
+        dm -= 0.5
+
+    if any(w in signal for w in ["victory", "triumph", "won the", "defeated the", "successful raid", "secured"]):
+        da += 1.5    # success feeds ambition
+        di += 0.5    # victory teaches strategy
+
+    if any(w in signal for w in ["defeated", "routed", "lost the", "failed", "collapsed", "surrendered"]):
+        da -= 1.5    # failure deflates ambition
+        dm -= 1.0    # loss corrodes morale
+
+    if any(w in signal for w in ["appointed", "promoted", "elevated", "honored", "rewarded"]):
+        da += 1.0
+        dl += 1.0    # institutional recognition deepens loyalty
+
+    if any(w in signal for w in ["exiled", "imprisoned", "stripped", "condemned", "punished"]):
+        dl -= 2.0    # punishment breeds resentment
+        da += 0.8    # and hardens ambition
+
+    if any(w in signal for w in ["bribed", "corrupt", "embezzl", "extort", "smuggl"]):
+        dm -= 1.5
+        dl -= 0.5
+
+    if any(w in signal for w in ["massacre", "atrocity", "slaughter", "executed", "horror"]):
+        dm -= 1.0    # witnessing violence corrodes conscience
+        dl -= 0.5
+
+    if any(w in signal for w in ["sworn", "pledged", "oath", "vowed", "alliance sealed"]):
+        dl += 1.5    # formal oaths reinforce loyalty
+
+    if any(w in signal for w in ["crisis", "desperate", "famine", "siege", "collapse"]):
+        dm -= 0.5    # sustained crisis erodes moral standards
+        da += 0.5    # desperation sharpens hunger
+
+    # ── PASSIVE DRIFT ──────────────────────────────────────────────────────
+    # Extreme ambition self-corrects without feeding victories
+    if ambition > 78:
+        da -= 0.06
+
+    # Betrayed loyalty stabilises at a lower floor (hits bottom, stops falling)
+    if loyalty < 22:
+        dl += 0.10
+
+    # Low morality compounds: cynicism breeds more cynicism
+    if morality < 28:
+        dm -= 0.05
+
+    # Suffering tests moral conviction
+    if morality > 82 and health < 55:
+        dm -= 0.04
+
+    # Chronic wounds deflate ambition and erode loyalty (pain isolates)
+    if len(wounds) >= 3:
+        da -= 0.12
+        dl -= 0.06
+
+    # ── AGE-STAGE DRIFT ────────────────────────────────────────────────────
+    span    = RACE_LIFESPAN.get(race, RACE_LIFESPAN["Human"])
+    natural = span["natural"]
+    frac    = age / natural if natural > 0 else 1.0
+
+    if frac > 0.80:        # deep into life — ambition fades, legacy loyalty grows
+        da -= 0.04
+        dl += 0.02
+        di -= 0.02         # very slow cognitive slowing in true old age
+
+    # ── APPLY RATE AND CLAMP ───────────────────────────────────────────────
+    def _c(v): return max(0.0, min(100.0, v))
+
+    return {
+        **char,
+        "morality":     round(_c(morality     + dm * rate), 2),
+        "ambition":     round(_c(ambition     + da * rate), 2),
+        "loyalty":      round(_c(loyalty      + dl * rate), 2),
+        "intelligence": round(_c(intelligence + di * rate), 2),
+    }
+
+
+def _seed_relationship(char, target):
+    """Generate initial trust/fear/respect between char and target based on proximity and traits."""
+    import random
+    same_house      = char.get("house") == target.get("house")
+    same_faction    = char.get("faction") == target.get("faction")
+    char_loyalty    = float(char.get("loyalty", 50))
+    target_infl     = int(target.get("influenceScore", 50))
+    target_ambition = float(target.get("ambition", 50))
+
+    if same_house:
+        trust   = random.randint(55, 80)
+        fear    = random.randint(0, 20)
+        respect = random.randint(45, 70)
+    elif same_faction:
+        trust   = random.randint(30, 55)
+        fear    = random.randint(5, 25)
+        respect = random.randint(30, 60)
+    else:
+        trust   = random.randint(10, 35)
+        fear    = random.randint(10, 40)
+        respect = random.randint(20, 50)
+
+    # High-influence targets earn more respect; high-ambition targets inspire more fear
+    respect = min(100, respect + int((target_infl - 50) * 0.3))
+    fear    = min(100, fear    + int((target_ambition - 50) * 0.2))
+    # Loyal characters trust housemates more
+    if same_house and char_loyalty > 60:
+        trust = min(100, trust + int((char_loyalty - 60) * 0.4))
+
+    return {
+        "trust":   max(0, min(100, trust)),
+        "fear":    max(0, min(100, fear)),
+        "respect": max(0, min(100, respect)),
+    }
+
+
+def _seed_relationships_for(char, candidates):
+    """Build a full relationships dict for a character against a candidate list."""
+    rels = {}
+    for target in candidates:
+        if target.get("name") == char.get("name"):
+            continue
+        name = target.get("name", "")
+        if name:
+            rels[name] = _seed_relationship(char, target)
+    return rels
+
+
+def _evolve_relationships(char):
+    """Update relationship values from events, outcomes, memory, and personality traits."""
+    rels    = {k: dict(v) for k, v in (char.get("relationships") or {}).items()}
+    rate    = _trait_evolution_rate(char.get("age", 30), char.get("race", "Human"))
+    actions = " ".join(char.get("recentActions") or []).lower()
+
+    # Personality trait modifiers — how strongly this char reacts to each signal type
+    morality     = float(char.get("morality",     50))
+    ambition     = float(char.get("ambition",     50))
+    loyalty      = float(char.get("loyalty",      50))
+    intelligence = float(char.get("intelligence", 50))
+
+    betrayal_sensitivity = 1.0 + (morality  - 50) * 0.015  # high morality = hurt more by betrayal
+    loyalty_bonus        = 1.0 + (loyalty   - 50) * 0.010  # high loyalty  = trust gains amplified
+    ambition_fear_bias   = 1.0 + (ambition  - 50) * 0.008  # high ambition = more fearful of rivals
+    intel_skepticism     = 1.0 - (intelligence - 50) * 0.005 # high intel  = slower to trust
+
+    # World-event context flags from this character's own recent actions
+    war_active      = any(k in actions for k in ("war declared", "battle fought", "siege", "invaded", "at war"))
+    alliance_active = any(k in actions for k in ("alliance signed", "treaty", "peace agreed", "pact formed"))
+    shared_victory  = any(k in actions for k in ("alongside", "together with", "with the help of")) and \
+                      any(k in actions for k in ("victory", "won", "successful raid", "captured"))
+    faction_defeat  = any(k in actions for k in ("defeated in battle", "routed", "forced to retreat", "surrendered"))
+
+    for name, rel in rels.items():
+        nlow    = name.lower()
+        trust   = float(rel.get("trust",   50))
+        fear    = float(rel.get("fear",    50))
+        respect = float(rel.get("respect", 50))
+
+        # ── Named-target event signals ──────────────────────────────────────
+        if nlow in actions:
+            # Positive cooperation
+            if any(k in actions for k in ("allied with", "cooperated with", "aided", "supported",
+                                           "befriended", "negotiated with", "protected", "stood with")):
+                trust   = min(100, trust   + 4 * rate * loyalty_bonus * intel_skepticism)
+                respect = min(100, respect + 2 * rate)
+                fear    = max(0,   fear    - 1 * rate)
+
+            # Betrayal — high-morality chars feel this much harder
+            if any(k in actions for k in ("betrayed", "deceived", "abandoned", "undermined",
+                                           "sold out", "broke the pact", "violated the agreement")):
+                trust = max(0,   trust - 14 * rate * betrayal_sensitivity)
+                fear  = min(100, fear  +  5 * rate)
+                respect = max(0, respect - 3 * rate)
+
+            # Defeat of or by this target
+            if any(k in actions for k in ("defeated", "crushed", "humiliated", "overpowered", "subdued")):
+                fear    = min(100, fear    + 7 * rate * ambition_fear_bias)
+                respect = min(100, respect + 4 * rate)
+                trust   = max(0,   trust   - 3 * rate)
+
+            # Gifts, tribute, and public honors
+            if any(k in actions for k in ("gifted", "offered tribute", "paid ransom for",
+                                           "honored", "publicly praised")):
+                trust   = min(100, trust   + 4 * rate * loyalty_bonus)
+                respect = min(100, respect + 3 * rate)
+                fear    = max(0,   fear    - 2 * rate)
+
+            # Public humiliation received from this target
+            if any(k in actions for k in ("humiliated by", "forced to kneel", "publicly shamed by", "mocked by")):
+                fear    = min(100, fear    +  9 * rate)
+                trust   = max(0,   trust   -  6 * rate)
+                respect = max(0,   respect -  4 * rate)
+
+            # Shared victory together
+            if shared_victory:
+                trust   = min(100, trust   + 3 * rate * loyalty_bonus)
+                respect = min(100, respect + 3 * rate)
+
+        # ── World-event ambient shifts (apply to ALL relationships, not just named) ──
+        if war_active:
+            fear  = min(100, fear  + 0.4 * rate)   # everyone more fearful during war
+            trust = max(0,   trust - 0.3 * rate)   # suspicion rises across the board
+        if alliance_active:
+            trust = min(100, trust + 0.6 * rate)   # formal alliances ease ambient tension
+        if faction_defeat:
+            fear    = max(0, fear    - 0.5 * rate)  # losing makes you less intimidating
+            respect = max(0, respect - 0.4 * rate)
+
+        rels[name] = {
+            "trust":   round(max(0, min(100, trust)),   1),
+            "fear":    round(max(0, min(100, fear)),    1),
+            "respect": round(max(0, min(100, respect)), 1),
+        }
+
+    # ── Memory signals ──────────────────────────────────────────────────────
+    for mem in (char.get("memory") or []):
+        target   = mem.get("target", "")
+        mem_type = mem.get("type", "").lower()
+        if not target or target not in rels:
+            continue
+        strength = float(mem.get("strength", 0.5))
+        rel      = rels[target]
+        trust    = float(rel.get("trust",   50))
+        fear     = float(rel.get("fear",    50))
+        respect  = float(rel.get("respect", 50))
+
+        if mem_type == "betrayal":
+            trust   = max(0,   trust   - strength * 6 * rate * betrayal_sensitivity)
+            fear    = min(100, fear    + strength * 3 * rate)
+            respect = max(0,   respect - strength * 2 * rate)
+        elif mem_type == "alliance":
+            trust   = min(100, trust   + strength * 4 * rate * loyalty_bonus)
+            respect = min(100, respect + strength * 2 * rate)
+        elif mem_type == "victory":
+            respect = min(100, respect + strength * 3 * rate)
+            fear    = min(100, fear    + strength * 2 * rate * ambition_fear_bias)
+        elif mem_type == "loss":
+            trust = max(0,   trust - strength * 2 * rate)
+            fear  = min(100, fear  + strength * 4 * rate)
+        elif mem_type == "gift":
+            trust   = min(100, trust   + strength * 3 * rate * loyalty_bonus)
+            respect = min(100, respect + strength * 1 * rate)
+
+        rels[target] = {
+            "trust":   round(max(0, min(100, trust)),   1),
+            "fear":    round(max(0, min(100, fear)),    1),
+            "respect": round(max(0, min(100, respect)), 1),
+        }
+
+    return rels
+
+
+def _drift_relationships_from_power(rows):
+    """Second-pass: adjust fear and respect based on each target's actual current stats."""
+    by_name = {r["name"]: r for r in rows}
+
+    for char in rows:
+        rels    = char.get("relationships") or {}
+        rate    = _trait_evolution_rate(char.get("age", 30), char.get("race", "Human"))
+        ambition = float(char.get("ambition", 50))
+
+        for name, rel in rels.items():
+            target = by_name.get(name)
+            if not target:
+                continue
+
+            trust   = float(rel.get("trust",   50))
+            fear    = float(rel.get("fear",    50))
+            respect = float(rel.get("respect", 50))
+
+            t_infl     = int(target.get("influenceScore", 50))
+            t_warfare  = int(target.get("warfare",  50))
+            t_diplo    = int(target.get("diplomacy", 50))
+            t_ambition = float(target.get("ambition", 50))
+            t_health   = float(target.get("health", 80))
+
+            # Power-based fear: high influence + high ambition = commanding presence
+            power_index = (t_infl + t_ambition) / 2
+            if power_index > 60:
+                fear_nudge  = (power_index - 60) * 0.014 * rate
+                fear_nudge *= 1.0 + (ambition - 50) * 0.010  # ambitious observers fear rivals more
+                fear = min(100, fear + fear_nudge)
+
+            # Leadership-based respect: high warfare or diplomacy = earned standing
+            leadership = max(t_warfare, t_diplo)
+            if leadership > 65:
+                respect = min(100, respect + (leadership - 65) * 0.012 * rate)
+
+            # Wounded/weak targets bleed fear and respect
+            if t_health < 30:
+                deficit = (30 - t_health) * 0.02 * rate
+                fear    = max(0, fear    - deficit)
+                respect = max(0, respect - deficit * 0.5)
+
+            rels[name] = {
+                "trust":   round(max(0, min(100, trust)),   1),
+                "fear":    round(max(0, min(100, fear)),    1),
+                "respect": round(max(0, min(100, respect)), 1),
+            }
+
+        char["relationships"] = rels
+        char["relationship_signals"] = _build_relationship_signals(char)
+
+
+def _decay_relationships(char, current_tick=0):
+    """Pull all relationship values toward neutral each tick.
+
+    Decay rate is suppressed by strong, recent memories of the target.
+    A fresh high-strength memory anchors the relationship; an old faded one lets it drift freely.
+    """
+    rels = {k: dict(v) for k, v in (char.get("relationships") or {}).items()}
+    if not rels:
+        return rels
+
+    rate = _trait_evolution_rate(char.get("age", 30), char.get("race", "Human"))
+
+    # Neutral baselines and per-axis base decay rate
+    NEUTRAL    = {"trust": 40.0, "fear": 20.0, "respect": 35.0}
+    BASE_DECAY = {"trust": 0.007, "fear": 0.006, "respect": 0.006}
+
+    # Index memories: target → strongest memory and its tick (for recency calculation)
+    # A strong, recent memory anchors the relationship and slows decay toward neutral.
+    mem_anchor: dict = {}
+    for mem in (char.get("memory") or []):
+        target   = mem.get("target", "")
+        strength = float(mem.get("strength", 0.0))
+        mem_tick = int(mem.get("tick", 0))
+        if target and target in rels:
+            prev = mem_anchor.get(target)
+            if prev is None or strength > prev[0]:
+                mem_anchor[target] = (strength, mem_tick)
+
+    for name, rel in rels.items():
+        anchor_strength, anchor_tick = mem_anchor.get(name, (0.0, 0))
+
+        # Recency: 1.0 = happened this tick, linearly decays to 0 over 120 ticks (~4 months)
+        tick_age = max(0, current_tick - anchor_tick)
+        recency  = max(0.0, 1.0 - tick_age / 120.0)
+
+        # anchor_factor 0–1: how much the memory resists decay
+        # strength=1.0 × recency=1.0 → fully anchored (no decay this tick)
+        # strength=0.4 × recency=0.5 → 20% anchor → 80% of normal decay applies
+        anchor_factor = anchor_strength * recency
+
+        # decay_mult: fraction of base decay that actually applies
+        decay_mult = max(0.0, 1.0 - anchor_factor) * rate
+
+        for axis, neutral in NEUTRAL.items():
+            val   = float(rel.get(axis, neutral))
+            delta = (neutral - val) * BASE_DECAY[axis] * decay_mult
+            rel[axis] = round(max(0.0, min(100.0, val + delta)), 1)
+
+        rels[name] = rel
+
+    return rels
+
+
+def _relationship_decision_weights(char, target_name):
+    """Return numerical decision bias multipliers for char acting toward target_name.
+
+    All biases are signed floats; positive = pulled toward that decision type.
+    Computed from neutral baselines: trust→40, fear→20, respect→35.
+    """
+    rel     = (char.get("relationships") or {}).get(target_name, {})
+    trust   = float(rel.get("trust",   40))
+    fear    = float(rel.get("fear",    20))
+    respect = float(rel.get("respect", 35))
+
+    dt = trust   - 40   # delta from neutral
+    df = fear    - 20
+    dr = respect - 35
+
+    # Alliance: driven by trust + respect; fear suppresses nothing (can ally with someone you fear)
+    alliance_bias    = dt * 0.025 + dr * 0.015
+
+    # Betrayal: driven by low trust + low respect; high fear suppresses overt betrayal (covert only)
+    betrayal_bias    = -dt * 0.030 + -dr * 0.010 + -df * 0.018
+
+    # Avoidance / submission: driven by fear; high respect softens it
+    avoidance_bias   = df * 0.028 + -dr * 0.008
+
+    # Cooperation: driven by trust + respect; fear slightly reduces proactivity but not compliance
+    cooperation_bias = dt * 0.022 + dr * 0.018 + -df * 0.005
+
+    # War initiation: low trust + low fear + low respect = aggression; fear heavily suppresses it
+    war_bias         = -dt * 0.012 + -df * 0.022 + -dr * 0.010
+
+    return {
+        "alliance_bias":    round(alliance_bias,    3),
+        "betrayal_bias":    round(betrayal_bias,    3),
+        "avoidance_bias":   round(avoidance_bias,   3),
+        "cooperation_bias": round(cooperation_bias, 3),
+        "war_bias":         round(war_bias,         3),
+    }
+
+
+def _build_relationship_signals(char):
+    """Build a pre-computed bias summary for the character's most significant relationships.
+
+    Stored on the character so Claude can read it directly without recomputing from raw numbers.
+    """
+    rels = char.get("relationships") or {}
+    if not rels:
+        return []
+
+    def significance(rel_tuple):
+        rel = rel_tuple[1]
+        return (abs(rel.get("trust",   40) - 40) +
+                abs(rel.get("fear",    20) - 20) +
+                abs(rel.get("respect", 35) - 35))
+
+    top = sorted(rels.items(), key=significance, reverse=True)[:10]
+
+    signals = []
+    for name, rel in top:
+        trust   = rel.get("trust",   40)
+        fear    = rel.get("fear",    20)
+        respect = rel.get("respect", 35)
+        weights = _relationship_decision_weights(char, name)
+
+        # Identify the highest-magnitude bias
+        dominant_key = max(weights, key=lambda k: abs(weights[k]))
+        dominant_val = weights[dominant_key]
+
+        if abs(dominant_val) < 0.08:
+            continue  # negligibly neutral — skip
+
+        # Describe bias as an actionable label
+        label = dominant_key.replace("_bias", "").replace("_", " ")
+        strength = "strongly" if abs(dominant_val) > 0.35 else ("moderately" if abs(dominant_val) > 0.18 else "slightly")
+        direction = "toward" if dominant_val > 0 else "against"
+
+        # Secondary signal: note when fear suppresses a betrayal urge (covert-only flag)
+        covert_only = (weights["betrayal_bias"] > 0.15 and fear > 55)
+
+        entry = {
+            "target":          name,
+            "trust":           trust,
+            "fear":            fear,
+            "respect":         respect,
+            "primary_bias":    f"{strength} biased {direction} {label}",
+        }
+        if covert_only:
+            entry["note"] = "fear suppresses open action — betrayal would be covert only"
+
+        signals.append(entry)
+
+    return signals
+
+
+def _compute_character_event_pressure(char, all_chars_by_name):
+    """Scan a character's relationships and traits for threshold-based event triggers.
+
+    Returns a list of event pressure tags Claude can act on this tick.
+    Tags are strings naming the event type; multiple may fire simultaneously.
+    """
+    tags = []
+    rels  = char.get("relationships") or {}
+    name  = char.get("name", "")
+
+    morality     = float(char.get("morality",     50))
+    ambition     = float(char.get("ambition",     50))
+    loyalty      = float(char.get("loyalty",      50))
+    intrigue     = int(char.get("intrigue",       50))
+    intelligence = float(char.get("intelligence", 50))
+
+    for target_name, rel in rels.items():
+        trust   = float(rel.get("trust",   40))
+        fear    = float(rel.get("fear",    20))
+        respect = float(rel.get("respect", 35))
+        target  = all_chars_by_name.get(target_name, {})
+        t_infl  = int(target.get("influenceScore", 50))
+        t_intrigue = int(target.get("intrigue", 50))
+
+        # ── BETRAYAL ──────────────────────────────────────────────────────
+        # Low trust + low loyalty + motivated by ambition + not too afraid
+        if trust < 25 and loyalty < 40 and ambition > 55 and fear < 55 and morality < 55:
+            tags.append(f"betrayal_risk:{target_name}")
+
+        # ── ASSASSINATION ATTEMPT ─────────────────────────────────────────
+        # Near-zero trust + high intrigue skill + low morality + target has influence worth taking
+        if trust < 15 and intrigue > 60 and morality < 40 and t_infl > 55 and fear < 50:
+            tags.append(f"assassination_attempt:{target_name}")
+
+        # ── OPEN RIVALRY ESCALATION ───────────────────────────────────────
+        # Low trust + low respect + high ambition on this side + not actively afraid
+        if trust < 30 and respect < 28 and ambition > 65 and fear < 40:
+            tags.append(f"rivalry_escalation:{target_name}")
+
+        # ── ALLIANCE APPROACH ─────────────────────────────────────────────
+        # High trust + high respect + neither side heavily hostile
+        if trust > 68 and respect > 58 and fear < 45 and loyalty > 45:
+            tags.append(f"alliance_approach:{target_name}")
+
+        # ── SUBMISSION / TRIBUTE ──────────────────────────────────────────
+        # Extreme fear + low trust + high influence target = likely to capitulate
+        if fear > 75 and trust < 35 and t_infl > 65:
+            tags.append(f"submission_likely:{target_name}")
+
+        # ── DEFECTION TO RIVAL ────────────────────────────────────────────
+        # Very low loyalty to own side AND high trust toward this target
+        if loyalty < 25 and trust > 60 and ambition > 60:
+            tags.append(f"defection_risk:{target_name}")
+
+        # ── COVERT INTELLIGENCE LEAK ──────────────────────────────────────
+        # Low trust + high intrigue + not afraid enough to stay quiet
+        if trust < 20 and intrigue > 55 and fear < 60 and morality < 50:
+            tags.append(f"intelligence_leak:{target_name}")
+
+        # ── COUNTER-ASSASSINATION SUSPICION ───────────────────────────────
+        # Target has high intrigue + low trust toward us = they may be planning something
+        if t_intrigue > 65 and trust < 30 and intelligence > 55:
+            tags.append(f"assassination_suspicion:{target_name}")
+
+    return tags[:20]  # cap — don't flood Claude with noise
+
+
+def _compute_faction_event_pressure(relationships):
+    """Scan faction relationships for threshold-based macro event triggers.
+
+    Returns a list of dicts describing faction-level events ready to fire.
+    """
+    events = []
+    for rel in (relationships or []):
+        a             = rel.get("faction_a", "")
+        b             = rel.get("faction_b", "")
+        trust         = int(rel.get("trust",          50))
+        hostility     = int(rel.get("hostility",      20))
+        alliance_level = int(rel.get("alliance_level", 0))
+        rel_type      = rel.get("type", "neutral")
+        if not a or not b:
+            continue
+
+        # War imminent: hostility very high, not already at war
+        if hostility >= 82 and rel_type != "war":
+            events.append({"trigger": "war_imminent", "faction_a": a, "faction_b": b,
+                           "hostility": hostility, "trust": trust})
+
+        # Alliance collapse: declared alliance but trust collapsed or hostility spiked
+        if rel_type == "alliance" and (trust < 25 or hostility > 55):
+            events.append({"trigger": "alliance_collapse", "faction_a": a, "faction_b": b,
+                           "trust": trust, "hostility": hostility})
+
+        # Faction betrayal: high alliance_level but trust fell off a cliff (backstab)
+        if alliance_level > 45 and trust < 20:
+            events.append({"trigger": "faction_betrayal", "faction_a": a, "faction_b": b,
+                           "alliance_level": alliance_level, "trust": trust})
+
+        # Peace overture: both sides in active war but trust crept back up
+        if rel_type == "war" and trust > 38 and hostility < 60:
+            events.append({"trigger": "peace_overture", "faction_a": a, "faction_b": b,
+                           "trust": trust, "hostility": hostility})
+
+        # Alliance formation ready: trust high, hostility low, not yet formalized
+        if trust > 68 and hostility < 28 and alliance_level < 40 and rel_type != "alliance":
+            events.append({"trigger": "alliance_forming", "faction_a": a, "faction_b": b,
+                           "trust": trust, "alliance_level": alliance_level})
+
+        # Rivalry escalation: moderate hostility rising without war
+        if 55 <= hostility <= 82 and trust < 35 and rel_type not in ("war", "alliance"):
+            events.append({"trigger": "rivalry_escalating", "faction_a": a, "faction_b": b,
+                           "hostility": hostility, "trust": trust})
+
+    return events
+
+
 def _normalize_house_characters(prev_state, new_state):
+    import random
+
+    current_tick = int(new_state.get("tick", 0))
+
     prev_rows = {
         (row.get("faction"), row.get("house"), row.get("name")): row
         for row in prev_state.get("house_characters", [])
@@ -2075,10 +5234,93 @@ def _normalize_house_characters(prev_state, new_state):
         for row in new_state.get("house_characters", [])
         if row.get("name")
     }
+
+    def _is_deceased(r):
+        return str(r.get("status", "")).lower().startswith("deceased")
+
+    # Build faction → char list for relationship seeding (from prev state so it's stable)
+    faction_chars: dict = {}
+    for c in prev_state.get("house_characters", []):
+        if c.get("name") and not _is_deceased(c):
+            faction_chars.setdefault(c.get("faction", ""), []).append(c)
+
+    def _build_relationship_candidates(char):
+        faction = char.get("faction", "")
+        house   = char.get("house", "")
+        # All housemates
+        housemates = [c for c in faction_chars.get(faction, []) if c.get("house") == house]
+        # Top 5 same-faction other-house chars by influence
+        faction_peers = sorted(
+            [c for c in faction_chars.get(faction, []) if c.get("house") != house],
+            key=lambda c: -c.get("influenceScore", 0),
+        )[:5]
+        # Top faction leader from each other faction (max 6)
+        cross = []
+        for f, chars in faction_chars.items():
+            if f != faction:
+                top = sorted(chars, key=lambda c: -c.get("influenceScore", 0))
+                if top:
+                    cross.append(top[0])
+        return housemates + faction_peers + cross[:6]
+
+    # Houses that already have living characters — don't inject hardcoded defaults into them
+    occupied_houses: set = set()
+    for row in list(prev_rows.values()) + list(incoming_rows.values()):
+        if not _is_deceased(row) and row.get("name"):
+            occupied_houses.add((row.get("faction"), row.get("house")))
+
     rows = []
     for seed in _default_house_characters():
         key = (seed["faction"], seed["house"], seed["name"])
+
+        # Once dead, always dead — don't resurrect from seed
+        prev = prev_rows.get(key)
+        if prev and _is_deceased(prev):
+            continue
+
+        # Skip default injection if this house already has living characters
+        # (fresh-game characters or AI-generated members already occupy it)
+        house_key = (seed["faction"], seed["house"])
+        if house_key in occupied_houses and key not in prev_rows and key not in incoming_rows:
+            continue
+
         row = incoming_rows.get(key, prev_rows.get(key, seed))
+
+        # Respect AI-marked deaths
+        if _is_deceased(row):
+            continue
+
+        race = row.get("race", seed["race"])
+
+        # Memory fading (before evolution — current memories feed into trait signals)
+        faded_memory = _fade_memories(row)
+        row = {**row, "memory": faded_memory}
+
+        # Personality evolution (before death check — dead characters don't evolve)
+        row = _evolve_traits(row)
+
+        # Relationships — seed on first encounter; evolve then decay on subsequent ticks
+        existing_rels = row.get("relationships") or {}
+        if not existing_rels:
+            new_rels = _seed_relationships_for(row, _build_relationship_candidates(row))
+        else:
+            evolved_row = {**row, "relationships": _evolve_relationships(row)}
+            new_rels    = _decay_relationships(evolved_row, current_tick)
+
+        # Age advancement
+        new_age = _advance_age(row)
+
+        # Health recovery
+        new_health = _recover_health(row)
+        wounds     = list(row.get("wounds") or [])
+
+        # Death check — age-based chance amplified by poor health, plus critical-health baseline
+        age_death_p      = _natural_death_chance(new_age, race) * _health_death_modifier(new_health)
+        critical_death_p = _critical_health_death_chance(new_health)
+        total_death_p    = min(age_death_p + critical_death_p, 0.40)
+        if total_death_p > 0 and random.random() < total_death_p:
+            continue
+
         rows.append({
             "name": row.get("name", seed["name"]),
             "faction": row.get("faction", seed["faction"]),
@@ -2086,22 +5328,73 @@ def _normalize_house_characters(prev_state, new_state):
             "coreRole": row.get("coreRole", seed.get("coreRole", "Secondary")),
             "role": row.get("role", seed["role"]),
             "status": row.get("status", seed["status"]),
-            "age": seed["age"] if str(row.get("age", seed["age"])).strip().lower() in {"", "adult", "unknown"} else str(row.get("age", seed["age"])),
-            "race": row.get("race", seed["race"]),
+            "age": round(new_age, 3),
+            "race": race,
             "influenceScore": max(0, min(100, int(row.get("influenceScore", seed["influenceScore"])))),
-            "morality": max(0, min(100, int(row.get("morality", seed["morality"])))),
-            "ambition": max(0, min(100, int(row.get("ambition", seed["ambition"])))),
-            "loyalty": max(0, min(100, int(row.get("loyalty", seed["loyalty"])))),
-            "intelligence": max(0, min(100, int(row.get("intelligence", seed.get("intelligence", 50))))),
+            "morality":     round(max(0.0, min(100.0, float(row.get("morality",     seed["morality"])))),     2),
+            "ambition":     round(max(0.0, min(100.0, float(row.get("ambition",     seed["ambition"])))),     2),
+            "loyalty":      round(max(0.0, min(100.0, float(row.get("loyalty",      seed["loyalty"])))),      2),
+            "intelligence": round(max(0.0, min(100.0, float(row.get("intelligence", seed.get("intelligence", 50))))), 2),
             "bias": row.get("bias", seed["bias"]),
             "currentGoal": row.get("currentGoal", seed["currentGoal"]),
             "recentActions": (row.get("recentActions") or [])[:5],
+            "location": row.get("location") or seed.get("location", ""),
+            "destination": row.get("destination", ""),
+            "ticks_to_arrive": max(0, int(row.get("ticks_to_arrive", 0) or 0)),
+            "journey_purpose": row.get("journey_purpose", ""),
+            "warfare":   max(0, min(100, int(row.get("warfare",   seed.get("warfare",   50))))),
+            "diplomacy": max(0, min(100, int(row.get("diplomacy", seed.get("diplomacy", 50))))),
+            "intrigue":  max(0, min(100, int(row.get("intrigue",  seed.get("intrigue",  50))))),
+            "faith":     max(0, min(100, int(row.get("faith",     seed.get("faith",     20))))),
+            "health":    round(new_health, 2),
+            "wounds":    wounds,
+            "memory":    faded_memory,
+            "relationships":       new_rels,
+            "relationship_signals": _build_relationship_signals({**row, "relationships": new_rels}),
+            "event_pressure":      [],  # filled in second pass below
         })
+
+    # Include AI-generated characters not in the seed (recruits, new arrivals, etc.)
+    existing_keys = {(r["faction"], r["house"], r["name"]) for r in rows}
     for key, row in incoming_rows.items():
-        if key in {(item["faction"], item["house"], item["name"]) for item in rows}:
+        if key in existing_keys or _is_deceased(row):
             continue
-        rows.append(row)
-    new_state["house_characters"] = rows[:120]
+        new_age      = _advance_age(row)
+        new_health   = _recover_health(row)
+        race         = row.get("race", "Human")
+        age_death_p  = _natural_death_chance(new_age, race) * _health_death_modifier(new_health)
+        crit_death_p = _critical_health_death_chance(new_health)
+        if min(age_death_p + crit_death_p, 0.40) > 0 and random.random() < min(age_death_p + crit_death_p, 0.40):
+            continue
+        ai_rels = row.get("relationships") or {}
+        if not ai_rels:
+            ai_rels = _seed_relationships_for(row, _build_relationship_candidates(row))
+        else:
+            ai_rels = _evolve_relationships(row)
+        rows.append({
+            **row,
+            "age": round(new_age, 3),
+            "health": round(new_health, 2),
+            "wounds": list(row.get("wounds") or []),
+            "memory": _fade_memories(row),
+            "relationships": ai_rels,
+            "relationship_signals": _build_relationship_signals({**row, "relationships": ai_rels}),
+        })
+
+    # Second pass: adjust fear/respect based on each target's actual live stats
+    _drift_relationships_from_power(rows)
+
+    # Third pass: compute event pressure now that all relationships are final
+    all_chars_by_name = {r["name"]: r for r in rows}
+    for char in rows:
+        char["event_pressure"] = _compute_character_event_pressure(char, all_chars_by_name)
+
+    # Faction-level event pressure stored separately in state
+    new_state["faction_event_pressure"] = _compute_faction_event_pressure(
+        new_state.get("relationships", [])
+    )
+
+    new_state["house_characters"] = rows[:200]
 
 
 def _normalize_belief_currents(prev_state, new_state):
@@ -2221,7 +5514,7 @@ def _normalize_population_state(prev_state, new_state):
         ("Twin Cities", "Humans", "Twin Cities", 160000, 180000, 0.00025, 86, 22, 4),
         ("Tidefall", "Humans", "Tidefall", 160000, 185000, 0.00028, 82, 32, 20),
         ("Faerwood", "Dread Elves", "Shadow Court", 30000, 42000, 0.00003, 74, 38, 0),
-        ("Glenhaven", "Glenhaven Elves", "Wildwood Elves", 35000, 52000, 0.00005, 88, 18, 0),
+        ("Glenhaven", "Glenhaven", "Wildwood Elves", 35000, 52000, 0.00005, 88, 18, 0),
         ("Lostfeld", "Dwarves", "Lostfeld Clans", 65000, 85000, 0.00008, 81, 24, 0),
         ("Gilgeth and Groth", "Orcs", "Mountain Orcs", 100000, 125000, 0.00022, 72, 43, 0),
         ("Rock Plains", "Goblins", "Vilefin", 215000, 230000, 0.00055, 63, 68, 0),
@@ -2300,6 +5593,734 @@ def _normalize_population_state(prev_state, new_state):
     new_state["population_state"] = rows[:20]
 
 
+# ── DECISION ENGINE ────────────────────────────────────────────────────────────
+
+_DECISION_FACTIONS = [
+    "Twin Cities", "Tidefall", "Gilded Exchange", "Dur Khadur",
+    "Shadow Court", "Glenhaven", "Gilgeth Clans", "Groth Clans",
+    "Vilefin", "Dreadwind",
+]
+
+
+def _faction_leader_traits(faction_name, state):
+    """Return averaged trait scores for a faction's active leader-tier characters."""
+    LEADER_ROLES = {"Leader", "Heir", "Power Role"}
+    leaders = [
+        c for c in state.get("house_characters", [])
+        if c.get("faction") == faction_name
+        and c.get("coreRole") in LEADER_ROLES
+        and not str(c.get("status", "")).lower().startswith("deceased")
+    ]
+    if not leaders:
+        return {"ambition": 50, "morality": 50, "loyalty": 50,
+                "intelligence": 50, "warfare": 50, "diplomacy": 50}
+
+    def _avg(key):
+        vals = [float(c[key]) for c in leaders if isinstance(c.get(key), (int, float))]
+        return sum(vals) / len(vals) if vals else 50.0
+
+    return {k: _avg(k) for k in ("ambition", "morality", "loyalty", "intelligence", "warfare", "diplomacy")}
+
+
+def _faction_relationships(faction_name, state):
+    """Return {partner_faction: relationship_row} for all relationships involving this faction."""
+    result = {}
+    for row in state.get("relationships", []):
+        a, b = row.get("faction_a", ""), row.get("faction_b", "")
+        if a == faction_name:
+            result[b] = row
+        elif b == faction_name:
+            result[a] = row
+    return result
+
+
+def _faction_power_entry(faction_name, state):
+    """Return this faction's power_state entry or a neutral default."""
+    for entry in state.get("faction_power_state", []):
+        if entry.get("faction") == faction_name:
+            return entry
+    return {"militaryPower": 50, "economicPower": 50,
+            "politicalInfluence": 50, "religiousInfluence": 50}
+
+
+def evaluateActions(faction_name, state):
+    """Score each possible action for a faction. Returns {action: score}.
+
+    Two-stage design:
+      Stage 1 — Situational base: what does the world actually offer this faction?
+                 (hostile targets, trusted partners, unstable territory)
+      Stage 2 — Personality multipliers: dominant traits amplify or suppress
+                 each action nonlinearly so high-ambition factions feel
+                 categorically different from diplomatic or passive ones.
+
+    Hard blocks override scores entirely:
+      - morality >= 70 OR loyalty >= 70  → betray = 0, always
+      - intelligence >= 70 AND military < 45 → war score * 0.15 (won't attack weak)
+      - ambition <= 30 (passive faction) → all aggressive actions halved
+    """
+    traits = _faction_leader_traits(faction_name, state)
+    power  = _faction_power_entry(faction_name, state)
+    rels   = _faction_relationships(faction_name, state)
+
+    ambition     = float(traits["ambition"])
+    morality     = float(traits["morality"])
+    loyalty      = float(traits["loyalty"])
+    intelligence = float(traits["intelligence"])
+    warfare      = float(traits.get("warfare",   50))
+    diplomacy    = float(traits.get("diplomacy", 50))
+
+    mil = float(power.get("militaryPower",      50))
+    eco = float(power.get("economicPower",       50))
+    pol = float(power.get("politicalInfluence",  50))
+
+    at_war  = [p for p, r in rels.items() if r.get("type") == "war"]
+    allied  = [p for p, r in rels.items() if r.get("type") == "alliance"]
+    has_war = bool(at_war)
+
+    # ── Personality profile tags (nonlinear thresholds) ───────────────────────
+    is_aggressive   = ambition     >= 72
+    is_passive      = ambition     <= 32
+    is_honorable    = morality     >= 68
+    is_ruthless     = morality     <= 32
+    is_steadfast    = loyalty      >= 68
+    is_treacherous  = loyalty      <= 32
+    is_strategic    = intelligence >= 70
+    is_impulsive    = intelligence <= 35
+    is_warrior      = warfare      >= 68
+    is_diplomat     = diplomacy    >= 65
+
+    # ── Viable target pre-checks (prevent phantom action scores) ──────────────
+    hostile_targets = [
+        p for p, r in rels.items()
+        if r.get("type") not in ("war", "alliance") and r.get("hostility", 0) > 40
+    ]
+    trust_targets = [
+        p for p, r in rels.items()
+        if r.get("type") not in ("war", "alliance") and r.get("trust", 0) > 55
+    ]
+
+    scores = {}
+
+    # ── DECLARE WAR ──────────────────────────────────────────────────────────
+    declare_score = 0.0
+    if not has_war and mil > 40 and hostile_targets:
+        # Stage 1: situational — how hostile is the most hostile relationship?
+        for partner, rel in rels.items():
+            if rel.get("type") in ("war", "alliance"):
+                continue
+            h = rel.get("hostility", 0)
+            if h > 50:
+                declare_score += (h - 50) * 1.2   # 85 hostility → +42 base
+
+        # Stage 2: personality push (larger coefficients than before)
+        declare_score += (ambition  - 50) * 0.9
+        declare_score += (warfare   - 50) * 0.6
+        declare_score -= (morality  - 50) * 0.5
+        declare_score -= (loyalty   - 50) * 0.2
+
+        # Dominant-trait multipliers (nonlinear, order matters)
+        if is_aggressive:  declare_score *= 1.8   # warlord: near-certain to fight
+        if is_warrior:     declare_score *= 1.35
+        if is_honorable:   declare_score *= 0.35  # honorable factions rarely start wars
+        if is_passive:     declare_score *= 0.25  # passive factions almost never do
+
+        # Intelligence check: strategic leaders won't attack when outmatched
+        if is_strategic and mil < 45:
+            declare_score *= 0.15   # they know the math
+        elif is_impulsive:
+            declare_score += 18     # attacks without calculating odds
+
+    scores["declare_war"] = round(max(0.0, declare_score), 1)
+
+    # ── FORM ALLIANCE ─────────────────────────────────────────────────────────
+    form_score = 0.0
+    if trust_targets:
+        # Stage 1: how trusted is the most trusted available partner?
+        for partner, rel in rels.items():
+            if rel.get("type") == "war":
+                continue
+            t = rel.get("trust", 0)
+            if t > 50:
+                form_score += (t - 50) * 1.1
+
+        # Stage 2: personality
+        form_score += (loyalty    - 50) * 0.7
+        form_score += (diplomacy  - 50) * 0.6
+        form_score -= (ambition   - 50) * 0.35   # ambitious factions prefer to go alone
+
+        if is_steadfast:  form_score *= 1.6   # loyal leaders love formal alliances
+        if is_diplomat:   form_score *= 1.45
+        if is_aggressive: form_score *= 0.45  # aggressive factions see allies as liabilities
+        if is_treacherous:form_score *= 0.5   # treacherous factions don't value alliances
+        if has_war:       form_score -= 25
+
+    scores["form_alliance"] = round(max(0.0, form_score), 1)
+
+    # ── BETRAY ────────────────────────────────────────────────────────────────
+    betray_score = 0.0
+    if allied:
+        # Hard block: morality or loyalty above threshold → never betray
+        if is_honorable or is_steadfast:
+            betray_score = 0.0
+        else:
+            betray_score  = 12.0
+            betray_score += (ambition  - 50) * 0.9
+            betray_score -= (loyalty   - 50) * 1.4   # loyalty is the dominant restraint
+            betray_score -= (morality  - 50) * 1.0
+
+            # Dominant-trait multipliers
+            if is_treacherous: betray_score *= 2.2   # pathologically disloyal
+            if is_ruthless:    betray_score *= 1.6
+            if is_aggressive:  betray_score *= 1.4
+            # Strategic betrayers wait for the right moment: weakest alliance
+            if is_strategic:
+                weakest_al = min(
+                    (r.get("alliance_level", 50) for p, r in rels.items()
+                     if r.get("type") == "alliance"),
+                    default=50,
+                )
+                if weakest_al < 40:
+                    betray_score *= 1.5   # low-commitment alliance = ripe target
+                else:
+                    betray_score *= 0.8   # strategic: won't burn a solid alliance carelessly
+
+    scores["betray"] = round(max(0.0, betray_score), 1)
+
+    # ── STABILIZE TERRITORY ───────────────────────────────────────────────────
+    unstable = sum(
+        1 for loc in state.get("locations", [])
+        if loc.get("controller") == faction_name
+        and int(loc.get("stability", loc.get("control", 50))) < 45
+    )
+    stab_score  = unstable * 20.0
+    stab_score += max(0.0, 50 - eco) * 0.5   # economic pressure → need to stabilize
+    stab_score += (pol - 50) * 0.3
+    if has_war:   stab_score *= 0.5
+    if is_aggressive: stab_score *= 0.65  # aggressive factions neglect internal work
+    if is_passive:    stab_score *= 1.5   # passive factions focus inward
+
+    scores["stabilize_territory"] = round(max(0.0, stab_score), 1)
+
+    # ── DO NOTHING ────────────────────────────────────────────────────────────
+    nothing_score  = 15.0
+    nothing_score -= (ambition - 50) * 0.30  # ambitious factions hate waiting
+    nothing_score += max(0.0, 40 - mil) * 0.20  # weak factions hold
+    if is_passive:    nothing_score += 18.0
+    if is_aggressive: nothing_score  -= 10.0
+
+    scores["do_nothing"] = round(max(3.0, nothing_score), 1)
+
+    return scores
+
+
+def chooseAction(faction_name, state, evaluated=None):
+    """Probabilistically pick an action from weighted scores.
+
+    Returns (action_name, meta_dict).
+    """
+    import random
+
+    if evaluated is None:
+        evaluated = evaluateActions(faction_name, state)
+
+    total = sum(evaluated.values())
+    if total <= 0:
+        return "do_nothing", {}
+
+    r = random.uniform(0, total)
+    cumulative = 0.0
+    chosen_action = "do_nothing"
+    for action, score in sorted(evaluated.items(), key=lambda x: -x[1]):
+        cumulative += score
+        if r <= cumulative:
+            chosen_action = action
+            break
+
+    rels = _faction_relationships(faction_name, state)
+    meta = {}
+
+    if chosen_action == "declare_war":
+        best = max(
+            ((p, r) for p, r in rels.items() if r.get("type") not in ("war", "alliance")),
+            key=lambda x: x[1].get("hostility", 0),
+            default=(None, {}),
+        )
+        meta["target"] = best[0]
+
+    elif chosen_action == "form_alliance":
+        best = max(
+            ((p, r) for p, r in rels.items() if r.get("type") not in ("war", "alliance")),
+            key=lambda x: x[1].get("trust", 0),
+            default=(None, {}),
+        )
+        meta["target"] = best[0]
+
+    elif chosen_action == "betray":
+        allied_rels = [(p, r) for p, r in rels.items() if r.get("type") == "alliance"]
+        if allied_rels:
+            best = min(allied_rels, key=lambda x: x[1].get("trust", 100))
+            meta["target"] = best[0]
+        else:
+            chosen_action = "do_nothing"
+
+    elif chosen_action == "stabilize_territory":
+        unstable_locs = [
+            loc for loc in state.get("locations", [])
+            if loc.get("controller") == faction_name
+            and int(loc.get("stability", loc.get("control", 50))) < 45
+        ]
+        if unstable_locs:
+            worst = min(unstable_locs,
+                        key=lambda l: int(l.get("stability", l.get("control", 50))))
+            meta["location"] = worst.get("name") or worst.get("id", "")
+
+    return chosen_action, meta
+
+
+def applyDecision(action, faction_name, meta, state):
+    """Apply mechanical consequences of a decision to state in-place.
+
+    Returns a log-entry dict describing the outcome.
+    """
+    power_map = {e["faction"]: e for e in state.get("faction_power_state", [])}
+    rels_list  = state.get("relationships", [])
+    target     = meta.get("target")
+
+    def _rel_idx(a, b):
+        key = tuple(sorted((a, b)))
+        for i, row in enumerate(rels_list):
+            if tuple(sorted((row.get("faction_a", ""), row.get("faction_b", "")))) == key:
+                return i
+        return None
+
+    def _clamp(v, lo=0, hi=100):
+        return max(lo, min(hi, int(v)))
+
+    log = {"faction": faction_name, "action": action, "meta": meta}
+
+    if action == "declare_war" and target:
+        idx = _rel_idx(faction_name, target)
+        if idx is not None:
+            rels_list[idx]["type"]           = "war"
+            rels_list[idx]["hostility"]      = _clamp(rels_list[idx].get("hostility", 50) + 20)
+            rels_list[idx]["trust"]          = _clamp(rels_list[idx].get("trust",     50) - 25)
+            rels_list[idx]["alliance_level"] = 0
+        if faction_name in power_map:
+            pw = power_map[faction_name]
+            pw["militaryPower"]       = _clamp(pw.get("militaryPower",       50) + 5)
+            pw["economicPower"]       = _clamp(pw.get("economicPower",       50) - 8)
+            pw["politicalInfluence"]  = _clamp(pw.get("politicalInfluence",  50) - 3)
+        if target in power_map:
+            pw = power_map[target]
+            pw["militaryPower"]       = _clamp(pw.get("militaryPower",       50) - 5)
+            pw["politicalInfluence"]  = _clamp(pw.get("politicalInfluence",  50) - 5)
+        log["summary"] = f"{faction_name} declared war on {target}."
+
+    elif action == "form_alliance" and target:
+        idx = _rel_idx(faction_name, target)
+        if idx is not None:
+            rels_list[idx]["type"]           = "alliance"
+            rels_list[idx]["trust"]          = _clamp(rels_list[idx].get("trust",          50) + 15)
+            rels_list[idx]["hostility"]      = _clamp(rels_list[idx].get("hostility",       30) - 15)
+            rels_list[idx]["alliance_level"] = _clamp(rels_list[idx].get("alliance_level",   0) + 25)
+        for f in (faction_name, target):
+            if f in power_map:
+                power_map[f]["politicalInfluence"] = _clamp(power_map[f].get("politicalInfluence", 50) + 5)
+        log["summary"] = f"{faction_name} formalized an alliance with {target}."
+
+    elif action == "betray" and target:
+        idx = _rel_idx(faction_name, target)
+        if idx is not None:
+            rels_list[idx]["type"]           = "rivalry"
+            rels_list[idx]["trust"]          = _clamp(rels_list[idx].get("trust",     60) - 35)
+            rels_list[idx]["hostility"]      = _clamp(rels_list[idx].get("hostility", 20) + 30)
+            rels_list[idx]["alliance_level"] = 0
+        if faction_name in power_map:
+            pw = power_map[faction_name]
+            pw["politicalInfluence"] = _clamp(pw.get("politicalInfluence", 50) - 8)
+            pw["economicPower"]      = _clamp(pw.get("economicPower",      50) + 5)
+        if target in power_map:
+            power_map[target]["politicalInfluence"] = _clamp(
+                power_map[target].get("politicalInfluence", 50) - 10)
+        log["summary"] = f"{faction_name} betrayed their alliance with {target}."
+
+    elif action == "stabilize_territory":
+        loc_name = meta.get("location", "")
+        if loc_name:
+            for loc in state.get("locations", []):
+                if (loc.get("name") or loc.get("id", "")) == loc_name:
+                    loc["stability"] = _clamp(int(loc.get("stability", loc.get("control", 30))) + 8)
+                    loc["control"]   = _clamp(int(loc.get("control", 50)) + 5)
+        if faction_name in power_map:
+            pw = power_map[faction_name]
+            pw["politicalInfluence"] = _clamp(pw.get("politicalInfluence", 50) - 3)
+            pw["economicPower"]      = _clamp(pw.get("economicPower",      50) - 4)
+            pw["militaryPower"]      = _clamp(pw.get("militaryPower",      50) + 2)
+        log["summary"] = (
+            f"{faction_name} invested in stabilizing {loc_name or 'their territory'}."
+        )
+
+    else:
+        log["summary"] = f"{faction_name} held position this tick."
+
+    return log
+
+
+# ── EVENT EXECUTION SYSTEM ────────────────────────────────────────────────────
+
+_EVENT_META = {
+    "declare_war": {
+        "severity": 14,
+        "stage":    "escalating",
+        "trend":    "rising",
+        "template": "{faction} declared war on {target}.",
+        "consequences_template": (
+            "Open hostilities between {faction} and {target} have begun. "
+            "Border regions face immediate military pressure. "
+            "Trade and diplomacy between the two factions are severed."
+        ),
+    },
+    "form_alliance": {
+        "severity": 9,
+        "stage":    "emerging",
+        "trend":    "rising",
+        "template": "{faction} and {target} formalized an alliance.",
+        "consequences_template": (
+            "The alliance between {faction} and {target} reshapes the regional balance. "
+            "Both factions' political influence rises. "
+            "Rivals of either party now face a combined front."
+        ),
+    },
+    "betray": {
+        "severity": 13,
+        "stage":    "escalating",
+        "trend":    "rising",
+        "template": "{faction} betrayed their alliance with {target}.",
+        "consequences_template": (
+            "{faction}'s betrayal of {target} sends a signal across all factions: "
+            "no alliance is permanent. "
+            "Trust in {faction} drops across the region. "
+            "{target} faces an unexpected political and military crisis."
+        ),
+    },
+    "stabilize_territory": {
+        "severity": 4,
+        "stage":    "emerging",
+        "trend":    "stable",
+        "template": "{faction} committed resources to stabilize {location}.",
+        "consequences_template": (
+            "The internal consolidation effort in {location} reduces unrest "
+            "and strengthens {faction}'s administrative grip. "
+            "Effects will compound if maintained across several ticks."
+        ),
+    },
+}
+
+
+def createEvent(log_entry, world):
+    """Convert a decision-engine log entry into an active_event dict.
+
+    Returns None for do_nothing or entries without enough context.
+    The returned dict is compatible with _normalize_event and can be
+    injected directly into world['active_events'].
+    """
+    action  = log_entry.get("action", "do_nothing")
+    faction = log_entry.get("faction", "")
+    meta    = log_entry.get("meta", {})
+
+    if action == "do_nothing" or action not in _EVENT_META:
+        return None
+
+    target   = meta.get("target", "")
+    location = meta.get("location", "")
+    cfg      = _EVENT_META[action]
+
+    fmt = {"faction": faction, "target": target or "unknown",
+           "location": location or faction + "'s territory"}
+
+    involved = [faction]
+    if target:
+        involved.append(target)
+    if location:
+        involved.append(location)
+
+    if action == "declare_war":
+        name = f"War Declared: {faction} vs {target}"
+    elif action == "form_alliance":
+        pair = tuple(sorted((faction, target)))
+        name = f"Alliance Formed: {pair[0]} and {pair[1]}"
+    elif action == "betray":
+        name = f"Betrayal: {faction} turns on {target}"
+    else:
+        name = f"Stabilization: {faction} — {location or 'internal'}"
+
+    return {
+        "name":         name,
+        "involved":     involved,
+        "severity":     cfg["severity"],
+        "stage":        cfg["stage"],
+        "duration":     1,
+        "trend":        cfg["trend"],
+        "summary":      cfg["template"].format(**fmt),
+        "consequences": cfg["consequences_template"].format(**fmt),
+        "source":       "decision_engine",
+        "action":       action,
+        "faction":      faction,
+        "meta":         meta,
+    }
+
+
+def executeEvent(event, world):
+    """Apply full secondary effects of a decision-engine event to world state.
+
+    applyDecision handles the primary mechanical mutation (relationship fields,
+    power axes). executeEvent handles the remaining world-consistency updates:
+
+      - Inject into active_events (dedup by name)
+      - declare_war  → recalculate war_outcomes entry; add border location_event
+      - form_alliance → purge war_targets entries between the new allies
+      - betray        → add instability location_event in shared border regions
+      - stabilize     → add positive location_event for the named location
+    """
+    action  = event.get("action", "")
+    faction = event.get("faction", "")
+    meta    = event.get("meta", {})
+    target  = meta.get("target", "")
+    loc_key = meta.get("location", "")
+    tick    = int(world.get("tick", 0))
+
+    # ── 1. Inject into active_events (deduplicated by name) ──────────────────
+    existing_names = {e.get("name", "") for e in world.get("active_events", [])}
+    if event["name"] not in existing_names:
+        world.setdefault("active_events", []).append({
+            k: v for k, v in event.items()
+            if k not in ("action", "faction", "meta")
+        })
+        # Keep sorted by severity; trim to 10 (next full normalization trims to 8)
+        world["active_events"].sort(key=lambda e: e.get("severity", 0), reverse=True)
+        world["active_events"] = world["active_events"][:10]
+
+    loc_events = world.setdefault("location_events", [])
+
+    # ── 2. Action-specific secondary effects ─────────────────────────────────
+    if action == "declare_war" and target:
+        # Recalculate war_outcomes to include the new conflict immediately
+        war_outcomes = world.setdefault("war_outcomes", [])
+        pair = frozenset((faction, target))
+        if not any(frozenset((o.get("attacker",""), o.get("defender",""))) == pair
+                   for o in war_outcomes):
+            outcome = _resolve_war_advantage(faction, target, world)
+            war_outcomes.append(outcome)
+
+        # Border pressure location_event on the defender's frontier locations
+        for loc in world.get("locations", []):
+            if loc.get("controller") == target:
+                adj = set(loc.get("adjacent", []))
+                # Check if any of attacker's territory is adjacent
+                attacker_locs = {
+                    l.get("name", "") for l in world.get("locations", [])
+                    if l.get("controller") == faction
+                }
+                if adj & attacker_locs:
+                    loc_events.append({
+                        "type":     "war_border_pressure",
+                        "location": loc.get("name", ""),
+                        "attacker": faction,
+                        "defender": target,
+                        "detail": (
+                            f"{faction}'s forces begin applying pressure on {loc.get('name','')}. "
+                            f"Stability will erode if the offensive is sustained."
+                        ),
+                        "tick": tick,
+                    })
+                    break  # one border event per war declaration
+
+    elif action == "form_alliance" and target:
+        # Remove war_targets entries where the two new allies were targeting each other
+        war_targets = world.get("war_targets", [])
+        world["war_targets"] = [
+            wt for wt in war_targets
+            if not (
+                wt.get("attacker") in (faction, target)
+                and wt.get("defender") in (faction, target)
+            )
+        ]
+
+        # Also remove any war_outcomes entry between them (shouldn't exist, but guard)
+        world["war_outcomes"] = [
+            o for o in world.get("war_outcomes", [])
+            if not (
+                frozenset((o.get("attacker",""), o.get("defender","")))
+                == frozenset((faction, target))
+            )
+        ]
+
+    elif action == "betray" and target:
+        # Instability ripple in any border location between the former allies
+        for loc in world.get("locations", []):
+            ctrl = loc.get("controller", "")
+            if ctrl not in (faction, target):
+                continue
+            other = target if ctrl == faction else faction
+            adj = set(loc.get("adjacent", []))
+            other_locs = {
+                l.get("name", "") for l in world.get("locations", [])
+                if l.get("controller") == other
+            }
+            if adj & other_locs:
+                loc["stability"] = max(0, int(loc.get("stability", loc.get("control", 50))) - 5)
+                loc_events.append({
+                    "type":     "betrayal_border_unrest",
+                    "location": loc.get("name", ""),
+                    "detail": (
+                        f"News of {faction}'s betrayal of {target} has reached {loc.get('name','')}. "
+                        f"Local populations and garrisons grow uncertain. Stability has fallen."
+                    ),
+                    "tick": tick,
+                })
+                break  # one border event per betrayal
+
+    elif action == "stabilize_territory" and loc_key:
+        loc_events.append({
+            "type":     "stabilization_effort",
+            "location": loc_key,
+            "faction":  faction,
+            "detail": (
+                f"{faction} has dispatched administrators and resources to {loc_key}. "
+                f"Unrest is being actively suppressed. Control is expected to improve."
+            ),
+            "tick": tick,
+        })
+
+
+def _run_decision_engine(prev_state, new_state):
+    """Orchestrate faction decisions for one tick with strict chaos controls.
+
+    Priority budget (only one slot per type, resolved in priority order):
+      1. crisis            — not yet engine-driven; reserved slot prevents spillover
+      2. declare_war       — max 1 per tick, highest mechanical impact
+      3. betray            — max 1 per tick, second-highest relationship damage
+      4. form_alliance     — max 1 per tick, only fires if war + betray slots unused
+      5. stabilize_territory — fills remaining budget (total cap: 3 non-trivial)
+
+    A lower-priority type is only allowed if no higher-priority type has fired.
+    do_nothing never counts against the budget.
+    """
+    import random
+
+    # ── Per-type slot trackers ────────────────────────────────────────────────
+    slot_used = {
+        "declare_war":       False,
+        "betray":            False,
+        "form_alliance":     False,
+        "stabilize_territory": 0,   # counts (up to 2 if no other action used a slot)
+    }
+    STAB_LIMIT = 2          # stabilize slots available when nothing else fires
+    MAX_NONTRIVIAL = 3      # absolute ceiling across all types
+
+    wars_this_tick:  set = set()   # frozenset (a, b) pairs — war just declared
+    allies_this_tick: set = set()  # factions involved in a just-formed alliance
+    nontrivial = 0
+    decision_log = []
+
+    # Priority ordering: high-impact factions evaluated first within each pass.
+    # Shuffle within priority tiers so the same faction doesn't always win.
+    factions = list(_DECISION_FACTIONS)
+    random.shuffle(factions)
+
+    for faction in factions:
+        if nontrivial >= MAX_NONTRIVIAL:
+            decision_log.append({
+                "faction": faction, "action": "do_nothing", "meta": {},
+                "summary": f"{faction} held position this tick (tick budget exhausted).",
+            })
+            continue
+
+        evaluated = evaluateActions(faction, new_state)
+
+        # ── Slot-based suppression ────────────────────────────────────────────
+        # Zero out actions whose type slot is already consumed this tick
+        if slot_used["declare_war"]:
+            evaluated["declare_war"] = 0
+        if slot_used["betray"]:
+            evaluated["betray"] = 0
+        if slot_used["form_alliance"]:
+            evaluated["form_alliance"] = 0
+
+        # Alliance only fires if neither war nor betray has triggered yet
+        if slot_used["declare_war"] or slot_used["betray"]:
+            evaluated["form_alliance"] = 0
+
+        # Stabilize is limited; push toward do_nothing once cap is reached
+        stab_cap = STAB_LIMIT if nontrivial == 0 else max(0, STAB_LIMIT - slot_used["stabilize_territory"])
+        if slot_used["stabilize_territory"] >= stab_cap:
+            evaluated["stabilize_territory"] = 0
+
+        # War target just declared on this faction — don't let them ally same tick
+        if any(faction in pair for pair in wars_this_tick):
+            evaluated["form_alliance"] = 0
+            evaluated["declare_war"]   = 0   # can't declare while absorbing a declaration
+
+        action, meta = chooseAction(faction, new_state, evaluated)
+        target = meta.get("target")
+
+        # ── Hard conflict guards (last-line veto) ─────────────────────────────
+        if action == "declare_war":
+            pair = frozenset((faction, target)) if target else None
+            if (
+                not target
+                or pair in wars_this_tick
+                or target in allies_this_tick
+                or slot_used["declare_war"]
+            ):
+                action, meta = "do_nothing", {}
+
+        elif action == "form_alliance":
+            if (
+                not target
+                or slot_used["form_alliance"]
+                or slot_used["declare_war"]
+                or slot_used["betray"]
+                or any(faction in p or target in p for p in wars_this_tick)
+            ):
+                action, meta = "do_nothing", {}
+
+        elif action == "betray":
+            if not target or slot_used["betray"]:
+                action, meta = "do_nothing", {}
+
+        elif action == "stabilize_territory":
+            if slot_used["stabilize_territory"] >= stab_cap:
+                action, meta = "do_nothing", {}
+
+        # ── Apply + emit event ────────────────────────────────────────────────
+        log_entry = applyDecision(action, faction, meta, new_state)
+
+        event = createEvent(log_entry, new_state)
+        if event:
+            executeEvent(event, new_state)
+            log_entry["event_name"] = event["name"]
+
+        decision_log.append(log_entry)
+
+        # ── Update slot trackers ──────────────────────────────────────────────
+        if action != "do_nothing":
+            nontrivial += 1
+            if action == "declare_war" and target:
+                slot_used["declare_war"] = True
+                wars_this_tick.add(frozenset((faction, target)))
+            elif action == "betray" and target:
+                slot_used["betray"] = True
+                allies_this_tick.update((faction, target))
+            elif action == "form_alliance" and target:
+                slot_used["form_alliance"] = True
+                allies_this_tick.update((faction, target))
+            elif action == "stabilize_territory":
+                slot_used["stabilize_territory"] += 1
+
+    new_state["decision_log"] = decision_log
+
+
 def _normalize_state(prev_state, new_state):
     prev_state = prev_state or {}
     prev_events = {
@@ -2346,6 +6367,8 @@ def _normalize_state(prev_state, new_state):
 
     _normalize_faction_resources(prev_state, new_state)
     _normalize_population_state(prev_state, new_state)
+    _normalize_locations(prev_state, new_state)
+    _normalize_faction_power_state(prev_state, new_state)
     _normalize_relationships(prev_state, new_state)
     _normalize_trade_routes(new_state)
     _normalize_faction_identities(new_state)
@@ -2358,11 +6381,18 @@ def _normalize_state(prev_state, new_state):
     _normalize_ruler_states(prev_state, new_state)
     _normalize_leadership_state(prev_state, new_state)
     _normalize_house_characters(prev_state, new_state)
+    new_state["war_outcomes"] = _compute_active_war_outcomes(new_state)
+    _update_location_control(new_state)
+    _update_location_stability(new_state)
+    _process_rebellions(new_state)
+    _apply_power_shifts(prev_state, new_state)
+    new_state["faction_dominance"] = _compute_faction_dominance(prev_state, new_state)
     _normalize_belief_currents(prev_state, new_state)
     _normalize_religious_factions(prev_state, new_state)
     _normalize_character_updates(prev_state, new_state)
 
     new_state.setdefault("faction_actions", [])
+    new_state.setdefault("decision_log", [])
     new_state.setdefault("recent_events", [])
     new_state.setdefault("active_tensions", [])
     new_state.setdefault("character_updates", [])
@@ -2381,6 +6411,14 @@ def _normalize_state(prev_state, new_state):
     new_state.setdefault("ruler_states", [])
     new_state.setdefault("leadership_state", [])
     new_state.setdefault("house_characters", [])
+    new_state.setdefault("locations", [])
+    new_state.setdefault("faction_event_pressure", [])
+    new_state.setdefault("faction_power_state", [])
+    new_state.setdefault("war_outcomes", [])
+    new_state.setdefault("war_targets", [])
+    new_state.setdefault("location_events", [])
+    new_state.setdefault("emerging_factions", [])
+    new_state.setdefault("faction_dominance", {})
     new_state.setdefault("belief_currents", [])
     new_state.setdefault("religious_factions", [])
     new_state.setdefault("whispers", [])
@@ -2571,6 +6609,177 @@ def _generate_tick_voice(chronicle_text, tick_num):
         logger.error(f"Voice generation failed: {exc}")
 
 
+def _advance_war_attrition(state):
+    """Apply per-tick economic and military drain to every active war pair.
+
+    Each tick of open war costs both sides:
+      - Attacker: -2 eco, -1 mil base
+      - Defender: -2 eco, -1 mil base
+    The losing side (per war_outcomes verdict) pays an extra -1 on the axis
+    they are already suffering on.  After 10 consecutive ticks a war-exhaustion
+    event is injected so Claude can react to it in the next narrative pass.
+    """
+    power_map = {e["faction"]: e for e in state.get("faction_power_state", [])}
+    if not power_map:
+        return
+
+    outcome_index: dict = {}
+    for wo in state.get("war_outcomes", []):
+        key = frozenset((wo.get("attacker", ""), wo.get("defender", "")))
+        outcome_index[key] = float(wo.get("advantage", 0))
+
+    exhaustion_events = []
+
+    for rel in state.get("relationships", []):
+        if rel.get("type") != "war":
+            continue
+        a = rel.get("faction_a", "")
+        b = rel.get("faction_b", "")
+        if not a or not b:
+            continue
+
+        # Track consecutive war ticks on the relationship row itself
+        war_ticks = int(rel.get("war_ticks", 0)) + 1
+        rel["war_ticks"] = war_ticks
+
+        advantage = outcome_index.get(frozenset((a, b)), 0.0)
+        # Positive = a is winning; negative = b is winning
+
+        def _drain(faction, winning):
+            if faction not in power_map:
+                return
+            pw = power_map[faction]
+            eco_cost = 2 + (0 if winning else 1)
+            mil_cost = 1 + (0 if winning else 1)
+            pw["economicPower"] = max(0, int(pw.get("economicPower", 50)) - eco_cost)
+            pw["militaryPower"] = max(0, int(pw.get("militaryPower", 50)) - mil_cost)
+
+        _drain(a, winning=(advantage > 3))
+        _drain(b, winning=(advantage < -3))
+
+        # War-exhaustion threshold
+        if war_ticks == 10:
+            exhaustion_events.append({
+                "name":   f"War Exhaustion: {a} and {b}",
+                "involved": [a, b],
+                "severity": 9,
+                "stage":  "escalating",
+                "duration": 1,
+                "trend":  "rising",
+                "summary": (
+                    f"Ten ticks of sustained war between {a} and {b} have ground both sides down. "
+                    f"Economies are strained, populations are war-weary, and political pressure "
+                    f"for a resolution is beginning to build on both sides."
+                ),
+                "consequences": (
+                    f"Further fighting accelerates collapse for the weaker side. "
+                    f"Peace negotiations or a decisive offensive are the likely exits."
+                ),
+                "source": "war_attrition",
+            })
+
+    if exhaustion_events:
+        existing_names = {e.get("name", "") for e in state.get("active_events", [])}
+        for ev in exhaustion_events:
+            if ev["name"] not in existing_names:
+                state.setdefault("active_events", []).append(ev)
+        state["active_events"].sort(key=lambda e: e.get("severity", 0), reverse=True)
+        state["active_events"] = state["active_events"][:10]
+
+
+def _archive_tick_events(state):
+    """Append a concise mechanical summary of this tick to tick_history.
+
+    Keeps the 50 most recent ticks.  Each entry records what the decision
+    engine chose to do and the current war / alliance snapshot so the god
+    panel and Claude can reference recent mechanical history.
+    """
+    decision_log = state.get("decision_log", [])
+    nontrivial   = [e for e in decision_log if e.get("action") != "do_nothing"]
+
+    entry = {
+        "tick":       int(state.get("tick", 0)),
+        "world_date": state.get("world_date", ""),
+        "decisions": [
+            {
+                "faction": e.get("faction", ""),
+                "action":  e.get("action",  ""),
+                "target":  (e.get("meta") or {}).get("target", "")
+                           or (e.get("meta") or {}).get("location", ""),
+                "summary": e.get("summary", ""),
+            }
+            for e in nontrivial
+        ],
+        "events_fired": [
+            e.get("event_name", "") for e in decision_log if e.get("event_name")
+        ],
+        "active_wars": [
+            {
+                "a": r.get("faction_a", ""),
+                "b": r.get("faction_b", ""),
+                "ticks": r.get("war_ticks", 0),
+            }
+            for r in state.get("relationships", []) if r.get("type") == "war"
+        ],
+        "alliances": [
+            {"a": r.get("faction_a", ""), "b": r.get("faction_b", "")}
+            for r in state.get("relationships", []) if r.get("type") == "alliance"
+        ],
+    }
+
+    history = state.setdefault("tick_history", [])
+
+    # No duplicates: drop any previous entry for this same tick number
+    tick_num = entry["tick"]
+    state["tick_history"] = [h for h in history if h.get("tick") != tick_num]
+    state["tick_history"].append(entry)
+    state["tick_history"] = sorted(state["tick_history"], key=lambda h: h.get("tick", 0))[-50:]
+
+
+def updateWorld(world, prev_world=None):
+    """Execute one full mechanical tick on an already-normalized world state.
+
+    This is the pure-mechanical layer — no Claude call, no external APIs,
+    fully deterministic (uses random only for weighted action selection).
+
+    Tick flow:
+      1. Decision Engine — evaluate all factions, weighted action selection,
+                           conflict guards, max 3 non-trivial actions
+      2. Event Execution — createEvent + executeEvent for each chosen action
+                           (relationships, territory, power, wars mutated in-place)
+      3. War Attrition   — ongoing conflicts drain economy / military each tick;
+                           10-tick wars trigger an exhaustion event
+      4. History Archive — append a concise mechanical record to tick_history
+
+    Args:
+        world:      Already Claude-normalized world state dict (mutated in-place).
+        prev_world: Previous tick's state for decision-engine context. Optional.
+
+    Returns the mutated world dict.
+    """
+    if not world:
+        return world
+
+    # Guard: one engine pass per tick (prevents double-run if called more than once)
+    tick = int(world.get("tick", 0))
+    last_engine_tick = world.get("_engine_tick", -1)
+    if last_engine_tick == tick:
+        logger.debug(f"updateWorld skipped for tick {tick} — already ran this tick")
+        return world
+    world["_engine_tick"] = tick
+
+    # ── 1 + 2. Decision Engine → Event Execution ─────────────────────────────
+    _run_decision_engine(prev_world or {}, world)
+
+    # ── 3. Ongoing War Attrition ──────────────────────────────────────────────
+    _advance_war_attrition(world)
+
+    # ── 4. Tick History ───────────────────────────────────────────────────────
+    _archive_tick_events(world)
+
+    return world
+
+
 def run_tick():
     with _lock:
         logger.info("Running world tick...")
@@ -2579,6 +6788,8 @@ def run_tick():
             pending_lore = _load_pending_lore()
 
             new_state = _call_claude(prev_state, pending_lore)
+            updateWorld(new_state, prev_world=prev_state)
+            new_state = ensure_world_structure(new_state, prev_state)
             _ensure_character_portraits(new_state)
             _ensure_codex_images(new_state)
             _save_world_state(new_state)
@@ -2591,6 +6802,7 @@ def run_tick():
             chronicle = _generate_chronicle(new_state)
             if chronicle:
                 new_state["chronicle"] = chronicle
+                new_state = ensure_world_structure(new_state, prev_state)
                 _save_world_state(new_state)
 
             _generate_tick_voice(chronicle, new_state["tick"])
@@ -2623,8 +6835,19 @@ def start_scheduler():
         id="monday_story",
         replace_existing=True,
     )
-    _scheduler.start()
-    logger.info(f"Scheduler started - tick every {tick_hours}h, story every Monday 9am UTC.")
+    if not _scheduler.get_job("simulation_tick"):
+        _sim_trigger = IntervalTrigger(seconds=10) if TEST_MODE else IntervalTrigger(days=1)
+        _scheduler.add_job(
+            run_simulation_tick,
+            _sim_trigger,
+            id="simulation_tick",
+            max_instances=1,
+        )
+    if not TEST_MODE:
+        _scheduler.start()
+        logger.info(f"Scheduler started - tick every {tick_hours}h, story every Monday 9am UTC.")
+    else:
+        logger.info("TEST_MODE=True — scheduler disabled, no background ticks.")
 
     if not WORLD_STATE_FILE.exists():
         logger.info("No world state found - generating initial state...")
@@ -2638,3 +6861,15 @@ def stop_scheduler():
     if _scheduler.running:
         _scheduler.shutdown(wait=False)
         logger.info("Scheduler stopped.")
+
+
+def pause_ticks() -> None:
+    if _scheduler.running and _scheduler.get_job("simulation_tick"):
+        _scheduler.pause_job("simulation_tick")
+        logger.info("Simulation tick paused for world switch.")
+
+
+def resume_ticks() -> None:
+    if _scheduler.running and _scheduler.get_job("simulation_tick"):
+        _scheduler.resume_job("simulation_tick")
+        logger.info("Simulation tick resumed after world switch.")

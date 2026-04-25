@@ -16,12 +16,12 @@
   .home-command-stage {
     position: relative;
     z-index: 1;
-    width: min(88vw, 1680px);
-    height: clamp(620px, 74vh, 920px);
-    margin: 80px auto 90px;
+    width: 100%;
+    height: clamp(620px, calc(100vh - var(--nav-h)), 1080px);
+    margin: 0;
     display: grid;
     grid-template-columns: minmax(180px, 16vw) minmax(0, 1fr) minmax(200px, 14vw);
-    gap: clamp(16px, 1.5vw, 28px);
+    gap: 0;
     align-items: stretch;
   }
 
@@ -29,15 +29,9 @@
     position: relative;
     min-width: 0;
     height: 100%;
-    border: 1px solid rgba(255,215,150,0.2);
-    border-radius: 12px;
-    background:
-      linear-gradient(180deg, rgba(4,6,9,0.96), rgba(7,9,12,0.92)),
-      rgba(8,10,14,0.96);
-    box-shadow:
-      inset 0 0 40px rgba(0,0,0,0.6),
-      0 0 30px rgba(0,0,0,0.5),
-      0 26px 64px rgba(0,0,0,0.34);
+    border: none;
+    border-radius: 0;
+    background: rgba(5,7,10,1);
     overflow: hidden;
   }
 
@@ -164,7 +158,7 @@
     gap: 0;
     padding: 16px 16px 14px 18px;
     border: 1px solid rgba(255,215,150,0.15);
-    border-radius: 12px;
+    border-radius: 0;
     background:
       linear-gradient(90deg, rgba(0,0,0,0.14), transparent 72%),
       linear-gradient(90deg, rgba(10,10,10,0.58), rgba(10,10,10,0.55));
@@ -360,9 +354,9 @@
     display: grid;
     grid-template-rows: auto auto auto minmax(0, 1fr);
     gap: 0;
-    padding: 16px 14px 14px;
+    padding: 16px 14px 74px;
     border: 1px solid rgba(255,215,150,0.12);
-    border-radius: 12px;
+    border-radius: 0;
     background:
       linear-gradient(270deg, rgba(0,0,0,0.14), transparent 72%),
       linear-gradient(180deg, rgba(10,10,10,0.56), rgba(10,10,10,0.5));
@@ -1062,91 +1056,11 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     filter: saturate(0.96) contrast(1.04) brightness(0.8);
   }
 
-  .home-atlas-markers {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: auto;
-  }
-
-  .home-atlas-marker {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    display: grid;
-    place-items: center;
-    transition: transform 0.18s ease, filter 0.18s ease;
-    filter: drop-shadow(0 0 8px rgba(0,0,0,0.22));
-    pointer-events: auto;
-  }
-
-  .home-atlas-marker:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    filter: drop-shadow(0 0 16px rgba(201,169,110,0.2));
-  }
-
-  .home-atlas-sigil-marker {
-    width: 28px;
-    height: 34px;
-    position: relative;
-    border: 1px solid rgba(201,169,110,0.54);
-    background:
-      radial-gradient(circle at 50% 24%, rgba(255,255,255,0.08), transparent 32%),
-      linear-gradient(180deg, rgba(14,14,18,0.94), rgba(8,8,12,0.82));
-    clip-path: polygon(50% 0%, 100% 18%, 100% 76%, 50% 100%, 0% 76%, 0% 18%);
-    box-shadow:
-      0 0 0 1px rgba(0,0,0,0.42) inset,
-      0 8px 18px rgba(0,0,0,0.3),
-      0 0 12px color-mix(in srgb, var(--sigil-color, rgba(201,169,110,0.92)) 16%, transparent);
-  }
-
-  .home-atlas-sigil-marker::before,
-  .home-atlas-sigil-marker::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    background: var(--sigil-color, rgba(201,169,110,0.92));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--sigil-color, rgba(201,169,110,0.92)) 34%, transparent);
-    transform: translate(-50%, -50%);
-  }
-
-  .home-atlas-sigil-marker::before {
-    width: 12px;
-    height: 2px;
-  }
-
-  .home-atlas-sigil-marker::after {
-    width: 2px;
-    height: 12px;
-  }
-
-  .home-atlas-marker[data-tone="ice"] { --sigil-color: #8fc7ff; }
-  .home-atlas-marker[data-tone="forest"] { --sigil-color: #7dae55; }
-  .home-atlas-marker[data-tone="crown"] { --sigil-color: #6fc3ff; }
-  .home-atlas-marker[data-tone="ember"] { --sigil-color: #e0883e; }
-  .home-atlas-marker[data-tone="blood"] { --sigil-color: #cf5238; }
-  .home-atlas-marker[data-tone="violet"] { --sigil-color: #9e6ad3; }
-  .home-atlas-marker[data-tone="stone"] { --sigil-color: #d0b06f; }
-
-  @media (max-width: 760px) {
-    .home-atlas-sigil-marker {
-      width: 22px;
-      height: 27px;
-    }
-
-    .home-atlas-sigil-marker::before {
-      width: 8px;
-    }
-
-    .home-atlas-sigil-marker::after {
-      height: 8px;
-    }
-  }
 
   .home-atlas-footer {
     position: absolute;
@@ -1727,9 +1641,9 @@
 
   @media (max-width: 1180px) {
     .home-command-stage {
-      width: min(92vw, 1400px);
+      width: 100%;
       grid-template-columns: minmax(170px, 18vw) minmax(0, 1fr) minmax(190px, 18vw);
-      gap: 16px;
+      gap: 0;
     }
 
     .command-bar-frame {
@@ -1752,10 +1666,10 @@
     }
 
     .home-command-stage {
-      width: calc(100% - 24px);
+      width: 100%;
       height: auto;
       min-height: calc(100vh - var(--nav-h) - 180px);
-      margin: 20px auto 20px;
+      margin: 0;
       grid-template-columns: 1fr;
     }
 
@@ -1843,28 +1757,28 @@
                 <div class="home-codex-title">Codex</div>
                 <div class="home-codex-divider" aria-hidden="true"></div>
                 <nav class="home-codex-nav">
-                  <a class="home-codex-link" href="/codex?category=Characters">
+                  <a class="home-codex-link" href="/codex?category=Characters" id="rulers-link">
                     <span class="home-codex-icon" data-icon="rulers" aria-hidden="true"></span>
                     <span class="home-codex-text">
                       <span class="home-codex-label">Rulers</span>
                       <span class="home-codex-meta">Open Characters</span>
                     </span>
                   </a>
-                  <a class="home-codex-link" href="/codex?category=Kingdoms">
+                  <a class="home-codex-link" href="/codex?category=Kingdoms" id="dynasties-link">
                     <span class="home-codex-icon" data-icon="dynasties" aria-hidden="true"></span>
                     <span class="home-codex-text">
                       <span class="home-codex-label">Dynasties</span>
                       <span class="home-codex-meta">Open Kingdoms</span>
                     </span>
                   </a>
-                  <a class="home-codex-link" href="/codex?category=Lore">
+                  <a class="home-codex-link" href="/codex?category=Lore" id="battles-link">
                     <span class="home-codex-icon" data-icon="battles" aria-hidden="true"></span>
                     <span class="home-codex-text">
                       <span class="home-codex-label">Battles</span>
                       <span class="home-codex-meta">Open Lore</span>
                     </span>
                   </a>
-                  <a class="home-codex-link" href="/codex?category=Lore">
+                  <a class="home-codex-link" href="/codex?category=Lore" id="religion-link">
                     <span class="home-codex-icon" data-icon="religion" aria-hidden="true"></span>
                     <span class="home-codex-text">
                       <span class="home-codex-label">Religion</span>
@@ -1899,52 +1813,14 @@
     <section class="home-map-stage" aria-label="World map canvas">
       <div class="home-map-background" aria-hidden="true">
         <div class="home-atlas-frame">
-          <img class="home-atlas-map" src="/static/illustrations/ui/aeloria-lore-map-labeled.png" alt="Lore-labeled map of Aeloria">
+          <img class="home-atlas-map" src="/static/illustrations/ui/aeloria-lore-map-labeled.png?v=20260424-mapfit-1" alt="Lore-labeled map of Aeloria">
           <div class="home-atlas-tone-layer"></div>
-          <div class="home-atlas-markers">
-                <div class="home-atlas-marker" data-tone="forest" style="left: 17%; top: 39%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="ice" style="left: 38%; top: 17%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="ice" style="left: 62%; top: 16%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="stone" style="left: 45.3%; top: 46%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="ember" style="left: 24.6%; top: 67%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="crown" style="left: 45.7%; top: 42.3%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="ember" style="left: 46%; top: 81.2%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="blood" style="left: 72%; top: 39.5%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="stone" style="left: 60.2%; top: 43.6%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="stone" style="left: 62.1%; top: 56.6%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="forest" style="left: 69.1%; top: 72.4%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-                <div class="home-atlas-marker" data-tone="violet" style="left: 45.2%; top: 95.2%;">
-                  <div class="home-atlas-sigil-marker"></div>
-                </div>
-          </div>
         </div>
       </div>
 
       <div class="home-ui-layer">
         <div class="home-ui-overlay" aria-label="Map interface overlay">
-          <div class="center-event-backdrop is-open" id="center-event-backdrop" aria-hidden="false">
+          <div class="center-event-backdrop" id="center-event-backdrop" aria-hidden="true">
             <section class="center-event-modal" id="seer-interface" role="dialog" aria-modal="true" aria-labelledby="center-event-title">
               <button class="center-event-close" type="button" id="center-event-close" aria-label="Close event window">×</button>
               <div class="center-event-head">
@@ -2152,6 +2028,1908 @@
   </div>
 </main>
 <div class="toast" id="toast">Intent sent.</div>
+
+<!-- ── Rulers Panel ─────────────────────────────────────────── -->
+<div class="rulers-panel-backdrop" id="rulers-backdrop"></div>
+<div class="rulers-panel" id="rulers-panel" aria-hidden="true">
+  <button class="rulers-panel-close" id="rulers-panel-close" aria-label="Close">✕</button>
+  <div class="rp-layout">
+    <!-- Left col: wheel -->
+    <div class="rp-left-col">
+      <h2 class="rp-title">Rulers</h2>
+      <p class="rp-subtitle" id="rp-subtitle">Loading…</p>
+      <div class="rp-wheel-wrap">
+        <div class="rp-wheel-ring" id="rp-wheel-ring"></div>
+        <div class="rp-wheel-center">
+          <div class="rp-wheel-name" id="rp-wheel-name">Select a ruler</div>
+          <div class="rp-wheel-faction" id="rp-wheel-faction"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right col: detail -->
+    <div class="rp-right-col" id="rp-right-col">
+      <div class="rp-placeholder" id="rp-placeholder">
+        <div class="rp-placeholder-text">Click a portrait to view ruler details</div>
+      </div>
+      <div class="rp-detail" id="rp-detail" style="display:none">
+
+        <!-- Identity -->
+        <div class="rp-identity-row">
+          <div class="rp-portrait-wrap">
+            <img class="rp-portrait" id="rp-portrait" src="" alt="" />
+            <div class="rp-portrait-ph" id="rp-portrait-ph"><span id="rp-portrait-init">?</span></div>
+          </div>
+          <div class="rp-identity-text">
+            <div class="rp-badge" id="rp-badge">—</div>
+            <div class="rp-name" id="rp-name">—</div>
+            <div class="rp-rtitle" id="rp-rtitle">—</div>
+            <div class="rp-traits" id="rp-traits"></div>
+          </div>
+        </div>
+
+        <!-- Reign facts -->
+        <div class="rp-sec-title">Reign</div>
+        <table class="rp-facts">
+          <tr><td class="rp-fl">Age</td><td class="rp-fv" id="rp-age">—</td></tr>
+          <tr><td class="rp-fl">Dynasty</td><td class="rp-fv" id="rp-dynasty">—</td></tr>
+          <tr><td class="rp-fl">Reign Start</td><td class="rp-fv" id="rp-start">—</td></tr>
+          <tr><td class="rp-fl">Days Ruling</td><td class="rp-fv" id="rp-duration">—</td></tr>
+          <tr><td class="rp-fl">Rose By</td><td class="rp-fv" id="rp-rise">—</td></tr>
+        </table>
+
+        <!-- Rule history / notable events -->
+        <div class="rp-sec-title" style="margin-top:22px">History of This Rule</div>
+        <div id="rp-rule-history"></div>
+
+        <!-- Line of succession -->
+        <div class="rp-sec-title" style="margin-top:22px">Line of Succession</div>
+        <div class="rp-succ-type" id="rp-succ-type"></div>
+        <div id="rp-succession"></div>
+
+        <!-- Title history across all rulers -->
+        <div class="rp-sec-title" style="margin-top:22px" id="rp-title-hist-label">History of the Title</div>
+        <div id="rp-title-history"></div>
+
+        <!-- All previous rulers -->
+        <div class="rp-sec-title" style="margin-top:22px" id="rp-prev-label">Previous Rulers</div>
+        <div id="rp-prev-rulers"></div>
+
+      </div>
+    </div>
+
+  </div><!-- /rp-layout -->
+</div><!-- /rulers-panel -->
+
+<style>
+/* ── Rulers panel ───────────────────────────────────────── */
+.rulers-panel-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 890;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.rulers-panel-backdrop.rp-open { opacity: 1; pointer-events: auto; }
+
+.rulers-panel {
+  position: fixed;
+  top: var(--nav-h); left: 0; bottom: 0;
+  width: min(900px, 90vw);
+  background: var(--bg);
+  border-right: 1px solid rgba(201,169,110,.2);
+  z-index: 895;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+}
+.rulers-panel.rp-open { transform: translateX(0); }
+.home-codex-rail { position: relative; z-index: 950 !important; }
+
+.rulers-panel-close {
+  position: absolute;
+  top: 12px; right: 14px;
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--text-muted); font-size: 13px;
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color .15s, border-color .15s; z-index: 10;
+}
+.rulers-panel-close:hover { color: var(--text); border-color: var(--gold); }
+
+/* Two-column layout */
+.rp-layout {
+  display: flex;
+  height: 100%;
+}
+
+/* Left: wheel */
+.rp-left-col {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--surface2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 16px 20px;
+  overflow: hidden;
+}
+.rp-title {
+  font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+  color: var(--gold); letter-spacing: .05em; margin: 0 0 4px; text-align: center;
+}
+.rp-subtitle {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 12px; color: var(--text-muted); margin: 0 0 20px; text-align: center;
+}
+
+/* Right: detail */
+.rp-right-col {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px 40px;
+  scrollbar-width: thin; scrollbar-color: rgba(180,148,80,0.25) transparent;
+}
+.rp-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; min-height: 200px;
+}
+.rp-placeholder-text {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 14px; color: var(--text-muted); text-align: center;
+}
+
+/* ── Wheel ───────────────────────────────────────────────── */
+.rp-wheel-wrap {
+  position: relative;
+  width: 280px; height: 280px;
+  flex-shrink: 0;
+}
+.rp-wheel-ring { position: absolute; inset: 0; }
+.rp-wheel-ring::before {
+  content: '';
+  position: absolute; inset: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,169,110,.1);
+  pointer-events: none;
+}
+.rp-node {
+  position: absolute;
+  width: 52px; height: 52px;
+  transform: translate(-50%, -50%);
+  cursor: pointer; transition: filter .2s;
+}
+.rp-node:hover { filter: brightness(1.2); }
+.rp-node-img {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid #3a3a44;
+  overflow: hidden; background: var(--surface2); position: relative;
+  transition: border-color .2s, box-shadow .2s;
+}
+.rp-node:hover .rp-node-img { border-color: rgba(201,169,110,.6); }
+.rp-node.rp-active .rp-node-img {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201,169,110,.25), 0 0 12px rgba(201,169,110,.2);
+}
+.rp-node-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rp-node-ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 18px; color: var(--text-muted);
+}
+.rp-node-label {
+  position: absolute; bottom: -18px; left: 50%;
+  transform: translateX(-50%); white-space: nowrap;
+  font-size: 8px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-muted); font-family: 'EB Garamond', serif;
+  pointer-events: none; transition: color .2s;
+}
+.rp-node.rp-active .rp-node-label { color: var(--gold); }
+.rp-wheel-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center; pointer-events: none; width: 100px;
+}
+.rp-wheel-name {
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  color: var(--text); line-height: 1.3; margin-bottom: 3px;
+}
+.rp-wheel-faction {
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); font-family: 'EB Garamond', serif;
+}
+
+/* ── Detail (right col) ──────────────────────────────────── */
+.rp-detail { animation: rpIn .18s ease; }
+@keyframes rpIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:none; } }
+
+.rp-portrait-wrap {
+  width: 80px; height: 80px; border-radius: 50%;
+  border: 2px solid var(--gold);
+  overflow: hidden; background: var(--surface2); position: relative;
+  margin-bottom: 10px;
+}
+.rp-portrait { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rp-portrait-ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 26px; color: var(--text-muted);
+}
+.rp-badge {
+  display: inline-block;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold); background: rgba(201,169,110,.1);
+  border: 1px solid rgba(201,169,110,.2); border-radius: 3px;
+  padding: 2px 8px; margin-bottom: 6px; font-family: 'EB Garamond', serif;
+}
+.rp-name {
+  font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700;
+  color: var(--text); line-height: 1.3; margin-bottom: 2px;
+}
+.rp-rtitle {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 13px; color: var(--text-sec); margin-bottom: 10px;
+}
+.rp-traits { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.rp-trait {
+  font-size: 9px; letter-spacing: .05em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--surface2); color: var(--text-sec); font-family: 'EB Garamond', serif;
+}
+.rp-sec-title {
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(180,148,80,0.12); padding-bottom: 5px; margin-bottom: 9px;
+}
+.rp-facts { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+.rp-fl {
+  font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--text-muted); padding: 3px 12px 3px 0;
+  white-space: nowrap; vertical-align: top; font-family: 'EB Garamond', serif;
+}
+.rp-fv { font-family: 'Crimson Text', serif; font-size: 14px; color: var(--text); padding: 3px 0; }
+
+.rp-houses, .rp-figures, .rp-history { display: flex; flex-direction: column; gap: 6px; }
+.rp-house-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border-radius: 5px; padding: 7px 10px;
+}
+.rp-house-name { font-family: 'Cinzel', serif; font-size: 11px; color: var(--text); flex: 1; }
+.rp-house-sub { font-size: 10px; color: var(--text-muted); font-family: 'Crimson Text', serif; }
+.rp-house-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.rp-hbar-wrap { width: 70px; height: 3px; background: rgba(180,148,80,0.18); border-radius: 2px; overflow: hidden; }
+.rp-hbar { height: 100%; background: var(--gold); border-radius: 2px; }
+.rp-hprestige { font-size: 10px; color: var(--gold); font-family: 'Cinzel', serif; }
+.rp-htier {
+  font-size: 9px; letter-spacing: .05em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 2px; font-family: 'EB Garamond', serif;
+}
+.rpt1 { background: rgba(201,169,110,.12); color: var(--gold); }
+.rpt2 { background: rgba(90,122,170,.12); color: var(--stable); }
+.rpt3 { background: rgba(90,84,80,.12); color: var(--text-muted); }
+.rp-fig-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; background: var(--surface2); border-radius: 4px;
+}
+.rp-fig-name { flex: 1; font-size: 12px; color: var(--text); font-family: 'Crimson Text', serif; }
+.rp-fig-role { font-size: 10px; color: var(--text-muted); }
+.rp-fig-inf { font-size: 10px; color: var(--gold); font-family: 'Cinzel', serif; min-width: 22px; text-align: right; }
+.rp-hist-row {
+  padding: 7px 10px; background: var(--surface2); border-radius: 4px;
+  border-left: 3px solid rgba(180,148,80,0.25);
+}
+.rp-hist-name { font-family: 'Cinzel', serif; font-size: 11px; color: var(--text); }
+.rp-hist-meta { font-size: 10px; color: var(--text-muted); font-family: 'Crimson Text', serif; margin-top: 1px; }
+.rp-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+/* Identity row */
+.rp-identity-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+.rp-identity-text { flex: 1; padding-top: 4px; }
+
+/* Rule history events */
+.rp-event-row {
+  font-family: 'Crimson Text', serif; font-size: 14px; color: var(--text-sec);
+  padding: 5px 0; border-bottom: 1px solid var(--surface2); line-height: 1.5;
+}
+
+/* Succession */
+.rp-succ-type {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+}
+.rp-succ-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: var(--surface2); border-radius: 6px; margin-bottom: 6px;
+}
+.rp-succ-rank {
+  font-size: 15px; min-width: 18px; text-align: center; flex-shrink: 0;
+}
+.rp-succ-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid #3a3a44;
+  overflow: hidden; background: var(--surface); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 14px; color: var(--text-muted);
+  position: relative;
+}
+.rp-succ-avatar img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+.rp-succ-info { flex: 1; min-width: 0; }
+.rp-succ-name { font-family: 'Cinzel', serif; font-size: 13px; color: var(--text); }
+.rp-succ-meta { font-size: 10px; color: var(--text-muted); font-family: 'Crimson Text', serif; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rp-succ-bar-wrap { height: 2px; background: rgba(180,148,80,0.12); border-radius: 1px; overflow: hidden; margin-top: 5px; }
+.rp-succ-bar { height: 100%; border-radius: 1px; transition: width .3s; }
+.rp-succ-stats { display: flex; gap: 10px; flex-shrink: 0; }
+.rp-succ-stat-cell { display: flex; flex-direction: column; align-items: center; min-width: 36px; }
+.rp-succ-stat-val { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; line-height: 1; }
+.rp-succ-stat-label { font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); font-family: 'EB Garamond', serif; margin-top: 2px; }
+
+/* Title history */
+.rp-th-row {
+  padding: 7px 10px; background: var(--surface2); border-radius: 5px; margin-bottom: 5px;
+  border-left: 2px solid rgba(201,169,110,.3);
+}
+.rp-th-name { font-family: 'Cinzel', serif; font-size: 12px; color: var(--text); }
+.rp-th-meta { font-size: 11px; color: var(--text-muted); font-family: 'Crimson Text', serif; margin-top: 2px; }
+
+/* Previous rulers */
+.rp-prev-row {
+  display: flex; gap: 12px; align-items: center;
+  padding: 10px; background: var(--surface2); border-radius: 6px; margin-bottom: 7px;
+}
+.rp-prev-portrait {
+  width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+  background: var(--surface); flex-shrink: 0; position: relative;
+  border: 1px solid rgba(180,148,80,0.18);
+}
+.rp-prev-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rp-prev-ph {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 16px; color: var(--text-muted);
+}
+.rp-prev-info { flex: 1; }
+.rp-prev-name { font-family: 'Cinzel', serif; font-size: 13px; color: var(--text); }
+.rp-prev-title-text { font-size: 11px; color: var(--text-muted); font-family: 'EB Garamond', serif; font-style: normal; }
+.rp-prev-dates { font-size: 11px; color: var(--text-muted); font-family: 'Crimson Text', serif; margin-top: 2px; }
+.rp-prev-rise { font-size: 11px; color: var(--text-muted); font-family: 'Crimson Text', serif; }
+.rp-prev-end {
+  display: inline-block; font-size: 9px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 1px 6px; border-radius: 3px; margin-left: 6px; font-family: 'EB Garamond', serif;
+}
+.rp-end-death     { background: rgba(90,84,80,.2); color: var(--text-muted); }
+.rp-end-conflict  { background: rgba(201,55,44,.15); color: var(--red); }
+.rp-end-overthrow { background: rgba(122,90,154,.15); color: #b088d8; }
+.rp-end-abdication { background: rgba(90,122,170,.15); color: var(--stable); }
+</style>
+
+<script>
+(function () {
+  const CX = 140, CY = 140, R = 108;
+  let rpState = null;
+
+  function openRulers() {
+    document.getElementById('rulers-backdrop').classList.add('rp-open');
+    document.getElementById('rulers-panel').classList.add('rp-open');
+    document.getElementById('rulers-panel').setAttribute('aria-hidden', 'false');
+    if (!rpState) loadRulers();
+  }
+  function closeRulers() {
+    document.getElementById('rulers-backdrop').classList.remove('rp-open');
+    document.getElementById('rulers-panel').classList.remove('rp-open');
+    document.getElementById('rulers-panel').setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadRulers() {
+    const res = await fetch('/api/state');
+    rpState = await res.json();
+    const rulers = rpState.leadership_state || [];
+    document.getElementById('rp-subtitle').textContent =
+      rulers.length + ' active rulers · ' + (rpState.world_date || '');
+    buildWheel(rulers);
+  }
+
+  function buildWheel(rulers) {
+    const ring = document.getElementById('rp-wheel-ring');
+    ring.innerHTML = '';
+    const n = rulers.length;
+    rulers.forEach((entry, i) => {
+      const ruler = entry.currentRuler || {};
+      const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+      const x = CX + R * Math.cos(angle);
+      const y = CY + R * Math.sin(angle);
+      const hasPortrait = !!ruler.portrait_image;
+      const initial = (ruler.name || '?')[0].toUpperCase();
+
+      const node = document.createElement('div');
+      node.className = 'rp-node';
+      node.style.left = x + 'px';
+      node.style.top  = y + 'px';
+      node.dataset.faction = entry.faction;
+      node.innerHTML = `
+        <div class="rp-node-img">
+          ${hasPortrait ? `<img src="${ruler.portrait_image}" alt="${ruler.name}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+          <div class="rp-node-ph" style="${hasPortrait ? 'display:none' : ''}">${initial}</div>
+        </div>
+        <div class="rp-node-label">${shortName(entry.faction)}</div>`;
+      node.addEventListener('click', () => selectRuler(entry.faction));
+      ring.appendChild(node);
+    });
+  }
+
+  function selectRuler(faction) {
+    document.querySelectorAll('.rp-node').forEach(n =>
+      n.classList.toggle('rp-active', n.dataset.faction === faction));
+
+    const entry = (rpState.leadership_state || []).find(e => e.faction === faction);
+    if (!entry) return;
+    const ruler = entry.currentRuler || {};
+
+    document.getElementById('rp-wheel-name').textContent = ruler.name || '—';
+    document.getElementById('rp-wheel-faction').textContent = faction;
+
+    document.getElementById('rp-placeholder').style.display = 'none';
+    document.getElementById('rp-detail').style.display = 'block';
+    document.getElementById('rp-right-col').scrollTop = 0;
+    fillDetail(entry);
+  }
+
+  function fillDetail(entry) {
+    const ruler = entry.currentRuler || {};
+
+    // Portrait
+    const img = document.getElementById('rp-portrait');
+    const ph  = document.getElementById('rp-portrait-ph');
+    document.getElementById('rp-portrait-init').textContent = (ruler.name || '?')[0].toUpperCase();
+    if (ruler.portrait_image) {
+      img.src = ruler.portrait_image; img.style.display = 'block'; ph.style.display = 'none';
+      img.onerror = () => { img.style.display = 'none'; ph.style.display = 'flex'; };
+    } else { img.style.display = 'none'; ph.style.display = 'flex'; }
+
+    // Identity
+    document.getElementById('rp-badge').textContent    = entry.faction;
+    document.getElementById('rp-name').textContent     = ruler.name || '—';
+    document.getElementById('rp-rtitle').textContent   = ruler.title || 'Ruler';
+    document.getElementById('rp-traits').innerHTML     =
+      (ruler.traits || []).map(t => `<span class="rp-trait">${t}</span>`).join('');
+
+    // Reign facts
+    document.getElementById('rp-age').textContent      = ruler.age || '—';
+    document.getElementById('rp-dynasty').textContent  = ruler.dynasty || '—';
+    document.getElementById('rp-start').textContent    = ruler.startDay !== undefined ? 'Day ' + ruler.startDay : '—';
+    document.getElementById('rp-duration').textContent = ruler.duration !== undefined ? ruler.duration + ' days' : '—';
+    document.getElementById('rp-rise').textContent     = cap(ruler.causeOfRise || '—');
+
+    // History of this rule (notable events)
+    const events = ruler.notableEvents || [];
+    document.getElementById('rp-rule-history').innerHTML = events.length
+      ? events.map(e => `<div class="rp-event-row">• ${e}</div>`).join('')
+      : '<div class="rp-empty">No recorded events yet</div>';
+
+    // Line of succession — rules differ by faction
+    const PRIMOGENITURE = ['Twin Cities','Tidefall','Dur Khadur','Lostfeld Dwarves'];
+    const POWER_BASED   = ['Gilgeth Orcs','Groth Orcs','Vilefin Goblins'];
+    const COUNCIL       = ['Glenhaven Elves'];
+    const CHOSEN        = ['Shadow Court'];
+    const ELECTION      = ['Dreadwind Islands'];
+
+    const allChars = (rpState.house_characters || []).filter(c => c.faction === entry.faction && c.name !== ruler.name);
+    const rulingHouse = ruler.dynasty || '';
+    // For dynasty-based factions only members of the ruling house may inherit
+    const dynastyChars = rulingHouse ? allChars.filter(c => c.house === rulingHouse) : allChars;
+    let successors = [];
+    let successionType = '';
+
+    // coreRole rank is always the primary sort key — this mirrors how the simulation resolves succession
+    const CORE_ORDER = { Leader: 0, Heir: 1, 'Power Role': 2, Wildcard: 3, Secondary: 4 };
+    const coreRank = c => CORE_ORDER[c.coreRole] ?? 5;
+
+    if (PRIMOGENITURE.includes(entry.faction)) {
+      const houseName = rulingHouse || 'the ruling dynasty';
+      successionType = dynastyChars.length
+        ? `Only ${houseName} members may inherit — ranked by dynasty position`
+        : `No ${houseName} members — succession crisis imminent`;
+      successors = [...dynastyChars].sort((a,b) => {
+        const cr = coreRank(a) - coreRank(b);
+        if (cr !== 0) return cr;
+        return parseInt(b.age||0) - parseInt(a.age||0);
+      }).slice(0, 6);
+
+    } else if (POWER_BASED.includes(entry.faction)) {
+      successionType = 'Dynasty rank first; within each tier, strength and ambition decide who rises';
+      successors = [...allChars].sort((a,b) => {
+        const cr = coreRank(a) - coreRank(b);
+        if (cr !== 0) return cr;
+        const powerA = (a.influenceScore||0) + (a.ambition||0) + ((a.morality||0) < 50 ? 10 : 0);
+        const powerB = (b.influenceScore||0) + (b.ambition||0) + ((b.morality||0) < 50 ? 10 : 0);
+        return powerB - powerA;
+      }).slice(0, 6);
+
+    } else if (COUNCIL.includes(entry.faction)) {
+      successionType = 'Dynasty rank first; within each tier, wisdom and influence shape the council vote';
+      successors = [...allChars].sort((a,b) => {
+        const cr = coreRank(a) - coreRank(b);
+        if (cr !== 0) return cr;
+        const scoreA = (a.intelligence||0) + (a.loyalty||0) + (a.influenceScore||0);
+        const scoreB = (b.intelligence||0) + (b.loyalty||0) + (b.influenceScore||0);
+        return scoreB - scoreA;
+      }).slice(0, 6);
+
+    } else if (CHOSEN.includes(entry.faction)) {
+      successionType = `${rulingHouse ? rulingHouse+' members preferred — ' : ''}personal trust and loyalty to ${ruler.name||'the ruler'} determines selection`;
+      successors = [...(dynastyChars.length ? dynastyChars : allChars)].sort((a,b) => {
+        const cr = coreRank(a) - coreRank(b);
+        if (cr !== 0) return cr;
+        const scoreA = (a.loyalty||0) + (a.intelligence||0) + Math.floor((a.influenceScore||0) / 2);
+        const scoreB = (b.loyalty||0) + (b.intelligence||0) + Math.floor((b.influenceScore||0) / 2);
+        return scoreB - scoreA;
+      }).slice(0, 6);
+
+    } else if (ELECTION.includes(entry.faction)) {
+      successionType = 'Dynasty rank first; within each tier, political standing and loyalty shape the vote';
+      successors = [...allChars].sort((a,b) => {
+        const cr = coreRank(a) - coreRank(b);
+        if (cr !== 0) return cr;
+        const scoreA = (a.influenceScore||0) + (a.loyalty||0) + Math.floor((a.ambition||0) / 2);
+        const scoreB = (b.influenceScore||0) + (b.loyalty||0) + Math.floor((b.ambition||0) / 2);
+        return scoreB - scoreA;
+      }).slice(0, 6);
+    }
+
+    document.getElementById('rp-succ-type').textContent = successionType;
+
+    // Stat columns + accent color vary by succession rule
+    let succIcon, statCols, accentVar;
+    if (PRIMOGENITURE.includes(entry.faction)) {
+      succIcon  = '♛';
+      accentVar = 'var(--gold)';
+      statCols  = [
+        { label: 'AGE',       val: c => c.age || '?',               title: 'Age' },
+        { label: 'LOYALTY',   val: c => c.loyalty || '?',           title: 'Loyalty to the crown' },
+        { label: 'INTEL',     val: c => c.intelligence || '?',      title: 'Intelligence' },
+      ];
+    } else if (POWER_BASED.includes(entry.faction)) {
+      succIcon  = '⚔';
+      accentVar = 'var(--red)';
+      statCols  = [
+        { label: 'POWER',     val: c => c.influenceScore || '?',    title: 'Influence / Power' },
+        { label: 'AMBITION',  val: c => c.ambition || '?',          title: 'Ambition' },
+        { label: 'MORALITY',  val: c => c.morality || '?',          title: 'Morality' },
+      ];
+    } else if (COUNCIL.includes(entry.faction)) {
+      succIcon  = '◈';
+      accentVar = 'var(--stable)';
+      statCols  = [
+        { label: 'INFLUENCE', val: c => c.influenceScore || '?',    title: 'Influence' },
+        { label: 'LOYALTY',   val: c => c.loyalty || '?',           title: 'Loyalty' },
+        { label: 'INTEL',     val: c => c.intelligence || '?',      title: 'Intelligence' },
+      ];
+    } else if (ELECTION.includes(entry.faction)) {
+      succIcon  = 'â—‰';
+      accentVar = 'var(--gold)';
+      statCols  = [
+        { label: 'INFLUENCE', val: c => c.influenceScore || '?',    title: 'Political standing' },
+        { label: 'LOYALTY',   val: c => c.loyalty || '?',           title: 'Coalition loyalty' },
+        { label: 'AMBITION',  val: c => c.ambition || '?',          title: 'Drive to claim rule' },
+      ];
+    } else {
+      succIcon  = '◉';
+      accentVar = 'var(--purple)';
+      statCols  = [
+        { label: 'LOYALTY',   val: c => c.loyalty || '?',           title: 'Loyalty to the queen' },
+        { label: 'AMBITION',  val: c => c.ambition || '?',          title: 'Ambition' },
+        { label: 'INFLUENCE', val: c => c.influenceScore || '?',    title: 'Influence' },
+      ];
+    }
+
+    const rpPortraits = {};
+    (rpState.leadership_state || []).forEach(row => {
+      const r = row.currentRuler || {};
+      if (r.name && r.portrait_image) rpPortraits[r.name] = r.portrait_image;
+      (row.rulerHistory || []).forEach(h => { if (h.name && h.portrait_image) rpPortraits[h.name] = h.portrait_image; });
+    });
+    (rpState.character_updates || []).forEach(c => { if (c.name && c.portrait_image) rpPortraits[c.name] = c.portrait_image; });
+
+    document.getElementById('rp-succession').innerHTML = successors.length
+      ? successors.map((c, i) => {
+          const primaryStat = statCols[0].val(c);
+          const barPct      = Math.min(100, parseInt(primaryStat) || 0);
+          const portraitUrl = rpPortraits[c.name] || '';
+          const init        = (c.name || '?')[0].toUpperCase();
+          return `
+          <div class="rp-succ-row">
+            <div class="rp-succ-avatar">
+              ${init}${portraitUrl ? `<img src="${portraitUrl}" alt="${c.name}" onerror="this.remove()">` : ''}
+            </div>
+            <div class="rp-succ-info">
+              <div class="rp-succ-name">${c.name}</div>
+              <div class="rp-succ-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span>${c.house||''} · ${c.role||'—'}</span>
+                ${c.coreRole ? `<span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;text-transform:uppercase;padding:1px 5px;border-radius:2px;background:rgba(180,148,80,0.12);color:var(--gold)">${c.coreRole}</span>` : ''}
+                ${c.location ? `<span style="font-family:'Cinzel',serif;font-size:7px;color:var(--text-muted)">${c.destination ? '⟶ '+c.location+' → '+c.destination : '◈ '+c.location}</span>` : ''}
+              </div>
+              <div class="rp-succ-bar-wrap">
+                <div class="rp-succ-bar" style="width:${barPct}%;background:${accentVar}"></div>
+              </div>
+            </div>
+            <div class="rp-succ-stats">
+              ${statCols.map(col => `
+                <div class="rp-succ-stat-cell" title="${col.title}">
+                  <div class="rp-succ-stat-val" style="color:${accentVar}">${col.val(c)}</div>
+                  <div class="rp-succ-stat-label">${col.label}</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="rp-empty">No succession candidates</div>';
+
+    // History of the title — show all rulers who held this title
+    const history = entry.rulerHistory || [];
+    const titleHolders = history.filter(r => r.title === ruler.title);
+    document.getElementById('rp-title-hist-label').textContent = `History of the ${ruler.title || 'Title'}`;
+    document.getElementById('rp-title-history').innerHTML = titleHolders.length
+      ? titleHolders.map(r => `
+        <div class="rp-th-row">
+          <div class="rp-th-name">${r.name||'—'}</div>
+          <div class="rp-th-meta">Day ${r.startDay||0}–${r.endDay||'?'} · ${r.duration||'?'} days · Rose by ${cap(r.causeOfRise||'unknown')}</div>
+        </div>`).join('')
+      : `<div class="rp-empty">First holder of this title</div>`;
+
+    // All previous rulers — newest first, with portrait
+    const prevRulers = [...history].reverse();
+    document.getElementById('rp-prev-label').style.display = prevRulers.length ? 'block' : 'none';
+    document.getElementById('rp-prev-rulers').innerHTML = prevRulers.length
+      ? prevRulers.map(r => {
+          const hasImg = !!r.portrait_image;
+          const init = (r.name||'?')[0].toUpperCase();
+          const endLabel = r.causeOfEnd
+            ? `<span class="rp-prev-end rp-end-${r.causeOfEnd}">${cap(r.causeOfEnd)}</span>`
+            : '';
+          return `<div class="rp-prev-row">
+            <div class="rp-prev-portrait">
+              ${hasImg ? `<img src="${r.portrait_image}" alt="${r.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+              <div class="rp-prev-ph" style="${hasImg?'display:none':''}">${init}</div>
+            </div>
+            <div class="rp-prev-info">
+              <div class="rp-prev-name">${r.name||'—'} <span class="rp-prev-title-text">${r.title||''}</span></div>
+              <div class="rp-prev-dates">Day ${r.startDay||0} – Day ${r.endDay||'?'} · ${r.duration||'?'} days</div>
+              <div class="rp-prev-rise">Rose by ${cap(r.causeOfRise||'—')} ${endLabel}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="rp-empty">No prior rulers recorded</div>';
+  }
+
+  function shortName(f) {
+    return {'Lostfeld Dwarves':'Lostfeld','Glenhaven Elves':'Glenhaven',
+            'Gilgeth Orcs':'Gilgeth','Groth Orcs':'Groth',
+            'Vilefin Goblins':'Vilefin','Dreadwind Islands':'Dreadwind',
+            'Shadow Court':'Shadow Ct','Twin Cities':'Twin Cities',
+            'Tidefall':'Tidefall','Dur Khadur':'Dur Khadur'}[f] || f;
+  }
+  function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+
+  document.getElementById('rulers-link').addEventListener('click', e => {
+    e.preventDefault();
+    openRulers();
+  });
+  document.getElementById('rulers-panel-close').addEventListener('click', closeRulers);
+  document.getElementById('rulers-backdrop').addEventListener('click', closeRulers);
+})();
+</script>
+
+<!-- ── Dynasties Panel ───────────────────────────────────────── -->
+<div class="dyn-backdrop" id="dyn-backdrop"></div>
+<div class="dyn-panel" id="dyn-panel" aria-hidden="true">
+  <div class="dyn-header">
+    <button class="dyn-back" id="dyn-back" style="visibility:hidden">← Back</button>
+    <div class="dyn-header-title" id="dyn-header-title">Dynasties</div>
+    <button class="dyn-close" id="dyn-close" aria-label="Close">✕</button>
+  </div>
+  <div class="dyn-breadcrumb" id="dyn-breadcrumb"></div>
+  <div class="dyn-body" id="dyn-body"></div>
+</div>
+
+<style>
+.dyn-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 890;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.dyn-backdrop.dyn-open { opacity: 1; pointer-events: auto; }
+
+.dyn-panel {
+  position: fixed;
+  top: var(--nav-h); left: 0; bottom: 0;
+  width: min(860px, 90vw);
+  background: var(--bg);
+  border-right: 1px solid rgba(201,169,110,.2);
+  z-index: 895;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dyn-panel.dyn-open { transform: translateX(0); }
+
+.dyn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--surface2);
+  flex-shrink: 0;
+}
+.dyn-header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .06em;
+}
+.dyn-back {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--gold); font-size: 11px;
+  padding: 5px 10px; cursor: pointer;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: border-color .15s, color .15s;
+}
+.dyn-back:hover { border-color: var(--gold); }
+.dyn-close {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--text-muted); font-size: 13px;
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color .15s, border-color .15s;
+}
+.dyn-close:hover { color: var(--text); border-color: var(--gold); }
+
+.dyn-breadcrumb {
+  padding: 8px 18px;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .06em;
+  border-bottom: 1px solid rgba(180,148,80,0.12);
+  flex-shrink: 0;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dyn-crumb { color: var(--text-muted); }
+.dyn-crumb-sep { color: #444; }
+.dyn-crumb-active { color: var(--gold); }
+
+.dyn-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180,148,80,0.25) transparent;
+}
+
+/* ── Level 1: race cards ── */
+.dyn-race-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.dyn-race-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 20px 22px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, transform .15s;
+}
+.dyn-race-card:hover {
+  border-color: rgba(201,169,110,.4);
+  transform: translateY(-2px);
+}
+.dyn-race-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.dyn-race-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.dyn-race-count {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ── Level 2: house cards ── */
+.dyn-house-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.dyn-house-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .15s, transform .15s;
+}
+.dyn-house-card:hover {
+  border-color: rgba(201,169,110,.4);
+  transform: translateY(-2px);
+}
+.dyn-house-arms {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.9) contrast(1.05) brightness(0.88);
+  border-bottom: 1px solid var(--border);
+}
+.dyn-house-info {
+  padding: 14px 16px 16px;
+}
+.dyn-house-name {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.dyn-house-faction {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.dyn-house-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Level 3: character list ── */
+.dyn-char-list {
+  display: grid;
+  gap: 8px;
+}
+.dyn-char-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+}
+.dyn-char-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid #3a3a44;
+  overflow: hidden; background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 15px; color: var(--text-muted);
+  flex-shrink: 0; position: relative; margin-top: 2px;
+}
+.dyn-char-avatar img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+.dyn-char-name {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.dyn-char-role {
+  font-size: 12px;
+  color: var(--text-sec);
+  margin-bottom: 4px;
+}
+.dyn-char-goal {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.dyn-char-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.dyn-stat-pill {
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.dyn-stat-pill.core {
+  border-color: rgba(201,169,110,.3);
+  color: var(--gold);
+  background: rgba(201,169,110,.06);
+}
+</style>
+
+<script>
+(function () {
+  function houseSlug(name) {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  }
+
+  function houseArmsUrl(name) {
+    return `/static/illustrations/ui/house-arms/${houseSlug(name)}.png`;
+  }
+
+  function buildPortraitMap(state) {
+    const map = {};
+    (state.leadership_state || []).forEach(row => {
+      const r = row.currentRuler || {};
+      if (r.name && r.portrait_image) map[r.name] = r.portrait_image;
+      (row.rulerHistory || []).forEach(h => { if (h.name && h.portrait_image) map[h.name] = h.portrait_image; });
+    });
+    (state.character_updates || []).forEach(c => { if (c.name && c.portrait_image) map[c.name] = c.portrait_image; });
+    return map;
+  }
+
+  function avatarHtml(name, portraitMap, size = 40) {
+    const url = portraitMap[name];
+    const init = (name || '?')[0].toUpperCase();
+    return `<div class="dyn-char-avatar" style="width:${size}px;height:${size}px">
+      ${init}${url ? `<img src="${esc(url)}" alt="${esc(name)}" onerror="this.remove()">` : ''}
+    </div>`;
+  }
+
+  const RACE_ICONS = {
+    Human: '♛',
+    Dwarf: '⚒',
+    Elf: '✦',
+    Orc: '⚔',
+    Gnome: '⚙',
+    Goblin: '◈',
+    Dragon: '🜂',
+  };
+
+  let dynState = null;
+  let dynLevel = 0; // 0=races, 1=houses, 2=characters
+  let dynRace = '';
+  let dynHouse = '';
+
+  function openDynasties() {
+    document.getElementById('dyn-backdrop').classList.add('dyn-open');
+    document.getElementById('dyn-panel').classList.add('dyn-open');
+    document.getElementById('dyn-panel').setAttribute('aria-hidden', 'false');
+    if (!dynState) loadDynasties();
+    else renderLevel();
+  }
+
+  function closeDynasties() {
+    document.getElementById('dyn-backdrop').classList.remove('dyn-open');
+    document.getElementById('dyn-panel').classList.remove('dyn-open');
+    document.getElementById('dyn-panel').setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadDynasties() {
+    const res = await fetch('/api/state');
+    dynState = await res.json();
+    dynLevel = 0;
+    renderLevel();
+  }
+
+  function houseCharacters() {
+    return dynState.house_characters || [];
+  }
+
+  function raceMap() {
+    const map = {};
+    houseCharacters().forEach(c => {
+      const race = c.race || 'Unknown';
+      if (!map[race]) map[race] = {};
+      const house = c.house || 'Unknown';
+      if (!map[race][house]) map[race][house] = [];
+      map[race][house].push(c);
+    });
+    return map;
+  }
+
+  function renderLevel() {
+    updateHeader();
+    updateBreadcrumb();
+    updateBack();
+    const body = document.getElementById('dyn-body');
+    if (dynLevel === 0) renderRaces(body);
+    else if (dynLevel === 1) renderHouses(body);
+    else renderCharacters(body);
+  }
+
+  function updateHeader() {
+    const titles = ['Dynasties', dynRace, dynHouse];
+    document.getElementById('dyn-header-title').textContent = titles[dynLevel];
+  }
+
+  function updateBreadcrumb() {
+    const bc = document.getElementById('dyn-breadcrumb');
+    if (dynLevel === 0) { bc.innerHTML = '<span class="dyn-crumb-active">All Races</span>'; return; }
+    let html = '<span class="dyn-crumb" style="cursor:pointer" data-level="0">All Races</span>';
+    html += '<span class="dyn-crumb-sep">›</span>';
+    if (dynLevel === 1) { html += `<span class="dyn-crumb-active">${esc(dynRace)}</span>`; }
+    else {
+      html += `<span class="dyn-crumb" style="cursor:pointer" data-level="1">${esc(dynRace)}</span>`;
+      html += '<span class="dyn-crumb-sep">›</span>';
+      html += `<span class="dyn-crumb-active">${esc(dynHouse)}</span>`;
+    }
+    bc.innerHTML = html;
+    bc.querySelectorAll('[data-level]').forEach(el => {
+      el.addEventListener('click', () => {
+        dynLevel = parseInt(el.dataset.level);
+        renderLevel();
+      });
+    });
+  }
+
+  function updateBack() {
+    const btn = document.getElementById('dyn-back');
+    btn.style.visibility = dynLevel > 0 ? 'visible' : 'hidden';
+  }
+
+  function renderRaces(body) {
+    const map = raceMap();
+    const races = Object.keys(map).sort();
+    body.innerHTML = `<div class="dyn-race-grid">${races.map(race => {
+      const houseCount = Object.keys(map[race]).length;
+      const charCount = Object.values(map[race]).flat().length;
+      const icon = RACE_ICONS[race] || '◆';
+      return `<div class="dyn-race-card" data-race="${esc(race)}">
+        <div class="dyn-race-icon">${icon}</div>
+        <div class="dyn-race-name">${esc(race)}</div>
+        <div class="dyn-race-count">${houseCount} houses · ${charCount} members</div>
+      </div>`;
+    }).join('')}</div>`;
+    body.querySelectorAll('.dyn-race-card').forEach(el => {
+      el.addEventListener('click', () => {
+        dynRace = el.dataset.race;
+        dynLevel = 1;
+        renderLevel();
+      });
+    });
+  }
+
+  function renderHouses(body) {
+    const map = raceMap();
+    const houses = Object.keys(map[dynRace] || {}).sort();
+    body.innerHTML = `<div class="dyn-house-grid">${houses.map(house => {
+      const members = map[dynRace][house];
+      const factions = [...new Set(members.map(c => c.faction).filter(Boolean))];
+      return `<div class="dyn-house-card" data-house="${esc(house)}">
+        <img class="dyn-house-arms" src="${houseArmsUrl(house)}" alt="Coat of arms for ${esc(house)}" onerror="this.style.display='none'">
+        <div class="dyn-house-info">
+          <div class="dyn-house-name">${esc(house)}</div>
+          <div class="dyn-house-faction">${esc(factions.join(', ') || '—')}</div>
+          <div class="dyn-house-meta">${members.length} member${members.length !== 1 ? 's' : ''}</div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+    body.querySelectorAll('.dyn-house-card').forEach(el => {
+      el.addEventListener('click', () => {
+        dynHouse = el.dataset.house;
+        dynLevel = 2;
+        renderLevel();
+      });
+    });
+  }
+
+  function renderCharacters(body) {
+    const map = raceMap();
+    const members = (map[dynRace]?.[dynHouse] || []).slice().sort((a, b) => (b.influenceScore || 0) - (a.influenceScore || 0));
+    const portraits = buildPortraitMap(dynState);
+    body.innerHTML = `<div class="dyn-char-list">${members.map(c => `
+      <div class="dyn-char-row">
+        ${avatarHtml(c.name, portraits, 40)}
+        <div>
+          <div class="dyn-char-name">${esc(c.name)}</div>
+          <div class="dyn-char-role">${esc(c.role || c.coreRole || '—')}</div>
+          ${c.currentGoal ? `<div class="dyn-char-goal">${esc(c.currentGoal)}</div>` : ''}
+        </div>
+        <div class="dyn-char-stats">
+          ${c.coreRole === 'Leader' ? '<span class="dyn-stat-pill core">Leader</span>' : ''}
+          ${c.influenceScore != null ? `<span class="dyn-stat-pill">Inf ${c.influenceScore}</span>` : ''}
+          ${c.morality != null ? `<span class="dyn-stat-pill">Mor ${c.morality}</span>` : ''}
+          ${c.status ? `<span class="dyn-stat-pill">${esc(c.status.replace('Available for political action','Available'))}</span>` : ''}
+        </div>
+      </div>`).join('')}</div>`;
+  }
+
+  function esc(t) {
+    return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('dynasties-link').addEventListener('click', e => {
+    e.preventDefault();
+    openDynasties();
+  });
+  document.getElementById('dyn-close').addEventListener('click', closeDynasties);
+  document.getElementById('dyn-backdrop').addEventListener('click', closeDynasties);
+  document.getElementById('dyn-back').addEventListener('click', () => {
+    if (dynLevel > 0) { dynLevel--; renderLevel(); }
+  });
+})();
+</script>
+
+<!-- ── Religion Panel ────────────────────────────────────────── -->
+<div class="rel-backdrop" id="rel-backdrop"></div>
+<div class="rel-panel" id="rel-panel" aria-hidden="true">
+  <div class="rel-header">
+    <button class="rel-back" id="rel-back" style="visibility:hidden">← Back</button>
+    <div class="rel-header-title" id="rel-header-title">Faiths of Aeloria</div>
+    <button class="rel-close" id="rel-close" aria-label="Close">✕</button>
+  </div>
+  <div class="rel-body" id="rel-body"></div>
+</div>
+
+<style>
+.rel-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 890;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.rel-backdrop.rel-open { opacity: 1; pointer-events: auto; }
+
+.rel-panel {
+  position: fixed;
+  top: var(--nav-h); left: 0; bottom: 0;
+  width: min(860px, 90vw);
+  background: var(--bg);
+  border-right: 1px solid rgba(201,169,110,.2);
+  z-index: 895;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rel-panel.rel-open { transform: translateX(0); }
+
+.rel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--surface2);
+  flex-shrink: 0;
+}
+.rel-header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .06em;
+}
+.rel-back {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--gold); font-size: 11px;
+  padding: 5px 10px; cursor: pointer;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: border-color .15s;
+}
+.rel-back:hover { border-color: var(--gold); }
+.rel-close {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--text-muted); font-size: 13px;
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color .15s, border-color .15s;
+}
+.rel-close:hover { color: var(--text); border-color: var(--gold); }
+
+.rel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180,148,80,0.25) transparent;
+}
+
+/* ── Religion cards grid ── */
+.rel-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.rel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 22px 20px 18px;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rel-card:hover {
+  border-color: rgba(201,169,110,.4);
+  transform: translateY(-2px);
+}
+.rel-card-type {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .7;
+}
+.rel-card-name {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  color: var(--text);
+  line-height: 1.3;
+}
+.rel-card-stage {
+  font-size: 11px;
+  color: var(--text-sec);
+  letter-spacing: .05em;
+}
+.rel-card-followers {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.rel-card-belief {
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.55;
+  font-family: 'Crimson Text', serif;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+/* ── Religion detail ── */
+.rel-detail { animation: relIn .18s ease; }
+@keyframes relIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:none; } }
+
+.rel-detail-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .7;
+  margin-bottom: 6px;
+}
+.rel-detail-name {
+  font-family: 'Cinzel', serif;
+  font-size: 30px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.rel-detail-followers {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.rel-detail-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.rel-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  min-width: 80px;
+}
+.rel-stat-val {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.rel-stat-label {
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rel-section {
+  margin-bottom: 32px;
+}
+.rel-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(180,148,80,0.12);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.rel-prose {
+  font-family: 'Crimson Text', serif;
+  font-size: 17px;
+  line-height: 1.85;
+  color: var(--text-sec);
+}
+.rel-prose p + p { margin-top: 12px; }
+.rel-belief-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rel-belief-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid rgba(201,169,110,.4);
+  padding: 10px 14px;
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+.rel-origin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rel-origin-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+.rel-regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rel-region-pill {
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-sec);
+}
+.rel-empty {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Crimson Text', serif;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+</style>
+
+<script>
+(function () {
+  let relState = null;
+  let relSelected = null;
+
+  function openReligion() {
+    document.getElementById('rel-backdrop').classList.add('rel-open');
+    document.getElementById('rel-panel').classList.add('rel-open');
+    document.getElementById('rel-panel').setAttribute('aria-hidden', 'false');
+    if (!relState) loadReligion();
+    else renderReligionList();
+  }
+
+  function closeReligion() {
+    document.getElementById('rel-backdrop').classList.remove('rel-open');
+    document.getElementById('rel-panel').classList.remove('rel-open');
+    document.getElementById('rel-panel').setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadReligion() {
+    const res = await fetch('/api/state');
+    relState = await res.json();
+    renderReligionList();
+  }
+
+  function allFaiths() {
+    const faiths = [];
+    (relState.religious_factions || []).forEach(r => faiths.push({ ...r, _type: 'faction' }));
+    (relState.belief_currents || []).forEach(b => faiths.push({ ...b, _type: 'belief' }));
+    return faiths;
+  }
+
+  function stageLabel(stage) {
+    return {
+      rumor: 'Rumour',
+      pattern_recognition: 'Pattern Recognition',
+      belief: 'Emerging Belief',
+      doctrine: 'Doctrine',
+      organization: 'Organized Faith',
+      institution: 'Institution',
+    }[stage] || stage || '—';
+  }
+
+  function renderReligionList() {
+    relSelected = null;
+    document.getElementById('rel-header-title').textContent = 'Faiths of Aeloria';
+    document.getElementById('rel-back').style.visibility = 'hidden';
+
+    const faiths = allFaiths();
+    const body = document.getElementById('rel-body');
+
+    if (!faiths.length) {
+      body.innerHTML = `<div class="rel-empty">
+        No faiths have yet been recorded in this age.<br>
+        The world speaks, but the scribes have not yet named what stirs beneath.
+      </div>`;
+      return;
+    }
+
+    body.innerHTML = `<div class="rel-card-grid">${faiths.map((f, i) => {
+      const firstBelief = (f.core_beliefs?.[0] || f.interpretation || '').slice(0, 120);
+      const followers = f.followers != null ? f.followers.toLocaleString() + ' followers' : '';
+      return `<div class="rel-card" data-idx="${i}">
+        <div class="rel-card-type">${f._type === 'faction' ? 'Organised Faith' : stageLabel(f.stage)}</div>
+        <div class="rel-card-name">${esc(f.name)}</div>
+        ${f.stage ? `<div class="rel-card-stage">${esc(stageLabel(f.stage))}</div>` : ''}
+        ${followers ? `<div class="rel-card-followers">${esc(followers)}</div>` : ''}
+        ${firstBelief ? `<div class="rel-card-belief">${esc(firstBelief)}${firstBelief.length >= 120 ? '…' : ''}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+
+    body.querySelectorAll('.rel-card').forEach(el => {
+      el.addEventListener('click', () => {
+        openFaithDetail(faiths[parseInt(el.dataset.idx)]);
+      });
+    });
+  }
+
+  function openFaithDetail(faith) {
+    relSelected = faith;
+    document.getElementById('rel-header-title').textContent = faith.name;
+    document.getElementById('rel-back').style.visibility = 'visible';
+
+    const isFaction = faith._type === 'faction';
+    const beliefs = faith.core_beliefs || (faith.interpretation ? [faith.interpretation] : []);
+    const origins = faith.origin_events || (faith.origin ? [faith.origin] : []);
+    const regions = faith.regions || [];
+    const followers = faith.followers != null ? faith.followers.toLocaleString() : null;
+
+    const statsHtml = isFaction ? `
+      <div class="rel-detail-stats">
+        <div class="rel-stat"><div class="rel-stat-val">${faith.doctrine_strength ?? '—'}</div><div class="rel-stat-label">Doctrine</div></div>
+        <div class="rel-stat"><div class="rel-stat-val">${faith.organization_level ?? '—'}</div><div class="rel-stat-label">Organisation</div></div>
+        <div class="rel-stat"><div class="rel-stat-val">${faith.zeal ?? '—'}</div><div class="rel-stat-label">Zeal</div></div>
+        ${followers ? `<div class="rel-stat"><div class="rel-stat-val" style="font-size:16px">${followers}</div><div class="rel-stat-label">Followers</div></div>` : ''}
+      </div>` : `
+      <div class="rel-detail-stats">
+        <div class="rel-stat"><div class="rel-stat-val" style="font-size:14px">${esc(stageLabel(faith.stage))}</div><div class="rel-stat-label">Stage</div></div>
+        ${followers ? `<div class="rel-stat"><div class="rel-stat-val" style="font-size:16px">${followers}</div><div class="rel-stat-label">Followers</div></div>` : ''}
+      </div>`;
+
+    const beliefsSection = beliefs.length ? `
+      <div class="rel-section">
+        <div class="rel-section-title">What They Believe — Who &amp; How They Worship</div>
+        <div class="rel-belief-list">${beliefs.map(b => `<div class="rel-belief-item">${esc(b)}</div>`).join('')}</div>
+      </div>` : '';
+
+    const originsSection = origins.length ? `
+      <div class="rel-section">
+        <div class="rel-section-title">History — Origin &amp; Why It Exists</div>
+        <div class="rel-origin-list">${origins.map(o => `<div class="rel-origin-item">${esc(o)}</div>`).join('')}</div>
+      </div>` : '';
+
+    const regionsSection = regions.length ? `
+      <div class="rel-section">
+        <div class="rel-section-title">Regions of Influence</div>
+        <div class="rel-regions">${regions.map(r => `<span class="rel-region-pill">${esc(r)}</span>`).join('')}</div>
+      </div>` : '';
+
+    const seerSection = faith.stance_toward_seer ? `
+      <div class="rel-section">
+        <div class="rel-section-title">Stance Toward the Seer</div>
+        <div class="rel-prose"><p>${esc(faith.stance_toward_seer)}</p></div>
+      </div>` : '';
+
+    document.getElementById('rel-body').innerHTML = `
+      <div class="rel-detail">
+        <div class="rel-detail-kicker">${isFaction ? 'Organised Faith' : esc(stageLabel(faith.stage))}</div>
+        <div class="rel-detail-name">${esc(faith.name)}</div>
+        ${statsHtml}
+        ${beliefsSection}
+        ${originsSection}
+        ${regionsSection}
+        ${seerSection}
+      </div>`;
+  }
+
+  function esc(t) {
+    return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('religion-link').addEventListener('click', e => {
+    e.preventDefault();
+    openReligion();
+  });
+  document.getElementById('rel-close').addEventListener('click', closeReligion);
+  document.getElementById('rel-backdrop').addEventListener('click', closeReligion);
+  document.getElementById('rel-back').addEventListener('click', () => {
+    renderReligionList();
+  });
+})();
+</script>
+
+<!-- ── Battles Panel ──────────────────────────────────────────── -->
+<div class="bat-backdrop" id="bat-backdrop"></div>
+<div class="bat-panel" id="bat-panel" aria-hidden="true">
+  <div class="bat-header">
+    <button class="bat-back" id="bat-back" style="visibility:hidden">← Back</button>
+    <div class="bat-header-title" id="bat-header-title">Battles &amp; Conflicts</div>
+    <button class="bat-close" id="bat-close" aria-label="Close">✕</button>
+  </div>
+  <div class="bat-body" id="bat-body"></div>
+</div>
+
+<style>
+.bat-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 890;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.bat-backdrop.bat-open { opacity: 1; pointer-events: auto; }
+
+.bat-panel {
+  position: fixed;
+  top: var(--nav-h); left: 0; bottom: 0;
+  width: min(860px, 90vw);
+  background: var(--bg);
+  border-right: 1px solid rgba(201,169,110,.2);
+  z-index: 895;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.bat-panel.bat-open { transform: translateX(0); }
+
+.bat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--surface2);
+  flex-shrink: 0;
+}
+.bat-header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .06em;
+}
+.bat-back {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--gold); font-size: 11px;
+  padding: 5px 10px; cursor: pointer;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: border-color .15s;
+}
+.bat-back:hover { border-color: var(--gold); }
+.bat-close {
+  background: none; border: 1px solid rgba(180,148,80,0.18);
+  color: var(--text-muted); font-size: 13px;
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color .15s, border-color .15s;
+}
+.bat-close:hover { color: var(--text); border-color: var(--gold); }
+
+.bat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180,148,80,0.25) transparent;
+}
+
+/* ── Battle list ── */
+.bat-list { display: flex; flex-direction: column; gap: 12px; }
+
+.bat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid rgba(200, 80, 60, 0.5);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+}
+.bat-card:hover {
+  border-color: rgba(200,80,60,.7);
+  transform: translateX(3px);
+}
+.bat-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.bat-card-stage {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid rgba(200,80,60,.4);
+  color: rgba(220,120,100,1);
+  background: rgba(200,80,60,.08);
+}
+.bat-card-severity {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: .06em;
+}
+.bat-card-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.bat-card-summary {
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bat-card-involved {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .04em;
+}
+
+/* ── Battle detail ── */
+.bat-detail { animation: batIn .18s ease; }
+@keyframes batIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:none; } }
+
+.bat-detail-stage {
+  font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid rgba(200,80,60,.4);
+  color: rgba(220,120,100,1);
+  background: rgba(200,80,60,.08);
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.bat-detail-name {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.bat-detail-when {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.bat-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.bat-stat {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 10px 16px; min-width: 80px;
+}
+.bat-stat-val {
+  font-family: 'Cinzel', serif; font-size: 20px;
+  color: rgba(220,120,100,1); line-height: 1; margin-bottom: 4px;
+}
+.bat-stat-label {
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted);
+}
+.bat-section { margin-bottom: 28px; }
+.bat-section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(220,120,100,.9);
+  border-bottom: 1px solid rgba(180,148,80,0.12); padding-bottom: 8px; margin-bottom: 12px;
+}
+.bat-prose {
+  font-family: 'Crimson Text', serif;
+  font-size: 17px; line-height: 1.85; color: var(--text-sec);
+}
+.bat-involved-list {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.bat-involved-pill {
+  border: 1px solid var(--border);
+  padding: 5px 12px; font-size: 12px; color: var(--text-sec);
+}
+.bat-empty {
+  text-align: center; padding: 60px 20px;
+  font-family: 'Crimson Text', serif; font-style: italic;
+  color: var(--text-muted); font-size: 16px; line-height: 1.7;
+}
+</style>
+
+<script>
+(function () {
+  const BATTLE_KEYWORDS = ['battle','war','siege','skirmish','conflict','assault','attack','raid','combat','fought','clash','invasion','offensive','campaign','military','army','troops','fleet'];
+
+  let batState = null;
+  let batSelected = null;
+
+  function isBattle(event) {
+    const text = (event.name + ' ' + (event.summary || '') + ' ' + (event.consequences || '')).toLowerCase();
+    return BATTLE_KEYWORDS.some(w => text.includes(w));
+  }
+
+  function allBattles() {
+    const events = [
+      ...(batState.active_events || []),
+      ...(batState.supporting_events || []),
+      batState.primary_event,
+    ].filter(e => e && isBattle(e));
+    // deduplicate by name
+    const seen = new Set();
+    return events.filter(e => { if (seen.has(e.name)) return false; seen.add(e.name); return true; })
+      .sort((a, b) => (b.severity || 0) - (a.severity || 0));
+  }
+
+  function stageLabel(s) {
+    return { buildup: 'Buildup', peak: 'Active', declining: 'Winding Down', resolved: 'Concluded' }[s] || s || '—';
+  }
+
+  function openBattles() {
+    document.getElementById('bat-backdrop').classList.add('bat-open');
+    document.getElementById('bat-panel').classList.add('bat-open');
+    document.getElementById('bat-panel').setAttribute('aria-hidden', 'false');
+    if (!batState) loadBattles();
+    else renderBattleList();
+  }
+
+  function closeBattles() {
+    document.getElementById('bat-backdrop').classList.remove('bat-open');
+    document.getElementById('bat-panel').classList.remove('bat-open');
+    document.getElementById('bat-panel').setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadBattles() {
+    const res = await fetch('/api/state');
+    batState = await res.json();
+    renderBattleList();
+  }
+
+  function renderBattleList() {
+    batSelected = null;
+    document.getElementById('bat-header-title').textContent = 'Battles & Conflicts';
+    document.getElementById('bat-back').style.visibility = 'hidden';
+
+    const battles = allBattles();
+    const body = document.getElementById('bat-body');
+
+    if (!battles.length) {
+      body.innerHTML = `<div class="bat-empty">
+        No battles have been recorded yet.<br>
+        The world broods. Blood will come when the pressure breaks.
+      </div>`;
+      return;
+    }
+
+    body.innerHTML = `<div class="bat-list">${battles.map((b, i) => {
+      const involved = (b.involved || []).slice(0, 4).join(', ');
+      return `<div class="bat-card" data-idx="${i}">
+        <div class="bat-card-meta">
+          <span class="bat-card-stage">${esc(stageLabel(b.stage))}</span>
+          ${b.severity != null ? `<span class="bat-card-severity">Severity ${b.severity}/20</span>` : ''}
+        </div>
+        <div class="bat-card-name">${esc(b.name)}</div>
+        ${b.summary ? `<div class="bat-card-summary">${esc(b.summary)}</div>` : ''}
+        ${involved ? `<div class="bat-card-involved">Involved: ${esc(involved)}${(b.involved||[]).length > 4 ? ' +more' : ''}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+
+    body.querySelectorAll('.bat-card').forEach(el => {
+      el.addEventListener('click', () => openBattleDetail(battles[parseInt(el.dataset.idx)]));
+    });
+  }
+
+  function openBattleDetail(battle) {
+    batSelected = battle;
+    document.getElementById('bat-header-title').textContent = battle.name;
+    document.getElementById('bat-back').style.visibility = 'visible';
+
+    const involved = battle.involved || [];
+    const worldDate = batState.world_date || ('Day ' + (batState.tick || '?'));
+
+    // Heuristically split involved into leaders vs factions
+    // Characters tend to have two-word names; factions tend to be single words or known faction names
+    const leaders = involved.filter(n => n.split(' ').length >= 2);
+    const factions = involved.filter(n => n.split(' ').length === 1 || !leaders.includes(n));
+
+    const statsHtml = `<div class="bat-stats">
+      ${battle.severity != null ? `<div class="bat-stat"><div class="bat-stat-val">${battle.severity}</div><div class="bat-stat-label">Severity</div></div>` : ''}
+      ${battle.duration != null ? `<div class="bat-stat"><div class="bat-stat-val">${battle.duration}</div><div class="bat-stat-label">Days Active</div></div>` : ''}
+      <div class="bat-stat"><div class="bat-stat-val" style="font-size:13px;text-transform:capitalize">${esc(stageLabel(battle.stage))}</div><div class="bat-stat-label">Stage</div></div>
+      <div class="bat-stat"><div class="bat-stat-val" style="font-size:13px;text-transform:capitalize">${esc(battle.trend || '—')}</div><div class="bat-stat-label">Trend</div></div>
+    </div>`;
+
+    const descSection = battle.summary ? `
+      <div class="bat-section">
+        <div class="bat-section-title">What Happened</div>
+        <div class="bat-prose">${esc(battle.summary)}</div>
+      </div>` : '';
+
+    const involvedSection = involved.length ? `
+      <div class="bat-section">
+        <div class="bat-section-title">Who Fought</div>
+        <div class="bat-involved-list">${involved.map(n => `<span class="bat-involved-pill">${esc(n)}</span>`).join('')}</div>
+      </div>` : '';
+
+    const leadersSection = leaders.length ? `
+      <div class="bat-section">
+        <div class="bat-section-title">Who Led</div>
+        <div class="bat-involved-list">${leaders.map(n => `<span class="bat-involved-pill">${esc(n)}</span>`).join('')}</div>
+      </div>` : '';
+
+    const consequencesSection = battle.consequences ? `
+      <div class="bat-section">
+        <div class="bat-section-title">Casualties &amp; Consequences</div>
+        <div class="bat-prose">${esc(battle.consequences)}</div>
+      </div>` : '';
+
+    document.getElementById('bat-body').innerHTML = `
+      <div class="bat-detail">
+        <div class="bat-detail-stage">${esc(stageLabel(battle.stage))}</div>
+        <div class="bat-detail-name">${esc(battle.name)}</div>
+        <div class="bat-detail-when">${esc(worldDate)} · ${battle.duration != null ? battle.duration + ' day' + (battle.duration !== 1 ? 's' : '') + ' active' : ''}</div>
+        ${statsHtml}
+        ${descSection}
+        ${involvedSection}
+        ${leadersSection}
+        ${consequencesSection}
+      </div>`;
+  }
+
+  function esc(t) {
+    return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('battles-link').addEventListener('click', e => {
+    e.preventDefault();
+    openBattles();
+  });
+  document.getElementById('bat-close').addEventListener('click', closeBattles);
+  document.getElementById('bat-backdrop').addEventListener('click', closeBattles);
+  document.getElementById('bat-back').addEventListener('click', renderBattleList);
+})();
+</script>
 {% endblock %}
 
 {% block scripts %}
@@ -2175,13 +3953,17 @@ async function loadHome() {
   try {
     const response = await fetch('/api/state');
     worldState = await response.json();
-    renderHome(worldState || {});
-    bindActions();
-    startHomeRefresh();
   } catch (error) {
-    console.error(error);
-    addSeerMessage('I cannot reach the world state right now. That failure is mine to report, not yours to solve.', 'System');
+    console.error('World state fetch failed:', error);
+    try { addSeerMessage('I cannot reach the world state right now. That failure is mine to report, not yours to solve.', 'System'); } catch (_) {}
   }
+  try {
+    renderHome(worldState || {});
+  } catch (error) {
+    console.error('renderHome failed:', error);
+  }
+  bindActions();
+  startHomeRefresh();
 }
 
 function startHomeRefresh() {
@@ -2192,37 +3974,40 @@ function startHomeRefresh() {
 }
 
 function renderHome(state) {
-  const primary = getPrimaryThread(state);
-  const secondary = getSecondaryThread(state);
-  const seer = getSeerState(state);
-  const pressure = state.active_events?.length || state.active_tensions?.length || 0;
-  const pressureState = summarizePressure(state, pressure);
-  currentWorldDay = state.tick != null ? Number(state.tick) : null;
+  let primary = null, secondary = null, seer = { status: 'stationary', location: 'Unknown road', destination: 'None' };
+  try {
+    primary = getPrimaryThread(state);
+    secondary = getSecondaryThread(state);
+    seer = getSeerState(state);
+    const pressure = state.active_events?.length || state.active_tensions?.length || 0;
+    const pressureState = summarizePressure(state, pressure);
+    currentWorldDay = state.tick != null ? Number(state.tick) : null;
 
-  text('world-date', state.world_date || 'Unknown date');
-  text('world-tick', state.tick != null ? `Day ${state.tick}` : '--');
-  text('seer-location', seer.location);
-  text('seer-status', capitalize(seer.status));
-  text('seer-destination', seer.destination);
-  text('center-event-title', buildCenterEventTitle(primary, seer));
-  text('seer-quote', buildSeerQuote(primary, secondary, seer));
+    text('world-date', state.world_date || 'Unknown date');
+    text('world-tick', state.tick != null ? `Day ${state.tick}` : '--');
+    text('seer-location', seer.location);
+    text('seer-status', capitalize(seer.status));
+    text('seer-destination', seer.destination);
+    text('center-event-title', buildCenterEventTitle(primary, seer));
+    text('seer-quote', buildSeerQuote(primary, secondary, seer));
 
-  text('focus-location', seer.location || 'Unknown road');
-  text('focus-summary', buildSeerFocusThought(primary, secondary, seer));
+    text('focus-location', seer.location || 'Unknown road');
+    text('focus-summary', buildSeerFocusThought(primary, secondary, seer));
 
-  text('pressure-number', pressure);
-  text('pressure-trend', pressureState.trend);
-  text('pressure-summary', pressureState.summary);
+    text('pressure-number', pressure);
+    text('pressure-trend', pressureState.trend);
+    text('pressure-summary', pressureState.summary);
 
-  text('seer-primary', buildSeerPrimary(primary, state, seer));
-  text('seer-secondary', buildSeerSecondary(secondary, state, seer));
-  renderPressureSparkline(state);
-  renderIntelMetrics(state);
-  renderCommandInfluence(state);
-  renderFocusPortrait(state, primary);
-  renderActiveRulers(state);
-  renderDreamTargets(state);
-  syncCenterEventModal();
+    text('seer-primary', buildSeerPrimary(primary, state, seer));
+    text('seer-secondary', buildSeerSecondary(secondary, state, seer));
+  } catch (e) { console.error('renderHome core:', e); }
+  try { renderPressureSparkline(state); } catch (e) { console.error('sparkline:', e); }
+  try { renderIntelMetrics(state); } catch (e) { console.error('metrics:', e); }
+  try { renderCommandInfluence(state); } catch (e) { console.error('influence:', e); }
+  try { renderFocusPortrait(state, primary); } catch (e) { console.error('portrait:', e); }
+  try { renderActiveRulers(state); } catch (e) { console.error('rulers:', e); }
+  try { renderDreamTargets(state); } catch (e) { console.error('dreams:', e); }
+  try { syncCenterEventModal(); } catch (e) { console.error('modal sync:', e); }
 }
 
 function getPrimaryThread(state) {
@@ -2546,6 +4331,12 @@ function modalDismissKey() {
 function syncCenterEventModal() {
   const backdrop = document.getElementById('center-event-backdrop');
   if (!backdrop) return;
+  // Don't auto-open on a fresh world (tick 0 or unknown) — user must click Focus
+  if (currentWorldDay == null || currentWorldDay === 0) {
+    backdrop.classList.remove('is-open');
+    backdrop.setAttribute('aria-hidden', 'true');
+    return;
+  }
   const key = modalDismissKey();
   const dismissed = key ? window.localStorage.getItem(key) === '1' : false;
   if (dismissed && !centerModalForcedOpen) {

@@ -48,9 +48,508 @@
   .chronicle-search:focus { border-color: rgba(201, 169, 110, 0.28); }
 
   .chronicle-shell {
-    max-width: 720px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 70px 24px 120px;
+  }
+
+  .chronicle-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 52px;
+  }
+
+  .chronicle-section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 0.15s, border-left-width 0.1s, background 0.15s, transform 0.15s;
+    text-align: left;
+  }
+
+  .chronicle-section-card:hover,
+  .chronicle-section-card.active {
+    border-color: var(--border2);
+    border-left: 2px solid var(--gold);
+    background: linear-gradient(180deg, rgba(201, 169, 110, 0.06), rgba(17, 17, 22, 0.94));
+    transform: translateY(-2px);
+  }
+
+  .chronicle-card-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .chronicle-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .chronicle-card-copy {
+    font-size: 14px;
+    color: var(--text-sec);
+    line-height: 1.6;
+  }
+
+  .chronicle-card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .chronicle-card-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .chronicle-card-badge.is-live {
+    border-color: rgba(201, 169, 110, 0.28);
+    color: var(--gold);
+    background: rgba(201, 169, 110, 0.08);
+  }
+
+  .chronicle-card-badge.is-empty {
+    color: var(--text-muted);
+  }
+
+  .chronicle-reading-shell {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .chronicle-section-intro {
+    margin-bottom: 28px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at top left, rgba(201, 169, 110, 0.1), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(201, 169, 110, 0.05), transparent 28%),
+      var(--surface);
+    box-shadow: inset 0 0 0 1px rgba(201, 169, 110, 0.04);
+  }
+
+  .chronicle-section-intro.hidden {
+    display: none;
+  }
+
+  .chronicle-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .chronicle-section-copy {
+    color: var(--text-sec);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .chronicle-intro-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .chronicle-intro-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .chronicle-intro-stat {
+    min-width: 110px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: rgba(10, 10, 12, 0.65);
+  }
+
+  .chronicle-intro-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .chronicle-intro-stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .chronicle-section-shell {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .chronicle-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: sticky;
+    top: calc(var(--nav-h) + 92px);
+  }
+
+  .chronicle-catalog-card {
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(201, 169, 110, 0.04), transparent 26%),
+      rgba(11, 11, 14, 0.9);
+    padding: 18px;
+  }
+
+  .chronicle-catalog-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .chronicle-catalog-copy {
+    font-size: 14px;
+    color: var(--text-sec);
+    line-height: 1.7;
+  }
+
+  .chronicle-catalog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .chronicle-catalog-item {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  .chronicle-catalog-item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .chronicle-catalog-item-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .chronicle-catalog-item-value {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .chronicle-viewport {
+    min-width: 0;
+  }
+
+  .chronicle-stack {
+    display: grid;
+    gap: 16px;
+  }
+
+  .chronicle-record {
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at top right, rgba(201, 169, 110, 0.06), transparent 28%),
+      linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08)),
+      var(--surface);
+    padding: 22px 22px 20px;
+    box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.04);
+  }
+
+  .chronicle-record-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .chronicle-record-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 3px 10px;
+    border: 1px solid rgba(201, 169, 110, 0.22);
+    background: rgba(201, 169, 110, 0.08);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .chronicle-record-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .chronicle-record-title {
+    font-family: 'Cinzel', serif;
+    font-size: 25px;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .chronicle-record-copy {
+    font-size: 15px;
+    color: var(--text-sec);
+    line-height: 1.75;
+  }
+
+  .chronicle-record-copy p + p {
+    margin-top: 14px;
+  }
+
+  .ruler-browser {
+    display: grid;
+    gap: 18px;
+  }
+
+  .ruler-strip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(190px, 220px);
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .ruler-strip-card {
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at top center, rgba(201,169,110,0.08), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,0.025), transparent 28%),
+      var(--surface);
+    padding: 14px;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .ruler-strip-card:hover,
+  .ruler-strip-card.active {
+    transform: translateY(-2px);
+    border-color: rgba(201, 169, 110, 0.44);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .ruler-strip-portrait {
+    width: 100%;
+    aspect-ratio: 0.78;
+    border: 1px solid rgba(201,169,110,0.16);
+    background:
+      radial-gradient(circle at center, rgba(201,169,110,0.06), transparent 60%),
+      #0d0d11;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .ruler-strip-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ruler-strip-faction {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .ruler-strip-name {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .ruler-strip-house {
+    color: var(--text-sec);
+    font-size: 13px;
+  }
+
+  .chronicle-ruler-detail {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1.2fr) 300px;
+    gap: 18px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at top left, rgba(201,169,110,0.10), transparent 26%),
+      radial-gradient(circle at bottom right, rgba(201,169,110,0.04), transparent 22%),
+      var(--surface);
+    padding: 20px;
+  }
+
+  .chronicle-ruler-portrait {
+    border: 1px solid rgba(201,169,110,0.18);
+    background: #0f0f12;
+    min-height: 360px;
+    overflow: hidden;
+  }
+
+  .chronicle-ruler-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .chronicle-ruler-main {
+    min-width: 0;
+  }
+
+  .chronicle-ruler-faction {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .chronicle-ruler-name {
+    font-family: 'Cinzel', serif;
+    font-size: 38px;
+    line-height: 1.06;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .chronicle-ruler-house {
+    font-size: 18px;
+    color: var(--text-sec);
+    margin-bottom: 20px;
+  }
+
+  .chronicle-ruler-copy {
+    color: var(--text-sec);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .chronicle-ruler-copy p + p {
+    margin-top: 12px;
+  }
+
+  .chronicle-ruler-facts {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .chronicle-ruler-fact {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+  }
+
+  .chronicle-ruler-fact span {
+    color: var(--text-muted);
+  }
+
+  .chronicle-ruler-fact strong {
+    color: var(--text);
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .chronicle-ruler-side {
+    border-left: 1px solid rgba(255,255,255,0.08);
+    padding-left: 18px;
+  }
+
+  .chronicle-ruler-side-block + .chronicle-ruler-side-block {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .chronicle-ruler-side-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .chronicle-ruler-side-copy {
+    color: var(--text-sec);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .chronicle-ruler-statlist {
+    display: grid;
+    gap: 10px;
+  }
+
+  .chronicle-ruler-stat {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-sec);
+    font-size: 14px;
+  }
+
+  .chronicle-ruler-stat:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .chronicle-ruler-stat strong {
+    color: var(--text);
+    font-weight: 500;
   }
 
   .title-page {
@@ -148,9 +647,19 @@
     padding: 60px 0;
   }
 
+  .chronicle-empty.rich {
+    border: 1px solid var(--border);
+    background: rgba(11, 11, 14, 0.9);
+    padding: 44px 28px;
+  }
+
   @media (max-width: 700px) {
     .chronicle-filterbar-inner {
       padding: 14px 16px;
+    }
+
+    .chronicle-search {
+      width: 100%;
     }
 
     .chapter-date {
@@ -159,6 +668,33 @@
 
     .chapter-body {
       font-size: 17px;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .chronicle-section-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .chronicle-catalog {
+      position: static;
+    }
+
+    .chronicle-intro-topline {
+      flex-direction: column;
+    }
+
+    .chronicle-intro-stats {
+      justify-content: flex-start;
+    }
+
+    .chronicle-ruler-detail {
+      grid-template-columns: 1fr;
+    }
+
+    .chronicle-ruler-side {
+      border-left: none;
+      padding-left: 0;
     }
   }
 </style>
@@ -187,8 +723,75 @@
     <p>Being a True Account of Events in the Fractured Age<br>As Recorded by Those Who Witnessed Them</p>
   </div>
 
-  <div id="chronicle-list">
-    <div class="chronicle-empty">Loading chapters...</div>
+  <div class="chronicle-card-grid" id="chronicle-card-grid">
+    <button class="chronicle-section-card active" type="button" data-chronicle-section="history">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">History</div>
+      <div class="chronicle-card-copy">The living timeline of Aeloria, collected as chapter records across the Fractured Age.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="stories">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Stories</div>
+      <div class="chronicle-card-copy">Reserved for curated story arcs, named sequences, and narrative threads worth following end to end.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="lore">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Lore</div>
+      <div class="chronicle-card-copy">Important lore entries, foundational truths, discoveries, revelations, and world-shaping knowledge.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="religions">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Religions</div>
+      <div class="chronicle-card-copy">Faith movements, omens, sacred institutions, prophecies, rites, and divine disturbances.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="rulers">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Rulers</div>
+      <div class="chronicle-card-copy">Reigns, succession turns, political decrees, leadership crises, and seats of power.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="dynasties">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Dynasties</div>
+      <div class="chronicle-card-copy">House records, family influence, prestige shifts, bloodlines, inheritance, and noble maneuvering.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="artifacts">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Artifacts</div>
+      <div class="chronicle-card-copy">Relics, keys, sealed objects, dangerous items, and objects of historical or supernatural consequence.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="battles">
+      <div class="chronicle-card-type">Chronicle Section</div>
+      <div class="chronicle-card-name">Battles</div>
+      <div class="chronicle-card-copy">A focused record of campaigns, fleet actions, sieges, clashes, and war-bound turning points.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+  </div>
+
+  <div class="chronicle-reading-shell">
+    <div class="chronicle-section-intro hidden" id="chronicle-section-intro">
+      <div class="chronicle-intro-topline">
+        <div>
+          <div class="chapter-label">Organized Chronicle</div>
+          <h3 class="chronicle-section-title" id="chronicle-section-title">History</h3>
+          <p class="chronicle-section-copy" id="chronicle-section-copy"></p>
+        </div>
+        <div class="chronicle-intro-stats" id="chronicle-intro-stats"></div>
+      </div>
+    </div>
+
+    <div class="chronicle-section-shell">
+      <aside class="chronicle-catalog" id="chronicle-catalog"></aside>
+      <div class="chronicle-viewport" id="chronicle-list">
+        <div class="chronicle-empty">Loading chapters...</div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -206,6 +809,52 @@ const MOOD_ICONS = {
 };
 
 let chronicleEntries = [];
+let chronicleSection = 'history';
+let worldState = null;
+let selectedRulerFaction = '';
+
+const CHRONICLE_SECTIONS = {
+  history: {
+    title: 'History',
+    copy: 'The living chapter record of Aeloria, arranged as a continuous historical ledger.',
+    mode: 'entries'
+  },
+  stories: {
+    title: 'Stories',
+    copy: 'Narrative threads, named sequences, and unfolding arcs gathered like volumes from the same shelf.',
+    mode: 'archive'
+  },
+  lore: {
+    title: 'Lore',
+    copy: 'Collected truths, discoveries, hidden patterns, and world-shaping knowledge preserved for study.',
+    mode: 'archive'
+  },
+  religions: {
+    title: 'Religions',
+    copy: 'Faith, omens, sacred institutions, prophetic pressure, and spiritual disturbances arranged as ecclesiastical record.',
+    mode: 'archive'
+  },
+  rulers: {
+    title: 'Rulers',
+    copy: 'Reigns, succession pressures, court transitions, and the present holders of power across Aeloria.',
+    mode: 'archive'
+  },
+  dynasties: {
+    title: 'Dynasties',
+    copy: 'Bloodlines, noble houses, prestige ledgers, and inherited power catalogued by faction and standing.',
+    mode: 'archive'
+  },
+  artifacts: {
+    title: 'Artifacts',
+    copy: 'Named objects, dangerous items, symbols of authority, and suspicious materials flagged for reference.',
+    mode: 'archive'
+  },
+  battles: {
+    title: 'Battles',
+    copy: 'A focused record of violent campaigns, fleet actions, sieges, clashes, and war-bound turning points drawn from the living chronicle.',
+    mode: 'entries'
+  }
+};
 
 function chapterDivider(mood) {
   const colors = {
@@ -238,16 +887,19 @@ function escapeHtml(text) {
 function renderChronicle(entries) {
   const container = document.getElementById('chronicle-list');
   if (!entries.length) {
-    container.innerHTML = '<div class="chronicle-empty">No chapters have been written yet.</div>';
+    const emptyText = chronicleSection === 'battles'
+      ? 'No battle chapters have been recorded yet.'
+      : 'No chapters have been written yet.';
+    container.innerHTML = `<div class="chronicle-empty rich">${emptyText}</div>`;
     return;
   }
 
-  container.innerHTML = entries.map((entry, index) => {
+  container.innerHTML = `<div class="chronicle-stack">${entries.map((entry, index) => {
     const mood = entry.mood || 'default';
     const paragraphs = String(entry.text || '').trim().split(/\n\n+/).filter(Boolean);
     return `
       <article class="chapter" data-search="${escapeHtml((`${entry.world_date} ${entry.major_event} ${entry.text}`).toLowerCase())}">
-        <div class="chapter-label">Chapter ${entry.tick}</div>
+        ${entry.category === 'battles' ? '<div class="chapter-label">Battle Record</div>' : `<div class="chapter-label">Chapter ${entry.tick}</div>`}
         <h2 class="chapter-date">${escapeHtml(entry.world_date || '')}</h2>
         <div class="chapter-meta">
           <span class="mood-icon">${MOOD_ICONS[mood] || MOOD_ICONS.default}</span>
@@ -259,22 +911,490 @@ function renderChronicle(entries) {
         ${index < entries.length - 1 ? `<div class="chapter-divider">${chapterDivider(mood)}</div>` : ''}
       </article>
     `;
-  }).join('');
+  }).join('')}</div>`;
 }
 
 function filterChronicle(query) {
   const q = String(query || '').trim().toLowerCase();
-  document.querySelectorAll('.chapter').forEach(chapter => {
-    const text = chapter.dataset.search || '';
-    chapter.classList.toggle('hidden', !!q && !text.includes(q));
+  document.querySelectorAll('.chapter, .chronicle-record').forEach(node => {
+    const text = node.dataset.search || '';
+    node.classList.toggle('hidden', !!q && !text.includes(q));
   });
+}
+
+function syncChronicleSectionUi() {
+  document.querySelectorAll('.chronicle-section-card').forEach(button => {
+    button.classList.toggle('active', button.dataset.chronicleSection === chronicleSection);
+  });
+  const intro = document.getElementById('chronicle-section-intro');
+  const meta = CHRONICLE_SECTIONS[chronicleSection] || CHRONICLE_SECTIONS.history;
+  document.getElementById('chronicle-section-title').textContent = meta.title;
+  document.getElementById('chronicle-section-copy').textContent = meta.copy;
+  document.getElementById('chronicle-intro-stats').innerHTML = sectionStatMarkup(meta);
+  intro.classList.remove('hidden');
+}
+
+function sectionStatMarkup(meta) {
+  const archive = buildSectionLibrary();
+  const section = archive[chronicleSection] || { records: [] };
+  const records = section.records || [];
+  const stats = [
+    { label: 'Section', value: meta.title },
+    { label: 'Shelved Records', value: String(records.length) },
+    { label: 'Mode', value: meta.mode === 'entries' ? 'Living Ledger' : 'Archive Shelf' }
+  ];
+  return stats.map(stat => `
+    <div class="chronicle-intro-stat">
+      <div class="chronicle-intro-stat-label">${escapeHtml(stat.label)}</div>
+      <div class="chronicle-intro-stat-value">${escapeHtml(stat.value)}</div>
+    </div>
+  `).join('');
+}
+
+function syncChronicleCardMeta() {
+  const archive = buildSectionLibrary();
+
+  document.querySelectorAll('.chronicle-section-card').forEach(button => {
+    const section = button.dataset.chronicleSection;
+    const meta = button.querySelector('.chronicle-card-meta');
+    if (!meta) return;
+
+    const count = archive[section]?.records?.length || 0;
+    const label = count === 1 ? 'record' : 'records';
+    meta.innerHTML = `
+      <span class="chronicle-card-badge ${count ? 'is-live' : 'is-empty'}">${count ? 'Catalogued' : 'Archive Shelf'}</span>
+      <span class="chronicle-card-badge">${count} ${label}</span>
+    `;
+  });
+}
+
+function visibleChronicleEntries() {
+  if (chronicleSection === 'battles') {
+    return chronicleEntries.filter(entry => entry.category === 'battles');
+  }
+  if (chronicleSection === 'history') {
+    return chronicleEntries;
+  }
+  return [];
+}
+
+function chapterMatchesKeywords(entry, keywords) {
+  const haystack = `${entry.world_date || ''} ${entry.major_event || ''} ${entry.text || ''}`.toLowerCase();
+  return keywords.some(keyword => haystack.includes(keyword));
+}
+
+function uniqueByTitle(records) {
+  const seen = new Set();
+  return records.filter(record => {
+    const key = `${record.title}|${record.meta}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildSectionLibrary() {
+  const leadership = worldState?.leadership_state || [];
+  const activeEvents = worldState?.active_events || [];
+  const supportingEvents = [worldState?.primary_event, ...(worldState?.supporting_events || [])].filter(Boolean);
+  const factionActions = worldState?.faction_actions || [];
+  const beliefCurrents = worldState?.belief_currents || [];
+  const religiousFactions = worldState?.religious_factions || [];
+
+  const latestStories = chronicleEntries.slice(0, 6).map(entry => ({
+    tag: 'Story Thread',
+    title: entry.major_event || entry.world_date || `Tick ${entry.tick}`,
+    meta: `Tick ${entry.tick} • ${entry.world_date || 'Undated'}`,
+    body: entry.excerpt || entry.text || ''
+  }));
+
+  const loreRecords = uniqueByTitle([
+    ...supportingEvents.map(event => ({
+      tag: 'World Event',
+      title: event.name || 'Unnamed Event',
+      meta: `${event.stage || 'active'} • severity ${event.severity ?? 'unknown'}`,
+      body: event.summary || ''
+    })),
+    ...activeEvents.slice(0, 6).map(event => ({
+      tag: 'Active Record',
+      title: event.name || 'Unnamed Event',
+      meta: `${event.stage || 'active'} • ${event.trend || 'stable'}`,
+      body: event.summary || ''
+    }))
+  ]).slice(0, 8);
+
+  const religionKeywords = ['seer', 'monastery', 'druid', 'omen', 'prophet', 'belief', 'ritual', 'listener'];
+  const religionRecords = uniqueByTitle([
+    ...religiousFactions.map(faction => ({
+      tag: 'Religious Faction',
+      title: faction.name || faction.faction || 'Unnamed Order',
+      meta: faction.status || 'active',
+      body: faction.summary || faction.description || 'Catalogued within the Chronicle.'
+    })),
+    ...beliefCurrents.map(current => ({
+      tag: 'Belief Current',
+      title: current.name || current.current || 'Belief Current',
+      meta: current.trend || 'unclassified',
+      body: current.summary || current.description || ''
+    })),
+    ...chronicleEntries.filter(entry => chapterMatchesKeywords(entry, religionKeywords)).slice(0, 6).map(entry => ({
+      tag: 'Faith Record',
+      title: entry.major_event || entry.world_date || `Tick ${entry.tick}`,
+      meta: `Tick ${entry.tick}`,
+      body: entry.excerpt || ''
+    }))
+  ]).slice(0, 8);
+
+  const rulerRecords = leadership.map(block => {
+    const ruler = block.currentRuler || {};
+    return {
+      tag: 'Reigning Power',
+      title: `${ruler.title || 'Ruler'} ${ruler.name || ''}`.trim(),
+      meta: `${block.faction || 'Unknown Realm'} • ${ruler.dynasty || 'No dynasty listed'}`,
+      body: `Age ${ruler.age || 'unknown'}. Reign length ${ruler.duration ?? 'unknown'} days. Traits: ${(ruler.traits || []).join(', ') || 'not recorded'}.`
+    };
+  });
+
+  const dynastyRecords = uniqueByTitle(
+    leadership.flatMap(block => (block.dynasties || []).map(dynasty => ({
+      tag: `Tier ${dynasty.tier || '?'}`,
+      title: dynasty.name || 'Unnamed Dynasty',
+      meta: `${dynasty.faction || block.faction || 'Unknown Faction'} • prestige ${dynasty.prestige ?? 'unknown'}`,
+      body: `Founder: ${dynasty.founder || 'unknown'}. Members recorded: ${(dynasty.members || []).length}. Status: ${dynasty.status || 'unlisted'}.`
+    })))
+  ).sort((a, b) => {
+    const aPrestige = Number((a.meta.match(/prestige (\d+)/) || [])[1] || 0);
+    const bPrestige = Number((b.meta.match(/prestige (\d+)/) || [])[1] || 0);
+    return bPrestige - aPrestige;
+  }).slice(0, 12);
+
+  const artifactKeywords = ['signet', 'glyph', 'inscription', 'rubbing', 'cipher', 'dossier', 'artifact', 'relic', 'crown', 'blade'];
+  const artifactRecords = uniqueByTitle([
+    ...chronicleEntries.filter(entry => chapterMatchesKeywords(entry, artifactKeywords)).slice(0, 6).map(entry => ({
+      tag: 'Referenced Object',
+      title: entry.major_event || entry.world_date || `Tick ${entry.tick}`,
+      meta: `Tick ${entry.tick} • field note`,
+      body: entry.excerpt || ''
+    })),
+    ...factionActions.filter(action => chapterMatchesKeywords({
+      world_date: '',
+      major_event: action.faction,
+      text: `${action.action} ${action.target} ${action.reason}`
+    }, artifactKeywords)).slice(0, 6).map(action => ({
+      tag: 'Custody Note',
+      title: action.faction || 'Unknown Faction',
+      meta: 'Faction action record',
+      body: action.target || action.action || ''
+    }))
+  ]).slice(0, 8);
+
+  return {
+    history: {
+      records: chronicleEntries
+    },
+    stories: {
+      records: latestStories,
+      catalog: [
+        { label: 'Threading', value: 'Narrative arcs and recurring turns' },
+        { label: 'Source', value: 'Latest living chronicle entries' }
+      ]
+    },
+    lore: {
+      records: loreRecords,
+      catalog: [
+        { label: 'Scope', value: 'Revelations, truths, and active mysteries' },
+        { label: 'Source', value: 'Primary and supporting world events' }
+      ]
+    },
+    religions: {
+      records: religionRecords,
+      catalog: [
+        { label: 'Scope', value: 'Faith records, omens, and sacred disturbance' },
+        { label: 'Source', value: 'Chronicle excerpts and belief-linked records' }
+      ]
+    },
+    rulers: {
+      records: rulerRecords,
+      catalog: [
+        { label: 'Scope', value: 'Current rulers and present seats of power' },
+        { label: 'Source', value: 'Leadership state ledger' }
+      ]
+    },
+    dynasties: {
+      records: dynastyRecords,
+      catalog: [
+        { label: 'Scope', value: 'House standing, founders, and prestige' },
+        { label: 'Source', value: 'Dynasty ledgers by faction' }
+      ]
+    },
+    artifacts: {
+      records: artifactRecords,
+      catalog: [
+        { label: 'Scope', value: 'Flagged objects, symbols, and suspicious materials' },
+        { label: 'Source', value: 'Referenced object notes across the chronicle' }
+      ]
+    },
+    battles: {
+      records: chronicleEntries.filter(entry => entry.category === 'battles')
+    }
+  };
+}
+
+function renderCatalog(sectionMeta, sectionLibrary) {
+  const catalog = document.getElementById('chronicle-catalog');
+  const records = sectionLibrary.records || [];
+  const detailRows = [
+    ...(sectionLibrary.catalog || []),
+    { label: 'Records', value: String(records.length) }
+  ];
+  const firstRecord = records[0];
+  catalog.innerHTML = `
+    <div class="chronicle-catalog-card">
+      <div class="chronicle-catalog-label">Archive Guide</div>
+      <div class="chronicle-catalog-copy">${escapeHtml(sectionMeta.copy)}</div>
+    </div>
+    <div class="chronicle-catalog-card">
+      <div class="chronicle-catalog-label">Shelf Notes</div>
+      <div class="chronicle-catalog-list">
+        ${detailRows.map(row => `
+          <div class="chronicle-catalog-item">
+            <div class="chronicle-catalog-item-label">${escapeHtml(row.label)}</div>
+            <div class="chronicle-catalog-item-value">${escapeHtml(row.value)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="chronicle-catalog-card">
+      <div class="chronicle-catalog-label">Reading Prompt</div>
+      <div class="chronicle-catalog-copy">${escapeHtml(firstRecord ? firstRecord.title || firstRecord.world_date || 'Begin with the newest record on the shelf.' : 'This shelf is ready for future records and discoveries.')}</div>
+    </div>
+  `;
+}
+
+function renderArchiveRecords(records, emptyMessage) {
+  const container = document.getElementById('chronicle-list');
+  if (!records.length) {
+    container.innerHTML = `<div class="chronicle-empty rich">${escapeHtml(emptyMessage)}</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="chronicle-stack">
+      ${records.map(record => `
+        <article class="chronicle-record" data-search="${escapeHtml(`${record.title || ''} ${record.meta || ''} ${record.body || ''}`.toLowerCase())}">
+          <div class="chronicle-record-header">
+            <span class="chronicle-record-tag">${escapeHtml(record.tag || 'Archive Record')}</span>
+            <div class="chronicle-record-meta">${escapeHtml(record.meta || '')}</div>
+          </div>
+          <h3 class="chronicle-record-title">${escapeHtml(record.title || 'Untitled Record')}</h3>
+          <div class="chronicle-record-copy">${escapeHtml(record.body || 'No record text available.')}</div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function titleCase(value) {
+  return String(value || '')
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function leadershipPressure(ruler, dynasties) {
+  const traits = (ruler?.traits || []).map(trait => String(trait).toLowerCase());
+  const competition = (dynasties || []).filter(item => item.status === 'active' && num(item.prestige) >= 60).length;
+  if (traits.includes('ailing') || competition >= 4) return 'High';
+  if (traits.includes('withdrawn') || competition >= 3) return 'Medium';
+  return 'Low';
+}
+
+function rulerBackdrop(row) {
+  const faction = String(row?.faction || '').toLowerCase();
+  const lore = {
+    'twin cities': 'The court of the Twin Cities is built on layered compromise, old stone legitimacy, and the uneasy rise of merchant power beside the throne.',
+    'tidefall': 'Tidefall leadership is measured against the sea itself: endurance, command, electoral pressure, and the ability to survive political storms without blinking first.',
+    'glenhaven': 'Glenhaven rulers inherit an ancient tradition of patience, stewardship, and long memory, where every decision is weighed against centuries to come.',
+    'lostfeld': 'Lostfeld authority is forged under stone pressure, where endurance and command are tested not only by rivals above ground, but by what waits in the deep.',
+    'shadow court': 'Shadow Court power moves through secrecy, lineage, and the control of information, where silence often carries more force than proclamation.',
+    'dur khadur': 'Dur Khadur crowns the most effective broker of contracts and influence, making trade cunning and strategic leverage the measure of sovereignty.',
+    'farrock': 'Farrock leadership is shaped by the logic of frontier command: defense, supply, vigilance, and the discipline to hold a dangerous edge.',
+    'gilgeth & groth orcs': 'Orc rule is defined by strength, endurance, and the ability to keep fierce rival traditions from tearing the whole realm apart.',
+    'vilefin goblins': 'Goblin leadership is kept through wit, negotiation, and survival, where practical advantage matters more than ceremony.',
+    'dreadwind islands': 'The Dreadwind ruler stands over a people hardened by loss, exile, and the old rumor of a drowned inheritance still calling from the sea.'
+  };
+  return lore[faction] || 'This ruler stands at the center of a living political structure shaped by inheritance, pressure, and the unfinished demands of the age.';
+}
+
+function rulerStats(row) {
+  const faction = row.faction;
+  const resources = (worldState?.faction_resources || []).find(item => item.faction === faction) || {};
+  const power = (worldState?.faction_power || []).find(item => item.faction === faction) || {};
+  const dynasties = row.dynasties || [];
+  const topDynasty = dynasties.slice().sort((a, b) => num(b.prestige) - num(a.prestige))[0] || {};
+  return [
+    ['Prestige', String(topDynasty.prestige ?? '--')],
+    ['Reign Length', `${row.currentRuler?.duration ?? '--'} days`],
+    ['Succession Pressure', leadershipPressure(row.currentRuler || {}, dynasties)],
+    ['Economic Control', power.economic != null ? `${pct(power.economic)}` : (resources.gold != null ? `${pct(resources.gold)}` : 'Unknown')],
+    ['Military Strength', power.military != null ? `${pct(power.military)}` : (resources.military != null ? `${pct(resources.military)}` : 'Unknown')],
+    ['Foreign Standing', power.influence != null ? `${pct(power.influence)}` : (resources.influence != null ? `${pct(resources.influence)}` : 'Unknown')]
+  ];
+}
+
+function renderRulersArchive() {
+  const container = document.getElementById('chronicle-list');
+  const rows = worldState?.leadership_state || [];
+  if (!rows.length) {
+    container.innerHTML = `<div class="chronicle-empty rich">No ruler records have been organized here yet.</div>`;
+    return;
+  }
+
+  if (!rows.some(row => row.faction === selectedRulerFaction)) {
+    selectedRulerFaction = rows[0].faction;
+  }
+
+  const selectedRow = rows.find(row => row.faction === selectedRulerFaction) || rows[0];
+  const ruler = selectedRow.currentRuler || {};
+  const dynasties = (selectedRow.dynasties || []).slice().sort((a, b) => num(b.prestige) - num(a.prestige));
+  const topDynasty = dynasties[0] || {};
+  const history = (selectedRow.rulerHistory || []).slice().reverse();
+  const stats = rulerStats(selectedRow);
+  const backstoryParts = [
+    rulerBackdrop(selectedRow),
+    `They rule under ${ruler.dynasty || 'an unrecorded house'} and came to power through ${String(ruler.causeOfRise || 'unknown means').replace(/_/g, ' ')}.`,
+    topDynasty.name ? `${topDynasty.name} currently leads the noble ledger with prestige ${topDynasty.prestige}.` : '',
+    (ruler.notableEvents || []).length ? `Recorded reign notes: ${(ruler.notableEvents || []).join('; ')}.` : 'No formal reign events have yet been entered into the archive.'
+  ].filter(Boolean);
+
+  container.innerHTML = `
+    <div class="ruler-browser">
+      <div class="ruler-strip">
+        ${rows.map(row => {
+          const current = row.currentRuler || {};
+          return `
+            <button
+              class="ruler-strip-card ${row.faction === selectedRulerFaction ? 'active' : ''}"
+              type="button"
+              data-ruler-faction="${escapeHtml(row.faction || '')}"
+              data-search="${escapeHtml(`${row.faction || ''} ${rulerDisplayName(current)} ${current.dynasty || ''}`.toLowerCase())}">
+              <div class="ruler-strip-portrait">${current.portrait_image ? `<img src="${escapeHtml(current.portrait_image)}" alt="${escapeHtml(rulerDisplayName(current))}">` : ''}</div>
+              <div class="ruler-strip-faction">${escapeHtml(row.faction || 'Unknown Realm')}</div>
+              <div class="ruler-strip-name">${escapeHtml(rulerDisplayName(current))}</div>
+              <div class="ruler-strip-house">${escapeHtml(current.dynasty || 'Unknown House')}</div>
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <article class="chronicle-ruler-detail" data-search="${escapeHtml(`${selectedRow.faction || ''} ${rulerDisplayName(ruler)} ${ruler.dynasty || ''} ${backstoryParts.join(' ')}`.toLowerCase())}">
+        <div class="chronicle-ruler-portrait">
+          ${ruler.portrait_image ? `<img src="${escapeHtml(ruler.portrait_image)}" alt="${escapeHtml(rulerDisplayName(ruler))}">` : ''}
+        </div>
+
+        <div class="chronicle-ruler-main">
+          <div class="chronicle-ruler-faction">${escapeHtml(selectedRow.faction || 'Ruler')}</div>
+          <h3 class="chronicle-ruler-name">${escapeHtml(rulerDisplayName(ruler))}</h3>
+          <div class="chronicle-ruler-house">${escapeHtml(ruler.dynasty || 'Unknown Dynasty')}</div>
+
+          <div class="chronicle-ruler-copy">
+            ${backstoryParts.map(part => `<p>${escapeHtml(part)}</p>`).join('')}
+          </div>
+
+          <div class="chronicle-ruler-facts">
+            <div class="chronicle-ruler-fact"><span>Age</span><strong>${escapeHtml(ruler.age || 'Unknown')}</strong></div>
+            <div class="chronicle-ruler-fact"><span>Rise To Power</span><strong>${escapeHtml(titleCase(ruler.causeOfRise || 'Unknown'))}</strong></div>
+            <div class="chronicle-ruler-fact"><span>Reign</span><strong>Day ${escapeHtml(ruler.startDay ?? 0)} to present, ${escapeHtml(ruler.duration ?? 0)} days</strong></div>
+            <div class="chronicle-ruler-fact"><span>Traits</span><strong>${(ruler.traits || []).map(trait => escapeHtml(titleCase(trait))).join(', ') || 'None recorded'}</strong></div>
+          </div>
+        </div>
+
+        <aside class="chronicle-ruler-side">
+          <div class="chronicle-ruler-side-block">
+            <div class="chronicle-ruler-side-title">Key Stats</div>
+            <div class="chronicle-ruler-statlist">
+              ${stats.map(([label, value]) => `<div class="chronicle-ruler-stat"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('')}
+            </div>
+          </div>
+
+          <div class="chronicle-ruler-side-block">
+            <div class="chronicle-ruler-side-title">Dynasty Ledger</div>
+            <div class="chronicle-ruler-side-copy">
+              ${dynasties.slice(0, 5).map(dynasty => `${dynasty.name} holds prestige ${dynasty.prestige} as tier ${dynasty.tier}, founded by ${dynasty.founder || 'unknown founder'}.`).join(' ') || 'No dynastic ledger is available.'}
+            </div>
+          </div>
+
+          <div class="chronicle-ruler-side-block">
+            <div class="chronicle-ruler-side-title">Recorded History</div>
+            <div class="chronicle-ruler-side-copy">
+              ${history.length
+                ? history.slice(0, 3).map(reign => `${rulerDisplayName(reign)} ruled for ${reign.duration ?? '?'} days and ended by ${reign.causeOfEnd || 'unknown cause'}.`).join(' ')
+                : 'No prior reign records have been entered yet.'}
+            </div>
+          </div>
+        </aside>
+      </article>
+    </div>
+  `;
+
+  document.querySelectorAll('[data-ruler-faction]').forEach(button => {
+    button.addEventListener('click', () => {
+      selectedRulerFaction = button.dataset.rulerFaction;
+      renderRulersArchive();
+      filterChronicle(document.getElementById('chronicle-search').value);
+    });
+  });
+}
+
+function renderSection() {
+  const sectionMeta = CHRONICLE_SECTIONS[chronicleSection] || CHRONICLE_SECTIONS.history;
+  const library = buildSectionLibrary()[chronicleSection] || { records: [] };
+  renderCatalog(sectionMeta, library);
+
+  if (sectionMeta.mode === 'entries') {
+    renderChronicle(visibleChronicleEntries());
+    return;
+  }
+
+  if (chronicleSection === 'rulers') {
+    renderRulersArchive();
+    return;
+  }
+
+  renderArchiveRecords(
+    library.records || [],
+    `No ${sectionMeta.title.toLowerCase()} records have been organized here yet.`
+  );
+}
+
+function setChronicleSection(section, { replaceHistory = false } = {}) {
+  chronicleSection = CHRONICLE_SECTIONS[section] ? section : 'history';
+  syncChronicleSectionUi();
+  renderSection();
+  filterChronicle(document.getElementById('chronicle-search').value);
+
+  const url = new URL(window.location.href);
+  if (chronicleSection !== 'history') url.searchParams.set('section', chronicleSection);
+  else url.searchParams.delete('section');
+  if (replaceHistory) {
+    window.history.replaceState({}, '', url);
+  } else {
+    window.history.pushState({}, '', url);
+  }
 }
 
 async function loadChronicle() {
   try {
-    const response = await fetch('/api/chronicle');
-    chronicleEntries = await response.json();
-    renderChronicle(chronicleEntries);
+    const [chronicleResponse, stateResponse] = await Promise.all([
+      fetch('/api/chronicle'),
+      fetch('/api/state')
+    ]);
+    chronicleEntries = await chronicleResponse.json();
+    worldState = await stateResponse.json();
+    syncChronicleCardMeta();
+    const initialSection = new URL(window.location.href).searchParams.get('section') || 'history';
+    setChronicleSection(initialSection, { replaceHistory: true });
   } catch (error) {
     document.getElementById('chronicle-list').innerHTML = '<div class="chronicle-empty">The chronicle could not be loaded.</div>';
   }
@@ -282,6 +1402,12 @@ async function loadChronicle() {
 
 document.getElementById('chronicle-search').addEventListener('input', (event) => {
   filterChronicle(event.target.value);
+});
+
+document.querySelectorAll('.chronicle-section-card').forEach(button => {
+  button.addEventListener('click', () => {
+    setChronicleSection(button.dataset.chronicleSection);
+  });
 });
 
 loadChronicle();

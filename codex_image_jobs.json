@@ -270,5 +270,75 @@
     "status": "queued",
     "created_tick": 21,
     "created_at": "2026-04-23T04:13:56.042660"
+  },
+  {
+    "key": "place:Farrock",
+    "kind": "place",
+    "name": "Farrock",
+    "prompt": "Location illustration for Farrock: At dawn on Day 31, soldiers in Farrock's garrison began collapsing with black bile vomiting. The primary well smelled of rot. The commander's horse died in its stall. By midday forty soldiers were quarantined, the well sealed, and emergency supply requests sent to both DK and Twin Cities. The cipher fragment acquisition race has stalled. The tinker, frightened by the sickness, sold his transcriptions to the Gloomspire keeper before the garrison lockdown.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-farrock.png",
+    "static_path": "/static/illustrations/codex/place-farrock.png",
+    "status": "completed",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:13.401406",
+    "last_attempt_at": "2026-04-24T14:21:56.275162",
+    "error": ""
+  },
+  {
+    "key": "place:Gilgeth-Groth Border",
+    "kind": "place",
+    "name": "Gilgeth-Groth Border",
+    "prompt": "Location illustration for Gilgeth-Groth Border: Hargan Stonejaw departed Gilgeth at first light with twelve elders and twenty-four mounted warriors, riding for the Groth border ridge. He carries the caravan master's recorded testimony. He rejected Elowen's joint-consultation offer while accepting her observers as passive witnesses. He will reach Morgath's position in two days. Morgath has extended his hold order by one day, still unaware of Stonejaw's departure.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-gilgeth-groth-border.png",
+    "static_path": "/static/illustrations/codex/place-gilgeth-groth-border.png",
+    "status": "completed",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:56.281175",
+    "last_attempt_at": "2026-04-25T18:33:14.399390",
+    "error": ""
+  },
+  {
+    "key": "lore:The Farrock Sickness and the Tidefall Otters \u2014 Dual Omens Split the World",
+    "kind": "lore",
+    "name": "The Farrock Sickness and the Tidefall Otters \u2014 Dual Omens Split the World",
+    "prompt": "Major lore event illustration for The Farrock Sickness and the Tidefall Otters \u2014 Dual Omens Split the World: At dawn a garrison sickness struck Farrock: soldiers collapsed with black bile, the well water turned foul, and the commander's horse died in its stall. Simultaneously, a herd of forty-odd river otters appeared on Tidefall's harbor docks, wandering calmly among the morning fishermen. Neither event has a clear natural cause. Factions that know of Caeris Thorne's otter dream and the God's prior signs are beginning to connect the signs.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-the-farrock-sickness-and-the-tidefall-otters-dual-omens-split-the-world.png",
+    "static_path": "/static/illustrations/codex/lore-the-farrock-sickness-and-the-tidefall-otters-dual-omens-split-the-world.png",
+    "status": "queued",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:56.298935"
+  },
+  {
+    "key": "lore:Caeris Thorne Dreams of the Otter Again \u2014 Mandate Sharpens",
+    "kind": "lore",
+    "name": "Caeris Thorne Dreams of the Otter Again \u2014 Mandate Sharpens",
+    "prompt": "Major lore event illustration for Caeris Thorne Dreams of the Otter Again \u2014 Mandate Sharpens: Caeris Thorne woke before dawn from a second otter dream. The God's form was the same \u2014 upright, calm, absolute \u2014 but this time the instruction was narrower: begin the religion now, before the throne. She sat in the dark for an hour. She is running out of reasons to wait.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-caeris-thorne-dreams-of-the-otter-again-mandate-sharpens.png",
+    "static_path": "/static/illustrations/codex/lore-caeris-thorne-dreams-of-the-otter-again-mandate-sharpens.png",
+    "status": "queued",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:56.299318"
+  },
+  {
+    "key": "lore:Ironmaul Decides \u2014 He Will Meet Varek at Noon Tomorrow",
+    "kind": "lore",
+    "name": "Ironmaul Decides \u2014 He Will Meet Varek at Noon Tomorrow",
+    "prompt": "Major lore event illustration for Ironmaul Decides \u2014 He Will Meet Varek at Noon Tomorrow: By morning Ironmaul had reached his decision: he will grant Varek's audience on Day 32, in the Thane's own hall, with Korin and two clan elders present. He sent word to the cell. Varek received the message, said nothing to the guard, and resumed his ritual practice. Ashveil's second letter is now one day from Stonebreak.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-ironmaul-decides-he-will-meet-varek-at-noon-tomorrow.png",
+    "static_path": "/static/illustrations/codex/lore-ironmaul-decides-he-will-meet-varek-at-noon-tomorrow.png",
+    "status": "queued",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:56.299665"
+  },
+  {
+    "key": "lore:Stonejaw Departs Gilgeth \u2014 Rides for Groth Border",
+    "kind": "lore",
+    "name": "Stonejaw Departs Gilgeth \u2014 Rides for Groth Border",
+    "prompt": "Major lore event illustration for Stonejaw Departs Gilgeth \u2014 Rides for Groth Border: Hargan Stonejaw departed Gilgeth at first light with a mounted escort of twelve elders and Clan Stonejaw warriors. He carries the caravan master's recorded testimony. He will reach the Groth border ridge in approximately two days. Morgath's clan captains are still holding \u2014 three days left on Morgath's withdrawal order.",
+    "target_file": "c:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-stonejaw-departs-gilgeth-rides-for-groth-border.png",
+    "static_path": "/static/illustrations/codex/lore-stonejaw-departs-gilgeth-rides-for-groth-border.png",
+    "status": "queued",
+    "created_tick": 31,
+    "created_at": "2026-04-24T14:21:56.299887"
   }
 ]

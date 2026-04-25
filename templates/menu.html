@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aeloria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Crimson+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #04050a;
+      color: #e8d9bc;
+      font-family: 'Crimson Text', serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Atmospheric background */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(120, 80, 30, 0.18), transparent 60%),
+        radial-gradient(ellipse at 20% 100%, rgba(40, 20, 80, 0.14), transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(20, 40, 70, 0.12), transparent 50%),
+        linear-gradient(180deg, #04050a 0%, #070910 50%, #050608 100%);
+    }
+
+    .bg-map {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url('/static/illustrations/ui/aeloria-lore-map-labeled.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.06;
+      filter: saturate(0) contrast(1.2);
+    }
+
+    .bg-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(4,5,10,0.88) 80%);
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      animation: twinkle var(--d, 4s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.9; }
+    }
+
+    /* Layout */
+    .screen {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Title block */
+    .title-block {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .title-kicker {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(201, 169, 110, 0.6);
+      margin-bottom: 16px;
+    }
+
+    .title-word {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(52px, 12vw, 84px);
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      line-height: 1;
+      color: #efe0c2;
+      text-shadow:
+        0 0 60px rgba(201, 169, 110, 0.18),
+        0 0 120px rgba(201, 169, 110, 0.08);
+      animation: titleGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 60px rgba(201,169,110,0.18), 0 0 120px rgba(201,169,110,0.08); }
+      50%       { text-shadow: 0 0 80px rgba(201,169,110,0.28), 0 0 160px rgba(201,169,110,0.12); }
+    }
+
+    .title-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 18px;
+      color: rgba(201, 169, 110, 0.5);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+    }
+    .title-rule::before,
+    .title-rule::after {
+      content: '';
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,169,110,0.4));
+    }
+    .title-rule::after {
+      background: linear-gradient(270deg, transparent, rgba(201,169,110,0.4));
+    }
+
+    /* Main menu */
+    .menu {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-btn {
+      width: 100%;
+      padding: 18px 28px;
+      border: 1px solid rgba(201, 169, 110, 0.2);
+      background: rgba(8, 10, 16, 0.6);
+      color: rgba(232, 217, 188, 0.86);
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-align: left;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      backdrop-filter: blur(6px);
+    }
+
+    .menu-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(201,169,110,0.06), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .menu-btn:hover {
+      border-color: rgba(201, 169, 110, 0.52);
+      color: #f2e4c8;
+      background: rgba(12, 14, 20, 0.8);
+    }
+
+    .menu-btn:hover::before { opacity: 1; }
+
+    .menu-btn-inner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .menu-btn-sub {
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 400;
+      color: rgba(201, 169, 110, 0.56);
+      display: block;
+      margin-top: 3px;
+    }
+
+    .menu-btn-arrow {
+      color: rgba(201, 169, 110, 0.5);
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: transform 0.2s, color 0.2s;
+    }
+    .menu-btn:hover .menu-btn-arrow {
+      transform: translateX(4px);
+      color: rgba(201, 169, 110, 0.9);
+    }
+
+    .menu-btn.primary {
+      border-color: rgba(201, 169, 110, 0.36);
+      background: rgba(14, 12, 10, 0.72);
+    }
+
+    /* Timeline panel */
+    .timelines-panel {
+      display: none;
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid rgba(201, 169, 110, 0.18);
+      background: rgba(6, 8, 14, 0.88);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .timelines-panel.open { display: block; }
+
+    .timelines-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(201, 169, 110, 0.12);
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(201, 169, 110, 0.6);
+    }
+
+    .timelines-list {
+      max-height: 240px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201,169,110,0.2) transparent;
+    }
+
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .timeline-row:last-child { border-bottom: 0; }
+    .timeline-row:hover { background: rgba(201,169,110,0.06); }
+
+    .timeline-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      color: #e0ccaa;
+      letter-spacing: 0.06em;
+    }
+
+    .timeline-load {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(201, 169, 110, 0.6);
+      padding: 4px 10px;
+      border: 1px solid rgba(201, 169, 110, 0.22);
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .timeline-load:hover {
+      border-color: rgba(201, 169, 110, 0.6);
+      color: #e4c590;
+    }
+
+    .timelines-empty {
+      padding: 22px 20px;
+      font-style: italic;
+      color: rgba(201, 169, 110, 0.4);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Save name input panel */
+    .save-panel {
+      display: none;
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid rgba(201, 169, 110, 0.18);
+      background: rgba(6, 8, 14, 0.88);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px;
+    }
+    .save-panel.open { display: block; }
+
+    .save-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(201, 169, 110, 0.6);
+      margin-bottom: 10px;
+      font-family: 'Cinzel', serif;
+    }
+
+    .save-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .save-input {
+      flex: 1;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid rgba(201, 169, 110, 0.24);
+      background: rgba(4, 5, 10, 0.8);
+      color: #e8d9bc;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .save-input:focus { border-color: rgba(201, 169, 110, 0.52); }
+    .save-input::placeholder { color: rgba(201, 169, 110, 0.3); }
+
+    .save-confirm {
+      height: 40px;
+      padding: 0 16px;
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      background: rgba(100, 60, 20, 0.4);
+      color: #e4c590;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .save-confirm:hover {
+      background: rgba(120, 72, 24, 0.6);
+      border-color: rgba(201, 169, 110, 0.56);
+    }
+
+    /* Status / toast */
+    .status {
+      margin-top: 16px;
+      height: 18px;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: rgba(201, 169, 110, 0.6);
+      transition: opacity 0.3s;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 5, 10, 0.92);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .loading-overlay.show { display: flex; }
+
+    .loading-title {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(201, 169, 110, 0.82);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+    .loading-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .loading-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(201, 169, 110, 0.6);
+      animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse { 0%,100% { transform: scale(0.6); opacity: 0.4; } 50% { transform: scale(1); opacity: 1; } }
+
+    .version {
+      position: fixed;
+      bottom: 18px;
+      right: 22px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: rgba(201, 169, 110, 0.22);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-map"></div>
+<div class="bg-vignette"></div>
+<div class="stars" id="stars"></div>
+
+<div class="screen">
+  <div class="title-block">
+    <div class="title-kicker">A Living World</div>
+    <span class="title-word">Aeloria</span>
+    <div class="title-rule">✦</div>
+  </div>
+
+  <nav class="menu" aria-label="Main menu">
+
+    <button class="menu-btn primary" id="btn-continue" type="button">
+      <span class="menu-btn-inner">
+        <span>
+          <span>Continue</span>
+          <span class="menu-btn-sub">Resume the current timeline</span>
+        </span>
+        <span class="menu-btn-arrow">›</span>
+      </span>
+    </button>
+
+    <button class="menu-btn" id="btn-load" type="button">
+      <span class="menu-btn-inner">
+        <span>
+          <span>Load Timeline</span>
+          <span class="menu-btn-sub">Choose a saved world</span>
+        </span>
+        <span class="menu-btn-arrow">›</span>
+      </span>
+    </button>
+
+    <div class="timelines-panel" id="timelines-panel">
+      <div class="timelines-header">Saved Timelines</div>
+      <div class="timelines-list" id="timelines-list">
+        <div class="timelines-empty">Loading…</div>
+      </div>
+    </div>
+
+    <button class="menu-btn" id="btn-save" type="button">
+      <span class="menu-btn-inner">
+        <span>
+          <span>Save Current World</span>
+          <span class="menu-btn-sub">Store this timeline under a name</span>
+        </span>
+        <span class="menu-btn-arrow">›</span>
+      </span>
+    </button>
+
+    <div class="save-panel" id="save-panel">
+      <div class="save-label">Timeline Name</div>
+      <div class="save-row">
+        <input class="save-input" id="save-input" type="text" placeholder="e.g. before-the-war" maxlength="48" spellcheck="false">
+        <button class="save-confirm" id="save-confirm" type="button">Save</button>
+      </div>
+    </div>
+
+    <button class="menu-btn" id="btn-new" type="button">
+      <span class="menu-btn-inner">
+        <span>
+          <span>New World</span>
+          <span class="menu-btn-sub">Begin from the starter template</span>
+        </span>
+        <span class="menu-btn-arrow">›</span>
+      </span>
+    </button>
+
+    <a class="menu-btn" href="/create" style="text-decoration:none;display:block">
+      <span class="menu-btn-inner">
+        <span>
+          <span>Custom World</span>
+          <span class="menu-btn-sub">Pick factions and shape your own world</span>
+        </span>
+        <span class="menu-btn-arrow">›</span>
+      </span>
+    </a>
+
+  </nav>
+
+  <div class="status" id="status"></div>
+</div>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-title" id="loading-label">Entering the world</div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<div class="version">Aeloria · Living World Engine</div>
+
+<script>
+(function () {
+  // ── Stars ─────────────────────────────────────────────────
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 100 + '%';
+    s.style.setProperty('--d', (3 + Math.random() * 5).toFixed(1) + 's');
+    s.style.setProperty('--delay', -(Math.random() * 6).toFixed(1) + 's');
+    s.style.opacity = (0.2 + Math.random() * 0.5).toFixed(2);
+    starsEl.appendChild(s);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function setStatus(msg) {
+    document.getElementById('status').textContent = msg;
+  }
+
+  function showLoading(label) {
+    document.getElementById('loading-label').textContent = label || 'Entering the world…';
+    document.getElementById('loading-overlay').classList.add('show');
+  }
+
+  function enter() {
+    showLoading('Entering the world…');
+    setTimeout(() => { window.location.href = '/'; }, 600);
+  }
+
+  function togglePanel(id, closeOthers = []) {
+    closeOthers.forEach(oid => document.getElementById(oid)?.classList.remove('open'));
+    document.getElementById(id)?.classList.toggle('open');
+  }
+
+  // ── Continue ──────────────────────────────────────────────
+  document.getElementById('btn-continue').addEventListener('click', () => {
+    showLoading('Resuming timeline…');
+    setTimeout(() => { window.location.href = '/'; }, 500);
+  });
+
+  // ── Load timeline ─────────────────────────────────────────
+  document.getElementById('btn-load').addEventListener('click', async () => {
+    togglePanel('timelines-panel', ['save-panel']);
+    const list = document.getElementById('timelines-list');
+    list.innerHTML = '<div class="timelines-empty">Loading…</div>';
+    try {
+      const res = await fetch('/api/worlds');
+      const data = await res.json();
+      const worlds = data.worlds || [];
+      if (!worlds.length) {
+        list.innerHTML = '<div class="timelines-empty">No saved timelines yet.</div>';
+        return;
+      }
+      list.innerHTML = worlds.map(w =>
+        `<div class="timeline-row">
+          <span class="timeline-name">${esc(w.replace('.json', ''))}</span>
+          <button class="timeline-load" data-file="${esc(w)}" type="button">Load</button>
+        </div>`
+      ).join('');
+      list.querySelectorAll('.timeline-load').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          showLoading('Loading timeline…');
+          try {
+            const r = await fetch('/api/worlds/load', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: btn.dataset.file })
+            });
+            if (!r.ok) throw new Error('Load failed');
+            enter();
+          } catch (e) {
+            document.getElementById('loading-overlay').classList.remove('show');
+            setStatus('Failed to load timeline.');
+          }
+        });
+      });
+    } catch (e) {
+      list.innerHTML = '<div class="timelines-empty">Could not fetch timelines.</div>';
+    }
+  });
+
+  // ── Save ──────────────────────────────────────────────────
+  document.getElementById('btn-save').addEventListener('click', () => {
+    togglePanel('save-panel', ['timelines-panel']);
+    document.getElementById('save-input').focus();
+  });
+
+  document.getElementById('save-confirm').addEventListener('click', saveWorld);
+  document.getElementById('save-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveWorld();
+  });
+
+  async function saveWorld() {
+    const name = document.getElementById('save-input').value.trim();
+    if (!name) { setStatus('Enter a name first.'); return; }
+    try {
+      const r = await fetch('/api/worlds/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (!r.ok) throw new Error();
+      document.getElementById('save-input').value = '';
+      document.getElementById('save-panel').classList.remove('open');
+      setStatus(`Saved as "${name}"`);
+    } catch (e) {
+      setStatus('Save failed.');
+    }
+  }
+
+  // ── Custom world ──────────────────────────────────────────
+  document.getElementById('btn-custom').addEventListener('click', () => {
+    togglePanel('custom-panel', ['timelines-panel', 'save-panel']);
+    document.getElementById('custom-factions').focus();
+  });
+
+  document.getElementById('custom-confirm').addEventListener('click', async () => {
+    const raw = document.getElementById('custom-factions').value;
+    const factions = raw.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!factions.length) { setStatus('Enter at least one faction name.'); return; }
+    showLoading('Building custom world…');
+    try {
+      const r = await fetch('/api/worlds/custom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ factions })
+      });
+      if (!r.ok) throw new Error();
+      enter();
+    } catch (e) {
+      document.getElementById('loading-overlay').classList.remove('show');
+      setStatus('Failed to create custom world.');
+    }
+  });
+
+  // ── New world ─────────────────────────────────────────────
+  document.getElementById('btn-new').addEventListener('click', async () => {
+    if (!confirm('Start a new world? The current world_state will be replaced.')) return;
+    showLoading('Creating new world…');
+    try {
+      const r = await fetch('/api/worlds/new', { method: 'POST' });
+      if (!r.ok) throw new Error();
+      enter();
+    } catch (e) {
+      document.getElementById('loading-overlay').classList.remove('show');
+      setStatus('Failed to create new world.');
+    }
+  });
+
+  function esc(t) {
+    return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+</body>
+</html>

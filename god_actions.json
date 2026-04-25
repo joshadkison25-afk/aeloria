@@ -1,37 +1,9 @@
 [
   {
-    "type": "divine_omen",
+    "type": "world_created",
     "target": "Aeloria",
-    "detail": "red lightnight",
-    "lore": "Across all of Aeloria, a supernatural sign has appeared: red lightnight. Factions scramble to interpret its meaning.",
-    "timestamp": "2026-04-22T03:57:40.480209"
-  },
-  {
-    "type": "divine_omen",
-    "target": "Aeloria",
-    "detail": "red lighning over tidefall",
-    "lore": "Across all of Aeloria, a supernatural sign has appeared: red lighning over tidefall. Factions scramble to interpret its meaning.",
-    "timestamp": "2026-04-22T06:39:17.158594"
-  },
-  {
-    "type": "divine_omen",
-    "target": "Aeloria",
-    "detail": "cause an eclipse over the twin cities",
-    "lore": "Across all of Aeloria, a supernatural sign has appeared: cause an eclipse over the twin cities. Factions scramble to interpret its meaning.",
-    "timestamp": "2026-04-22T13:45:05.902147"
-  },
-  {
-    "type": "divine_omen",
-    "target": "Aeloria",
-    "detail": "a raven flys to the throne room of lostfeld and speaks \"death death death\"",
-    "lore": "Across all of Aeloria, a supernatural sign has appeared: a raven flys to the throne room of lostfeld and speaks \"death death death\". Factions scramble to interpret its meaning.",
-    "timestamp": "2026-04-23T02:45:11.690911"
-  },
-  {
-    "type": "divine_omen",
-    "target": "Aeloria",
-    "detail": "blood moon",
-    "lore": "Across all of Aeloria, a supernatural sign has appeared: blood moon. Factions scramble to interpret its meaning.",
-    "timestamp": "2026-04-23T05:07:17.485777"
+    "detail": "Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven",
+    "lore": "A new world has been forged. 3 factions (Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven) now vie for dominance across Aeloria. The age begins \u2014 every throne is unsettled, every border unproven.",
+    "timestamp": "2026-04-25T17:49:00.210935"
   }
 ]

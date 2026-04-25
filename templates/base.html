@@ -5,44 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}Aeloria{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
   {% block head %}{% endblock %}
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #0e0e12;
-      --surface:     #161618;
-      --surface2:    #1e1e24;
-      --surface3:    #252530;
-      --border:      rgba(255,255,255,0.08);
-      --border2:     rgba(255,255,255,0.12);
-      --text:        #f0ead6;
-      --text-sec:    #9a9080;
-      --text-muted:  #5a5450;
-      --red:         #c9372c;
-      --red-dark:    #8a1a12;
-      --red-dim:     rgba(201,55,44,0.15);
-      --gold:        #c9a96e;
-      --gold-dim:    rgba(201,169,110,0.15);
-      --gold-dark:   #7a6040;
-      --purple:      #7a5a9a;
-      --link:        #a78bfa;
-      --rising:      #4aad6a;
-      --stable:      #5a7aaa;
-      --declining:   #c08040;
-      --critical:    #c04040;
-      --nav-h:       60px;
+      --bg:          #06050a;
+      --surface:     #0e0b10;
+      --surface2:    #16121a;
+      --surface3:    #1e1824;
+      --border:      rgba(180,148,80,0.16);
+      --border2:     rgba(180,148,80,0.32);
+      --text:        #e8d9b8;
+      --text-sec:    #9a8060;
+      --text-muted:  #584838;
+      --red:         #9e2416;
+      --red-dark:    #5e1008;
+      --red-dim:     rgba(158,36,22,0.18);
+      --gold:        #c8a040;
+      --gold-bright: #e0ba60;
+      --gold-dim:    rgba(200,160,64,0.14);
+      --gold-dark:   #7a5c22;
+      --purple:      #6a4a8a;
+      --link:        #9a7be0;
+      --rising:      #3a9a52;
+      --stable:      #486a9a;
+      --declining:   #b87030;
+      --critical:    #b03030;
+      --nav-h:       58px;
     }
 
     html { scroll-behavior: smooth; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.65;
       overflow-x: hidden;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.038;
+      pointer-events: none;
+      z-index: 9997;
     }
 
     /* ── NAVIGATION ─────────────────────────────── */
@@ -50,11 +60,13 @@
       position: fixed;
       top: 0; left: 0; right: 0;
       height: var(--nav-h);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.72), rgba(8,10,14,0.46));
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(201,169,110,0.14);
-      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
+      background: linear-gradient(180deg, rgba(4,3,8,0.96) 0%, rgba(8,6,12,0.88) 100%);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(180,148,80,0.22);
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.6),
+        inset 0 -1px 0 rgba(180,148,80,0.06),
+        0 4px 24px rgba(0,0,0,0.5);
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -72,51 +84,76 @@
 
     .nav-wordmark {
       font-family: 'Cinzel', serif;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
-      color: #d9b77f;
+      color: var(--gold-bright);
       text-decoration: none;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       flex-shrink: 0;
       margin-right: 40px;
+      text-shadow: 0 0 18px rgba(200,160,64,0.35);
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 4px;
       flex: 1;
     }
 
     .nav-link {
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(201,169,110,0.76);
+      padding: 7px 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(200,160,64,0.62);
       text-decoration: none;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       position: relative;
-      transition: color 0.15s ease, opacity 0.15s ease;
+      transition: color 0.2s ease;
       white-space: nowrap;
-      opacity: 0.82;
     }
     .nav-link:hover {
-      color: #e3c28a;
-      opacity: 1;
+      color: var(--gold-bright);
     }
     .nav-link.active {
-      color: #f0d4a2;
-      opacity: 1;
+      color: var(--gold-bright);
     }
     .nav-link.active::after {
       content: '';
       position: absolute;
-      left: 10px;
-      right: 10px;
+      left: 12px;
+      right: 12px;
       bottom: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(201,169,110,0.95), transparent);
+      background: linear-gradient(90deg, transparent, rgba(224,186,96,0.9), transparent);
+      box-shadow: 0 0 6px rgba(200,160,64,0.5);
+    }
+
+    .nav-exit-btn {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-left: 14px;
+      padding: 5px 11px;
+      border: 1px solid rgba(201,169,110,0.28);
+      border-radius: 3px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(201,169,110,0.7);
+      text-decoration: none;
+      transition: color 0.18s, border-color 0.18s, background 0.18s;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .nav-exit-btn:hover {
+      color: #e4c590;
+      border-color: rgba(201,169,110,0.58);
+      background: rgba(201,169,110,0.06);
     }
 
     .nav-meta {
@@ -128,29 +165,30 @@
     }
 
     .nav-date {
-      font-size: 11px;
-      letter-spacing: 0.14em;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(240,234,214,0.74);
+      color: rgba(200,160,64,0.55);
       line-height: 1.35;
       text-align: right;
     }
 
     .nav-tick-pill {
-      min-height: 32px;
+      min-height: 28px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 0 14px;
-      background: rgba(10,10,14,0.34);
-      border: 1px solid rgba(201,169,110,0.5);
-      color: #e3c28a;
+      background: rgba(200,160,64,0.06);
+      border: 1px solid rgba(200,160,64,0.36);
+      color: var(--gold);
       font-family: 'Cinzel', serif;
-      font-size: 12px;
-      letter-spacing: 0.08em;
+      font-size: 11px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       white-space: nowrap;
-      box-shadow: inset 0 0 0 1px rgba(201,169,110,0.08);
+      box-shadow: inset 0 0 12px rgba(200,160,64,0.04);
     }
 
     /* Hamburger */
@@ -178,7 +216,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: #0a0a0e;
+      background: rgba(4,3,8,0.97);
       z-index: 999;
       flex-direction: column;
       align-items: center;
@@ -187,10 +225,10 @@
     }
     .nav-overlay.open { display: flex; }
     .nav-overlay .nav-link {
-      font-size: 24px;
+      font-size: 20px;
       padding: 16px 32px;
       font-family: 'Cinzel', serif;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
     }
     .nav-overlay-close {
       position: absolute;
@@ -220,37 +258,45 @@
 
     .section-header { margin-bottom: 48px; }
     .section-label {
-      font-size: 11px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--gold);
       margin-bottom: 12px;
+      opacity: 0.85;
     }
     .section-title {
       font-family: 'Cinzel', serif;
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.15;
       margin-bottom: 12px;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.02em;
     }
     .section-subtitle {
-      font-size: 16px;
+      font-family: 'EB Garamond', serif;
+      font-size: 17px;
       color: var(--text-sec);
       max-width: 600px;
+      font-style: italic;
     }
 
     /* ── CARDS ───────────────────────────────────── */
     .card {
-      background: var(--surface);
+      background: linear-gradient(160deg, var(--surface) 0%, rgba(14,10,18,0.95) 100%);
       border: 1px solid var(--border);
       padding: 24px;
       position: relative;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: inset 0 1px 0 rgba(180,148,80,0.05), 0 2px 8px rgba(0,0,0,0.4);
     }
-    .card:hover { border-color: var(--border2); }
+    .card:hover {
+      border-color: var(--border2);
+      box-shadow: inset 0 1px 0 rgba(180,148,80,0.1), 0 4px 16px rgba(0,0,0,0.5);
+    }
     .card.card-accent:hover {
       border-left: 2px solid var(--gold);
     }
@@ -265,37 +311,48 @@
     /* ── BUTTONS ─────────────────────────────────── */
     .btn {
       display: inline-block;
-      padding: 12px 28px;
-      font-size: 13px;
+      padding: 10px 26px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       text-decoration: none;
       cursor: pointer;
       border: none;
-      transition: background 0.15s, opacity 0.15s;
+      transition: background 0.18s, box-shadow 0.18s;
     }
     .btn-primary {
-      background: var(--red);
-      color: #fff;
+      background: linear-gradient(180deg, #aa2818, var(--red));
+      color: #f0d8c0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,200,160,0.1);
     }
-    .btn-primary:hover { background: #a82d23; }
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #c03020, #902010);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.6);
+    }
 
     .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--gold);
+      background: rgba(200,160,64,0.06);
+      border: 1px solid rgba(200,160,64,0.45);
       color: var(--gold);
+      box-shadow: inset 0 1px 0 rgba(200,160,64,0.08);
     }
-    .btn-secondary:hover { background: var(--gold-dim); }
+    .btn-secondary:hover {
+      background: rgba(200,160,64,0.12);
+      border-color: rgba(200,160,64,0.7);
+    }
 
     .btn-ghost {
       background: transparent;
       color: var(--text-muted);
       padding: 8px 0;
+      font-family: 'EB Garamond', serif;
+      letter-spacing: 0.04em;
     }
-    .btn-ghost:hover { color: var(--text); text-decoration: underline; }
+    .btn-ghost:hover { color: var(--text-sec); }
 
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     /* ── MORALE BADGES ───────────────────────────── */
     .badge {
@@ -324,7 +381,7 @@
       color: var(--text-muted);
     }
     .power-label span { color: var(--text-sec); }
-    .power-track { height: 2px; background: rgba(255,255,255,0.08); }
+    .power-track { height: 2px; background: rgba(180,148,80,0.10); }
     .power-fill  { height: 100%; transition: width 0.6s ease; }
     .pf-mil { background: var(--red); }
     .pf-pol { background: var(--gold-dark); }
@@ -347,34 +404,38 @@
     #toast {
       position: fixed;
       bottom: 24px; right: 24px;
-      background: var(--surface2);
+      background: linear-gradient(135deg, var(--surface2), var(--surface));
       border: 1px solid var(--border2);
       border-left: 2px solid var(--gold);
       color: var(--text-sec);
-      font-size: 12px;
-      letter-spacing: 0.05em;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       padding: 10px 18px;
       opacity: 0;
       transform: translateY(8px);
       transition: opacity 0.25s, transform 0.25s;
       pointer-events: none;
       z-index: 9999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(180,148,80,0.08);
     }
     #toast.show { opacity: 1; transform: translateY(0); }
 
     /* ── PAGE HERO ───────────────────────────────── */
     .page-hero {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--surface) 0%, rgba(8,6,12,0.6) 100%);
+      border-bottom: 1px solid rgba(180,148,80,0.18);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
       padding: 64px 0 56px;
     }
     .page-hero .section-label { margin-bottom: 16px; }
-    .page-hero .section-title { font-size: 48px; }
+    .page-hero .section-title { font-size: 44px; letter-spacing: 0.04em; }
 
     /* ── DIVIDER ─────────────────────────────────── */
     hr.divider {
       border: none;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid rgba(180,148,80,0.12);
       margin: 0;
     }
 
@@ -404,13 +465,13 @@
       <a href="/codex"     class="nav-link {% if active_page == 'codex' %}active{% endif %}">Codex</a>
       <a href="/factions"  class="nav-link {% if active_page == 'factions' %}active{% endif %}">Factions</a>
       <a href="/chronicle" class="nav-link {% if active_page == 'chronicle' %}active{% endif %}">Chronicle</a>
-      <a href="/story"     class="nav-link {% if active_page == 'story' %}active{% endif %}">Story</a>
       <a href="/god"       class="nav-link {% if active_page == 'god' %}active{% endif %}">God Panel</a>
     </div>
     <div class="nav-meta">
       <span class="nav-date" id="nav-date">—</span>
       <span class="nav-tick-pill" id="nav-tick">Tick —</span>
     </div>
+    <a href="/menu" class="nav-link" style="margin-left:auto;border:1px solid rgba(201,169,110,0.3);padding:5px 14px;">Main Menu</a>
     <button class="nav-hamburger" onclick="openMobileNav()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -425,8 +486,8 @@
   <a href="/codex"     class="nav-link" onclick="closeMobileNav()">Codex</a>
   <a href="/factions"  class="nav-link" onclick="closeMobileNav()">Factions</a>
   <a href="/chronicle" class="nav-link" onclick="closeMobileNav()">Chronicle</a>
-  <a href="/story"     class="nav-link" onclick="closeMobileNav()">Story</a>
   <a href="/god"       class="nav-link" onclick="closeMobileNav()">God Panel</a>
+  <a href="/menu"      class="nav-link nav-exit-btn" onclick="closeMobileNav()">&#9665; Menu</a>
 </div>
 
 <div class="page-body">

@@ -2,6 +2,7 @@ import atexit
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -34,17 +35,243 @@ MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/map")
 
 app = Flask(__name__)
 
+BATTLE_PATTERNS = [
+    r"\bbattle\b",
+    r"\bbattles\b",
+    r"\bwar\b",
+    r"\bwarfare\b",
+    r"\bskirmish\b",
+    r"\bsiege\b",
+    r"\bclash\b",
+    r"\braid\b",
+    r"\bassault\b",
+    r"\bcampaign\b",
+    r"\bwarship\b",
+    r"\bwarships\b",
+    r"\bwar-band\b",
+    r"\bwar-bands\b",
+    r"\bfleet\b",
+]
+
+
+# ── Permanent house identities ────────────────────────────────────────────────
+# These houses always exist in every new game; only their members get fresh names.
+_PERMANENT_HOUSES = [
+    {"house": "House Adkison",       "race": "Human",    "home": "plains"},
+    {"house": "House Highland",      "race": "Human",    "home": "plains"},
+    {"house": "House Aurand",        "race": "Human",    "home": "plains"},
+    {"house": "House Ver Meer",      "race": "Human",    "home": "coastal"},
+    {"house": "House Gross",         "race": "Human",    "home": "plains"},
+    {"house": "House Darkleaf",      "race": "High Elf", "home": "dense forest"},
+    {"house": "Goldfinger-Duke Clan","race": "Dwarf",    "home": "mountain"},
+]
+
+_FRESH_NAMES = {
+    "Human":    ["Aldric","Bren","Caela","Davan","Elsin","Farryn","Gara","Holt","Isel","Jorn",
+                 "Kella","Leris","Maren","Nori","Orlen","Petra","Quel","Rana","Sela","Torren",
+                 "Ulva","Varis","Wren","Aryn","Berin","Doryn","Erris","Fael","Garyn","Heva"],
+    "High Elf": ["Aelindra","Bereth","Caladis","Daerith","Elowen","Faelyn","Galadis","Haerith",
+                 "Iorel","Jaelis","Kaladis","Lysse","Maerith","Naelis","Oreith","Pyriel","Raelis",
+                 "Silith","Taeris","Urelith","Vaelin","Waelis","Xirith","Yaelis","Zaelin"],
+    "Dwarf":    ["Aldrok","Breth","Dorva","Grath","Helva","Kordak","Morra","Orik","Runa","Skor",
+                 "Thora","Urgom","Vessa","Wulda","Bera","Dagna","Fulda","Grunda","Hulda","Jorva"],
+}
+
+_HOUSE_MEMBER_ROLES = [
+    ("Leader",  "House head",      72, 62, 68, 74, "honorable"),
+    ("Heir",    "Heir apparent",   58, 64, 62, 70, "defensive"),
+    ("Advisor", "Senior adviser",  54, 72, 52, 68, "opportunistic"),
+    ("Agent",   "House agent",     50, 58, 64, 60, "opportunistic"),
+]
+
+# ── Region-based faction lore ─────────────────────────────────────────────────
+FACTION_LORE: dict[str, dict] = {
+    "Dread Elves":          {"species": "Dark Elf",          "role": "Shadow Dominion"},
+    "Kenku":                {"species": "Kenku",             "role": "Canopy Intelligence"},
+    "Verdan Rootbound":     {"species": "Verdan",            "role": "Environmental Defense"},
+    "Sylthari Web Domain":  {"species": "Sylthari",          "role": "Territorial Trap Control"},
+    "Greenveil Clans":      {"species": "Human",             "role": "Forest Clans"},
+    "Ironwood Settlers":    {"species": "Human",             "role": "Forest Settlers"},
+    "Veilbound":            {"species": "Human",             "role": "Forest Mystics"},
+    "Unbound":              {"species": "Human",             "role": "Free Company"},
+    "Dwarves of Lostfeld":  {"species": "Dwarf",             "role": "Resource Dominion"},
+    "Roki":                 {"species": "Roki",              "role": "Environmental Anti-Expansion"},
+    "Stonekin":             {"species": "Stonekin",          "role": "Environmental Defense"},
+    "Kharox Clans":         {"species": "Kharox",            "role": "Mountain Warriors"},
+    "Gravekin Depths":      {"species": "Gravekin",          "role": "Subterranean Presence"},
+    "Deepwatch":            {"species": "Human",             "role": "Containment Order"},
+    "Elves of Glenhaven":   {"species": "High Elf",          "role": "Balanced Dominion"},
+    "Faeborn":              {"species": "Faeborn",           "role": "Forest Spirits"},
+    "Sylvan Covenant":      {"species": "Multi-species",     "role": "Forest Alliance"},
+    "Centaur Tribes":       {"species": "Centaur",           "role": "Territorial Mobility"},
+    "Glenhaven Rangers":    {"species": "Human",             "role": "Adaptive Guardians"},
+    "Admiral Electorate":   {"species": "Human",             "role": "Naval Trade"},
+    "Tideborn Dominion":    {"species": "Tideborn",          "role": "Sea-Adapted Control"},
+    "Tidebound Circle":     {"species": "Tortle",            "role": "Coastal Stability"},
+    "Stormwardens":         {"species": "Human",             "role": "Weather Control"},
+    "Blacktide Corsairs":   {"species": "Human",             "role": "Maritime Pirates"},
+    "Twin Realms":          {"species": "Human",             "role": "Unified Dominion"},
+    "Aelorians":            {"species": "High Elf (Ancient)","role": "Reclaimed Dominion"},
+    "Dwarven Hold":         {"species": "Dwarf",             "role": "Fortified Dominion"},
+    "Orc War Dominion":     {"species": "Orc",               "role": "Conquest State"},
+    "Drow Dominion":        {"species": "Dark Elf",          "role": "Shadow Control"},
+    "Vargai Packs":         {"species": "Vargai",            "role": "Structured Packs"},
+    "Ursari Dominion":      {"species": "Ursari",            "role": "Territorial Strength"},
+    "Frostwraiths":         {"species": "Frostwraith",       "role": "Environmental Horror"},
+    "Winter Court":         {"species": "Frost Fey",         "role": "Mystical Kingdom"},
+    "Wintermark":           {"species": "Human",             "role": "Noble Survival"},
+    "Orcs":                 {"species": "Orc",               "role": "War Dominion"},
+    "Dwarves":              {"species": "Dwarf",             "role": "Mountain Defense"},
+    "Kharox":               {"species": "Kharox",            "role": "Mountain Raiders"},
+    "Skarren":              {"species": "Skarren",           "role": "Battlefield Scavengers"},
+    "Stonewardens":         {"species": "Human",             "role": "Defensive Order"},
+    "Goblins":              {"species": "Goblin",            "role": "Dominant Population"},
+    "Gritkin":              {"species": "Gritkin",           "role": "Subterranean Movement"},
+    "Scorpids":             {"species": "Scorpid",           "role": "Enforcers"},
+    "Shaleborn":            {"species": "Shaleborn",         "role": "Territorial Anchors"},
+    "Dustlanders":          {"species": "Human",             "role": "Adaptable Survivors"},
+    "Red Banner Legion":    {"species": "Human",             "role": "Elite Mercenary Dominion"},
+}
+
+_SPECIES_RULER: dict[str, tuple] = {
+    "Human":            ("Lord",            ["Ambitious", "Pragmatic"],              "appointment"),
+    "Dark Elf":         ("Shadowlord",      ["Cunning", "Patient", "Ruthless"],      "chosen"),
+    "High Elf":         ("Archon",          ["Ancient", "Measured"],                 "council vote"),
+    "High Elf (Ancient)":("Archon",         ["Ancient", "Measured", "Inscrutable"],  "council vote"),
+    "Dwarf":            ("Thane",           ["Stubborn", "Honorable"],               "inheritance"),
+    "Orc":              ("Warchief",        ["Brutal", "Fierce"],                    "combat"),
+    "Goblin":           ("Boss",            ["Greedy", "Cunning"],                   "bribery"),
+    "Kenku":            ("Speaker",         ["Cunning", "Observant"],                "election"),
+    "Centaur":          ("Chieftain",       ["Fierce", "Independent"],               "combat"),
+    "Tortle":           ("Elder",           ["Patient", "Wise"],                     "council vote"),
+    "Faeborn":          ("Sovereign",       ["Elusive", "Mystical"],                 "chosen"),
+    "Vargai":           ("Pack-lord",       ["Loyal", "Fierce"],                     "combat"),
+    "Ursari":           ("Den-lord",        ["Territorial", "Enduring"],             "inheritance"),
+    "Frostwraith":      ("Wraith",          ["Ancient", "Unknowable"],               "unknown"),
+    "Frost Fey":        ("Winter Queen",    ["Mystical", "Capricious"],              "chosen"),
+    "Tideborn":         ("Tide-lord",       ["Fluid", "Strategic"],                  "election"),
+    "Roki":             ("Stone-speaker",   ["Stubborn", "Ancient"],                 "council vote"),
+    "Kharox":           ("War-elder",       ["Brutal", "Cunning"],                   "combat"),
+    "Gravekin":         ("Deepmaster",      ["Ancient", "Patient"],                  "chosen"),
+    "Gritkin":          ("Burrow-chief",    ["Cunning", "Industrious"],              "election"),
+    "Scorpid":          ("Sting-lord",      ["Precise", "Ruthless"],                 "combat"),
+    "Shaleborn":        ("Anchor",          ["Immovable", "Ancient"],                "chosen"),
+    "Skarren":          ("Scavenge-lord",   ["Cunning", "Opportunistic"],            "power"),
+    "Multi-species":    ("Covenant-Speaker",["Diplomatic", "Wise"],                  "council vote"),
+    "Sylthari":         ("Web-sovereign",   ["Patient", "Territorial"],              "chosen"),
+    "Verdan":           ("Root-guardian",   ["Ancient", "Protective"],               "chosen"),
+    "Stonekin":         ("Stone-warden",    ["Stubborn", "Enduring"],                "inheritance"),
+}
+
+
+def _build_fresh_house_characters(faction_identities: dict) -> list:
+    """
+    Generate one set of fresh (randomly-named) house_character entries for
+    the permanent houses, matched to whichever factions are present by race.
+    Returns a list ready to drop into world["house_characters"].
+    """
+    import random
+
+    # Map race → first faction name that has that race
+    race_to_faction: dict[str, str] = {}
+    for fname, fdata in faction_identities.items():
+        r = fdata.get("race", "Human")
+        if r not in race_to_faction:
+            race_to_faction[r] = fname
+
+    chars = []
+    used_first_names: set = set()
+
+    for hdef in _PERMANENT_HOUSES:
+        race     = hdef["race"]
+        house    = hdef["house"]
+        faction  = race_to_faction.get(race)
+        if not faction:
+            continue  # no faction of this race in this world — skip
+
+        name_pool = list(_FRESH_NAMES.get(race, _FRESH_NAMES["Human"]))
+        random.shuffle(name_pool)
+
+        last_name = house.replace("House ", "").replace(" Clan", "").replace("-Duke", "")
+
+        member_pool = list(_HOUSE_MEMBER_ROLES)
+        random.shuffle(member_pool)
+
+        for i, (core_role, role_label, influence, morality, ambition, loyalty, bias) in enumerate(member_pool[:4]):
+            # Pick an unused first name from the pool
+            first = next((n for n in name_pool if n not in used_first_names), name_pool[0])
+            used_first_names.add(first)
+            name_pool = [n for n in name_pool if n != first]
+
+            full_name = f"{first} {last_name}"
+            age = [45, 32, 38, 27][i]
+            intel = max(35, min(90, int((influence + ambition + loyalty) / 3)))
+
+            chars.append({
+                "name":         full_name,
+                "faction":      faction,
+                "house":        house,
+                "coreRole":     core_role,
+                "role":         role_label,
+                "status":       "alive",
+                "age":          float(age),
+                "race":         race,
+                "influenceScore": influence,
+                "morality":     float(morality),
+                "ambition":     float(ambition),
+                "loyalty":      float(loyalty),
+                "intelligence": float(intel),
+                "bias":         bias,
+                "currentGoal":  "",
+                "recentActions": [],
+                "location":     "",
+                "destination":  "",
+                "ticks_to_arrive": 0,
+                "journey_purpose": "",
+                "warfare":   max(5, min(95, int(ambition * 0.5 + (100 - morality) * 0.3 + influence * 0.2))),
+                "diplomacy": max(5, min(95, int(intel * 0.4 + loyalty * 0.4 + morality * 0.2))),
+                "intrigue":  max(5, min(95, int(ambition * 0.4 + (100 - loyalty) * 0.3 + intel * 0.3))),
+                "faith":     20,
+                "health":    85.0,
+                "wounds":    [],
+                "memory":    [],
+                "relationships": {},
+            })
+
+    return chars
+
 
 def _read_json(path, default):
-    if Path(path).exists():
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
+    p = Path(path)
+    if p.exists() and p.stat().st_size > 0:
+        try:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
     return default
 
 
 def _write_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+
+
+def _classify_chronicle_entry(text, major_event="", mood=""):
+    haystack = f"{major_event} {text}".lower()
+    if mood.lower() == "violent":
+        return "battles"
+    if any(re.search(pattern, haystack) for pattern in BATTLE_PATTERNS):
+        return "battles"
+    return "chronicle"
+
+
+def _chronicle_excerpt(text, limit=180):
+    value = " ".join(str(text or "").split())
+    if len(value) <= limit:
+        return value
+    trimmed = value[:limit].rsplit(" ", 1)[0].strip()
+    return f"{trimmed}..."
 
 
 def _default_population_state():
@@ -68,7 +295,425 @@ def _default_population_state():
 
 @app.route("/")
 def index():
+    if not WORLD_STATE_FILE.exists():
+        return redirect("/menu")
     return render_template("home.html", active_page="home")
+
+
+@app.route("/menu")
+def menu_page():
+    return render_template("menu.html")
+
+
+@app.route("/api/worlds", methods=["GET"])
+def api_list_worlds():
+    from world_manager import list_worlds
+    return jsonify({"worlds": list_worlds()})
+
+
+@app.route("/api/worlds/load", methods=["POST"])
+def api_load_world():
+    from world_manager import load_world_from_slot
+    data = request.get_json(force=True)
+    filename = data.get("filename", "").strip()
+    if not filename:
+        return jsonify({"error": "filename required"}), 400
+    world = load_world_from_slot(filename)
+    if not world:
+        return jsonify({"error": "failed to load world"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/worlds/campaign", methods=["POST"])
+def api_load_campaign():
+    src = BASE_DIR / "worlds" / "aeloria_campaign_start.json"
+    if not src.exists():
+        return jsonify({"error": "aeloria_campaign_start.json not found"}), 404
+    try:
+        world = json.loads(src.read_text(encoding="utf-8"))
+    except Exception as e:
+        return jsonify({"error": f"failed to read campaign file: {e}"}), 500
+    from scheduler import is_valid_world, safe_save_world
+    if not world or not is_valid_world(world):
+        return jsonify({"error": "campaign file failed validation"}), 500
+    _reset_world_files(world.get("faction_identities") or {})
+    safe_save_world(world)
+    try:
+        from scheduler import run_tick
+        run_tick()
+    except Exception as e:
+        logger.warning(f"Campaign tick failed (world loaded anyway): {e}")
+    return jsonify({"ok": True, "mode": world.get("mode", "campaign"), "tick": world.get("tick", 0)})
+
+
+@app.route("/api/worlds/new", methods=["POST"])
+def api_new_world():
+    from world_manager import create_new_world
+    # Preserve codex/faction artwork references before wiping state
+    codex_images = {}
+    if WORLD_STATE_FILE.exists():
+        try:
+            existing = json.loads(WORLD_STATE_FILE.read_text(encoding="utf-8"))
+            codex_images = existing.get("codex_images", {})
+        except Exception:
+            pass
+    world = create_new_world("starter_world.json")
+    if not world:
+        return jsonify({"error": "failed to create world"}), 500
+    if codex_images:
+        world["codex_images"] = codex_images
+        from scheduler import is_valid_world, safe_save_world
+        if world and world.keys() and is_valid_world(world):
+            safe_save_world(world)
+        else:
+            logger.error("api_new_world: refusing to save codex patch — world failed validation")
+    return jsonify({"ok": True})
+
+
+@app.route("/api/worlds/save", methods=["POST"])
+def api_save_world():
+    from world_manager import save_world_as
+    data = request.get_json(force=True)
+    name = data.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "name required"}), 400
+    save_world_as(name)
+    return jsonify({"ok": True})
+
+
+@app.route("/create")
+def create_world_page():
+    return render_template("create.html")
+
+
+@app.route("/loading")
+def loading_page():
+    return render_template("loading.html")
+
+
+@app.route("/api/faction-presets", methods=["GET"])
+def api_faction_presets():
+    presets_path = BASE_DIR / "faction_presets.json"
+    data = json.loads(presets_path.read_text(encoding="utf-8"))
+    return jsonify(data["presets"])
+
+
+@app.route("/api/region-factions", methods=["GET"])
+def api_region_factions():
+    regions_path = BASE_DIR / "regions.json"
+    data = json.loads(regions_path.read_text(encoding="utf-8"))
+    result = []
+    for region_name, region in data["regions"].items():
+        factions = []
+        for fname in region.get("available_factions", []):
+            lore = FACTION_LORE.get(fname, {"species": "Unknown", "role": "Unknown"})
+            factions.append({
+                "name": fname,
+                "species": lore["species"],
+                "role": lore["role"],
+                "is_canonical": fname == region.get("canonical_faction"),
+            })
+        result.append({
+            "name": region_name,
+            "terrain": region.get("terrain", ""),
+            "canonical_faction": region.get("canonical_faction"),
+            "factions": factions,
+        })
+    return jsonify(result)
+
+
+def _reset_world_files(faction_identities: dict) -> None:
+    """Wipe all per-run files so a new game starts completely clean."""
+    for f in HISTORY_DIR.glob("chronicle_*.txt"):
+        f.unlink(missing_ok=True)
+    for f in HISTORY_DIR.glob("*_tick_*.json"):
+        f.unlink(missing_ok=True)
+    for f in HISTORY_DIR.glob("world_*.json"):
+        f.unlink(missing_ok=True)
+    _write_json(PENDING_LORE_FILE, [])
+    if SYNOPSIS_FILE.exists():
+        SYNOPSIS_FILE.write_text("", encoding="utf-8")
+
+    faction_names = list(faction_identities.keys())
+    races = list({v.get("race", "Unknown") for v in faction_identities.values()})
+    seed_entry = {
+        "type": "world_created",
+        "target": "Aeloria",
+        "detail": ", ".join(faction_names),
+        "lore": (
+            f"A new world has been forged. {len(faction_names)} faction{'s' if len(faction_names) != 1 else ''} "
+            f"({', '.join(faction_names)}) now vie for dominance across Aeloria. "
+            f"The age begins — every throne is unsettled, every border unproven."
+        ),
+        "timestamp": datetime.now().isoformat(),
+    }
+    _write_json(GOD_ACTIONS_FILE, [seed_entry])
+
+
+def _build_world_from_regions(region_assignments: dict, world_name: str, portrait_cache: dict) -> "Response":
+    import random
+
+    # Load canonical region data for validation
+    regions_path = BASE_DIR / "regions.json"
+    regions_data = json.loads(regions_path.read_text(encoding="utf-8"))["regions"]
+
+    # Validate: each assigned faction must exist in that region's available_factions
+    errors = []
+    for rname, fname in region_assignments.items():
+        if not fname:
+            continue
+        rdata = regions_data.get(rname)
+        if not rdata:
+            errors.append(f"Unknown region: {rname!r}")
+            continue
+        available = rdata.get("available_factions", [])
+        if fname not in available:
+            errors.append(f"{fname!r} is not available in {rname!r} (available: {available})")
+    if errors:
+        return jsonify({"error": "invalid assignments", "details": errors}), 400
+
+    # Exactly one faction per region is enforced by the dict structure (one value per key).
+    # Filter out any regions with no assignment.
+    assigned = {rname: fname for rname, fname in region_assignments.items() if fname}
+    unique_factions = list(dict.fromkeys(assigned.values()))
+
+    if not unique_factions:
+        return jsonify({"error": "at least one region must have a faction assigned"}), 400
+
+    leadership_state = []
+    faction_identities = {}
+    faction_power_state = {}
+    relationships = {}
+
+    for fname in unique_factions:
+        lore = FACTION_LORE.get(fname, {"species": "Human", "role": "Unknown"})
+        species = lore["species"]
+        title, traits, succession = _SPECIES_RULER.get(species, ("Lord", ["Ambitious"], "appointment"))
+
+        ruler_name = f"{title} of the {fname}"
+        ruler = {
+            "name": ruler_name,
+            "title": title,
+            "dynasty": f"House of {fname}",
+            "age": random.randint(34, 58),
+            "traits": traits,
+            "causeOfRise": succession,
+            "causeOfEnd": "",
+            "startDay": 0,
+            "endDay": None,
+            "duration": 0,
+            "notableEvents": [],
+            "portrait_image": portrait_cache.get(ruler_name, ""),
+        }
+
+        leadership_state.append({
+            "faction": fname,
+            "currentRuler": ruler,
+            "rulerHistory": [],
+            "dynasties": [{"name": f"House of {fname}", "founder": ruler_name, "prestige": 50, "tier": 2, "status": "active", "members": [ruler_name]}],
+        })
+
+        faction_identities[fname] = {
+            "race": species,
+            "type": lore["role"],
+            "description": f"The {fname} — {lore['role']}.",
+            "traits": traits,
+            "succession": succession,
+        }
+
+        faction_power_state[fname] = 50
+
+        for other in unique_factions:
+            if other == fname:
+                continue
+            relationships.setdefault(fname, {})[other] = {"score": 50, "status": "neutral"}
+
+    # Build region map: strip meta fields, set controller only for assigned regions
+    regions = {}
+    for rname, rdata in regions_data.items():
+        r = {k: v for k, v in rdata.items() if k not in ("available_factions", "canonical_faction")}
+        r["controller"] = assigned.get(rname)  # None for unassigned regions
+        regions[rname] = r
+
+    world = {
+        "tick": 0,
+        "world_date": "Day 0",
+        "primary_event": {
+            "name": f"{world_name} Begins",
+            "summary": f"{world_name} stirs to life. {len(unique_factions)} faction{'s' if len(unique_factions) != 1 else ''} take their first breath.",
+            "severity": 1,
+            "stage": "emerging",
+            "trend": "stable",
+            "involved": unique_factions[:6],
+        },
+        "supporting_events": [],
+        "active_events": [],
+        "active_tensions": [],
+        "recent_events": [],
+        "faction_actions": {},
+        "faction_identities": faction_identities,
+        "faction_power_state": faction_power_state,
+        "leadership_state": leadership_state,
+        "relationships": relationships,
+        "house_characters": _build_fresh_house_characters(faction_identities),
+        "character_updates": [],
+        "faction_resources": {f: {"gold": 100, "food": 100, "troops": 50} for f in unique_factions},
+        "population_state": [],
+        "belief_currents": [],
+        "religious_factions": [],
+        "weather_and_omens": [],
+        "war_outcomes": [],
+        "whispers": [],
+        "chronicle": [],
+        "regions": regions,
+    }
+    if portrait_cache:
+        world["portrait_cache"] = portrait_cache
+
+    from scheduler import is_valid_world, safe_save_world
+    if not is_valid_world(world):
+        logger.error("_build_world_from_regions: refusing to save — world failed validation")
+        return jsonify({"error": "world validation failed"}), 500
+    safe_save_world(world)
+    _reset_world_files(faction_identities)
+    return jsonify({"ok": True, "factions": len(unique_factions), "regions_assigned": len(assigned)})
+
+
+@app.route("/api/worlds/build", methods=["POST"])
+def api_build_world():
+    from world_manager import _extract_portrait_cache
+    data = request.get_json(force=True)
+    world_name = data.get("world_name", "").strip() or "Custom World"
+    portrait_cache = _extract_portrait_cache()
+
+    # ── Region-based builder ──────────────────────────────────────────────────
+    region_assignments = data.get("region_assignments")
+    if region_assignments is not None:
+        if not isinstance(region_assignments, dict) or not region_assignments:
+            return jsonify({"error": "region_assignments must be a non-empty object"}), 400
+        return _build_world_from_regions(region_assignments, world_name, portrait_cache)
+
+    # ── Preset-based builder ──────────────────────────────────────────────────
+    selected_ids = data.get("factions", [])
+    if not selected_ids:
+        return jsonify({"error": "provide region_assignments or a non-empty factions list"}), 400
+
+    presets_path = BASE_DIR / "faction_presets.json"
+    all_presets = json.loads(presets_path.read_text(encoding="utf-8"))["presets"]
+    preset_map = {p["id"]: p for p in all_presets}
+
+    leadership_state = []
+    faction_identities = {}
+    faction_power_state = {}
+    relationships = {}
+
+    for fid in selected_ids:
+        p = preset_map.get(fid)
+        if not p:
+            continue
+        name = p["name"]
+        ruler = dict(p["starting_ruler"])
+        ruler["startDay"] = 0
+        ruler["duration"] = 0
+        ruler["notableEvents"] = []
+        ruler["portrait_image"] = portrait_cache.get(ruler["name"], "")
+
+        leadership_state.append({
+            "faction": name,
+            "currentRuler": ruler,
+            "rulerHistory": [],
+            "dynasties": [{"name": f"House {ruler['name'].split()[-1]}", "prestige": p["power"]}],
+        })
+
+        faction_identities[name] = {
+            "race": p["race"],
+            "type": p["type"],
+            "description": p["description"],
+            "traits": p["traits"],
+            "succession": p["succession"],
+        }
+
+        faction_power_state[name] = p["power"]
+
+        for other_id in selected_ids:
+            if other_id == fid:
+                continue
+            other_name = preset_map[other_id]["name"] if other_id in preset_map else other_id
+            if name not in relationships:
+                relationships[name] = {}
+            relationships[name][other_name] = {"score": 50, "status": "neutral"}
+
+    world = {
+        "tick": 0,
+        "world_date": "Day 0",
+        "primary_event": f"{world_name} begins. The factions take their first breath.",
+        "supporting_events": [],
+        "active_events": [],
+        "active_tensions": [],
+        "recent_events": [],
+        "faction_actions": {},
+        "faction_identities": faction_identities,
+        "faction_power_state": faction_power_state,
+        "leadership_state": leadership_state,
+        "relationships": relationships,
+        "house_characters": _build_fresh_house_characters(faction_identities),
+        "character_updates": [],
+        "faction_resources": {f["name"]: {"gold": 100, "food": 100, "troops": 50} for f in [preset_map[i] for i in selected_ids if i in preset_map]},
+        "population_state": [],
+        "belief_currents": [],
+        "religious_factions": [],
+        "weather_and_omens": [],
+        "war_outcomes": [],
+        "whispers": [],
+        "chronicle": [],
+    }
+
+    if portrait_cache:
+        world["portrait_cache"] = portrait_cache
+
+    from world_manager import get_default_regions, assign_regions_to_factions
+    faction_list = [
+        {"name": p["name"], "race": p["race"], "type": p["type"]}
+        for p in [preset_map[i] for i in selected_ids if i in preset_map]
+    ]
+    world["regions"] = assign_regions_to_factions(faction_list, get_default_regions())
+
+    from scheduler import is_valid_world, safe_save_world
+    if not world or not world.keys() or not is_valid_world(world):
+        logger.error("api_build_world (preset): refusing to save — world failed validation")
+        return jsonify({"error": "world validation failed"}), 500
+    safe_save_world(world)
+    _reset_world_files(faction_identities)
+    return jsonify({"ok": True, "factions": len(leadership_state)})
+
+
+@app.route("/api/worlds/custom", methods=["POST"])
+def api_custom_world():
+    from world_manager import _extract_portrait_cache
+    data = request.get_json(force=True)
+    factions_raw = data.get("factions", [])
+    portrait_cache = _extract_portrait_cache()
+    world = {
+        "tick": 0,
+        "world_date": "Day 0",
+        "primary_event": "A new world is being shaped.",
+        "supporting_events": [],
+        "active_events": [],
+        "factions": {},
+        "characters": {},
+    }
+    if portrait_cache:
+        world["portrait_cache"] = portrait_cache
+    for name in factions_raw:
+        name = name.strip()
+        if name:
+            world["factions"][name] = {"name": name, "power": 50, "relations": {}, "status": "stable"}
+    from scheduler import is_valid_world, safe_save_world
+    if not world or not world.keys() or not is_valid_world(world):
+        logger.error("api_build_world (factions): refusing to save — world failed validation")
+        return jsonify({"error": "world validation failed"}), 500
+    safe_save_world(world)
+    return jsonify({"ok": True, "factions": len(world["factions"])})
 
 
 @app.route("/map")
@@ -94,6 +739,11 @@ def chronicle_page():
 @app.route("/god")
 def god_page():
     return render_template("god.html", active_page="god")
+
+
+@app.route("/leadership")
+def leadership_page():
+    return render_template("leadership.html", active_page="leadership")
 
 
 @app.route("/story")
@@ -144,15 +794,17 @@ def _state_with_display_defaults(state):
             state["leadership_state"] = []
     elif _normalize_leadership_state:
         _normalize_leadership_state(state, state)
-    if not state.get("house_characters"):
+    has_named_chars = any(c.get("name") for c in state.get("house_characters", []))
+    if not has_named_chars and not state.get("house_characters"):
+        # Completely missing — legacy world; seed from defaults for backwards compat
         try:
             from scheduler import _default_house_characters
-
             state["house_characters"] = _default_house_characters()
         except Exception:
             state["house_characters"] = []
-    elif _normalize_house_characters:
+    elif has_named_chars and _normalize_house_characters:
         _normalize_house_characters(state, state)
+    # else: fresh game stubs present but no names yet — leave as-is
     return state
 
 
@@ -284,12 +936,16 @@ def get_chronicle():
                 data = json.loads(tick_file.read_text())
                 mood = data.get("mood", "")
                 major_event = data.get("major_event", "")
+            text = f.read_text(encoding="utf-8")
+            category = _classify_chronicle_entry(text, major_event, mood)
             entries.append({
                 "tick": tick_num,
                 "world_date": world_date,
                 "mood": mood,
                 "major_event": major_event,
-                "text": f.read_text(encoding="utf-8"),
+                "category": category,
+                "excerpt": _chronicle_excerpt(text),
+                "text": text,
             })
         except Exception:
             pass
@@ -543,4 +1199,4 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", "5000"))
     logger.info(f"Aeloria starting on port {port}...")
-    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=True)
