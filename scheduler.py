@@ -113,15 +113,15 @@ def rollback_last_save() -> None:
     logger.info(f"Rollback complete: restored world_state.json from {latest.name}")
 
 
-def simulate_next_tick(world: dict) -> dict:
-    # Placeholder — replace with full simulation logic when ready
-    return world
+def _run_legacy_simulation_tick() -> None:
+    """Legacy simulation path kept for debugging only.
 
-
-def run_simulation_tick() -> None:
-    logger.info("Simulation tick starting")
+    This path is intentionally unscheduled. `run_tick()` is the single
+    authoritative simulation entrypoint for production and API state.
+    """
+    logger.warning("Legacy simulation tick path invoked; use run_tick() instead.")
     if not WORLD_STATE_FILE.exists():
-        logger.error("world_state.json not found — cannot run tick")
+        logger.error("world_state.json not found — cannot run legacy tick")
         return
 
     with open(WORLD_STATE_FILE, "r", encoding="utf-8") as f:
@@ -131,17 +131,14 @@ def run_simulation_tick() -> None:
             logger.error(f"Failed to parse world_state.json: {e}")
             return
 
-    new_world = simulate_next_tick(world)
+    from territory_engine import process_territorial_events
 
+    new_world = process_territorial_events(world)
     if is_valid_world(new_world):
-        from territory_engine import process_territorial_events
-        new_world = process_territorial_events(new_world)
         safe_save_world(new_world)
-        from world_manager import snapshot_world
-        snapshot_world()
-        logger.info("Simulation tick complete")
+        logger.info("Legacy simulation tick complete")
     else:
-        logger.error("Tick produced invalid world state — world_state.json not overwritten")
+        logger.error("Legacy tick produced invalid world state — world_state.json not overwritten")
 
 
 _scheduler = BackgroundScheduler(timezone="UTC")
@@ -6428,6 +6425,16 @@ def _normalize_state(prev_state, new_state):
     return new_state
 
 
+def _canonicalize_world_state(prev_state, state):
+    """Return API-safe, normalized world state for persistence and responses."""
+    normalized = _normalize_state(prev_state or {}, state or {})
+    normalized = ensure_world_structure(normalized, prev_state or {})
+    if not is_valid_world(normalized):
+        logger.error("canonicalize: normalized world failed validation; returning previous state")
+        return prev_state or normalized
+    return normalized
+
+
 def _call_claude(prev_state, pending_lore):
     from anthropic import Anthropic
 
@@ -6789,9 +6796,10 @@ def run_tick():
 
             new_state = _call_claude(prev_state, pending_lore)
             updateWorld(new_state, prev_world=prev_state)
-            new_state = ensure_world_structure(new_state, prev_state)
+            new_state = _canonicalize_world_state(prev_state, new_state)
             _ensure_character_portraits(new_state)
             _ensure_codex_images(new_state)
+            new_state = _canonicalize_world_state(prev_state, new_state)
             _save_world_state(new_state)
             _save_history(new_state)
             _clear_pending_lore()
@@ -6802,7 +6810,7 @@ def run_tick():
             chronicle = _generate_chronicle(new_state)
             if chronicle:
                 new_state["chronicle"] = chronicle
-                new_state = ensure_world_structure(new_state, prev_state)
+                new_state = _canonicalize_world_state(prev_state, new_state)
                 _save_world_state(new_state)
 
             _generate_tick_voice(chronicle, new_state["tick"])
@@ -6835,14 +6843,9 @@ def start_scheduler():
         id="monday_story",
         replace_existing=True,
     )
-    if not _scheduler.get_job("simulation_tick"):
-        _sim_trigger = IntervalTrigger(seconds=10) if TEST_MODE else IntervalTrigger(days=1)
-        _scheduler.add_job(
-            run_simulation_tick,
-            _sim_trigger,
-            id="simulation_tick",
-            max_instances=1,
-        )
+    if _scheduler.get_job("simulation_tick"):
+        _scheduler.remove_job("simulation_tick")
+    logger.info("Authoritative tick mode enabled: run_tick() is the only scheduled simulation path.")
     if not TEST_MODE:
         _scheduler.start()
         logger.info(f"Scheduler started - tick every {tick_hours}h, story every Monday 9am UTC.")
@@ -6864,12 +6867,12 @@ def stop_scheduler():
 
 
 def pause_ticks() -> None:
-    if _scheduler.running and _scheduler.get_job("simulation_tick"):
-        _scheduler.pause_job("simulation_tick")
-        logger.info("Simulation tick paused for world switch.")
+    if _scheduler.running and _scheduler.get_job("world_tick"):
+        _scheduler.pause_job("world_tick")
+        logger.info("World tick paused for world switch.")
 
 
 def resume_ticks() -> None:
-    if _scheduler.running and _scheduler.get_job("simulation_tick"):
-        _scheduler.resume_job("simulation_tick")
-        logger.info("Simulation tick resumed after world switch.")
+    if _scheduler.running and _scheduler.get_job("world_tick"):
+        _scheduler.resume_job("world_tick")
+        logger.info("World tick resumed after world switch.")

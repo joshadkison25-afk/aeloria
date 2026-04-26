@@ -2,8 +2,8 @@
   {
     "type": "world_created",
     "target": "Aeloria",
-    "detail": "Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven",
-    "lore": "A new world has been forged. 3 factions (Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven) now vie for dominance across Aeloria. The age begins \u2014 every throne is unsettled, every border unproven.",
-    "timestamp": "2026-04-25T17:49:00.210935"
+    "detail": "Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven, Admiral Electorate, Twin Realms, Vargai Packs, Orcs, Goblins, Red Banner Legion",
+    "lore": "A new world has been forged. 9 factions (Dread Elves, Dwarves of Lostfeld, Elves of Glenhaven, Admiral Electorate, Twin Realms, Vargai Packs, Orcs, Goblins, Red Banner Legion) now vie for dominance across Aeloria. The age begins \u2014 every throne is unsettled, every border unproven.",
+    "timestamp": "2026-04-25T19:49:00.105885"
   }
 ]
