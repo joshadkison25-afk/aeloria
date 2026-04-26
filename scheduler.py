@@ -1028,7 +1028,6 @@ Keep arrays concise:
 - max 20 faction resources
 - max 20 relationships
 - max 20 leadership_state entries
-- max 120 house_characters
 
 Character recording:
 - Every character_updates item must include biography and portrait fields, even if some values are "Unknown"
@@ -5575,7 +5574,7 @@ def _normalize_house_characters(prev_state, new_state):
         new_state.get("relationships", [])
     )
 
-    new_state["house_characters"] = rows[:200]
+    new_state["house_characters"] = rows[:300]
     from death_system import run_death_system
 
     run_death_system(new_state)
@@ -7159,9 +7158,63 @@ def run_tick():
         logger.info("Running world tick...")
         try:
             prev_state = _load_world_state()
+            if not isinstance(prev_state, dict):
+                logger.warning(
+                    "run_tick: world_state.json was not an object (%s); using empty state fallback",
+                    type(prev_state).__name__,
+                )
+                prev_state = {}
             pending_lore = _load_pending_lore()
 
-            new_state = _call_claude(prev_state, pending_lore)
+            try:
+                new_state = _call_claude(prev_state, pending_lore)
+            except Exception as llm_exc:
+                # Keep the world moving even if external LLM calls are unavailable
+                # (for example: exhausted API credits, timeouts, provider outages).
+                fallback_tick = int((prev_state or {}).get("tick", 0)) + 1
+                fallback_day = f"Day {fallback_tick}"
+                logger.warning(
+                    "LLM tick generation failed; using local fallback simulation: %s",
+                    llm_exc,
+                )
+                new_state = dict(prev_state or {})
+                faction_identities = new_state.get("faction_identities", {})
+                if isinstance(faction_identities, dict):
+                    involved = list(faction_identities.keys())[:6]
+                elif isinstance(faction_identities, list):
+                    involved = [
+                        row.get("name")
+                        for row in faction_identities
+                        if isinstance(row, dict) and row.get("name")
+                    ][:6]
+                else:
+                    involved = []
+                new_state["tick"] = fallback_tick
+                new_state["world_date"] = fallback_day
+                new_state["primary_event"] = {
+                    "name": "The Clock Moves Without Prophecy",
+                    "summary": (
+                        "A quiet day passes without fresh divine insight. Existing tensions "
+                        "and political momentum continue shaping Aeloria."
+                    ),
+                    "severity": 1,
+                    "stage": "ongoing",
+                    "trend": "stable",
+                    "involved": involved,
+                }
+                fallback_note = {
+                    "region": "Aeloria",
+                    "text": (
+                        "The day advanced under local simulation while the prophecy engine was unavailable."
+                    ),
+                    "impact": "low",
+                }
+                raw_recent = new_state.get("recent_events", [])
+                if isinstance(raw_recent, list):
+                    existing_recent = [row for row in raw_recent if isinstance(row, dict)]
+                else:
+                    existing_recent = []
+                new_state["recent_events"] = [fallback_note] + existing_recent[:11]
             updateWorld(new_state, prev_world=prev_state)
             new_state = _canonicalize_world_state(prev_state, new_state)
             _ensure_character_portraits(new_state)
@@ -7202,7 +7255,7 @@ def _run_monday_story():
 
 
 def start_scheduler():
-    tick_hours = int(os.getenv("TICK_INTERVAL_HOURS", "24"))
+    tick_hours = int(os.getenv("TICK_INTERVAL_HOURS", "8"))
     _scheduler.add_job(run_tick, IntervalTrigger(hours=tick_hours), id="world_tick", replace_existing=True)
     _scheduler.add_job(
         _run_monday_story,

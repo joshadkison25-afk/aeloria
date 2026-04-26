@@ -23,7 +23,7 @@ DEFAULT_BIRTH_CONFIG = {
     "female_age_min": 16,
     "female_age_max": 45,
     "male_age_min": 16,
-    "max_births_per_tick": 2,
+    "max_births_per_tick": 3,
     "stat_variance": 8,
     "trait_inherit_chance": 0.45,
     "random_extra_trait_chance": 0.08,

@@ -411,6 +411,15 @@ def loading_page():
     return render_template("loading.html")
 
 
+@app.route("/<path:filename>")
+def public_assets(filename):
+    public_dir = BASE_DIR / "public"
+    target = public_dir / filename
+    if not target.exists() or target.is_dir():
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(public_dir, filename)
+
+
 @app.route("/api/faction-presets", methods=["GET"])
 def api_faction_presets():
     presets_path = BASE_DIR / "faction_presets.json"
@@ -776,6 +785,16 @@ def leadership_page():
 @app.route("/story")
 def story_page():
     return render_template("story.html", active_page="story")
+
+
+@app.route("/intel")
+def intel_page():
+    return render_template("intel.html", active_page="intel")
+
+
+@app.route("/families")
+def families_page():
+    return render_template("families.html", active_page="families")
 
 
 @app.route("/api/story")
