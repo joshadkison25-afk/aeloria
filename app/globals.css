@@ -223,6 +223,235 @@ a {
   display: none;
 }
 
+/* CK3-style atlas: pan/zoom hex canvas */
+.fantasy-map-stage--atlas {
+  padding: 0.4rem 0.5rem 0.5rem;
+}
+
+.fantasy-map-frame--atlas {
+  min-height: 0;
+  height: min(100dvh, 100vh) !important;
+  max-height: 100dvh;
+}
+
+.fantasy-map-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  background: #05060b;
+  cursor: default;
+}
+
+.fantasy-map-viewport.is-panning {
+  cursor: grabbing;
+}
+
+.fantasy-map-world {
+  will-change: transform;
+  transform-origin: 0 0;
+  width: 100%;
+}
+
+.fantasy-map-canvas {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.fantasy-map-atlas-mood {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.fantasy-map-atlas-mood__vignette {
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, rgba(0, 0, 0, 0) 0%, rgba(2, 6, 18, 0.35) 55%, rgba(0, 0, 0, 0.55) 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+.fantasy-map-terrain {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  filter: contrast(1.04) saturate(1.1) drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
+  border-radius: 2px;
+}
+
+.fantasy-map-atlas-crown {
+  position: absolute;
+  z-index: 8;
+  top: 0.65rem;
+  left: 0.9rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  pointer-events: none;
+  line-height: 1.1;
+  font-family: Georgia, 'Palatino Linotype', serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 18px rgba(0, 0, 0, 0.5);
+}
+
+.fantasy-map-atlas-crown__title {
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f4e4bc;
+  opacity: 0.95;
+}
+
+.fantasy-map-atlas-crown__sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200, 186, 150, 0.85);
+}
+
+.fantasy-map-compass {
+  position: absolute;
+  z-index: 8;
+  top: 0.6rem;
+  right: 0.75rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 188, 120, 0.35);
+  background: linear-gradient(160deg, rgba(18, 16, 22, 0.85), rgba(6, 8, 16, 0.75));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.fantasy-map-compass__n {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #d6b16d;
+  transform: translateY(-1px);
+}
+
+.fantasy-map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fantasy-map-legend__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.fantasy-map-legend__swatch {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  border: 1px solid rgba(250, 233, 197, 0.25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35) inset;
+}
+
+.fantasy-map-legend__name {
+  color: rgba(240, 228, 200, 0.92);
+  line-height: 1.25;
+}
+
+.fantasy-map-hexes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.fantasy-map-hex-hud {
+  position: absolute;
+  z-index: 5;
+  max-width: min(26rem, calc(100% - 1.5rem));
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.4rem;
+  background: rgba(4, 5, 10, 0.82);
+  border: 1px solid rgba(250, 233, 197, 0.18);
+  color: #f0e4c8;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  align-items: baseline;
+}
+
+.fantasy-map-hex-hud__id {
+  font-weight: 700;
+  color: #d6b16d;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.fantasy-map-zoom-bar {
+  position: absolute;
+  z-index: 10;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  pointer-events: auto;
+}
+
+.fantasy-map-zoom-bar button {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(250, 233, 197, 0.2);
+  background: rgba(14, 12, 18, 0.9);
+  color: #f6ebd1;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: Georgia, 'Palatino Linotype', inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.fantasy-map-zoom-bar button:hover {
+  border-color: rgba(227, 189, 117, 0.55);
+  background: rgba(32, 26, 18, 0.95);
+}
+
+.fantasy-map-nav-hint {
+  position: absolute;
+  z-index: 4;
+  right: 0.75rem;
+  top: 0.5rem;
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(250, 233, 197, 0.38);
+  pointer-events: none;
+}
+
 .fantasy-region {
   transition:
     fill-opacity 180ms ease,

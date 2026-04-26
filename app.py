@@ -5,6 +5,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, send_from_directory
@@ -737,7 +738,14 @@ def api_custom_world():
 
 @app.route("/map")
 def map_page():
-    return redirect(MAP_PUBLIC_URL, code=302)
+    # Force browser to pick up the current Next map bundle when dev cache gets sticky.
+    # Uses Map.tsx mtime as a stable cache-buster that updates whenever map code changes.
+    map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
+    parsed = urlsplit(MAP_PUBLIC_URL)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query["cb"] = str(map_ts)
+    target = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+    return redirect(target, code=302)
 
 
 @app.route("/codex")
@@ -1203,19 +1211,36 @@ def latest_audio():
     return jsonify({"url": f"/static/audio/{latest.name}", "tick": int(latest.stem.split("_")[1])})
 
 
+def _env_truthy(name: str, default: str = "0") -> bool:
+    return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
+
+
 if __name__ == "__main__":
     for d in ["logs", "history", "lore", "weekly_stories", "conversations", "static/audio"]:
         (BASE_DIR / d).mkdir(parents=True, exist_ok=True)
 
+    # Auto-reload on code changes: set FLASK_DEBUG=1 in .env (see .env.example) or `dev-flask.bat`
+    # Use 0 in production. With the reloader, only the Werkzeug worker runs schedulers (not the parent watch process)
+    use_flask_reloader = _env_truthy("FLASK_DEBUG", "0")
+    worker_process = os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not use_flask_reloader
+
     from scheduler import start_scheduler, stop_scheduler
     from lore_watcher import start_watcher, stop_watcher
 
-    start_scheduler()
-    start_watcher()
-
-    atexit.register(stop_scheduler)
-    atexit.register(stop_watcher)
+    if worker_process:
+        start_scheduler()
+        start_watcher()
+        atexit.register(stop_scheduler)
+        atexit.register(stop_watcher)
 
     port = int(os.getenv("PORT", "5000"))
-    logger.info(f"Aeloria starting on port {port}...")
-    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=True)
+    if use_flask_reloader:
+        logger.info(f"Aeloria on port {port} (dev: auto-reload when FLASK_DEBUG=1)")
+    else:
+        logger.info(f"Aeloria starting on port {port}...")
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=use_flask_reloader,
+        use_reloader=use_flask_reloader,
+    )

@@ -7,6 +7,7 @@ services:
       - .env
     environment:
       PORT: 5000
+      FLASK_DEBUG: "0"
       MAP_PUBLIC_URL: /map
     restart: unless-stopped
     volumes:

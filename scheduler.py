@@ -68,7 +68,17 @@ STRUCTURE_REQUIRED_KEYS = {
 # restore from previous world rather than keeping empty.
 CONTAINER_PRESERVE_KEYS = {
     "faction_identities", "region_control", "relationships", "regions",
-    "faction_power_state", "leadership_state", "locations", "house_characters",
+    "faction_power_state",     "leadership_state", "locations", "house_characters",     "faction_economy",
+    "resource_market",
+    "economic_trade_routes",
+    "economic_route_flows",
+    "siege_warfare",
+    "faction_armies",
+    "treaties",
+    "noble_marriages",
+    "character_marriages",
+    "tributary_pacts",
+    "ruler_legitimacy_scores",
 }
 
 def is_valid_world(world: dict) -> bool:
@@ -86,6 +96,13 @@ def ensure_world_structure(world: dict, previous_world: dict) -> dict:
     if not isinstance(world, dict) or not world:
         logger.error("ensure_world_structure: world is invalid — returning previous world")
         return previous_world if isinstance(previous_world, dict) and previous_world else {}
+
+    try:
+        from sim_engine_sanitize import sanitize_world_state
+
+        sanitize_world_state(world)
+    except Exception as e:
+        logger.warning("sanitize_world_state failed (continuing): %s", e)
 
     prev = previous_world if isinstance(previous_world, dict) else {}
 
@@ -2305,12 +2322,12 @@ def _normalize_faction_power_state(prev_state, new_state):
     prev_rows = {
         row.get("faction"): row
         for row in prev_state.get("faction_power_state", [])
-        if row.get("faction")
+        if isinstance(row, dict) and row.get("faction")
     }
     incoming = {
         row.get("faction"): row
         for row in new_state.get("faction_power_state", [])
-        if row.get("faction")
+        if isinstance(row, dict) and row.get("faction")
     }
 
     AXES = ("militaryPower", "economicPower", "politicalInfluence", "religiousInfluence")
@@ -2350,6 +2367,9 @@ def _normalize_faction_power_state(prev_state, new_state):
         rows.append(entry)
 
     new_state["faction_power_state"] = rows
+
+    from economy_simulation import apply_shortage_to_faction_power
+    apply_shortage_to_faction_power(new_state)
 
     # Attach outcome modifiers — computed after all axes are final
     for entry in new_state["faction_power_state"]:
@@ -3677,6 +3697,8 @@ def _normalize_relationships(prev_state, new_state):
     normalized = []
     seen: set = set()
     for row in new_state.get("relationships", []):
+        if not isinstance(row, dict):
+            continue
         a = (row.get("faction_a") or "").strip()
         b = (row.get("faction_b") or "").strip()
         if not a or not b or a == b:
@@ -5388,7 +5410,12 @@ def _compute_faction_event_pressure(relationships):
 def _normalize_house_characters(prev_state, new_state):
     import random
 
-    current_tick = int(new_state.get("tick", 0))
+    current_tick = int(new_state.get("tick", 0) or 0)
+    try:
+        if int(new_state.get("_house_lifecycle_tick", -1)) == current_tick:
+            return
+    except (TypeError, ValueError):
+        pass
 
     prev_rows = {
         (row.get("faction"), row.get("house"), row.get("name")): row
@@ -5480,13 +5507,6 @@ def _normalize_house_characters(prev_state, new_state):
         new_health = _recover_health(row)
         wounds     = list(row.get("wounds") or [])
 
-        # Death check — age-based chance amplified by poor health, plus critical-health baseline
-        age_death_p      = _natural_death_chance(new_age, race) * _health_death_modifier(new_health)
-        critical_death_p = _critical_health_death_chance(new_health)
-        total_death_p    = min(age_death_p + critical_death_p, 0.40)
-        if total_death_p > 0 and random.random() < total_death_p:
-            continue
-
         rows.append({
             "name": row.get("name", seed["name"]),
             "faction": row.get("faction", seed["faction"]),
@@ -5527,11 +5547,6 @@ def _normalize_house_characters(prev_state, new_state):
             continue
         new_age      = _advance_age(row)
         new_health   = _recover_health(row)
-        race         = row.get("race", "Human")
-        age_death_p  = _natural_death_chance(new_age, race) * _health_death_modifier(new_health)
-        crit_death_p = _critical_health_death_chance(new_health)
-        if min(age_death_p + crit_death_p, 0.40) > 0 and random.random() < min(age_death_p + crit_death_p, 0.40):
-            continue
         ai_rels = row.get("relationships") or {}
         if not ai_rels:
             ai_rels = _seed_relationships_for(row, _build_relationship_candidates(row))
@@ -5561,6 +5576,10 @@ def _normalize_house_characters(prev_state, new_state):
     )
 
     new_state["house_characters"] = rows[:200]
+    from death_system import run_death_system
+
+    run_death_system(new_state)
+    new_state["_house_lifecycle_tick"] = current_tick
 
 
 def _normalize_belief_currents(prev_state, new_state):
@@ -6493,6 +6512,27 @@ def _run_decision_engine(prev_state, new_state):
 
 def _normalize_state(prev_state, new_state):
     prev_state = prev_state or {}
+    try:
+        if int(new_state.get("tick", 0)) != int(prev_state.get("tick", -1)):
+            new_state.pop("_economy_engine_tick", None)
+            new_state.pop("_economic_pressure_decisions_tick", None)
+            new_state.pop("_military_ensure_tick", None)
+            new_state.pop("_military_after_econ_tick", None)
+            new_state.pop("_military_faction_decisions_tick", None)
+            new_state.pop("_treaty_system_tick", None)
+            new_state.pop("_marriage_succession_tick", None)
+            new_state.pop("_tributary_system_tick", None)
+            new_state.pop("_legitimacy_system_tick", None)
+            new_state.pop("_diplomatic_faction_decisions_tick", None)
+            new_state.pop("_birth_system_tick", None)
+            new_state.pop("_death_lifecycle_tick", None)
+            new_state.pop("_marriage_system_tick", None)
+            new_state.pop("_family_politics_tick", None)
+            new_state.pop("_house_lifecycle_tick", None)
+            new_state.pop("_intrigue_system_tick", None)
+            new_state.pop("_engine_tick", None)
+    except (TypeError, ValueError):
+        pass
     prev_events = {
         event.get("name"): event
         for event in prev_state.get("active_events", [])
@@ -6536,6 +6576,8 @@ def _normalize_state(prev_state, new_state):
         ]
 
     _normalize_faction_resources(prev_state, new_state)
+    from economy_simulation import normalize_faction_economy_rows
+    normalize_faction_economy_rows(prev_state, new_state)
     _normalize_population_state(prev_state, new_state)
     _normalize_locations(prev_state, new_state)
     _normalize_faction_power_state(prev_state, new_state)
@@ -6594,6 +6636,68 @@ def _normalize_state(prev_state, new_state):
     new_state.setdefault("whispers", [])
     new_state.setdefault("weather_and_omens", [])
     new_state.setdefault("absorbed_lore", [])
+    new_state.setdefault("faction_economy", [])
+    new_state.setdefault("resource_market", {})
+    new_state.setdefault("economic_trade_routes", [])
+    new_state.setdefault("economic_route_flows", {})
+    new_state.setdefault("economic_disruption_price_mult", 1.0)
+    new_state.setdefault("siege_warfare", {})
+    new_state.setdefault("besieged_factions", [])
+    new_state.setdefault("siege_grain_drain_by_faction", {})
+    new_state.setdefault("siege_import_mult", 1.0)
+    new_state.setdefault("siege_stress_add", 0.0)
+    new_state.setdefault("economic_pressure_decisions", [])
+    new_state.setdefault("military_faction_decisions", [])
+    new_state.setdefault("treaties", [])
+    new_state.setdefault("treaty_tick_outcomes", [])
+    new_state.setdefault("diplomatic_standing", {})
+    new_state.setdefault("world_treaty_order", 100.0)
+    new_state.setdefault("noble_marriages", [])
+    new_state.setdefault("character_marriages", [])
+    new_state.setdefault("pending_marriage_pairs", [])
+    new_state.setdefault("marriage_events", [])
+    new_state.setdefault("succession_events", [])
+    new_state.setdefault("birth_events", [])
+    new_state.setdefault("death_events", [])
+    new_state.setdefault(
+        "tick_lifecycle",
+        {
+            "births": [],
+            "deaths": [],
+            "marriages": [],
+            "succession_events": [],
+        },
+    )
+    new_state.setdefault("dynastic_legitimacy", {})
+    new_state.setdefault("dynastic_report", {"marriages": [], "claims": [], "potential_conflicts": []})
+    new_state.setdefault("tributary_pacts", [])
+    new_state.setdefault("tributary_resentment", {})
+    new_state.setdefault(
+        "tributary_report",
+        {"tributaries": [], "payments": [], "tension_level": 0.0},
+    )
+    new_state.setdefault("ruler_legitimacy_scores", {})
+    new_state.setdefault("legitimacy_report", [])
+    new_state.setdefault("legitimacy_events", [])
+    new_state.setdefault("diplomatic_faction_decisions", [])
+    new_state.setdefault("intrigue_decisions", [])
+    new_state.setdefault("faction_intrigue", [])
+    new_state.setdefault("intrigue_pending", [])
+    new_state.setdefault("intrigue_actions", [])
+    new_state.setdefault("spy_networks", [])
+    new_state.setdefault("assassination_reports", [])
+    new_state.setdefault("sabotage_reports", [])
+    new_state.setdefault("sabotage_price_stress", 0.0)
+    new_state.setdefault("blackmail_reports", [])
+    new_state.setdefault("active_blackmail_coercion", [])
+    new_state.setdefault(
+        "counterintelligence_report",
+        {"detected_actions": [], "exposed_factions": [], "penalties": []},
+    )
+    new_state.setdefault("faction_armies", [])
+    new_state.setdefault("military_attrition", [])
+    new_state.setdefault("military_supply", [])
+    new_state.setdefault("military_weather_attrition_mult", 1.0)
 
     return new_state
 
@@ -6925,6 +7029,22 @@ def _archive_tick_events(state):
     state["tick_history"] = sorted(state["tick_history"], key=lambda h: h.get("tick", 0))[-50:]
 
 
+def _apply_tick_lifecycle_report(state: dict) -> None:
+    """Unified marriage / birth / death / succession slice for the tick (API + tick_history)."""
+    t = int(state.get("tick", 0) or 0)
+    report = {
+        "births": list(state.get("birth_events") or []),
+        "deaths": list(state.get("death_events") or []),
+        "marriages": list(state.get("marriage_events") or []),
+        "succession_events": list(state.get("succession_events") or []),
+    }
+    state["tick_lifecycle"] = report
+    for h in reversed(state.get("tick_history") or []):
+        if h.get("tick") == t:
+            h["tick_lifecycle"] = report
+            break
+
+
 def updateWorld(world, prev_world=None):
     """Execute one full mechanical tick on an already-normalized world state.
 
@@ -6939,6 +7059,20 @@ def updateWorld(world, prev_world=None):
       3. War Attrition   — ongoing conflicts drain economy / military each tick;
                            10-tick wars trigger an exhaustion event
       4. History Archive — append a concise mechanical record to tick_history
+      5. Faction armies    — ensure/merge `faction_armies` with prior tick; bootstrap if missing
+      6. Economy           — P/C, stockpiles, shortages; grain and gold use summed army manpower
+      7. Army field state    — supply, morale, desertion (after shortages are known)
+      8. Economic pressure  — per-faction economic decisions (trade, taxes, raids, supply lines)
+      9. Military strategy  — per-faction military posture (survival > supply > defense > expansion)
+     10. Treaties         — expiration, breach detection vs. decisions and economy, trust and reputation
+     11. Marriages         — eligible house pairs, political/internal unions, trust & diplomacy hooks
+     12. Births           — children from `character_marriages`
+     13. Intrigue         — covert ops (gold, agent stats); `pending_character_deaths` before deaths resolve
+     14. House lifecycle  — age/heal house_characters, then deaths (succession on ruler death immediately)
+     15. Dynastic         — `noble_marriages` report, cross-house claims, succession pressure
+     16. Family politics  — house size, heirs, rival siblings, marriage-web ties
+     17. Legitimacy      — ruler scores; feeds diplomacy & unrest
+     18. Diplomacy       — per-faction diplomatic posture (sees new rulers and tensions)
 
     Args:
         world:      Already Claude-normalized world state dict (mutated in-place).
@@ -6948,6 +7082,13 @@ def updateWorld(world, prev_world=None):
     """
     if not world:
         return world
+
+    try:
+        from sim_engine_sanitize import sanitize_world_state
+
+        sanitize_world_state(world)
+    except Exception as e:
+        logger.warning("sanitize_world_state in updateWorld: %s", e)
 
     # Guard: one engine pass per tick (prevents double-run if called more than once)
     tick = int(world.get("tick", 0))
@@ -6965,6 +7106,50 @@ def updateWorld(world, prev_world=None):
 
     # ── 4. Tick History ───────────────────────────────────────────────────────
     _archive_tick_events(world)
+
+    # ── 5. Faction resource economy (production, consumption, shortages) ─────
+    from military_simulation import ensure_faction_armies, run_military_after_economy_tick
+    ensure_faction_armies(world, prev_world or {})
+
+    from economy_simulation import run_faction_economy_tick
+    run_faction_economy_tick(world, prev_world or {})
+
+    from tributary_system import run_tributary_system
+    run_tributary_system(world)
+
+    run_military_after_economy_tick(world, prev_world or {})
+
+    from economic_pressure_decisions import run_economic_pressure_decisions
+    run_economic_pressure_decisions(world)
+
+    from military_faction_decisions import run_military_faction_decisions
+    run_military_faction_decisions(world)
+
+    from treaty_system import run_treaty_system
+    run_treaty_system(world)
+
+    from marriage_system import run_marriage_system
+    from birth_system import run_birth_system
+
+    run_marriage_system(world)
+    run_birth_system(world)
+    from intrigue_system import run_intrigue_system
+    run_intrigue_system(world)
+    _normalize_house_characters(prev_world or {}, world)
+
+    from marriage_succession import run_marriage_succession_tick
+    run_marriage_succession_tick(world)
+
+    from family_politics import run_family_politics
+    run_family_politics(world)
+
+    from legitimacy_system import run_legitimacy_system
+    run_legitimacy_system(world)
+
+    from diplomatic_faction_decisions import run_diplomatic_faction_decisions
+    run_diplomatic_faction_decisions(world)
+
+    _apply_tick_lifecycle_report(world)
 
     return world
 

@@ -340,5 +340,62 @@
     "status": "queued",
     "created_tick": 31,
     "created_at": "2026-04-24T14:21:56.299887"
+  },
+  {
+    "key": "place:Stonebreak",
+    "kind": "place",
+    "name": "Stonebreak",
+    "prompt": "Location illustration for Stonebreak: Both of Ashveil's documents arrived by midday. The Senior Council read them in afternoon session and voted four to one to dispatch a formal envoy. Senior Druid Pellin Thornvale was appointed and will depart at dawn Day 33 with a Council letter asserting institutional authority and demanding Varek's transfer to Monastery custody.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-stonebreak.png",
+    "static_path": "/static/illustrations/codex/place-stonebreak.png",
+    "status": "completed",
+    "created_tick": 32,
+    "created_at": "2026-04-25T23:30:55.235415",
+    "last_attempt_at": "2026-04-25T23:31:34.600681",
+    "error": ""
+  },
+  {
+    "key": "lore:The Varek Audience \u2014 Lostfeld's Reckoning Begins",
+    "kind": "lore",
+    "name": "The Varek Audience \u2014 Lostfeld's Reckoning Begins",
+    "prompt": "Major lore event illustration for The Varek Audience \u2014 Lostfeld's Reckoning Begins: Grand Druid Varek was brought before Thane Ironmaul in the clan hall at midmorning, wearing clean clothes and carrying nothing. He spoke for twenty minutes without pause. He claimed the entity beneath Lostfeld had chosen him as its voice and that the seals were not imprisonment but invitation. Ironmaul listened without interrupting. When Varek finished, Ironmaul said three words: 'You will stay.' Korin and the clan elders said nothing. The Runewardens scribes recorded everything. By afternoon, Torvek Runewarden returned from the deep shaft with a disturbing report: two of the seven inscription seals showed recent fissure \u2014 not broken, but changed.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-the-varek-audience-lostfeld-s-reckoning-begins.png",
+    "static_path": "/static/illustrations/codex/lore-the-varek-audience-lostfeld-s-reckoning-begins.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T23:31:34.602987"
+  },
+  {
+    "key": "lore:Ashveil's Documents Arrive at Stonebreak \u2014 Senior Council Convenes",
+    "kind": "lore",
+    "name": "Ashveil's Documents Arrive at Stonebreak \u2014 Senior Council Convenes",
+    "prompt": "Major lore event illustration for Ashveil's Documents Arrive at Stonebreak \u2014 Senior Council Convenes: Both the sealed transcript and Ashveil's second letter arrived at Stonebreak by midday courier. The Senior Council read them in session through the afternoon. By evening they had agreed on three things: the binding candidate situation is real, Ironmaul's detention of Varek is an overreach, and a formal envoy must be dispatched. The envoy will depart on Day 33.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-ashveil-s-documents-arrive-at-stonebreak-senior-council-convenes.png",
+    "static_path": "/static/illustrations/codex/lore-ashveil-s-documents-arrive-at-stonebreak-senior-council-convenes.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T23:31:34.612779"
+  },
+  {
+    "key": "lore:Seer Delivers First Formal Otter Interpretation to Admiral Ver Meer",
+    "kind": "lore",
+    "name": "Seer Delivers First Formal Otter Interpretation to Admiral Ver Meer",
+    "prompt": "Major lore event illustration for Seer Delivers First Formal Otter Interpretation to Admiral Ver Meer: In Tidefall's harbor-facing council chamber, the Seer gave his interpretation under formal witness: the otters are not an omen of threat but of presence \u2014 a being that watches, not hunts. He said the sign appeared simultaneously in Farrock's sickness and Tidefall's harbor, and that both were manifestations of the same source. The Admiral listened, asked no questions, and dismissed the Seer. Within an hour he had ordered Isolde to compile everything the harbor annals held about the God's prior signs.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-seer-delivers-first-formal-otter-interpretation-to-admiral-ver-meer.png",
+    "static_path": "/static/illustrations/codex/lore-seer-delivers-first-formal-otter-interpretation-to-admiral-ver-meer.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T23:31:34.613659"
+  },
+  {
+    "key": "lore:Stonejaw Column \u2014 One Day from Morgath's Ridge",
+    "kind": "lore",
+    "name": "Stonejaw Column \u2014 One Day from Morgath's Ridge",
+    "prompt": "Major lore event illustration for Stonejaw Column \u2014 One Day from Morgath's Ridge: Stonejaw's mounted column camped at the corridor's edge overnight and will reach the Groth border ridge by tomorrow morning. His advance rider returned with the Glenhaven observer positions. Morgath's captains remain in place \u2014 the extended hold order has three days remaining. The confrontation is one sleep away.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-stonejaw-column-one-day-from-morgath-s-ridge.png",
+    "static_path": "/static/illustrations/codex/lore-stonejaw-column-one-day-from-morgath-s-ridge.png",
+    "status": "queued",
+    "created_tick": 32,
+    "created_at": "2026-04-25T23:31:34.614424"
   }
 ]

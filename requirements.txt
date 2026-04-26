@@ -6,3 +6,4 @@ python-dotenv
 requests
 pdfplumber
 gunicorn
+pytest>=7.0

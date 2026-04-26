@@ -7,7 +7,7 @@
    pip install -r requirements.txt
    ```
 
-2. Copy the example env file and fill in your keys:
+2. Copy the example env and fill in your keys (the example has `FLASK_DEBUG=1` so **Flask restarts when you change `.py` files**; set `FLASK_DEBUG=0` for a single long-lived process or production):
    ```bash
    copy .env.example .env
    ```
@@ -16,6 +16,7 @@
    ```bash
    python app.py
    ```
+   On Windows you can also use `dev-flask.bat` from the repo root (it sets `FLASK_DEBUG=1`).
 
 4. Open:
    ```text
