@@ -57,13 +57,56 @@ BATTLE_PATTERNS = [
 # ── Permanent house identities ────────────────────────────────────────────────
 # These houses always exist in every new game; only their members get fresh names.
 _PERMANENT_HOUSES = [
-    {"house": "House Adkison",       "race": "Human",    "home": "plains"},
-    {"house": "House Highland",      "race": "Human",    "home": "plains"},
-    {"house": "House Aurand",        "race": "Human",    "home": "plains"},
-    {"house": "House Ver Meer",      "race": "Human",    "home": "coastal"},
-    {"house": "House Gross",         "race": "Human",    "home": "plains"},
-    {"house": "House Darkleaf",      "race": "High Elf", "home": "dense forest"},
-    {"house": "Goldfinger-Duke Clan","race": "Dwarf",    "home": "mountain"},
+    # Shadow Court — Dark Elf, Faerwood
+    {"house": "House Verlorn",          "race": "Dark Elf",  "home": "dense forest"},
+    {"house": "House Nightborn",        "race": "Dark Elf",  "home": "dense forest"},
+    {"house": "House Shadowveil",       "race": "Dark Elf",  "home": "dense forest"},
+    # Twin Cities — Human, plains
+    {"house": "House Aurand",           "race": "Human",     "home": "plains"},
+    {"house": "House Braafhart",        "race": "Human",     "home": "plains"},
+    {"house": "House LeFleur",          "race": "Human",     "home": "plains"},
+    {"house": "House Bower",            "race": "Human",     "home": "plains"},
+    {"house": "House Binx",             "race": "Human",     "home": "plains"},
+    {"house": "House Dale",             "race": "Human",     "home": "plains"},
+    # Glenhaven — Wood Elf, forest
+    {"house": "House Wood",             "race": "Wood Elf",  "home": "dense forest"},
+    {"house": "House Darkleaf",         "race": "Wood Elf",  "home": "dense forest"},
+    {"house": "House Mistafae",         "race": "Wood Elf",  "home": "dense forest"},
+    # Tidefall — Human, coastal
+    {"house": "House Ver Meer",         "race": "Human",     "home": "coastal"},
+    {"house": "House Highland-Dusken",  "race": "Human",     "home": "coastal"},
+    {"house": "House Fish",             "race": "Human",     "home": "coastal"},
+    {"house": "House McGowan",          "race": "Human",     "home": "coastal"},
+    # Varkuun — Human, rugged
+    {"house": "House Van Cleave",       "race": "Human",     "home": "rugged"},
+    # Dur Khadur — Human, mountain
+    {"house": "House Gross",            "race": "Human",     "home": "mountain"},
+    {"house": "House Delonious",        "race": "Human",     "home": "mountain"},
+    {"house": "House Galfazzar",        "race": "Human",     "home": "mountain"},
+    {"house": "House Vercenti",         "race": "Human",     "home": "mountain"},
+    # The Wintermark — Human, frozen
+    {"house": "House Adkison",          "race": "Human",     "home": "frozen"},
+    {"house": "House McIntosh",         "race": "Human",     "home": "frozen"},
+    {"house": "House Holter",           "race": "Human",     "home": "frozen"},
+    {"house": "House Duval",            "race": "Human",     "home": "frozen"},
+    # Dreadwind Isles — Human, coastal
+    {"house": "House Blacktide",        "race": "Human",     "home": "coastal"},
+    # Lostfeld — Dwarf, mountain
+    {"house": "Clan Goldfinger-Duke",   "race": "Dwarf",     "home": "mountain"},
+    {"house": "Clan Runewarden",        "race": "Dwarf",     "home": "mountain"},
+    {"house": "Clan Ironmaul",          "race": "Dwarf",     "home": "mountain"},
+    # Groth Clans — Orc, mountain
+    {"house": "Clan Mijid",             "race": "Orc",       "home": "mountain"},
+    {"house": "Clan Ashfang",           "race": "Orc",       "home": "mountain"},
+    {"house": "Clan Syncar",            "race": "Orc",       "home": "mountain"},
+    # Gilgeth Clans — Orc, mountain
+    {"house": "Clan Blackblood",        "race": "Orc",       "home": "mountain"},
+    {"house": "Clan Ironhide",          "race": "Orc",       "home": "mountain"},
+    {"house": "Clan Redtusk",           "race": "Orc",       "home": "mountain"},
+    # Vilefin — Goblin, stone plains
+    {"house": "Clan Bloodware",         "race": "Goblin",    "home": "stone plains"},
+    {"house": "Clan Cogtooth",          "race": "Goblin",    "home": "stone plains"},
+    {"house": "Clan Rustfang",          "race": "Goblin",    "home": "stone plains"},
 ]
 
 _FRESH_NAMES = {
@@ -73,6 +116,10 @@ _FRESH_NAMES = {
     "High Elf": ["Aelindra","Bereth","Caladis","Daerith","Elowen","Faelyn","Galadis","Haerith",
                  "Iorel","Jaelis","Kaladis","Lysse","Maerith","Naelis","Oreith","Pyriel","Raelis",
                  "Silith","Taeris","Urelith","Vaelin","Waelis","Xirith","Yaelis","Zaelin"],
+    "Wood Elf": ["Aelvorn","Brenwynn","Caeldrith","Daevorn","Eolith","Faernyl","Gaelorn","Haelvyn",
+                 "Idrelith","Jaevorn","Kaelwyn","Lorelyn","Maevorn","Naelith","Orelwyn","Pyrelyn",
+                 "Raevorn","Sylvorn","Taelvyn","Urvelyn","Vaelyn","Weldrith","Xaelvyn","Yaelvyn",
+                 "Zaelorn","Thalorn"],
     "Dwarf":    ["Aldrok","Breth","Dorva","Grath","Helva","Kordak","Morra","Orik","Runa","Skor",
                  "Thora","Urgom","Vessa","Wulda","Bera","Dagna","Fulda","Grunda","Hulda","Jorva"],
 }
@@ -86,51 +133,19 @@ _HOUSE_MEMBER_ROLES = [
 
 # ── Region-based faction lore ─────────────────────────────────────────────────
 FACTION_LORE: dict[str, dict] = {
-    "Dread Elves":          {"species": "Dark Elf",          "role": "Shadow Dominion"},
-    "Kenku":                {"species": "Kenku",             "role": "Canopy Intelligence"},
-    "Verdan Rootbound":     {"species": "Verdan",            "role": "Environmental Defense"},
-    "Sylthari Web Domain":  {"species": "Sylthari",          "role": "Territorial Trap Control"},
-    "Greenveil Clans":      {"species": "Human",             "role": "Forest Clans"},
-    "Ironwood Settlers":    {"species": "Human",             "role": "Forest Settlers"},
-    "Veilbound":            {"species": "Human",             "role": "Forest Mystics"},
-    "Unbound":              {"species": "Human",             "role": "Free Company"},
-    "Dwarves of Lostfeld":  {"species": "Dwarf",             "role": "Resource Dominion"},
-    "Roki":                 {"species": "Roki",              "role": "Environmental Anti-Expansion"},
-    "Stonekin":             {"species": "Stonekin",          "role": "Environmental Defense"},
-    "Kharox Clans":         {"species": "Kharox",            "role": "Mountain Warriors"},
-    "Gravekin Depths":      {"species": "Gravekin",          "role": "Subterranean Presence"},
-    "Deepwatch":            {"species": "Human",             "role": "Containment Order"},
-    "Elves of Glenhaven":   {"species": "High Elf",          "role": "Balanced Dominion"},
-    "Faeborn":              {"species": "Faeborn",           "role": "Forest Spirits"},
-    "Sylvan Covenant":      {"species": "Multi-species",     "role": "Forest Alliance"},
-    "Centaur Tribes":       {"species": "Centaur",           "role": "Territorial Mobility"},
-    "Glenhaven Rangers":    {"species": "Human",             "role": "Adaptive Guardians"},
-    "Admiral Electorate":   {"species": "Human",             "role": "Naval Trade"},
-    "Tideborn Dominion":    {"species": "Tideborn",          "role": "Sea-Adapted Control"},
-    "Tidebound Circle":     {"species": "Tortle",            "role": "Coastal Stability"},
-    "Stormwardens":         {"species": "Human",             "role": "Weather Control"},
-    "Blacktide Corsairs":   {"species": "Human",             "role": "Maritime Pirates"},
-    "Twin Realms":          {"species": "Human",             "role": "Unified Dominion"},
-    "Aelorians":            {"species": "High Elf (Ancient)","role": "Reclaimed Dominion"},
-    "Dwarven Hold":         {"species": "Dwarf",             "role": "Fortified Dominion"},
-    "Orc War Dominion":     {"species": "Orc",               "role": "Conquest State"},
-    "Drow Dominion":        {"species": "Dark Elf",          "role": "Shadow Control"},
-    "Vargai Packs":         {"species": "Vargai",            "role": "Structured Packs"},
-    "Ursari Dominion":      {"species": "Ursari",            "role": "Territorial Strength"},
-    "Frostwraiths":         {"species": "Frostwraith",       "role": "Environmental Horror"},
-    "Winter Court":         {"species": "Frost Fey",         "role": "Mystical Kingdom"},
-    "Wintermark":           {"species": "Human",             "role": "Noble Survival"},
-    "Orcs":                 {"species": "Orc",               "role": "War Dominion"},
-    "Dwarves":              {"species": "Dwarf",             "role": "Mountain Defense"},
-    "Kharox":               {"species": "Kharox",            "role": "Mountain Raiders"},
-    "Skarren":              {"species": "Skarren",           "role": "Battlefield Scavengers"},
-    "Stonewardens":         {"species": "Human",             "role": "Defensive Order"},
-    "Goblins":              {"species": "Goblin",            "role": "Dominant Population"},
-    "Gritkin":              {"species": "Gritkin",           "role": "Subterranean Movement"},
-    "Scorpids":             {"species": "Scorpid",           "role": "Enforcers"},
-    "Shaleborn":            {"species": "Shaleborn",         "role": "Territorial Anchors"},
-    "Dustlanders":          {"species": "Human",             "role": "Adaptable Survivors"},
-    "Red Banner Legion":    {"species": "Human",             "role": "Elite Mercenary Dominion"},
+    "Shadow Court":          {"species": "Dark Elf",   "role": "Shadow Dominion"},
+    "Twin Cities":           {"species": "Human",      "role": "Dual Monarchy"},
+    "Glenhaven":             {"species": "Wood Elf",   "role": "Forest Sovereignty"},
+    "Groth Clans":           {"species": "Orc",        "role": "War Dominion"},
+    "Gilgeth Clans":         {"species": "Orc",        "role": "Organized War State"},
+    "Tidefall":              {"species": "Human",      "role": "Naval Trade Power"},
+    "Varkuun":               {"species": "Human",      "role": "Mercenary Fortress"},
+    "Vilefin":               {"species": "Goblin",     "role": "Scavenger Network"},
+    "The Wintermark":        {"species": "Human",      "role": "Frozen Fortress Kingdom"},
+    "Lostfeld":              {"species": "Dwarf",      "role": "Mountain Hold"},
+    "Dur Khadur":            {"species": "Human",      "role": "Trade Prince Fortress"},
+    "Dreadwind Isles":       {"species": "Human",      "role": "Pirate Fleet"},
+    "Stonebreak Monastery":  {"species": "Human",      "role": "Druid Monastery"},
 }
 
 _SPECIES_RULER: dict[str, tuple] = {
@@ -138,6 +153,7 @@ _SPECIES_RULER: dict[str, tuple] = {
     "Dark Elf":         ("Shadowlord",      ["Cunning", "Patient", "Ruthless"],      "chosen"),
     "High Elf":         ("Archon",          ["Ancient", "Measured"],                 "council vote"),
     "High Elf (Ancient)":("Archon",         ["Ancient", "Measured", "Inscrutable"],  "council vote"),
+    "Wood Elf":         ("Sovereign",       ["Ancient", "Protective", "Insular"],    "council vote"),
     "Dwarf":            ("Thane",           ["Stubborn", "Honorable"],               "inheritance"),
     "Orc":              ("Warchief",        ["Brutal", "Fierce"],                    "combat"),
     "Goblin":           ("Boss",            ["Greedy", "Cunning"],                   "bribery"),
@@ -276,18 +292,21 @@ def _chronicle_excerpt(text, limit=180):
 
 def _default_population_state():
     return [
-        {"region": "Twin Cities", "species": "Humans", "culture": "Twin Cities", "population": 160000, "growthRate": 0.00025, "capacity": 180000, "health": 86, "pressure": 22, "activeMilitary": 5600, "navalAllocation": 3, "notes": "Centralized human capital with strong defenses and slower adaptation."},
-        {"region": "Tidefall", "species": "Humans", "culture": "Tidefall", "population": 160000, "growthRate": 0.00028, "capacity": 185000, "health": 82, "pressure": 32, "activeMilitary": 6400, "navalAllocation": 20, "notes": "Naval power with a large harbor population, fleet personnel, and higher infiltration risk."},
-        {"region": "Faerwood", "species": "Dread Elves", "culture": "Shadow Court", "population": 30000, "growthRate": 0.00003, "capacity": 42000, "health": 74, "pressure": 38, "activeMilitary": 1050, "navalAllocation": 0, "notes": "Low-growth cursed forest society with high individual power."},
-        {"region": "Glenhaven", "species": "Glenhaven Elves", "culture": "Wildwood Elves", "population": 35000, "growthRate": 0.00005, "capacity": 52000, "health": 88, "pressure": 18, "activeMilitary": 1225, "navalAllocation": 0, "notes": "Stable, harmony-focused forest population."},
-        {"region": "Lostfeld", "species": "Dwarves", "culture": "Lostfeld Clans", "population": 65000, "growthRate": 0.00008, "capacity": 85000, "health": 81, "pressure": 24, "activeMilitary": 2275, "navalAllocation": 0, "notes": "Structured clan society with rare betrayal and strong lineage."},
-        {"region": "Gilgeth and Groth", "species": "Orcs", "culture": "Mountain Orcs", "population": 100000, "growthRate": 0.00022, "capacity": 125000, "health": 72, "pressure": 43, "activeMilitary": 4000, "navalAllocation": 0, "notes": "Connected mountain populations split between council stability and chieftain aggression."},
-        {"region": "Rock Plains", "species": "Goblins", "culture": "Vilefin", "population": 215000, "growthRate": 0.00055, "capacity": 230000, "health": 63, "pressure": 68, "activeMilitary": 8600, "navalAllocation": 0, "notes": "High-growth goblin population near capacity pressure."},
-        {"region": "Dreadwind Isles", "species": "Humans", "culture": "Dreadwind Pirates", "population": 45000, "growthRate": 0.00018, "capacity": 65000, "health": 67, "pressure": 52, "activeMilitary": 1800, "navalAllocation": 16, "notes": "Mobile exile population where betrayal and leadership challenges are normalized."},
-        {"region": "Dur Khadur", "species": "Humans", "culture": "Dur Khadur", "population": 115000, "growthRate": 0.00024, "capacity": 155000, "health": 79, "pressure": 36, "activeMilitary": 4025, "navalAllocation": 8, "notes": "Trade-driven population with transactional loyalties."},
-        {"region": "Stonebreak", "species": "Druids", "culture": "Monastery of Druids", "population": 5500, "growthRate": 0.00002, "capacity": 9000, "health": 91, "pressure": 12, "activeMilitary": 275, "navalAllocation": 0, "notes": "Low population, high influence, guided by balance rather than conventional state power."},
-        {"region": "Gloomspire", "species": "Gnomes", "culture": "Gloomspire Syndicate", "population": 8500, "growthRate": 0.00012, "capacity": 14000, "health": 76, "pressure": 28, "activeMilitary": 340, "navalAllocation": 0, "notes": "Covert influence population tied to pass control and intelligence trade."},
-        {"region": "Dragonscar Peaks", "species": "Ice Dragons", "culture": "Dragon Clans", "population": 12, "growthRate": 0, "capacity": 20, "health": 94, "pressure": 9, "activeMilitary": 12, "navalAllocation": 0, "notes": "Not a normal population faction; every dragon is region-level power."},
+        {"region": "Twin Cities",   "species": "Humans",     "culture": "Twin Cities",         "population": 140000, "growthRate": 0.00025, "capacity": 170000, "health": 86, "pressure": 22, "activeMilitary": 4900, "navalAllocation": 3,  "notes": "Centralized human capital controlling Eresteron and Eldoria."},
+        {"region": "Eldoria",       "species": "Humans",     "culture": "Twin Cities",         "population": 95000,  "growthRate": 0.00022, "capacity": 115000, "health": 82, "pressure": 18, "activeMilitary": 2850, "navalAllocation": 0,  "notes": "Cultural and artistic twin capital; may one day fracture from Eresteron."},
+        {"region": "Tidefall",      "species": "Humans",     "culture": "Tidefall",            "population": 160000, "growthRate": 0.00028, "capacity": 185000, "health": 82, "pressure": 32, "activeMilitary": 6400, "navalAllocation": 20, "notes": "Naval power with large harbor population and fleet personnel."},
+        {"region": "Faerwood",      "species": "Dark Elves", "culture": "Shadow Court",        "population": 30000,  "growthRate": 0.00003, "capacity": 42000,  "health": 74, "pressure": 38, "activeMilitary": 1050, "navalAllocation": 0,  "notes": "Low-growth dark elf society with high individual power and covert reach."},
+        {"region": "Glenhaven",     "species": "Wood Elves", "culture": "Glenhaven",           "population": 35000,  "growthRate": 0.00005, "capacity": 52000,  "health": 88, "pressure": 18, "activeMilitary": 1225, "navalAllocation": 0,  "notes": "Stable, council-led wood elf forest sovereignty."},
+        {"region": "Lostfeld",      "species": "Dwarves",    "culture": "Lostfeld",            "population": 65000,  "growthRate": 0.00008, "capacity": 85000,  "health": 81, "pressure": 24, "activeMilitary": 2275, "navalAllocation": 0,  "notes": "Sovereign dwarf mountain hold; strong lineage and rare betrayal."},
+        {"region": "Gilgeth",       "species": "Orcs",       "culture": "Gilgeth Clans",       "population": 55000,  "growthRate": 0.00020, "capacity": 70000,  "health": 72, "pressure": 44, "activeMilitary": 2200, "navalAllocation": 0,  "notes": "Organized elder council orc stronghold; disciplined and enduring."},
+        {"region": "Groth",         "species": "Orcs",       "culture": "Groth Clans",         "population": 45000,  "growthRate": 0.00022, "capacity": 60000,  "health": 68, "pressure": 52, "activeMilitary": 1800, "navalAllocation": 0,  "notes": "War capital orc region; chaotic, warchief-led, aggressive."},
+        {"region": "Vilefin",       "species": "Goblins",    "culture": "Vilefin",             "population": 215000, "growthRate": 0.00055, "capacity": 230000, "health": 63, "pressure": 68, "activeMilitary": 8600, "navalAllocation": 0,  "notes": "High-growth goblin population near capacity; communal speaker system."},
+        {"region": "Dreadwind Isles","species": "Humans",    "culture": "Dreadwind Isles",     "population": 45000,  "growthRate": 0.00018, "capacity": 65000,  "health": 67, "pressure": 52, "activeMilitary": 1800, "navalAllocation": 16, "notes": "Mobile exile fleet population; betrayal normalized, leadership volatile."},
+        {"region": "Dur Khadur",    "species": "Humans",     "culture": "Dur Khadur",          "population": 115000, "growthRate": 0.00024, "capacity": 155000, "health": 79, "pressure": 36, "activeMilitary": 4025, "navalAllocation": 8,  "notes": "Trade-driven mountain fortress; transactional loyalties."},
+        {"region": "Wintermark",    "species": "Humans",     "culture": "The Wintermark",      "population": 42000,  "growthRate": 0.00012, "capacity": 62000,  "health": 76, "pressure": 30, "activeMilitary": 1680, "navalAllocation": 0,  "notes": "Frost-hardened fortress kingdom; endurance over ambition."},
+        {"region": "Varkuun",       "species": "Humans",     "culture": "Varkuun",             "population": 18000,  "growthRate": 0.00010, "capacity": 28000,  "health": 82, "pressure": 20, "activeMilitary": 1260, "navalAllocation": 0,  "notes": "Professional mercenary fortress; high military ratio, low natural growth."},
+        {"region": "Stonebreak",    "species": "Druids",     "culture": "Stonebreak Monastery","population": 5500,   "growthRate": 0.00002, "capacity": 9000,   "health": 91, "pressure": 12, "activeMilitary": 275,  "navalAllocation": 0,  "notes": "Low population, very high influence; gnomes serve as covert arm."},
+        {"region": "Dragonscar Peaks","species": "Ice Dragons","culture": "Dragon Clans",      "population": 12,     "growthRate": 0,       "capacity": 20,     "health": 94, "pressure": 9,  "activeMilitary": 12,   "navalAllocation": 0,  "notes": "Not a normal faction; each dragon is region-level power."},
     ]
 
 

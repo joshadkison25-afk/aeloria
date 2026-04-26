@@ -60,9 +60,15 @@ def safe_save_world(world: dict, previous_world: dict = None) -> None:
 REQUIRED_WORLD_KEYS = {"tick", "world_date", "primary_event", "supporting_events", "active_events"}
 
 STRUCTURE_REQUIRED_KEYS = {
-    "tick", "world_date", "regions", "faction_identities",
-    "faction_power_state", "relationships", "primary_event",
+    "tick", "world_date", "primary_event",
     "supporting_events", "active_events",
+}
+
+# Keys that are containers (list/dict) — if Claude returns them as empty,
+# restore from previous world rather than keeping empty.
+CONTAINER_PRESERVE_KEYS = {
+    "faction_identities", "region_control", "relationships", "regions",
+    "faction_power_state", "leadership_state", "locations", "house_characters",
 }
 
 def is_valid_world(world: dict) -> bool:
@@ -77,16 +83,13 @@ def is_valid_world(world: dict) -> bool:
 
 
 def ensure_world_structure(world: dict, previous_world: dict) -> dict:
-    """
-    Ensure world has all structurally required keys.
-    Missing keys are copied from previous_world.
-    If world itself is invalid, return previous_world unchanged.
-    """
     if not isinstance(world, dict) or not world:
         logger.error("ensure_world_structure: world is invalid — returning previous world")
         return previous_world if isinstance(previous_world, dict) and previous_world else {}
 
     prev = previous_world if isinstance(previous_world, dict) else {}
+
+    # Restore structurally required scalar/object keys if missing or None
     for key in STRUCTURE_REQUIRED_KEYS:
         if key not in world or world[key] is None:
             if key in prev and prev[key] is not None:
@@ -95,6 +98,17 @@ def ensure_world_structure(world: dict, previous_world: dict) -> dict:
             else:
                 logger.error(f"ensure_world_structure: '{key}' missing and no fallback — returning previous world")
                 return prev if prev else world
+
+    # Restore container keys if Claude returned them empty ([] or {})
+    # Claude often returns empty arrays for keys it doesn't want to update;
+    # we preserve the previous world's data rather than letting it be wiped.
+    for key in CONTAINER_PRESERVE_KEYS:
+        val = world.get(key)
+        prev_val = prev.get(key)
+        if (val is None or (isinstance(val, (list, dict)) and len(val) == 0)) and prev_val:
+            world[key] = prev_val
+            logger.warning(f"ensure_world_structure: restored empty container '{key}' from previous world")
+
     return world
 
 
@@ -204,13 +218,22 @@ LEADERSHIP, DYNASTY, AND NOBLE HOUSE SYSTEM:
 - If a house exceeds 4 members, extras are secondary and should gradually leave influence, move to background, die, marry out, or become minor actors
 - Members can rise or fall naturally: wildcard may become leader, heir may fail, power role may seize authority, and houses can weaken, recover, or collapse
 - Prestige rises from long reigns, victories, stable succession, and influence; prestige falls from failed rulers, collapse, betrayal, or extinction
-- Human houses must exist from the start: Adkison, Aurand, Van Cleave, Ver Meer, Gross, Darkleaf, Highland, Binx, Dale, Fish
-- Twin Cities houses: major Aurand, Adkison, Van Cleave, Gross; minor Dale, Highland
-- Tidefall houses: major Ver Meer, Gross, Adkison, Van Cleave; minor Fish, Binx, Darkleaf
-- Dur Khadur houses: major Gross, Adkison, Van Cleave; minor Binx, Darkleaf, Dale
+- Twin Cities houses: major Aurand (High King, ruling), Braafhart (Eresteron), LeFleur (Eldoria); minor Bower, Binx, Dale — if the twin kingdoms split, each inherits its own houses
+- Tidefall houses: major Ver Meer (ruling), Highland-Dusken, Fish, McGowan
+- Varkuun houses: Van Cleave (sole house; military appointment, no rival dynasties)
+- Dur Khadur houses: major Gross (Trade Prince, ruling), Delonious, Galfazzar; minor Vercenti
+- The Wintermark houses: major Adkison (ruling), McIntosh, Holter; minor Duval
+- Lostfeld clans: major Goldfinger-Duke (ruling), Runewarden; minor Ironmaul
+- Glenhaven houses: Wood (Sovereign, ruling), Darkleaf, Mistafae — council of three houses, all have council vote
+- Shadow Court houses: Verlorn (Rulers), Nightborn (Executioners), Shadowveil (Manipulators) — Verlorn is always the ruling house unless a succession collapse occurs
+- Groth clans: Mijid (ruling Warchief), Ashfang, Syncar — combat determines succession; the strongest clan leads
+- Gilgeth clans: Blackblood (ruling High Warlord), Ironhide, Redtusk — elder council governance; majority clan vote determines leadership
+- Vilefin clans: Bloodware (ruling Speaker), Cogtooth, Rustfang — communal speaker system; any clan can elect the speaker
+- Dreadwind Isles houses: Blacktide (ruling Captain, Saltborn Crown claimant), Stormvane, Saltbreach — election system with frequent turnover
+- Stonebreak Monastery: Grand Druid council, no traditional house system; the Gnome Syndicate serves as its covert arm
 - Same dynasty succession preserves or improves stability; different dynasty succession raises instability; no clear successor creates a power vacuum and possible civil war
 - Succession is determined strictly by dynasty rank (coreRole), NOT by physical location; the character with coreRole "Heir" inherits regardless of where they are in the world when succession occurs; if the Heir is traveling or in a distant region, they must journey home to claim power, which may cause instability during the interregnum
-- Human leadership is family-dynastic and politically competitive; Dreadwind is loyalty-based with frequent turnover; Dwarves are clan-stable; Dread Elves have long manipulation-based reigns; Glenhaven transitions through council; Orcs use clan/strength/consensus; Goblins have flexible low-dynasty leadership
+- Human leadership is family-dynastic and politically competitive; Dreadwind Isles uses election with frequent turnover; Lostfeld is clan-stable; Shadow Court has long manipulation-based reigns; Glenhaven uses council vote; Groth uses combat succession; Gilgeth uses elder council vote; Goblins use communal speaker system; The Wintermark uses inheritance
 
 CHARACTER MOVEMENT SYSTEM:
 - Every house_character has a location (their current region), destination (region they are traveling to, empty if stationary), ticks_to_arrive (ticks until arrival, 0 if stationary), and journey_purpose (reason for travel, empty if stationary)
@@ -703,15 +726,17 @@ POPULATION AND SOCIETY SYSTEM:
 - Tidefall naval power comes from 15-25% of population allocated to naval systems; Twin Cities has only 0-5% naval presence
 - Naval actions include blockade, transport, raid, coastal control, and sea-route control; blockades reduce health/growth and raise pressure, raids cause population/economic disruption
 - Tidefall dominates naval combat, Twin Cities dominates land combat, coastal regions are contested zones
-- Dread Elves: 20,000-40,000, extremely low growth, high individual power
-- Glenhaven Elves: 25,000-45,000, slow growth, stable
-- Dwarves: 50,000-80,000, slow growth, very stable
-- Orcs total: 80,000-120,000, moderate growth, moderate instability
-- Goblins: 180,000-250,000, very high growth, high pressure
-- Dreadwind Pirates: 30,000-60,000 spread out, unstable and mobile
+- Shadow Court (Dark Elves of Faerwood): 20,000-40,000, extremely low growth, high individual power
+- Glenhaven (Wood Elves): 25,000-45,000, slow growth, stable forest population
+- Lostfeld (Dwarves): 50,000-80,000, slow growth, very stable clan structure
+- Groth + Gilgeth (Orcs combined): 80,000-120,000, moderate growth, moderate instability
+- Vilefin (Goblins): 180,000-250,000, very high growth, high pressure
+- Dreadwind Isles: 30,000-60,000 spread out, unstable and mobile
 - Dur Khadur Humans: 90,000-140,000, fluctuating and trade-driven
-- Gnomes: 5,000-12,000, covert influence
-- Druids: 3,000-8,000, low population and high influence
+- The Wintermark Humans: 40,000-70,000, harsh environment limits growth
+- Varkuun Humans: 10,000-25,000, professional military, low natural growth
+- Gloomspire Gnomes (Stonebreak Monastery arm): 5,000-12,000, covert influence
+- Stonebreak Monastery: 3,000-8,000, low population and very high religious influence
 - Ice Dragons: 5-20 total, not a normal population faction; each dragon is region-level power
 
 RELATIONSHIP SYSTEM:
@@ -820,15 +845,17 @@ SPECIES AND CULTURE LIFE CYCLE SYSTEM:
 - Reproduction must reflect species and culture; culture overrides behavior but not biology
 - Humans: Child 0-14, Young 14-25, Adult 25-60, Elder 60-85; moderate lifespan, moderate reproduction, natural and conflict deaths
 - Twin Cities and Tidefall humans use structured politics, moderate loyalty, organized succession, diplomacy/conflict balance, and controlled instability
-- Dreadwind humans are shaped by exile and legacy; loyalty is unstable, betrayal normalized, leadership challenged, alliances temporary
+- Dreadwind Isles humans are shaped by exile and sea life; loyalty is unstable, betrayal normalized, leadership challenged, alliances temporary
 - Dur Khadur humans are profit-driven, transactional, opportunistic, and strategically betrayal-prone
-- Dread Elves of Faerwood: Child 0-30, Initiate 30-100, Adult 100-400, Elder 400-1000, Ascended 1000+; natural death extremely rare, reproduction rare, power maintained through manipulation and shadow magic, political succession, fragile dangerous loyalty, long-term planning
-- Glenhaven Elves: Child 0-25, Young 25-80, Adult 80-300, Elder 300-700, Ancient 700+; slow aging, low birth rate, rare natural death, harmony-focused council leadership, defensive not expansionist
+- The Wintermark humans are stoic, cold-hardened, and deeply loyal to their High Lord; endurance over ambition
+- Varkuun humans are professional soldiers first; loyalty follows the coin and the High Marshal
+- Shadow Court (Dark Elves of Faerwood): Child 0-30, Initiate 30-100, Adult 100-400, Elder 400-1000, Ascended 1000+; natural death extremely rare, reproduction rare, power maintained through manipulation and shadow magic, fragile dangerous loyalty, long-term planning
+- Wood Elves of Glenhaven: Child 0-20, Young 20-60, Adult 60-250, Elder 250-600, Ancient 600+; slower than humans, longer-lived, council-focused leadership, defensive and forest-anchored
 - Lostfeld Dwarves: Child 0-20, Young 20-50, Adult 50-180, Elder 180-350, Ancient 350+; long-lived, strong lineage, low natural death, structured clan succession, high loyalty, betrayal rare
 - Orcs of Gilgeth/Groth: Child 0-10, Young 10-18, Adult 18-45, Elder 45-70; moderate lifespan, high conflict death; Gilgeth values council wisdom and strength with more stability, Groth is chieftain-based, aggressive, and leadership can change by force
 - Vilefin Goblins: Child 0-5, Young 5-10, Adult 10-25, Elder 25-40; short lifespan, high reproduction, high mortality, group survival focus, communal leadership, low individual impact
-- Gnomes: Child 0-15, Adult 15-80, Elder 80-150; longer-lived than humans, moderate reproduction, highly intelligent covert actors with indirect influence and hidden-agenda loyalty
-- Druids: extended lifespan 80-300+ depending on power; lifespan extended by nature magic, death tied to imbalance or sacrifice, guided by balance, morally gray and ruthless if necessary
+- Gloomspire Gnomes: Child 0-15, Adult 15-80, Elder 80-150; longer-lived than humans, moderate reproduction, highly intelligent covert actors with indirect influence; serve the Stonebreak Monastery
+- Druids of Stonebreak: extended lifespan 80-300+ depending on power; lifespan extended by nature magic, death tied to imbalance or sacrifice, guided by balance, morally gray and ruthless if necessary
 - Ice Dragons: Hatchling 0-50, Young 50-200, Adult 200-800, Ancient 800-2000+; extremely long-lived, very low reproduction, rare catastrophic death, territorial independent actors that influence regions through presence
 
 MISINTERPRETATION SYSTEM:
@@ -871,23 +898,85 @@ OMENS AND DREAMS:
 - They do not force outcomes
 - They influence belief, perception, and decisions over 1-2 ticks
 
-THE FACTIONS:
-- Shadow Court (Dread Elves of Faerwood) - Queen Lythara the Veiled, clans: Velorn, Nythariel, Arkenor
-- Lostfeld Dwarves - Thane Ulric Ironmaul, ancient evil stirring in deep mines, isolationist vs reformer split
-- Glenhaven Elves - Sovereign Elowen Silverleaf, Wayfarers, peaceful but pressured
-- Twin Cities (Eresteron & Eldoria) - King Roderic Thorne II, aging, uneasy succession
-- Tidefall - Admiral Electorate, ambitious, mistrusted by nobility
-- Dreadwind Islands - Pirate King Rowen, exile seeking his throne
-- Dur Khadur - Dark Council, mercenaries, forbidden magic, aligns with power not principle
-- Farrock - Self-serving fortress, exploits alliance with Dur Khadur
-- Gilgeth & Groth Orcs - rival orc cities; orc caravans are violently addicted to opioids, destabilizing trade
-- Vilefin Goblins - cunning scavengers in the Rock Plains
-- Gloomspire Assassin Gnome Syndicate - covert arm of the Monastery of Druids; ONLY faction that can cross the mountain passes; master glass-makers who fund operations through trade monopoly
-- Monastery of Druids (Stonebreak) - nature worship, dark rituals, morally ambiguous divine mandates
-- Vampires - integrated into elite society, hidden, charming, predatory
-- Ice Dragons (Dragonscar Peaks) - hierarchical clans under Frostwarden elders, guardians of winter
+TERRAIN AND REGIONAL BEHAVIOR RULES:
+Apply these when writing faction actions, military campaigns, and events. Terrain shapes what is possible — not just what is likely.
 
-INDEPENDENT REALMS: Triondeth, Triondil, Blayne, Frostvale, Northern Watchtowers
+Faerwood (Dense Forest — Shadow Court home):
+- Large armies are ineffective; formation warfare fails in limited visibility and broken ground
+- Control requires stealth, patience, and unseen influence — not military force
+- Any invading faction suffers -30% military effectiveness; Shadow Court operates at full strength here
+- "Faerwood is not conquered — it is endured"
+
+Wintermark (Frozen — The Wintermark faction home):
+- Only cold-adapted peoples operate at full effectiveness; all others suffer -2 stability/tick from supply failure and attrition
+- Winter campaigns into Wintermark are nearly impossible; supply lines collapse before sieges can be sustained
+- Frostvale is the capital city; House Adkison has held it for generations; they are the endurance faction
+- "Does not reward ambition — rewards those who can endure"
+
+Lostfeld (Mountain/Subterranean — Lostfeld Dwarf sovereign territory):
+- Surface control does NOT guarantee depth control; Dwarven clans can hold deep mines independently of surface invaders
+- Sieges must account for underground escape routes and subterranean supply lines
+- The Goldfinger-Duke, Runewarden, and Ironmaul clans are sovereign — not occupied, not tributary
+- Any faction attempting to seize Lostfeld faces both above-ground warfare and underground attrition
+
+Glenhaven (Balanced Forest — Glenhaven Wood Elf home):
+- Power here is maintained through stability, not seized by force
+- Large-scale warfare destabilizes the forest ecology itself; conflict is controlled and contained
+- Glenhaven governs by council of three houses (Wood, Darkleaf, Mistafae); they defend but do not expand
+- Once stability breaks in Glenhaven, it takes many ticks to restore
+
+Twin Cities (Central Plains Capital):
+- Most strategically important location in Aeloria; controller shapes the entire world's political balance
+- Holding Twin Cities gives indirect leverage over every neighboring faction
+- A change of control here triggers reactions across multiple factions in the same tick
+
+Tidefall / Open Sea (Coastal and Maritime):
+- Naval supremacy determines effective control regardless of land force strength
+- Blockades are as decisive as sieges — write naval actions as primary, not secondary
+- Tidefall and Dreadwind Isles are the only factions with meaningful naval capacity; all others cannot contest the sea
+- Trade route control determines economic power; Open Sea is currently contested between them
+
+Gilgeth vs Groth (Mountain Orc Regions — THESE ARE NOT THE SAME):
+- Groth = PRIMARY orc war capital: Clan Mijid rules by combat strength; invasion launch point, most chaotic, Warchief changes by force; write Groth as the source of large-scale orc offensives and military pressure
+- Gilgeth = SECONDARY organized stronghold: Clan Blackblood rules by elder council; supports active campaigns, holds territory; write Gilgeth as the logistics and coalition base
+- Never treat them identically — Groth is raw aggression (Mijid/Ashfang/Syncar), Gilgeth is organized endurance (Blackblood/Ironhide/Redtusk)
+
+Vilefin (Stone Plains — Goblin territory):
+- Clans Bloodware, Cogtooth, and Rustfang are the dominant political factions; minor tunneling and scavenger bands operate in the cracks between them
+- Goblin power is communal and opportunistic; they pivot quickly and rarely sustain long campaigns
+- Stone terrain provides natural defensive chokepoints that Goblins exploit; no major power can hold Vilefin without a goblin clan willing to serve
+
+Varkuun (Rugged Fortress — rising mercenary power):
+- House Van Cleave controls the only fortified pass between the coast and the stone plains
+- A professional army for hire, but increasingly acting as an independent power
+- Sieging Varkuun itself is tactically brutal; the fortress design rewards the defender heavily
+
+Dur Khadur (Fortress State):
+- Ruled by Trade Prince Seran Gross; merchant-driven, not military glory-seeking
+- Fort design means sieging Dur Khadur requires 3-5x normal force advantage
+- Dur Khadur's military serves commerce; it fights to protect trade routes and territory, not for conquest or ideology
+
+THE FACTIONS:
+Major Player Factions (tracked in faction_power_state and leadership_state):
+- Twin Cities — High King Eldaric Aurand III (House Aurand); human monarchy controlling Eresteron and Eldoria; these are two distinct regions under one crown — they can fracture into separate kingdoms if the crown weakens or a succession crisis strikes
+- Tidefall — Grand Admiral Levi Ver Meer (House Ver Meer); naval trade power; fleet strength is its identity; Ver Meer line holds the Admiralty by appointment
+- Dur Khadur — Trade Prince Seran Gross (House Gross); merchant fortress state at the mountain crossroads; aligns with power not principle; Human-led; Gross dynasty holds the Trade Throne by mercantile election
+- Shadow Court — Queen Lyathra the Veiled (House Verlorn); dark elf shadow dominion in Faerwood; operates only through manipulation and covert influence, never open warfare; House Verlorn rules, House Nightborn executes, House Shadowveil manipulates
+- Glenhaven — High Sovereign Thalorien Wood (House Wood); wood elf council sovereignty in the deep forest; power maintained not seized; three houses govern by council: Wood (Sovereign), Darkleaf, Mistafae
+- Gilgeth Clans — High Warlord Kragor Blackblood (Clan Blackblood); organized orc stronghold; elder council governance; holds territory and supports ongoing campaigns; clans: Blackblood, Ironhide, Redtusk
+- Groth Clans — Warchief Drogath Mijid (Clan Mijid); primary orc war capital and invasion launch point; chieftain-led, chaotic, leadership changes by force; clans: Mijid, Ashfang, Syncar
+- Vilefin — Speaker Grikk Bloodware (Clan Bloodware); goblin communal speaker-state; clans: Bloodware (ruling), Cogtooth, Rustfang
+- Varkuun — High Marshal Ashali Van Cleave (House Van Cleave); mercenary fortress state; sole house; rising independent military power; House Van Cleave controls the pass
+- The Wintermark — High Lord Kaelen Adkison (House Adkison); human fortress kingdom in the frozen north; Frostvale is the capital city; houses: Adkison (ruling), McIntosh, Holter, Duval
+- Lostfeld — High Thane Babadu Goldfinger-Duke (Clan Goldfinger-Duke); dwarf mountain hold; sovereign, not occupied; clans: Goldfinger-Duke (ruling), Runewarden, Ironmaul
+- Dreadwind Isles — Captain Ronan Blacktide (House Blacktide); human pirate fleet; Ronan's father was the ousted High Lord of Tidefall and holds the Saltborn Crown claim; raid-oriented, high leadership turnover; houses: Blacktide, Stormvane, Saltbreach
+- Stonebreak Monastery — Grand Druid Varak; small religious sovereign at Stonebreak; the Gloomspire Gnomes are the covert arm of the Monastery; morally gray, ancient-minded, high influence but low military
+
+Minor / Background Elements (not tracked as major power players):
+- Gloomspire Gnome Syndicate — invisible hand of the Monastery; gnome assassin-merchants control mountain passes; covert, never visible as an independent faction
+- Gilded Exchange — background mercantile element; no fixed territory; not tracked as a faction
+- Dragon Clans (Dragonscar Peaks) — Ice Dragons; hierarchical, territorial, independent; regional-level power; punish incursion but do not seek expansion
+- The Sinking Island — submerging slowly in the southern sea; generational timeframe; no faction; pilgrims and survivors emerge occasionally
 
 IMMUTABLE WORLD RULES:
 1. The Outerlands exist beyond the known world - 21st-century-equivalent technology; outsiders occasionally cross in
@@ -943,7 +1032,8 @@ CRITICAL — YOU MUST return a complete world_state:
 - primary_event must always be a non-empty object with name, summary, severity, stage, trend, and involved
 - supporting_events, active_events, active_tensions, recent_events must always be arrays (empty if nothing active, never omitted)
 - leadership_state must always be an array with one entry per active faction
-- faction_identities, faction_power_state, faction_resources, relationships must always be objects (never null, never empty unless the world truly has no factions)
+- faction_power_state, faction_resources, leadership_state, region_control, relationships must always be arrays (never null, never omitted, never truncated to zero)
+- faction_identities is managed externally — return it as [] if you have nothing to add; the engine preserves the previous world's copy automatically
 
 YOU ARE NOT ALLOWED TO:
 - Return an empty object or partial world
@@ -2197,16 +2287,19 @@ def _normalize_faction_power_state(prev_state, new_state):
       religiousInfluence  (0-100) — belief authority and morale
     """
     FACTION_SEEDS = {
-        "Twin Cities":     {"militaryPower": 55, "economicPower": 70, "politicalInfluence": 65, "religiousInfluence": 40},
-        "Tidefall":        {"militaryPower": 60, "economicPower": 65, "politicalInfluence": 50, "religiousInfluence": 25},
-        "Gilded Exchange": {"militaryPower": 30, "economicPower": 88, "politicalInfluence": 60, "religiousInfluence": 20},
-        "Dur Khadur":      {"militaryPower": 75, "economicPower": 62, "politicalInfluence": 55, "religiousInfluence": 50},
-        "Shadow Court":    {"militaryPower": 45, "economicPower": 55, "politicalInfluence": 72, "religiousInfluence": 35},
-        "Glenhaven":       {"militaryPower": 58, "economicPower": 50, "politicalInfluence": 60, "religiousInfluence": 55},
-        "Gilgeth Clans":   {"militaryPower": 70, "economicPower": 38, "politicalInfluence": 42, "religiousInfluence": 48},
-        "Groth Clans":     {"militaryPower": 78, "economicPower": 32, "politicalInfluence": 38, "religiousInfluence": 60},
-        "Vilefin":         {"militaryPower": 35, "economicPower": 45, "politicalInfluence": 40, "religiousInfluence": 30},
-        "Dreadwind":       {"militaryPower": 50, "economicPower": 48, "politicalInfluence": 45, "religiousInfluence": 28},
+        "Twin Cities":          {"militaryPower": 55, "economicPower": 70, "politicalInfluence": 65, "religiousInfluence": 35},
+        "Tidefall":             {"militaryPower": 60, "economicPower": 65, "politicalInfluence": 50, "religiousInfluence": 25},
+        "Dur Khadur":           {"militaryPower": 75, "economicPower": 62, "politicalInfluence": 55, "religiousInfluence": 30},
+        "Shadow Court":         {"militaryPower": 45, "economicPower": 55, "politicalInfluence": 72, "religiousInfluence": 38},
+        "Glenhaven":            {"militaryPower": 52, "economicPower": 50, "politicalInfluence": 58, "religiousInfluence": 60},
+        "Gilgeth Clans":        {"militaryPower": 70, "economicPower": 38, "politicalInfluence": 42, "religiousInfluence": 45},
+        "Groth Clans":          {"militaryPower": 78, "economicPower": 32, "politicalInfluence": 35, "religiousInfluence": 55},
+        "Vilefin":              {"militaryPower": 35, "economicPower": 45, "politicalInfluence": 40, "religiousInfluence": 28},
+        "Dreadwind Isles":      {"militaryPower": 50, "economicPower": 48, "politicalInfluence": 42, "religiousInfluence": 22},
+        "Varkuun":              {"militaryPower": 68, "economicPower": 55, "politicalInfluence": 44, "religiousInfluence": 18},
+        "The Wintermark":       {"militaryPower": 62, "economicPower": 38, "politicalInfluence": 40, "religiousInfluence": 48},
+        "Lostfeld":             {"militaryPower": 65, "economicPower": 58, "politicalInfluence": 45, "religiousInfluence": 42},
+        "Stonebreak Monastery": {"militaryPower": 20, "economicPower": 35, "politicalInfluence": 52, "religiousInfluence": 82},
     }
 
     prev_rows = {
@@ -3293,21 +3386,21 @@ def _default_locations():
     """Seed data for all known locations. owner/controller start as the same faction."""
     return [
         # id, name, owner, controller, control, stability, population, value, region_type, adjacent[]
-        ("twin-cities",     "Twin Cities",     "Twin Cities",       "Twin Cities",       82, 74, 160000, 88, "capital",   ["Tidefall", "Dur Khadur", "Faerwood"]),
-        ("tidefall",        "Tidefall",        "Tidefall",          "Tidefall",          78, 68, 160000, 82, "port",      ["Twin Cities", "Dreadwind Isles"]),
-        ("dur-khadur",      "Dur Khadur",      "Dur Khadur",        "Dur Khadur",        80, 72, 115000, 75, "fortress",  ["Twin Cities", "Gilgeth and Groth", "Lostfeld"]),
-        ("lostfeld",        "Lostfeld",        "Dur Khadur",        "Dur Khadur",        64, 42, 65000,  70, "mine",      ["Dur Khadur", "Gilgeth and Groth", "Stonebreak"]),
-        ("faerwood",        "Faerwood",        "Shadow Court",      "Shadow Court",      76, 55, 30000,  65, "fortress",  ["Twin Cities", "Glenhaven"]),
-        ("glenhaven",       "Glenhaven",       "Glenhaven",         "Glenhaven",         74, 80, 35000,  62, "wilderness",["Faerwood", "Frostvale Ridge"]),
-        ("frostvale-ridge", "Frostvale Ridge", "Glenhaven",         "Glenhaven",         52, 58, 8000,   55, "wilderness",["Glenhaven", "Lostfeld"]),
-        ("gilgeth",         "Gilgeth",         "Gilgeth Clans",     "Gilgeth Clans",     72, 50, 60000,  58, "fortress",  ["Groth Highlands", "Dur Khadur", "Lostfeld"]),
-        ("groth-highlands", "Groth Highlands", "Groth Clans",       "Groth Clans",       68, 46, 40000,  52, "wilderness",["Gilgeth", "Rock Plains"]),
-        ("rock-plains",     "Rock Plains",     "Vilefin",           "Vilefin",           58, 38, 215000, 48, "plains",    ["Groth Highlands", "Dreadwind Isles"]),
-        ("dreadwind-isles", "Dreadwind Isles", "Dreadwind",         "Dreadwind",         62, 45, 45000,  60, "port",      ["Tidefall", "Rock Plains"]),
-        ("stonebreak",      "Stonebreak",      "Monastery of Druids","Monastery of Druids",88, 90, 5500, 58, "sacred",    ["Lostfeld", "Glenhaven"]),
-        ("gloomspire",      "Gloomspire",      "Gloomspire Syndicate","Gloomspire Syndicate",70,65, 8500, 50, "city",     ["Faerwood", "Twin Cities"]),
-        ("dragonscar-peaks","Dragonscar Peaks","Dragon Clans",      "Dragon Clans",       95, 88, 12,    72, "wilderness",["Lostfeld", "Groth Highlands"]),
-        ("open-sea",        "Open Sea",        "Tidefall",          "Dreadwind",          35, 30, 0,     70, "sea",       ["Tidefall", "Dreadwind Isles", "Rock Plains"]),
+        ("twin-cities",     "Twin Cities",     "Twin Cities",       "Twin Cities",       82, 74, 140000, 88, "capital",   ["Tidefall", "Dur Khadur", "Faerwood", "Eldoria"]),
+        ("eldoria",         "Eldoria",         "Twin Cities",       "Twin Cities",       76, 70, 95000,  78, "city",      ["Twin Cities", "Tidefall", "Faerwood", "Varkuun"]),
+        ("tidefall",        "Tidefall",        "Tidefall",          "Tidefall",          78, 68, 160000, 82, "port",      ["Twin Cities", "Eldoria", "Dreadwind Isles", "Varkuun"]),
+        ("dur-khadur",      "Dur Khadur",      "Dur Khadur",        "Dur Khadur",        84, 74, 115000, 80, "fortress",  ["Lostfeld", "Gilgeth", "Groth"]),
+        ("lostfeld",        "Lostfeld",        "Lostfeld",          "Lostfeld",          78, 72, 65000,  72, "mine",      ["Dur Khadur", "Gilgeth", "Groth", "Stonebreak", "Wintermark"]),
+        ("faerwood",        "Faerwood",        "Shadow Court",      "Shadow Court",      76, 55, 30000,  65, "fortress",  ["Twin Cities", "Glenhaven", "Eldoria"]),
+        ("glenhaven",       "Glenhaven",       "Glenhaven",         "Glenhaven",         74, 80, 35000,  62, "wilderness",["Faerwood", "Tidefall", "Stonebreak"]),
+        ("frostvale",       "Frostvale",       "The Wintermark",    "The Wintermark",    70, 62, 42000,  58, "fortress",  ["Lostfeld", "Twin Cities", "Groth"]),
+        ("gilgeth",         "Gilgeth",         "Gilgeth Clans",     "Gilgeth Clans",     72, 50, 60000,  58, "fortress",  ["Groth", "Dur Khadur", "Lostfeld", "Vilefin"]),
+        ("groth",           "Groth",           "Groth Clans",       "Groth Clans",       68, 38, 40000,  52, "wilderness",["Gilgeth", "Frostvale", "Dur Khadur"]),
+        ("vilefin",         "Vilefin",         "Vilefin",           "Vilefin",           58, 38, 215000, 48, "plains",    ["Gilgeth", "Twin Cities", "Varkuun"]),
+        ("dreadwind-isles", "Dreadwind Isles", "Dreadwind Isles",   "Dreadwind Isles",   62, 38, 45000,  62, "port",      ["Tidefall", "Open Sea"]),
+        ("varkuun",         "Varkuun",         "Varkuun",           "Varkuun",           80, 72, 18000,  70, "fortress",  ["Tidefall", "Eldoria", "Twin Cities", "Vilefin"]),
+        ("stonebreak",      "Stonebreak",      "Stonebreak Monastery","Stonebreak Monastery",88, 90, 5500, 58, "sacred",  ["Lostfeld", "Glenhaven"]),
+        ("open-sea",        "Open Sea",        "Tidefall",          "Dreadwind Isles",    35, 30, 0,     70, "sea",       ["Tidefall", "Dreadwind Isles"]),
     ]
 
 
@@ -3539,11 +3632,16 @@ def _normalize_relationships(prev_state, new_state):
     VALID_TYPES = {"alliance", "rivalry", "neutral", "war"}
 
     prev_rows: dict = {}
-    for row in prev_state.get("relationships", []):
-        a = row.get("faction_a")
-        b = row.get("faction_b")
-        if a and b:
-            prev_rows[tuple(sorted((a, b)))] = row
+    prev_rels = prev_state.get("relationships", [])
+    # Guard: prev_state might have relationships as a dict (old format) — skip it
+    if isinstance(prev_rels, list):
+        for row in prev_rels:
+            if not isinstance(row, dict):
+                continue
+            a = row.get("faction_a")
+            b = row.get("faction_b")
+            if a and b:
+                prev_rows[tuple(sorted((a, b)))] = row
 
     # Build a lookup of each faction's leaders from prev_state house_characters
     # (prev_state is stable; new_state chars are still being processed downstream)
@@ -3657,8 +3755,16 @@ def _normalize_relationships(prev_state, new_state):
 
 
 def _normalize_faction_identities(new_state):
+    fi = new_state.get("faction_identities")
+    # Dict format (static identity data set at world creation) — preserve as-is.
+    # Claude returns [] for this field; ensure_world_structure restores the dict.
+    if isinstance(fi, dict):
+        return
+    # Array format — normalize each row
     identities = []
-    for row in new_state.get("faction_identities", []):
+    for row in (fi or []):
+        if not isinstance(row, dict):
+            continue
         faction = (row.get("faction") or "").strip()
         if not faction:
             continue
@@ -3784,16 +3890,20 @@ def _infer_seer_journey(new_state):
 
     known_places = [
         "Twin Cities",
+        "Eldoria",
         "Stonebreak",
         "Lostfeld",
         "Tidefall",
         "Faerwood",
         "Glenhaven",
+        "Wintermark",
         "Frostvale",
-        "Dreadwind",
-        "Farrock",
+        "Dreadwind Isles",
+        "Varkuun",
         "Dur Khadur",
-        "Rock Plains",
+        "Vilefin",
+        "Groth",
+        "Gilgeth",
         "Sinking Island",
     ]
 
@@ -3954,29 +4064,26 @@ def _default_leadership_state():
     return [
         {
             "faction": "Twin Cities",
-            "currentRuler": ruler("Roderic Thorne II", "King", "House Aurand", 61, "inheritance", ["centralizing", "ailing"]),
+            "currentRuler": ruler("Eldaric Aurand III", "High King", "House Aurand", 54, "inheritance", ["centralizing", "tradition-bound"]),
             "rulerHistory": [],
             "dynasties": [
-                dynasty("House Aurand", "Twin Cities", 1, 78, "Aurand the Unifier", ["Roderic Thorne II"]),
-                dynasty("House Adkison", "Twin Cities", 1, 70, "Mara Adkison", ["Caeris Thorne"]),
-                dynasty("House Van Cleave", "Twin Cities", 2, 66, "Ser Calven Van Cleave"),
-                dynasty("House Gross", "Twin Cities", 2, 62, "Edric Gross"),
-                dynasty("House Dale", "Twin Cities", 3, 42, "Nera Dale"),
-                dynasty("House Highland", "Twin Cities", 3, 45, "Bren Highland"),
+                dynasty("House Aurand", "Twin Cities", 1, 82, "Aurand the Unifier", ["High King Eldaric Aurand III"]),
+                dynasty("House Braafhart", "Twin Cities", 2, 65, "Aldric Braafhart"),
+                dynasty("House LeFleur", "Twin Cities", 2, 61, "Celeste LeFleur"),
+                dynasty("House Bower", "Twin Cities", 3, 44, "Old Bower"),
+                dynasty("House Binx", "Twin Cities", 3, 38, "Tallo Binx"),
+                dynasty("House Dale", "Twin Cities", 3, 41, "Nera Dale"),
             ],
         },
         {
             "faction": "Tidefall",
-            "currentRuler": ruler("Marcellus Ver Meer", "Admiral-Lord", "House Ver Meer", 52, "appointment", ["naval", "withdrawn"]),
+            "currentRuler": ruler("Levi Ver Meer", "Grand Admiral", "House Ver Meer", 48, "appointment", ["naval", "shrewd"]),
             "rulerHistory": [],
             "dynasties": [
-                dynasty("House Ver Meer", "Tidefall", 1, 80, "Admiral Joren Ver Meer", ["Marcellus Ver Meer"]),
-                dynasty("House Gross", "Tidefall", 2, 68, "Edric Gross"),
-                dynasty("House Adkison", "Tidefall", 2, 63, "Mara Adkison"),
-                dynasty("House Van Cleave", "Tidefall", 2, 58, "Ser Calven Van Cleave"),
-                dynasty("House Fish", "Tidefall", 3, 46, "Old Maren Fish"),
-                dynasty("House Binx", "Tidefall", 3, 39, "Tallo Binx"),
-                dynasty("House Darkleaf", "Tidefall", 3, 44, "Sera Darkleaf"),
+                dynasty("House Ver Meer", "Tidefall", 1, 80, "Admiral Joren Ver Meer", ["Grand Admiral Levi Ver Meer"]),
+                dynasty("House Highland-Dusken", "Tidefall", 2, 62, "Highland-Dusken the Elder"),
+                dynasty("House Fish", "Tidefall", 2, 54, "Old Maren Fish"),
+                dynasty("House McGowan", "Tidefall", 3, 46, "Bren McGowan"),
             ],
         },
         {
@@ -3984,63 +4091,108 @@ def _default_leadership_state():
             "currentRuler": ruler("Seran Gross", "Trade Prince", "House Gross", 49, "election", ["commercial", "calculating"]),
             "rulerHistory": [],
             "dynasties": [
-                dynasty("House Gross", "Dur Khadur", 1, 76, "Edric Gross", ["Seran Gross"]),
-                dynasty("House Adkison", "Dur Khadur", 2, 64, "Mara Adkison"),
-                dynasty("House Van Cleave", "Dur Khadur", 2, 59, "Ser Calven Van Cleave"),
-                dynasty("House Binx", "Dur Khadur", 3, 41, "Tallo Binx"),
-                dynasty("House Darkleaf", "Dur Khadur", 3, 47, "Sera Darkleaf"),
-                dynasty("House Dale", "Dur Khadur", 3, 38, "Nera Dale"),
+                dynasty("House Gross", "Dur Khadur", 1, 76, "Edric Gross", ["Trade Prince Seran Gross"]),
+                dynasty("House Delonious", "Dur Khadur", 2, 60, "Aldric Delonious"),
+                dynasty("House Galfazzar", "Dur Khadur", 2, 57, "Mira Galfazzar"),
+                dynasty("House Vercenti", "Dur Khadur", 3, 43, "Vercenti the Merchant"),
             ],
         },
         {
-            "faction": "Lostfeld Dwarves",
-            "currentRuler": ruler("Ulric Ironmaul", "Thane", "Clan Ironmaul", 173, "inheritance", ["clan-bound", "deliberate"]),
+            "faction": "Lostfeld",
+            "currentRuler": ruler("Babadu Goldfinger-Duke", "High Thane", "Clan Goldfinger-Duke", 218, "inheritance", ["coin-wise", "deliberate"]),
             "rulerHistory": [],
             "dynasties": [
-                dynasty("Clan Ironmaul", "Lostfeld Dwarves", 1, 82, "Brammir Ironmaul", ["Thane Ulric Ironmaul", "Ulric Ironmaul"]),
-                dynasty("Runewardens Clan", "Lostfeld Dwarves", 2, 68, "Dhorin Runewarden"),
-                dynasty("Goldfinger-Duke Clan", "Lostfeld Dwarves", 2, 64, "Orik Goldfinger-Duke"),
+                dynasty("Clan Goldfinger-Duke", "Lostfeld", 1, 78, "Orik Goldfinger-Duke", ["High Thane Babadu Goldfinger-Duke"]),
+                dynasty("Clan Runewarden", "Lostfeld", 2, 68, "Dhorin Runewarden"),
+                dynasty("Clan Ironmaul", "Lostfeld", 2, 64, "Brammir Ironmaul"),
             ],
         },
         {
             "faction": "Shadow Court",
-            "currentRuler": ruler("Lythara the Veiled", "Queen", "House Velorn", 412, "seizure of power", ["manipulative", "patient"]),
+            "currentRuler": ruler("Lyathra the Veiled", "Queen", "House Verlorn", 412, "seizure of power", ["manipulative", "patient"]),
             "rulerHistory": [],
             "dynasties": [
-                dynasty("House Velorn", "Shadow Court", 1, 84, "Velorn the First", ["Queen Lythara the Veiled"]),
-                dynasty("House Nythariel", "Shadow Court", 2, 65, "Nythariel of the Black Glades"),
-                dynasty("House Arkenor", "Shadow Court", 2, 67, "Arkenor the Quiet"),
+                dynasty("House Verlorn", "Shadow Court", 1, 90, "Verlorn the First", ["Queen Lyathra the Veiled"]),
+                dynasty("House Nightborn", "Shadow Court", 2, 70, "Nightborn of the Abyss"),
+                dynasty("House Shadowveil", "Shadow Court", 2, 65, "Shadowveil the Quiet"),
             ],
         },
         {
             "faction": "Glenhaven",
-            "currentRuler": ruler("Elowen Silverleaf", "Sovereign", "Silverleaf Line", 286, "election", ["council-guided", "defensive"]),
+            "currentRuler": ruler("Thalorien Wood", "High Sovereign", "House Wood", 312, "council vote", ["council-guided", "defensive"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Silverleaf Line", "Glenhaven", 1, 79, "Elowen the Elder", ["Sovereign Elowen Silverleaf"])],
+            "dynasties": [
+                dynasty("House Wood", "Glenhaven", 1, 82, "Thalorien the Ancient", ["High Sovereign Thalorien Wood"]),
+                dynasty("House Darkleaf", "Glenhaven", 2, 65, "Darkleaf the Keeper"),
+                dynasty("House Mistafae", "Glenhaven", 2, 58, "Mistafae Elder"),
+            ],
         },
         {
             "faction": "Gilgeth Clans",
-            "currentRuler": ruler("Hargan Stonejaw", "First Elder", "Council Clans", 44, "election", ["consensus-driven", "proud"]),
+            "currentRuler": ruler("Kragor Blackblood", "High Warlord", "Clan Blackblood", 46, "election", ["disciplined", "proud"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Council Clans", "Gilgeth Clans", 2, 61, "First Circle", ["Hargan Stonejaw"])],
+            "dynasties": [
+                dynasty("Clan Blackblood", "Gilgeth Clans", 1, 68, "First Blackblood", ["High Warlord Kragor Blackblood"]),
+                dynasty("Clan Ironhide", "Gilgeth Clans", 2, 60, "Ironhide Elder"),
+                dynasty("Clan Redtusk", "Gilgeth Clans", 2, 54, "Redtusk the War-Scarred"),
+            ],
         },
         {
             "faction": "Groth Clans",
-            "currentRuler": ruler("Morgath Bloodstone", "Chieftain", "Bloodstone Clan", 36, "seizure of power", ["aggressive", "strength-bound"]),
+            "currentRuler": ruler("Drogath Mijid", "Warchief", "Clan Mijid", 38, "seizure of power", ["aggressive", "strength-bound"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Bloodstone Clan", "Groth Clans", 2, 58, "First Bloodstone", ["Morgath Bloodstone"])],
+            "dynasties": [
+                dynasty("Clan Mijid", "Groth Clans", 1, 62, "First Mijid", ["Warchief Drogath Mijid"]),
+                dynasty("Clan Ashfang", "Groth Clans", 2, 55, "Ashfang the Smoke-Elder"),
+                dynasty("Clan Syncar", "Groth Clans", 2, 50, "Syncar the Wild"),
+            ],
         },
         {
             "faction": "Vilefin",
-            "currentRuler": ruler("Skrix Cogtooth", "Speaker", "Vilefin Moot", 19, "post-collapse emergence", ["flexible", "communal"]),
+            "currentRuler": ruler("Grikk Bloodware", "Speaker", "Clan Bloodware", 22, "post-collapse emergence", ["flexible", "communal"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Vilefin Moot", "Vilefin", 3, 36, "The First Moot", ["Skrix Cogtooth"])],
+            "dynasties": [
+                dynasty("Clan Bloodware", "Vilefin", 2, 44, "The First Bloodware", ["Speaker Grikk Bloodware"]),
+                dynasty("Clan Cogtooth", "Vilefin", 2, 38, "Cogtooth Elder"),
+                dynasty("Clan Rustfang", "Vilefin", 3, 30, "Rustfang Scavenger"),
+            ],
         },
         {
-            "faction": "Dreadwind",
-            "currentRuler": ruler("Rowen Blacktide", "Fleet Captain", "Dreadwind Compact", 41, "seizure of power", ["restless", "risk-bearing"]),
+            "faction": "The Wintermark",
+            "currentRuler": ruler("Kaelen Adkison", "High Lord", "House Adkison", 44, "inheritance", ["stoic", "enduring"]),
             "rulerHistory": [],
-            "dynasties": [dynasty("Dreadwind Compact", "Dreadwind", 2, 52, "The Exiled Crews", ["Rowen Blacktide"])],
+            "dynasties": [
+                dynasty("House Adkison", "The Wintermark", 1, 72, "Mara Adkison", ["High Lord Kaelen Adkison"]),
+                dynasty("House McIntosh", "The Wintermark", 2, 58, "Old McIntosh"),
+                dynasty("House Holter", "The Wintermark", 2, 54, "Holter the Frost-Warden"),
+                dynasty("House Duval", "The Wintermark", 3, 44, "Duval the Survivor"),
+            ],
+        },
+        {
+            "faction": "Varkuun",
+            "currentRuler": ruler("Ashali Van Cleave", "High Marshal", "House Van Cleave", 41, "appointment", ["tactical", "mercenary-born"]),
+            "rulerHistory": [],
+            "dynasties": [
+                dynasty("House Van Cleave", "Varkuun", 1, 74, "Calven Van Cleave", ["High Marshal Ashali Van Cleave"]),
+            ],
+        },
+        {
+            "faction": "Dreadwind Isles",
+            "currentRuler": ruler("Ronan Blacktide", "Captain", "House Blacktide", 34, "seizure of power", ["restless", "vengeance-driven"]),
+            "rulerHistory": [],
+            "dynasties": [
+                dynasty("House Blacktide", "Dreadwind Isles", 1, 58, "The Exiled Lord", ["Captain Ronan Blacktide"]),
+                dynasty("House Stormvane", "Dreadwind Isles", 2, 48, "Stormvane the Raider"),
+                dynasty("House Saltbreach", "Dreadwind Isles", 2, 44, "Saltbreach the Corsair"),
+            ],
+        },
+        {
+            "faction": "Stonebreak Monastery",
+            "currentRuler": ruler("Varak", "Grand Druid", "Druid Circle", 67, "chosen", ["ancient-minded", "inscrutable"]),
+            "rulerHistory": [],
+            "dynasties": [
+                dynasty("Druid Circle", "Stonebreak Monastery", 2, 62, "The First Grove"),
+            ],
         },
     ]
 
@@ -4050,12 +4202,13 @@ def _normalize_reign(row, current_tick, active=True):
         name = (name or "Unknown Ruler").strip()
         title = (title or "").strip()
         placeholders = {
-            "the admiral": "Marcellus Ver Meer",
+            "the admiral": "Levi Ver Meer",
             "the dark council": "Seran Gross",
-            "groth chieftain": "Morgath Bloodstone",
-            "gilgeth elder council": "Hargan Stonejaw",
-            "skrix": "Skrix Cogtooth",
-            "rowen": "Rowen Blacktide",
+            "groth chieftain": "Drogath Mijid",
+            "gilgeth elder council": "Kragor Blackblood",
+            "grikk": "Grikk Bloodware",
+            "ronan": "Ronan Blacktide",
+            "varak": "Varak",
         }
         lowered = name.lower()
         if lowered in placeholders:
@@ -4097,11 +4250,19 @@ def _normalize_reign(row, current_tick, active=True):
 
 
 _FACTION_ALIASES = {
-    "Dreadwind Islands": "Dreadwind",
-    "Gilgeth Orcs":      "Gilgeth Clans",
-    "Glenhaven Elves":   "Glenhaven",
-    "Groth Orcs":        "Groth Clans",
-    "Vilefin Goblins":   "Vilefin",
+    "Dreadwind":          "Dreadwind Isles",
+    "Dreadwind Islands":  "Dreadwind Isles",
+    "Dreadwind Compact":  "Dreadwind Isles",
+    "Gilgeth Orcs":       "Gilgeth Clans",
+    "Glenhaven Elves":    "Glenhaven",
+    "Groth Orcs":         "Groth Clans",
+    "Vilefin Goblins":    "Vilefin",
+    "Lostfeld Dwarves":   "Lostfeld",
+    "Monastery of Druids":"Stonebreak Monastery",
+    "Farrock":            "Varkuun",
+    "Red Banner Legion":  "Varkuun",
+    "Frostvale":          "The Wintermark",
+    "Wintermark":         "The Wintermark",
 }
 
 def _normalize_leadership_state(prev_state, new_state):
@@ -4193,66 +4354,70 @@ def _default_house_characters():
     specs = {
         "Twin Cities": {
             "House Aurand": [("Miren Aurand", "Heir apparent", 58, 72, 54, 82, "honorable"), ("Selda Aurand", "Court mediator", 43, 80, 38, 86, "defensive"), ("Tavian Aurand", "Palace steward", 36, 68, 41, 79, "defensive"), ("Orlan Aurand", "Royal cousin", 47, 63, 62, 67, "opportunistic")],
-            "House Adkison": [("Caeris Thorne", "Regent-designate", 74, 58, 82, 61, "opportunistic"), ("Marra Adkison", "Legal strategist", 52, 49, 76, 54, "opportunistic"), ("Joric Adkison", "Court whip", 44, 46, 71, 45, "aggressive"), ("Elian Adkison", "Treasury liaison", 39, 55, 64, 52, "opportunistic")],
-            "House Van Cleave": [("Ser Garron Van Cleave", "Marshal", 63, 61, 70, 74, "aggressive"), ("Helena Van Cleave", "Watch commander", 48, 67, 55, 81, "defensive"), ("Dain Van Cleave", "Cavalry captain", 41, 52, 73, 58, "aggressive"), ("Rusk Van Cleave", "Fortress inspector", 34, 57, 47, 76, "defensive")],
-            "House Gross": [("Edric Gross", "Trade minister", 57, 48, 78, 49, "opportunistic"), ("Sabine Gross", "Guild broker", 46, 44, 69, 42, "opportunistic"), ("Petra Gross", "Granary factor", 35, 64, 51, 62, "defensive"), ("Merek Gross", "Debt collector", 32, 35, 66, 37, "paranoid")],
-            "House Dale": [("Nera Dale", "Harvest governor", 33, 73, 42, 78, "honorable"), ("Tobin Dale", "Provisioner", 28, 66, 39, 72, "defensive"), ("Elska Dale", "Rural envoy", 26, 70, 45, 69, "honorable"), ("Berrit Dale", "Storehouse captain", 24, 58, 48, 71, "defensive")],
-            "House Highland": [("Bren Highland", "Border warden", 42, 65, 52, 83, "defensive"), ("Maela Highland", "Signal officer", 29, 62, 49, 76, "paranoid"), ("Torren Highland", "Militia captain", 31, 54, 58, 70, "aggressive"), ("Iona Highland", "Refuge coordinator", 25, 74, 36, 81, "honorable")],
+            "House Braafhart": [("Aldric Braafhart", "Duke of Eresteron", 58, 64, 52, 72, "defensive"), ("Senna Braafhart", "Braafhart Heir", 42, 68, 44, 78, "honorable"), ("Toven Braafhart", "Agricultural lord", 36, 72, 36, 74, "defensive"), ("Mira Braafhart", "Field administrator", 29, 66, 40, 70, "defensive")],
+            "House LeFleur": [("Celeste LeFleur", "Duchess of Eldoria", 52, 74, 48, 80, "honorable"), ("Rael LeFleur", "LeFleur Heir", 38, 70, 42, 76, "honorable"), ("Aldwin LeFleur", "Cultural patron", 34, 78, 34, 82, "honorable"), ("Lyse LeFleur", "Arts council head", 30, 74, 36, 78, "defensive")],
+            "House Bower": [("Arlen Bower", "City elder", 44, 68, 46, 72, "defensive"), ("Neva Bower", "Bower Heir", 32, 64, 48, 68, "opportunistic"), ("Harren Bower", "Guild contact", 28, 60, 52, 62, "opportunistic"), ("Meri Bower", "Quarter master", 26, 66, 44, 68, "defensive")],
+            "House Binx": [("Tallo Binx", "Chance broker", 38, 40, 83, 28, "opportunistic"), ("Nix Binx", "Rumor runner", 26, 36, 77, 31, "paranoid"), ("Pava Binx", "Dicehouse owner", 29, 44, 70, 35, "opportunistic"), ("Jessa Binx", "Smuggler contact", 24, 32, 74, 26, "aggressive")],
+            "House Dale": [("Nera Dale", "Harvest governor", 38, 73, 42, 78, "honorable"), ("Tobin Dale", "Provisioner", 28, 66, 39, 72, "defensive"), ("Elska Dale", "Rural envoy", 26, 70, 45, 69, "honorable"), ("Berrit Dale", "Storehouse captain", 24, 58, 48, 71, "defensive")],
         },
         "Tidefall": {
-            "House Ver Meer": [("Marcellus Ver Meer", "Admiral-Lord", 82, 54, 76, 58, "defensive"), ("Isolde Ver Meer", "Harbor magistrate", 52, 63, 68, 64, "opportunistic"), ("Joren Ver Meer", "Fleet heir", 48, 51, 80, 47, "aggressive"), ("Maeric Ver Meer", "Shipyard master", 39, 57, 59, 70, "defensive")],
-            "House Gross": [("Corvin Gross", "Harbor factor", 54, 42, 81, 39, "opportunistic"), ("Lessa Gross", "Customs broker", 43, 46, 72, 44, "opportunistic"), ("Tam Gross", "Warehouse prince", 37, 39, 74, 35, "paranoid"), ("Bryn Gross", "Fleet accountant", 31, 58, 50, 63, "defensive")],
-            "House Adkison": [("Veyra Adkison", "Council advocate", 49, 52, 77, 50, "opportunistic"), ("Cassian Adkison", "Compact lawyer", 41, 47, 70, 48, "opportunistic"), ("Rellan Adkison", "Dockside envoy", 34, 43, 68, 41, "aggressive"), ("Sera Adkison", "Election broker", 38, 45, 75, 46, "opportunistic")],
-            "House Van Cleave": [("Brannik Van Cleave", "Marine captain", 46, 56, 74, 66, "aggressive"), ("Alia Van Cleave", "Garrison inspector", 36, 61, 57, 74, "defensive"), ("Ren Van Cleave", "Boarding commander", 33, 49, 71, 53, "aggressive"), ("Clovis Van Cleave", "Armory keeper", 28, 58, 48, 68, "defensive")],
-            "House Fish": [("Maren Fish", "Salt quay elder", 35, 68, 44, 73, "defensive"), ("Pell Fish", "Netfleet organizer", 27, 62, 51, 67, "opportunistic"), ("Una Fish", "Coastal scout", 25, 57, 58, 59, "defensive"), ("Hobb Fish", "Harbor quartermaster", 24, 55, 47, 70, "defensive")],
-            "House Binx": [("Tallo Binx", "Chance broker", 31, 40, 83, 28, "opportunistic"), ("Nix Binx", "Rumor runner", 26, 36, 77, 31, "paranoid"), ("Pava Binx", "Dicehouse owner", 29, 44, 70, 35, "opportunistic"), ("Jessa Binx", "Smuggler contact", 24, 32, 74, 26, "aggressive")],
-            "House Darkleaf": [("Sera Darkleaf", "Quiet agent", 40, 38, 79, 34, "paranoid"), ("Vane Darkleaf", "Cipher keeper", 34, 42, 73, 39, "defensive"), ("Liora Darkleaf", "Informant handler", 32, 35, 76, 33, "opportunistic"), ("Moth Darkleaf", "Shadow courier", 22, 31, 68, 28, "paranoid")],
+            "House Ver Meer": [("Levi Ver Meer", "Grand Admiral", 84, 58, 76, 62, "defensive"), ("Isolde Ver Meer", "Harbor magistrate", 52, 63, 68, 64, "opportunistic"), ("Joren Ver Meer", "Fleet heir", 48, 51, 80, 47, "aggressive"), ("Maeric Ver Meer", "Shipyard master", 39, 57, 59, 70, "defensive")],
+            "House Highland-Dusken": [("Ser Arvyn Highland-Dusken", "Sea marshal", 54, 65, 72, 68, "aggressive"), ("Lysse Highland-Dusken", "Highland Heir", 40, 62, 64, 72, "defensive"), ("Torren Highland-Dusken", "Coastal warden", 35, 58, 70, 62, "aggressive"), ("Mera Highland-Dusken", "Signal officer", 30, 64, 56, 68, "defensive")],
+            "House Fish": [("Maren Fish", "Salt quay elder", 44, 68, 44, 73, "defensive"), ("Pell Fish", "Netfleet organizer", 32, 62, 51, 67, "opportunistic"), ("Una Fish", "Coastal scout", 28, 57, 58, 59, "defensive"), ("Hobb Fish", "Harbor quartermaster", 26, 55, 47, 70, "defensive")],
+            "House McGowan": [("Bren McGowan", "Harbor lord", 46, 62, 52, 70, "defensive"), ("Kessa McGowan", "McGowan Heir", 34, 58, 48, 66, "opportunistic"), ("Oran McGowan", "Dock inspector", 30, 54, 56, 62, "defensive"), ("Mira McGowan", "Trade factor", 26, 60, 44, 66, "opportunistic")],
         },
         "Dur Khadur": {
             "House Gross": [("Seran Gross", "Trade Prince", 79, 43, 84, 41, "opportunistic"), ("Orren Gross", "Council treasurer", 53, 45, 76, 46, "opportunistic"), ("Dalia Gross", "Caravan patron", 45, 54, 69, 58, "defensive"), ("Voss Gross", "Auction master", 38, 34, 72, 32, "opportunistic")],
-            "House Adkison": [("Kevar Adkison", "Treaty engineer", 50, 48, 78, 44, "opportunistic"), ("Mina Adkison", "Contract judge", 42, 56, 66, 55, "defensive"), ("Arven Adkison", "Foreign broker", 39, 41, 74, 36, "opportunistic"), ("Leont Adkison", "Claims advocate", 30, 49, 63, 43, "paranoid")],
-            "House Van Cleave": [("Bors Van Cleave", "Mercenary captain", 47, 46, 80, 52, "aggressive"), ("Kella Van Cleave", "Gate commander", 35, 58, 59, 68, "defensive"), ("Ravan Van Cleave", "Escort marshal", 33, 51, 70, 49, "aggressive"), ("Silas Van Cleave", "Arms buyer", 29, 44, 65, 38, "opportunistic")],
-            "House Binx": [("Perrin Binx", "Market gambler", 30, 37, 82, 24, "opportunistic"), ("Zella Binx", "Information seller", 28, 34, 79, 29, "paranoid"), ("Odo Binx", "Courier fixer", 25, 45, 64, 41, "opportunistic"), ("Miri Binx", "Black-market caller", 23, 31, 73, 27, "aggressive")],
-            "House Darkleaf": [("Nalia Darkleaf", "Covert negotiator", 44, 39, 80, 33, "paranoid"), ("Vale Darkleaf", "Pass watcher", 37, 42, 70, 40, "defensive"), ("Isern Darkleaf", "Silent partner", 35, 36, 77, 30, "opportunistic"), ("Nyra Darkleaf", "Ledger spy", 27, 33, 72, 31, "paranoid")],
-            "House Dale": [("Heth Dale", "Grain investor", 34, 67, 48, 64, "defensive"), ("Mora Dale", "Water rights broker", 29, 62, 53, 59, "opportunistic"), ("Corra Dale", "Storehouse auditor", 26, 69, 41, 68, "honorable"), ("Tavin Dale", "Farmstead envoy", 24, 71, 38, 72, "honorable")],
+            "House Delonious": [("Aldric Delonious", "Route master", 52, 52, 74, 50, "opportunistic"), ("Mina Delonious", "Contract judge", 42, 58, 64, 56, "defensive"), ("Roven Delonious", "Trade inspector", 36, 48, 70, 44, "opportunistic"), ("Zella Delonious", "Pass warden", 28, 54, 60, 48, "defensive")],
+            "House Galfazzar": [("Mira Galfazzar", "Guild patron", 48, 56, 68, 60, "defensive"), ("Cavan Galfazzar", "Galfazzar Heir", 36, 52, 62, 56, "opportunistic"), ("Nela Galfazzar", "Merchant factor", 32, 58, 56, 62, "defensive"), ("Roth Galfazzar", "Ledger keeper", 26, 48, 52, 52, "defensive")],
+            "House Vercenti": [("Vercenti the Elder", "Silent partner", 56, 38, 78, 34, "paranoid"), ("Izel Vercenti", "Vercenti Heir", 40, 42, 72, 38, "opportunistic"), ("Bram Vercenti", "Covert factor", 34, 36, 74, 32, "paranoid"), ("Sel Vercenti", "Shadow broker", 26, 32, 70, 28, "paranoid")],
         },
-        "Lostfeld Dwarves": {
-            "Clan Ironmaul": [("Ulric Ironmaul", "Thane", 83, 71, 48, 88, "defensive"), ("Bera Ironmaul", "First heir", 68, 76, 44, 84, "honorable"), ("Korin Ironmaul", "Forge marshal", 61, 63, 58, 80, "defensive"), ("Dagna Ironmaul", "Hall steward", 55, 78, 36, 86, "honorable")],
-            "Runewardens Clan": [("Dhorin Runewarden", "Runekeeper elder", 66, 74, 41, 79, "defensive"), ("Mira Runewarden", "Vault archivist", 58, 82, 34, 83, "honorable"), ("Torvek Runewarden", "Seal engineer", 54, 69, 45, 76, "defensive"), ("Helja Runewarden", "Deep record keeper", 49, 77, 31, 81, "honorable")],
-            "Goldfinger-Duke Clan": [("Orik Goldfinger-Duke", "Coin-duke claimant", 64, 52, 72, 57, "opportunistic"), ("Sanna Goldfinger-Duke", "Treasury assessor", 56, 61, 64, 63, "opportunistic"), ("Brum Goldfinger-Duke", "Mint captain", 52, 55, 59, 60, "defensive"), ("Kelda Goldfinger-Duke", "Contract keeper", 47, 67, 48, 69, "honorable")],
+        "Lostfeld": {
+            "Clan Goldfinger-Duke": [("Babadu Goldfinger-Duke", "High Thane", 86, 64, 52, 78, "honorable"), ("Sanna Goldfinger-Duke", "Clan Heir", 68, 68, 46, 82, "honorable"), ("Brum Goldfinger-Duke", "Mint captain", 62, 60, 58, 74, "defensive"), ("Kelda Goldfinger-Duke", "Contract keeper", 54, 70, 46, 76, "honorable")],
+            "Clan Runewarden": [("Dhorin Runewarden", "Runekeeper elder", 74, 76, 40, 82, "defensive"), ("Mira Runewarden", "Vault archivist", 62, 82, 34, 86, "honorable"), ("Torvek Runewarden", "Seal engineer", 58, 70, 44, 78, "defensive"), ("Helja Runewarden", "Deep record keeper", 52, 78, 30, 82, "honorable")],
+            "Clan Ironmaul": [("Ulric Ironmaul", "Forge elder", 78, 68, 50, 84, "defensive"), ("Bera Ironmaul", "Ironmaul Heir", 64, 72, 44, 80, "honorable"), ("Korin Ironmaul", "Forge marshal", 58, 62, 56, 78, "defensive"), ("Dagna Ironmaul", "Hall steward", 52, 76, 36, 82, "honorable")],
         },
-        # Shadow Court: 2 houses — small and secretive; only the inner veil-court matters politically
         "Shadow Court": {
-            "House Shadowveil": [("Lythara the Veiled", "Shadow Queen", 88, 22, 75, 42, "paranoid"), ("Vayne Shadowveil", "Shadow Heir", 68, 24, 78, 48, "paranoid"), ("Selith Shadowveil", "Court Interrogator", 62, 18, 72, 55, "aggressive"), ("Mira Shadowveil", "Veil Defector", 48, 38, 76, 28, "opportunistic")],
-            "House Nightborn": [("Draveth Nightborn", "Shadow General", 74, 20, 70, 65, "aggressive"), ("Selis Nightborn", "Ritual Keeper", 60, 25, 65, 58, "paranoid"), ("Ryss Nightborn", "Assassin Captain", 56, 16, 74, 52, "aggressive"), ("Veth Nightborn", "Disgraced Spy", 44, 32, 72, 24, "opportunistic")],
+            "House Verlorn": [("Lyathra the Veiled", "Shadow Queen", 92, 18, 76, 38, "paranoid"), ("Vayne Verlorn", "Shadow Heir", 70, 22, 80, 44, "paranoid"), ("Selith Verlorn", "Court Inquisitor", 64, 16, 74, 52, "aggressive"), ("Mira Verlorn", "Veil Keeper", 50, 30, 72, 28, "opportunistic")],
+            "House Nightborn": [("Draveth Nightborn", "Executioner General", 76, 18, 72, 62, "aggressive"), ("Selis Nightborn", "Ritual Keeper", 62, 22, 66, 56, "paranoid"), ("Ryss Nightborn", "Assassin Captain", 58, 14, 76, 50, "aggressive"), ("Veth Nightborn", "Disgraced Spy", 46, 28, 74, 22, "opportunistic")],
+            "House Shadowveil": [("Aelith Shadowveil", "Veil Manipulator", 68, 26, 78, 32, "paranoid"), ("Lysse Shadowveil", "Shadowveil Heir", 54, 30, 74, 36, "paranoid"), ("Erith Shadowveil", "Court Whisper", 50, 22, 80, 28, "opportunistic"), ("Nael Shadowveil", "Veiled Agent", 42, 18, 76, 24, "aggressive")],
         },
-        # Glenhaven: 3 houses — council dynamics need at least 3 factions for interesting votes; one is Darkleaf per user
         "Glenhaven": {
-            "House Silverleaf": [("Elowen Silverleaf", "Sovereign", 85, 76, 52, 80, "honorable"), ("Taelis Silverleaf", "Sovereign's Heir", 66, 72, 48, 78, "honorable"), ("Miren Silverleaf", "War-Reader", 62, 68, 55, 74, "defensive"), ("Alara Silverleaf", "Forest Envoy", 52, 74, 44, 72, "honorable")],
-            "House Darkleaf": [("Verath Darkleaf", "Shadow Councillor", 72, 42, 70, 55, "opportunistic"), ("Sylra Darkleaf", "Darkleaf Heir", 60, 45, 68, 50, "opportunistic"), ("Erith Darkleaf", "Forest Spy", 58, 38, 72, 48, "paranoid"), ("Nael Darkleaf", "Border Hunter", 50, 44, 65, 44, "aggressive")],
-            "House Moonwhisper": [("Cael Moonwhisper", "Elder Delegate", 68, 80, 42, 85, "honorable"), ("Lysse Moonwhisper", "Council Heir", 54, 76, 38, 82, "honorable"), ("Faen Moonwhisper", "Grove Keeper", 52, 78, 36, 80, "defensive"), ("Iorel Moonwhisper", "Memory Singer", 46, 82, 32, 76, "honorable")],
+            "House Wood": [("Thalorien Wood", "High Sovereign", 88, 78, 52, 84, "honorable"), ("Aelindra Wood", "Sovereign's Heir", 68, 74, 48, 82, "honorable"), ("Faeln Wood", "War-Reader", 64, 70, 55, 76, "defensive"), ("Sylvorn Wood", "Forest Envoy", 54, 76, 44, 74, "honorable")],
+            "House Darkleaf": [("Verath Darkleaf", "Shadow Councillor", 74, 44, 72, 56, "opportunistic"), ("Sylra Darkleaf", "Darkleaf Heir", 62, 46, 70, 52, "opportunistic"), ("Erith Darkleaf", "Forest Spy", 60, 40, 74, 50, "paranoid"), ("Nael Darkleaf", "Border Hunter", 52, 46, 66, 46, "aggressive")],
+            "House Mistafae": [("Cael Mistafae", "Elder Delegate", 70, 82, 42, 88, "honorable"), ("Lysse Mistafae", "Council Heir", 56, 78, 38, 84, "honorable"), ("Faen Mistafae", "Grove Keeper", 54, 80, 36, 82, "defensive"), ("Iorel Mistafae", "Memory Singer", 48, 84, 32, 80, "honorable")],
         },
-        # Gilgeth Clans: 3 clans — the elder council needs enough clans to debate and outvote each other
         "Gilgeth Clans": {
-            "Clan Stonejaw": [("Hargan Stonejaw", "First Elder", 83, 62, 55, 75, "defensive"), ("Broga Stonejaw", "Elder's Heir", 66, 58, 60, 70, "defensive"), ("Kreth Stonejaw", "Clan Champion", 62, 44, 74, 62, "aggressive"), ("Ulva Stonejaw", "Raider Captain", 55, 38, 78, 50, "aggressive")],
-            "Clan Ironhide": [("Vorg Ironhide", "Clan Warlord", 74, 38, 78, 58, "aggressive"), ("Grak Ironhide", "Warlord's Son", 62, 34, 76, 52, "aggressive"), ("Shura Ironhide", "Shield Maiden", 58, 42, 68, 64, "defensive"), ("Durz Ironhide", "Ambush Hunter", 50, 32, 72, 44, "aggressive")],
-            "Clan Ashfang": [("Griss Ashfang", "Smoke Elder", 70, 52, 62, 68, "opportunistic"), ("Nalla Ashfang", "Elder's Daughter", 58, 50, 64, 62, "opportunistic"), ("Krug Ashfang", "Fire Keeper", 54, 44, 70, 55, "aggressive"), ("Orra Ashfang", "Scout Mistress", 48, 48, 66, 58, "defensive")],
+            "Clan Blackblood": [("Kragor Blackblood", "High Warlord", 86, 62, 58, 74, "aggressive"), ("Broga Blackblood", "Warlord's Heir", 68, 58, 62, 70, "aggressive"), ("Kreth Blackblood", "Clan Champion", 64, 44, 76, 62, "aggressive"), ("Ulva Blackblood", "Raider Captain", 56, 38, 80, 50, "aggressive")],
+            "Clan Ironhide": [("Vorg Ironhide", "Clan Elder", 76, 40, 78, 58, "aggressive"), ("Grak Ironhide", "Elder's Son", 64, 36, 76, 52, "aggressive"), ("Shura Ironhide", "Shield Maiden", 60, 44, 70, 66, "defensive"), ("Durz Ironhide", "Ambush Hunter", 52, 34, 74, 46, "aggressive")],
+            "Clan Redtusk": [("Brak Redtusk", "Battle Elder", 74, 32, 78, 52, "aggressive"), ("Urka Redtusk", "Tusk Heir", 62, 30, 76, 48, "aggressive"), ("Ghal Redtusk", "Siege Master", 58, 26, 74, 44, "aggressive"), ("Vrenna Redtusk", "War Drummer", 50, 34, 70, 52, "defensive")],
         },
-        # Groth Clans: 2 clans — warlord culture; the ruling clan dominates, one rival clan creates tension
         "Groth Clans": {
-            "Clan Bloodstone": [("Morgath Bloodstone", "Chieftain", 86, 28, 82, 45, "aggressive"), ("Vrakka Bloodstone", "Warchief Heir", 70, 26, 80, 48, "aggressive"), ("Droth Bloodstone", "Berserker Lord", 64, 22, 84, 40, "aggressive"), ("Shara Bloodstone", "Blood Shaman", 58, 35, 72, 42, "paranoid")],
-            "Clan Redtusk": [("Brak Redtusk", "Battle Elder", 72, 30, 78, 52, "aggressive"), ("Urka Redtusk", "Tusk Heir", 60, 28, 76, 48, "aggressive"), ("Ghal Redtusk", "Siege Master", 56, 24, 74, 44, "aggressive"), ("Vrenna Redtusk", "War Drummer", 48, 32, 70, 50, "defensive")],
+            "Clan Mijid": [("Drogath Mijid", "Warchief", 88, 26, 84, 44, "aggressive"), ("Vrakka Mijid", "Warchief Heir", 72, 24, 82, 48, "aggressive"), ("Droth Mijid", "Berserker Lord", 66, 20, 86, 40, "aggressive"), ("Shara Mijid", "Blood Shaman", 60, 32, 74, 42, "paranoid")],
+            "Clan Ashfang": [("Griss Ashfang", "Smoke Elder", 72, 50, 64, 68, "opportunistic"), ("Nalla Ashfang", "Elder's Daughter", 60, 48, 66, 62, "opportunistic"), ("Krug Ashfang", "Fire Keeper", 56, 42, 72, 55, "aggressive"), ("Orra Ashfang", "Scout Mistress", 50, 46, 68, 58, "defensive")],
+            "Clan Syncar": [("Durn Syncar", "Clan Reaver", 68, 28, 80, 40, "aggressive"), ("Vela Syncar", "Syncar Heir", 54, 26, 78, 44, "aggressive"), ("Krath Syncar", "War Drummer", 50, 22, 82, 36, "aggressive"), ("Orva Syncar", "Bone Shaman", 44, 34, 70, 38, "paranoid")],
         },
-        # Vilefin: 2 clans — goblins are fractious but the speaker system keeps it to 2 competing blocs
         "Vilefin": {
-            "Clan Cogtooth": [("Skrix Cogtooth", "Speaker", 80, 36, 82, 38, "opportunistic"), ("Nix Cogtooth", "Speaker's Kin", 62, 32, 78, 42, "opportunistic"), ("Vrax Cogtooth", "Trap Master", 58, 28, 80, 35, "aggressive"), ("Pella Cogtooth", "Info Broker", 52, 35, 75, 30, "paranoid")],
-            "Clan Rustfang": [("Grix Rustfang", "Clan Boss", 68, 28, 80, 35, "opportunistic"), ("Skit Rustfang", "Boss's Runt", 55, 25, 76, 38, "opportunistic"), ("Mekka Rustfang", "Scavenger Chief", 52, 22, 78, 30, "aggressive"), ("Drip Rustfang", "Poison Brewer", 46, 18, 74, 28, "paranoid")],
+            "Clan Bloodware": [("Grikk Bloodware", "Speaker", 82, 34, 84, 36, "opportunistic"), ("Nix Bloodware", "Speaker's Kin", 64, 30, 80, 40, "opportunistic"), ("Vrax Bloodware", "Trap Master", 60, 26, 82, 32, "aggressive"), ("Pella Bloodware", "Info Broker", 54, 32, 78, 28, "paranoid")],
+            "Clan Cogtooth": [("Skrix Cogtooth", "Former Speaker", 72, 36, 80, 34, "opportunistic"), ("Pava Cogtooth", "Clan Rival", 58, 32, 76, 38, "opportunistic"), ("Mekka Cogtooth", "Scavenger Boss", 54, 28, 78, 30, "aggressive"), ("Drip Cogtooth", "Poison Brewer", 46, 22, 74, 24, "paranoid")],
+            "Clan Rustfang": [("Grix Rustfang", "Clan Boss", 70, 28, 80, 35, "opportunistic"), ("Skit Rustfang", "Boss's Runt", 58, 25, 76, 38, "opportunistic"), ("Vrenn Rustfang", "Scavenger Chief", 54, 22, 78, 30, "aggressive"), ("Drip Rustfang", "Rust Brewer", 48, 18, 74, 28, "paranoid")],
         },
-        # Dreadwind: 3 captaincy houses — election system needs enough rival captains to make votes contested
-        "Dreadwind": {
-            "House Blacktide": [("Rowen Blacktide", "Fleet Captain", 84, 48, 72, 55, "aggressive"), ("Sarra Blacktide", "Captain's Heir", 66, 44, 70, 58, "opportunistic"), ("Kel Blacktide", "Master Gunner", 62, 40, 68, 62, "aggressive"), ("Dune Blacktide", "Harbormaster", 54, 52, 58, 68, "defensive")],
-            "House Stormvane": [("Mira Stormvane", "Admiral", 72, 42, 74, 52, "aggressive"), ("Joss Stormvane", "Quartermaster Heir", 60, 38, 70, 55, "opportunistic"), ("Cael Stormvane", "Boarding Captain", 56, 36, 72, 48, "aggressive"), ("Una Stormvane", "Navigator", 50, 46, 62, 60, "defensive")],
-            "House Saltbreach": [("Torren Saltbreach", "Privateer Lord", 68, 44, 76, 46, "opportunistic"), ("Yvara Saltbreach", "Privateer Heir", 56, 40, 72, 50, "opportunistic"), ("Rinn Saltbreach", "Siege Corsair", 52, 36, 74, 44, "aggressive"), ("Brix Saltbreach", "Powder Master", 46, 42, 68, 52, "defensive")],
+        "The Wintermark": {
+            "House Adkison": [("Kaelen Adkison", "High Lord", 82, 68, 62, 76, "defensive"), ("Caeris Adkison", "Adkison Heir", 64, 64, 56, 72, "honorable"), ("Mara Adkison", "Frost Warden", 56, 60, 66, 70, "defensive"), ("Joric Adkison", "Border marshal", 48, 52, 72, 62, "aggressive")],
+            "House McIntosh": [("Bren McIntosh", "Highland warden", 50, 66, 54, 80, "defensive"), ("Maela McIntosh", "McIntosh Heir", 36, 62, 50, 74, "honorable"), ("Torren McIntosh", "Frost guard captain", 32, 56, 60, 68, "aggressive"), ("Iona McIntosh", "Refuge keeper", 28, 70, 38, 78, "honorable")],
+            "House Holter": [("Aldric Holter", "Cold roads marshal", 46, 60, 58, 72, "defensive"), ("Senna Holter", "Holter Heir", 34, 56, 52, 68, "defensive"), ("Toven Holter", "Winter scout", 30, 52, 62, 62, "aggressive"), ("Elia Holter", "Frost envoy", 26, 58, 48, 66, "defensive")],
+            "House Duval": [("Maris Duval", "Survivor elder", 44, 64, 50, 74, "defensive"), ("Ren Duval", "Duval Heir", 32, 60, 46, 70, "opportunistic"), ("Corra Duval", "Supply master", 28, 68, 40, 76, "honorable"), ("Tavin Duval", "Cold envoy", 24, 66, 44, 72, "defensive")],
+        },
+        "Varkuun": {
+            "House Van Cleave": [("Ashali Van Cleave", "High Marshal", 82, 52, 80, 58, "aggressive"), ("Garron Van Cleave", "Marshal's Heir", 62, 58, 72, 66, "aggressive"), ("Helena Van Cleave", "Gate commander", 48, 64, 62, 74, "defensive"), ("Dain Van Cleave", "Cavalry captain", 42, 50, 76, 56, "aggressive")],
+        },
+        "Dreadwind Isles": {
+            "House Blacktide": [("Ronan Blacktide", "Captain", 86, 46, 74, 52, "aggressive"), ("Sarra Blacktide", "Captain's Heir", 68, 42, 72, 56, "opportunistic"), ("Kel Blacktide", "Master Gunner", 64, 38, 70, 60, "aggressive"), ("Dune Blacktide", "Harbormaster", 56, 50, 60, 66, "defensive")],
+            "House Stormvane": [("Mira Stormvane", "Admiral", 74, 40, 76, 50, "aggressive"), ("Joss Stormvane", "Quartermaster", 62, 36, 72, 54, "opportunistic"), ("Cael Stormvane", "Boarding Captain", 58, 34, 74, 46, "aggressive"), ("Una Stormvane", "Navigator", 52, 44, 64, 58, "defensive")],
+            "House Saltbreach": [("Torren Saltbreach", "Privateer Lord", 70, 42, 78, 44, "opportunistic"), ("Yvara Saltbreach", "Privateer Heir", 58, 38, 74, 48, "opportunistic"), ("Rinn Saltbreach", "Siege Corsair", 54, 34, 76, 42, "aggressive"), ("Brix Saltbreach", "Powder Master", 48, 40, 70, 50, "defensive")],
+        },
+        "Stonebreak Monastery": {
+            "Druid Circle": [("Grand Druid Varak", "Grand Druid", 76, 82, 44, 78, "honorable"), ("Elder Maren", "Council Elder", 62, 86, 36, 82, "defensive"), ("Dwyn the Green", "Grove Keeper", 54, 80, 40, 76, "honorable"), ("Nira Stonepath", "Druid Initiate", 36, 74, 32, 68, "defensive")],
         },
     }
     rows = []
@@ -4260,30 +4425,33 @@ def _default_house_characters():
         "Twin Cities": "Twin Cities",
         "Tidefall": "Tidefall",
         "Dur Khadur": "Dur Khadur",
-        "Lostfeld Dwarves": "Lostfeld",
+        "Lostfeld": "Lostfeld",
         "Shadow Court": "Faerwood",
         "Glenhaven": "Glenhaven",
-        "Gilgeth Clans": "Gilgeth and Groth",
-        "Groth Clans": "Gilgeth and Groth",
-        "Vilefin": "Rock Plains",
-        "Dreadwind": "Dreadwind Isles",
+        "Gilgeth Clans": "Gilgeth",
+        "Groth Clans": "Groth",
+        "Vilefin": "Vilefin",
+        "The Wintermark": "Wintermark",
+        "Varkuun": "Varkuun",
+        "Dreadwind Isles": "Dreadwind Isles",
+        "Stonebreak Monastery": "Stonebreak",
     }
     faction_race = {
-        "Lostfeld Dwarves": "Dwarf",
+        "Lostfeld": "Dwarf",
         "Shadow Court": "Dark Elf",
-        "Glenhaven": "High Elf",
+        "Glenhaven": "Wood Elf",
         "Gilgeth Clans": "Orc",
         "Groth Clans": "Orc",
         "Vilefin": "Goblin",
     }
     faction_ages = {
         # (index0, index1, index2, index3+)
-        "Lostfeld Dwarves": (173, 141, 118, 92),
-        "Shadow Court":     (280, 210, 165, 120),
-        "Glenhaven":        (320, 245, 190, 145),
-        "Gilgeth Clans":    (52, 36, 44, 29),
-        "Groth Clans":      (48, 34, 40, 26),
-        "Vilefin":          (38, 26, 32, 20),
+        "Lostfeld":     (218, 168, 130, 98),
+        "Shadow Court": (320, 240, 180, 130),
+        "Glenhaven":    (312, 242, 186, 142),
+        "Gilgeth Clans":(52, 36, 44, 29),
+        "Groth Clans":  (48, 34, 40, 26),
+        "Vilefin":      (38, 26, 32, 20),
     }
     core_roles = ["Leader", "Heir", "Power Role", "Wildcard"]
     for faction, houses in specs.items():
@@ -4357,6 +4525,7 @@ RACE_LIFESPAN = {
     "Human":    {"natural": 72, "max": 92},
     "Dwarf":    {"natural": 285, "max": 360},
     "High Elf": {"natural": 620, "max": 790},
+    "Wood Elf": {"natural": 400, "max": 600},
     "Dark Elf": {"natural": 530, "max": 670},
     "Orc":      {"natural": 54, "max": 68},
     "Goblin":   {"natural": 40, "max": 52},
@@ -5508,18 +5677,21 @@ def _normalize_character_updates(prev_state, new_state):
 
 def _normalize_population_state(prev_state, new_state):
     seed_rows = [
-        ("Twin Cities", "Humans", "Twin Cities", 160000, 180000, 0.00025, 86, 22, 4),
-        ("Tidefall", "Humans", "Tidefall", 160000, 185000, 0.00028, 82, 32, 20),
-        ("Faerwood", "Dread Elves", "Shadow Court", 30000, 42000, 0.00003, 74, 38, 0),
-        ("Glenhaven", "Glenhaven", "Wildwood Elves", 35000, 52000, 0.00005, 88, 18, 0),
-        ("Lostfeld", "Dwarves", "Lostfeld Clans", 65000, 85000, 0.00008, 81, 24, 0),
-        ("Gilgeth and Groth", "Orcs", "Mountain Orcs", 100000, 125000, 0.00022, 72, 43, 0),
-        ("Rock Plains", "Goblins", "Vilefin", 215000, 230000, 0.00055, 63, 68, 0),
-        ("Dreadwind Isles", "Humans", "Dreadwind Pirates", 45000, 65000, 0.00018, 67, 52, 16),
-        ("Dur Khadur", "Humans", "Dur Khadur", 115000, 155000, 0.00024, 79, 36, 8),
-        ("Stonebreak", "Druids", "Monastery of Druids", 5500, 9000, 0.00002, 91, 12, 0),
-        ("Gloomspire", "Gnomes", "Gloomspire Syndicate", 8500, 14000, 0.00012, 76, 28, 0),
-        ("Dragonscar Peaks", "Ice Dragons", "Dragon Clans", 12, 20, 0.0, 94, 9, 0),
+        ("Twin Cities",   "Humans",     "Twin Cities",       140000, 170000, 0.00025, 86, 22, 4),
+        ("Eldoria",       "Humans",     "Twin Cities",        95000, 115000, 0.00022, 82, 18, 0),
+        ("Tidefall",      "Humans",     "Tidefall",          160000, 185000, 0.00028, 82, 32, 20),
+        ("Faerwood",      "Dark Elves", "Shadow Court",       30000,  42000, 0.00003, 74, 38, 0),
+        ("Glenhaven",     "Wood Elves", "Glenhaven",          35000,  52000, 0.00005, 88, 18, 0),
+        ("Lostfeld",      "Dwarves",    "Lostfeld",           65000,  85000, 0.00008, 81, 24, 0),
+        ("Gilgeth",       "Orcs",       "Gilgeth Clans",      55000,  70000, 0.00020, 72, 44, 0),
+        ("Groth",         "Orcs",       "Groth Clans",        45000,  60000, 0.00022, 68, 52, 0),
+        ("Vilefin",       "Goblins",    "Vilefin",           215000, 230000, 0.00055, 63, 68, 0),
+        ("Dreadwind Isles","Humans",    "Dreadwind Isles",    45000,  65000, 0.00018, 67, 52, 16),
+        ("Dur Khadur",    "Humans",     "Dur Khadur",        115000, 155000, 0.00024, 79, 36, 8),
+        ("Wintermark",    "Humans",     "The Wintermark",     42000,  62000, 0.00012, 76, 30, 0),
+        ("Varkuun",       "Humans",     "Varkuun",            18000,  28000, 0.00010, 82, 20, 0),
+        ("Stonebreak",    "Druids",     "Stonebreak Monastery", 5500,  9000, 0.00002, 91, 12, 0),
+        ("Dragonscar Peaks","Ice Dragons","Dragon Clans",        12,    20,  0.0,     94,  9, 0),
     ]
     prev_rows = {
         row.get("region"): row
@@ -5593,9 +5765,10 @@ def _normalize_population_state(prev_state, new_state):
 # ── DECISION ENGINE ────────────────────────────────────────────────────────────
 
 _DECISION_FACTIONS = [
-    "Twin Cities", "Tidefall", "Gilded Exchange", "Dur Khadur",
-    "Shadow Court", "Glenhaven", "Gilgeth Clans", "Groth Clans",
-    "Vilefin", "Dreadwind",
+    "Twin Cities", "Tidefall", "Dur Khadur", "Shadow Court",
+    "Glenhaven", "Gilgeth Clans", "Groth Clans", "Vilefin",
+    "Dreadwind Isles", "Varkuun", "The Wintermark", "Lostfeld",
+    "Stonebreak Monastery",
 ]
 
 
@@ -6493,7 +6666,16 @@ def _call_claude(prev_state, pending_lore):
         messages=[{"role": "user", "content": user_content}],
     )
 
-    result = _normalize_state(prev_state, response.content[0].input)
+    raw_input = response.content[0].input
+    # Strip null bytes that Claude occasionally embeds in long string fields.
+    # json.dumps → replace → json.loads is the safest round-trip approach.
+    try:
+        clean_json = json.dumps(raw_input).replace("\x00", "")
+        raw_input = json.loads(clean_json)
+    except Exception:
+        pass  # if stripping fails, proceed with original
+
+    result = _normalize_state(prev_state, raw_input)
     result["real_timestamp"] = datetime.now().isoformat()
     return result
 
