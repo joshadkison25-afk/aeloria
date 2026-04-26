@@ -94,7 +94,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   border-top: 1px solid rgba(180,148,80,0.18);
   background: rgba(6,5,10,0.75);
   backdrop-filter: blur(10px);
@@ -820,6 +820,1471 @@
   line-height: 1.5;
 }
 
+/* ── FAMILIES / DYNASTY TREE ──────────────────────────── */
+.gp-family-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.gp-family-list {
+  display: grid;
+  gap: 8px;
+  max-height: 72vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+.gp-family-list-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.gp-family-list-card:hover,
+.gp-family-list-card.active {
+  border-color: rgba(200,160,64,0.42);
+  background: rgba(180,148,80,0.06);
+  transform: translateX(2px);
+}
+.gp-family-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.gp-family-meta {
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.gp-family-detail {
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(180,148,80,0.09), transparent 32%),
+    linear-gradient(180deg, rgba(13,10,18,0.96), rgba(7,6,10,0.98));
+  min-height: 72vh;
+}
+.gp-family-hero {
+  padding: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.gp-family-name {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.gp-family-background {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--text-sec);
+  max-width: 980px;
+}
+.gp-family-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+.gp-family-fact {
+  border: 1px solid rgba(180,148,80,0.14);
+  background: rgba(0,0,0,0.18);
+  padding: 10px;
+}
+.gp-family-fact span {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.gp-family-fact b {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  color: var(--text);
+}
+.gp-tree-scroll {
+  overflow: auto;
+  padding: 22px;
+}
+.gp-tree-generation {
+  min-width: 880px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 34px;
+  position: relative;
+}
+.gp-tree-generation:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -25px;
+  height: 25px;
+  border-left: 1px solid rgba(180,148,80,0.22);
+}
+.gp-tree-card {
+  width: 178px;
+  border: 1px solid rgba(180,148,80,0.24);
+  background: linear-gradient(180deg, rgba(19,15,24,0.98), rgba(9,8,12,0.98));
+  box-shadow: 0 12px 30px rgba(0,0,0,0.26);
+  position: relative;
+}
+.gp-tree-card.is-ruler { border-color: rgba(200,160,64,0.58); }
+.gp-tree-card.is-child { border-color: rgba(90,138,106,0.34); }
+.gp-tree-portrait {
+  height: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.gp-tree-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.gp-tree-initial {
+  font-family: 'Cinzel', serif;
+  font-size: 38px;
+  color: var(--gold);
+}
+.gp-tree-body { padding: 10px; }
+.gp-tree-name {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+.gp-tree-role {
+  font-family: 'EB Garamond', serif;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.gp-tree-dates {
+  display: grid;
+  gap: 3px;
+  font-family: 'Cinzel', serif;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gp-tree-dates b { color: var(--gold); font-weight: 600; }
+.gp-marriage-band {
+  min-width: 880px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -18px 0 22px;
+}
+.gp-marriage-chip {
+  border: 1px solid rgba(180,148,80,0.2);
+  background: rgba(180,148,80,0.06);
+  padding: 7px 10px;
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  color: var(--text-sec);
+}
+@media (max-width: 1000px) {
+  .gp-family-layout { grid-template-columns: 1fr; }
+  .gp-family-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DYNASTY CODEX — illuminated genealogy
+   The most ornate page in the Court of Aeloria.
+   Three-tier flow: Bloodlines → Houses → Dynasty Stage.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── ROOT TOKENS for the codex ─────────────────────────────── */
+.dyn-root {
+  --dyn-ink:        #1a130d;
+  --dyn-ink-soft:   rgba(26,19,13,0.78);
+  --dyn-ink-mute:   rgba(26,19,13,0.55);
+  --dyn-vellum:     #efe1c0;
+  --dyn-vellum-2:   #e6d5ab;
+  --dyn-vellum-3:   #d9c391;
+  --dyn-vellum-edge:#a98c4a;
+  --dyn-gold:       #c8a040;
+  --dyn-gold-deep:  #a0782a;
+  --dyn-gold-glow:  rgba(220,184,108,0.55);
+  --dyn-blood:      #6e1818;
+  --dyn-night:      #0c0a08;
+  --dyn-rule:       rgba(168,140,80,0.45);
+
+  position: relative;
+  padding: 28px 0 80px;
+}
+
+/* page-wide drop shadow halo behind the codex */
+.dyn-root::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 320px at 50% 0%, rgba(220,184,108,0.10), transparent 70%),
+    radial-gradient(1200px 600px at 50% 100%, rgba(110,24,24,0.08), transparent 70%);
+  z-index: 0;
+}
+
+.dyn-shell { position: relative; z-index: 1; }
+
+/* ── BREADCRUMB / NAV BAR ──────────────────────────────────── */
+.dyn-crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(20,14,10,0.55), rgba(10,8,6,0.70));
+  border: 1px solid var(--dyn-rule);
+  border-radius: 2px;
+  position: relative;
+}
+.dyn-crumb::before, .dyn-crumb::after {
+  content: '';
+  position: absolute;
+  top: -1px; bottom: -1px;
+  width: 6px;
+  background: linear-gradient(180deg, var(--dyn-gold), var(--dyn-gold-deep));
+  opacity: 0.8;
+}
+.dyn-crumb::before { left: -1px; }
+.dyn-crumb::after  { right: -1px; }
+
+.dyn-crumb-step {
+  font-family: 'Cinzel', serif;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(220,184,108,0.72);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+.dyn-crumb-step:hover { color: var(--dyn-gold); text-shadow: 0 0 8px var(--dyn-gold-glow); }
+.dyn-crumb-step.is-current {
+  color: #f7e4ad;
+  cursor: default;
+  text-shadow: 0 0 12px var(--dyn-gold-glow);
+}
+.dyn-crumb-step.is-current:hover { color: #f7e4ad; }
+.dyn-crumb-sep {
+  font-family: 'Cinzel', serif;
+  color: var(--dyn-gold-deep);
+  opacity: 0.65;
+}
+.dyn-crumb-spacer { flex: 1; }
+
+.dyn-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  background: rgba(8,6,4,0.55);
+  border: 1px solid var(--dyn-rule);
+  border-radius: 2px;
+  min-width: 220px;
+}
+.dyn-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f3e6c4;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.dyn-search input::placeholder { color: rgba(220,184,108,0.45); font-style: italic; }
+.dyn-search-icon { color: var(--dyn-gold-deep); font-size: 13px; }
+
+/* ── TIER 1 :  BLOODLINES HERO ─────────────────────────────── */
+.dyn-hero {
+  text-align: center;
+  margin: 14px 0 36px;
+  padding: 36px 20px 28px;
+  position: relative;
+  border-top: 1px solid rgba(168,140,80,0.35);
+  border-bottom: 1px solid rgba(168,140,80,0.35);
+  background:
+    radial-gradient(800px 240px at 50% 50%, rgba(220,184,108,0.08), transparent 65%),
+    linear-gradient(180deg, rgba(8,6,4,0.45), rgba(8,6,4,0.65));
+}
+.dyn-hero-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 10px;
+}
+.dyn-hero-title {
+  font-family: 'Cinzel', serif;
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #f5e6b8;
+  margin: 0;
+  text-shadow: 0 0 28px rgba(220,184,108,0.20), 0 2px 0 rgba(0,0,0,0.6);
+}
+.dyn-hero-sub {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(220,184,108,0.78);
+  margin-top: 12px;
+  letter-spacing: 0.06em;
+}
+.dyn-hero-rule {
+  display: block;
+  margin: 18px auto 0;
+  width: min(560px, 80%);
+  height: 16px;
+  opacity: 0.85;
+}
+
+/* race medallion grid */
+.dyn-blood-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 12px;
+}
+@media (max-width: 1100px) { .dyn-blood-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 700px)  { .dyn-blood-grid { grid-template-columns: 1fr; } }
+
+.dyn-blood-card {
+  position: relative;
+  height: 360px;
+  cursor: pointer;
+  overflow: hidden;
+  background: var(--dyn-night);
+  border: 1px solid rgba(168,140,80,0.35);
+  isolation: isolate;
+  transition: transform 0.45s cubic-bezier(.2,.8,.2,1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.dyn-blood-card::before {
+  /* corner ornaments via pseudo */
+  content: '';
+  position: absolute; inset: 8px;
+  border: 1px solid rgba(220,184,108,0.18);
+  pointer-events: none;
+  z-index: 3;
+}
+.dyn-blood-card .dyn-blood-img {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.05) saturate(0.85) brightness(0.85);
+  transform: scale(1.04);
+  transition: transform 0.6s cubic-bezier(.2,.8,.2,1), filter 0.4s ease;
+  z-index: 0;
+}
+.dyn-blood-card .dyn-blood-veil {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8,6,4,0.10) 0%, rgba(8,6,4,0.35) 45%, rgba(8,6,4,0.92) 100%),
+    radial-gradient(140% 80% at 50% 0%, rgba(220,184,108,0.06), transparent 60%);
+  z-index: 1;
+}
+.dyn-blood-card .dyn-blood-foil {
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(220,184,108,0.10) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}
+.dyn-blood-card .dyn-blood-body {
+  position: absolute;
+  left: 22px; right: 22px; bottom: 22px;
+  z-index: 4;
+}
+.dyn-blood-card .dyn-blood-name {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f7e4ad;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.7), 0 0 18px rgba(220,184,108,0.20);
+  margin-bottom: 6px;
+}
+.dyn-blood-card .dyn-blood-home {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(220,184,108,0.72);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.dyn-blood-card .dyn-blood-stats {
+  display: flex;
+  gap: 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(247,228,173,0.75);
+}
+.dyn-blood-card .dyn-blood-stats b { color: var(--dyn-gold); font-weight: 600; }
+.dyn-blood-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--dyn-gold);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,184,108,0.18) inset;
+}
+.dyn-blood-card:hover .dyn-blood-img { transform: scale(1.08); filter: contrast(1.1) saturate(1.0) brightness(0.95); }
+.dyn-blood-card:hover .dyn-blood-foil { opacity: 1; }
+
+/* corner gilt motifs */
+.dyn-corner {
+  position: absolute;
+  width: 22px; height: 22px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.dyn-corner.tl { top: 4px;  left: 4px;  }
+.dyn-corner.tr { top: 4px;  right: 4px; transform: scaleX(-1); }
+.dyn-corner.bl { bottom: 4px; left: 4px;  transform: scaleY(-1); }
+.dyn-corner.br { bottom: 4px; right: 4px; transform: scale(-1,-1); }
+
+/* ── TIER 2 :  HOUSES OF [RACE] ────────────────────────────── */
+.dyn-race-banner {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: stretch;
+  margin: 0 0 36px;
+  padding: 26px;
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(239,225,192,0.96) 0%, rgba(217,195,145,0.92) 100%);
+  background-image:
+    linear-gradient(135deg, rgba(239,225,192,0.94) 0%, rgba(217,195,145,0.9) 100%),
+    url('/static/illustrations/parchment-tile.png');
+  background-blend-mode: multiply;
+  background-size: auto, 320px;
+  border: 1px solid var(--dyn-vellum-edge);
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(255,235,180,0.4),
+    inset 0 0 60px rgba(168,140,80,0.18);
+}
+.dyn-race-banner::before, .dyn-race-banner::after {
+  content: '';
+  position: absolute;
+  left: 18px; right: 18px;
+  height: 8px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(168,140,80,0.55) 12%, rgba(168,140,80,0.55) 88%, transparent),
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(168,140,80,0.18) 18px 19px);
+  background-size: 100% 1px, 100% 100%;
+  background-repeat: no-repeat;
+}
+.dyn-race-banner::before { top: 8px; }
+.dyn-race-banner::after  { bottom: 8px; transform: scaleY(-1); }
+
+.dyn-race-portrait {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid rgba(168,140,80,0.55);
+  background: var(--dyn-night);
+}
+.dyn-race-portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: sepia(0.18) contrast(1.05) saturate(0.95);
+}
+.dyn-race-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(20,14,8,0.55) 100%);
+}
+
+.dyn-race-text { display: flex; flex-direction: column; justify-content: center; }
+.dyn-race-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.40em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 10px;
+}
+.dyn-race-name {
+  font-family: 'Cinzel', serif;
+  font-size: 38px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dyn-ink);
+  margin-bottom: 6px;
+  line-height: 1.0;
+}
+.dyn-race-home {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--dyn-ink-soft);
+  margin-bottom: 14px;
+}
+.dyn-race-lore {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--dyn-ink);
+  column-count: 2;
+  column-gap: 26px;
+}
+@media (max-width: 1100px) {
+  .dyn-race-banner { grid-template-columns: 1fr; }
+  .dyn-race-lore { column-count: 1; }
+  .dyn-race-portrait { height: 220px; }
+}
+
+.dyn-section-rule {
+  display: flex; align-items: center; gap: 14px;
+  margin: 22px 0 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+}
+.dyn-section-rule::before, .dyn-section-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dyn-rule), transparent);
+}
+.dyn-section-rule .dyn-rule-glyph {
+  font-size: 18px; color: var(--dyn-gold); line-height: 1;
+}
+
+/* houses grid */
+.dyn-houses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+.dyn-house-card {
+  position: relative;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(18,14,10,0.85), rgba(8,6,4,0.92));
+  border: 1px solid rgba(168,140,80,0.35);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), border-color 0.25s ease, box-shadow 0.3s ease;
+}
+.dyn-house-card::before {
+  content: ''; position: absolute; inset: 6px;
+  border: 1px solid rgba(220,184,108,0.10);
+  pointer-events: none; z-index: 2;
+}
+.dyn-house-portrait {
+  position: relative;
+  height: 200px;
+  background: #0c0a08;
+  overflow: hidden;
+}
+.dyn-house-portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: contrast(1.04) saturate(0.92) brightness(0.86);
+}
+.dyn-house-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8,6,4,0.0) 30%, rgba(8,6,4,0.85) 100%),
+    radial-gradient(80% 60% at 50% 100%, rgba(220,184,108,0.10), transparent 70%);
+}
+.dyn-house-portrait .dyn-house-sigil {
+  position: absolute; right: 12px; top: 12px;
+  width: 38px; height: 38px;
+  border: 1px solid rgba(220,184,108,0.35);
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--dyn-gold);
+  z-index: 3;
+}
+.dyn-house-body { padding: 14px 16px 16px; position: relative; z-index: 3; }
+.dyn-house-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: #f5e6b8;
+  margin-bottom: 4px;
+}
+.dyn-house-faction {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 12px;
+}
+.dyn-house-stats {
+  display: flex; gap: 12px;
+  margin-bottom: 10px;
+}
+.dyn-house-stat {
+  flex: 1;
+  text-align: center;
+  padding: 6px 0;
+  border: 1px solid rgba(168,140,80,0.20);
+  background: rgba(168,140,80,0.04);
+}
+.dyn-house-stat b {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--dyn-gold);
+  line-height: 1;
+}
+.dyn-house-stat span {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(220,184,108,0.55);
+  margin-top: 4px;
+}
+.dyn-house-head {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(247,228,173,0.65);
+}
+.dyn-house-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--dyn-gold);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(220,184,108,0.16) inset;
+}
+
+/* ── TIER 3 :  THE DYNASTY STAGE ───────────────────────────── */
+.dyn-stage {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 360px;
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 1280px) {
+  .dyn-stage { grid-template-columns: 240px minmax(0,1fr); }
+  .dyn-stage .dyn-codex { grid-column: 1 / -1; }
+}
+@media (max-width: 880px) {
+  .dyn-stage { grid-template-columns: 1fr; }
+}
+
+/* Roster (left rail) */
+.dyn-roster {
+  position: sticky;
+  top: 14px;
+  background: linear-gradient(180deg, rgba(18,14,10,0.92), rgba(8,6,4,0.96));
+  border: 1px solid rgba(168,140,80,0.4);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.dyn-roster-head {
+  padding: 16px 16px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--dyn-rule);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(220,184,108,0.10), transparent 70%);
+}
+.dyn-roster-crest {
+  width: 46px; height: 46px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  border: 1px solid var(--dyn-gold);
+  background: radial-gradient(circle at 50% 40%, rgba(220,184,108,0.22), rgba(0,0,0,0.4));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: var(--dyn-gold);
+  text-shadow: 0 0 12px var(--dyn-gold-glow);
+}
+.dyn-roster-name {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f5e6b8;
+  margin-bottom: 3px;
+}
+.dyn-roster-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+}
+.dyn-roster-filters {
+  display: flex; gap: 4px; padding: 10px 12px;
+  border-bottom: 1px solid var(--dyn-rule);
+  flex-wrap: wrap;
+}
+.dyn-chip {
+  flex: 1;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 5px 6px;
+  cursor: pointer;
+  border: 1px solid rgba(168,140,80,0.25);
+  color: rgba(220,184,108,0.7);
+  background: rgba(168,140,80,0.04);
+  transition: all 0.2s ease;
+}
+.dyn-chip:hover { color: var(--dyn-gold); border-color: rgba(220,184,108,0.5); }
+.dyn-chip.is-active {
+  background: linear-gradient(180deg, rgba(220,184,108,0.20), rgba(168,140,80,0.12));
+  color: #f7e4ad;
+  border-color: var(--dyn-gold);
+  box-shadow: inset 0 0 8px rgba(220,184,108,0.15);
+}
+
+.dyn-roster-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 6px 0;
+}
+.dyn-roster-list::-webkit-scrollbar { width: 6px; }
+.dyn-roster-list::-webkit-scrollbar-thumb { background: rgba(168,140,80,0.35); border-radius: 4px; }
+
+.dyn-member {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 14px 9px 12px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease;
+  position: relative;
+}
+.dyn-member + .dyn-member { border-top: 1px solid rgba(168,140,80,0.07); }
+.dyn-member:hover { background: rgba(220,184,108,0.06); border-left-color: rgba(220,184,108,0.4); }
+.dyn-member.is-selected {
+  background: linear-gradient(90deg, rgba(220,184,108,0.18), rgba(220,184,108,0.0));
+  border-left-color: var(--dyn-gold);
+}
+.dyn-member.is-deceased { opacity: 0.55; }
+.dyn-member.is-deceased::before {
+  content: ''; position: absolute; left: 14px; right: 14px; top: 50%;
+  height: 1px; background: rgba(220,184,108,0.35);
+}
+.dyn-member-portrait {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(220,184,108,0.45);
+  background: rgba(0,0,0,0.4) center/cover no-repeat;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--dyn-gold);
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+.dyn-member-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.dyn-member-portrait.is-ruler {
+  border-color: var(--dyn-gold);
+  box-shadow: 0 0 0 1px rgba(220,184,108,0.4), 0 0 14px rgba(220,184,108,0.30);
+}
+.dyn-member-portrait.is-ruler::after {
+  content: '♛';
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; color: var(--dyn-gold);
+  text-shadow: 0 0 6px var(--dyn-gold-glow);
+}
+.dyn-member-info { flex: 1; min-width: 0; }
+.dyn-member-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: #f3e6c4;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dyn-member-meta {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(220,184,108,0.55);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dyn-member-tag {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--dyn-gold);
+  box-shadow: 0 0 6px var(--dyn-gold-glow);
+}
+.dyn-member-tag.heir { background: #d2a04a; }
+.dyn-member-tag.power { background: var(--dyn-blood); }
+.dyn-member-tag.advisor { background: #486a9a; }
+.dyn-member-tag.minor { background: rgba(168,140,80,0.4); box-shadow: none; }
+
+/* CENTER : THE CODEX (lore + tree + chronicle) */
+.dyn-codex { display: flex; flex-direction: column; gap: 22px; }
+
+/* House lore card */
+.dyn-lore-card {
+  position: relative;
+  padding: 30px 36px 32px;
+  background:
+    linear-gradient(135deg, rgba(239,225,192,0.95) 0%, rgba(217,195,145,0.92) 100%),
+    url('/static/illustrations/parchment-tile.png');
+  background-blend-mode: multiply;
+  background-size: auto, 320px;
+  border: 1px solid var(--dyn-vellum-edge);
+  box-shadow:
+    0 28px 56px rgba(0,0,0,0.50),
+    inset 0 0 0 1px rgba(255,235,180,0.35),
+    inset 0 0 80px rgba(168,140,80,0.18);
+}
+.dyn-lore-card::before {
+  content: ''; position: absolute; inset: 12px;
+  border: 1px solid rgba(168,140,80,0.30);
+  pointer-events: none;
+}
+.dyn-lore-card::after {
+  content: ''; position: absolute;
+  left: 18px; right: 18px; bottom: 18px;
+  height: 14px;
+  background:
+    linear-gradient(90deg, transparent, rgba(168,140,80,0.6) 10%, rgba(168,140,80,0.6) 90%, transparent),
+    repeating-linear-gradient(90deg, transparent 0 14px, rgba(168,140,80,0.18) 14px 15px);
+  background-size: 100% 1px, 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.dyn-lore-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.40em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 8px;
+}
+.dyn-lore-name {
+  font-family: 'Cinzel', serif;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--dyn-ink);
+  line-height: 1.0;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 0 rgba(255,235,180,0.25);
+}
+.dyn-lore-mott {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--dyn-ink-soft);
+  margin-bottom: 18px;
+}
+.dyn-lore-flourish {
+  display: block;
+  width: 220px;
+  height: 14px;
+  margin: 0 0 18px;
+  opacity: 0.7;
+}
+.dyn-lore-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--dyn-ink);
+  column-count: 2;
+  column-gap: 28px;
+  margin-bottom: 22px;
+}
+@media (max-width: 1100px) { .dyn-lore-text { column-count: 1; } }
+
+.dyn-lore-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  border-top: 1px solid rgba(168,140,80,0.40);
+  padding-top: 18px;
+}
+@media (max-width: 800px) { .dyn-lore-stats { grid-template-columns: repeat(3, 1fr); } }
+.dyn-lore-stat {
+  text-align: center;
+  position: relative;
+}
+.dyn-lore-stat:not(:last-child)::after {
+  content: ''; position: absolute; right: -6px; top: 8px; bottom: 8px;
+  width: 1px; background: rgba(168,140,80,0.25);
+}
+.dyn-lore-stat b {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--dyn-ink);
+  line-height: 1;
+}
+.dyn-lore-stat span {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-top: 6px;
+}
+
+/* Section heads inside the codex */
+.dyn-codex-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 6px 0 6px;
+}
+.dyn-codex-head h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #f5e6b8;
+  margin: 0;
+}
+.dyn-codex-head .rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--dyn-rule), transparent);
+}
+.dyn-codex-head .count {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+}
+
+/* DYNASTY TREE — generations & connectors */
+.dyn-tree-frame {
+  position: relative;
+  background: linear-gradient(180deg, rgba(18,14,10,0.85), rgba(8,6,4,0.92));
+  border: 1px solid rgba(168,140,80,0.35);
+  box-shadow: 0 18px 38px rgba(0,0,0,0.55);
+  padding: 26px 22px 28px;
+  overflow: hidden;
+}
+.dyn-tree-frame::before {
+  content: ''; position: absolute; inset: 8px;
+  border: 1px solid rgba(220,184,108,0.10);
+  pointer-events: none;
+}
+.dyn-tree-scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.dyn-tree-scroll::-webkit-scrollbar { height: 8px; }
+.dyn-tree-scroll::-webkit-scrollbar-thumb { background: rgba(168,140,80,0.35); border-radius: 4px; }
+
+.dyn-gen {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  padding: 12px 0 28px;
+}
+.dyn-gen + .dyn-gen { border-top: 1px dashed rgba(168,140,80,0.20); }
+.dyn-gen-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.30em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dyn-gen-label .roman {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  letter-spacing: 0;
+  color: var(--dyn-gold);
+  text-shadow: 0 0 10px var(--dyn-gold-glow);
+}
+.dyn-gen-label .rule {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--dyn-rule), transparent);
+}
+
+.dyn-gen-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 14px;
+  justify-content: flex-start;
+}
+
+/* portrait card in tree */
+.dyn-pcard {
+  position: relative;
+  width: 168px;
+  background: linear-gradient(180deg, rgba(28,22,16,0.92), rgba(12,10,8,0.95));
+  border: 1px solid rgba(168,140,80,0.4);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s ease, border-color 0.25s ease;
+}
+.dyn-pcard::before {
+  content: ''; position: absolute; inset: 4px;
+  border: 1px solid rgba(220,184,108,0.10);
+  pointer-events: none; z-index: 2;
+}
+.dyn-pcard.is-ruler {
+  border-color: var(--dyn-gold);
+  box-shadow: 0 0 0 1px rgba(220,184,108,0.18) inset, 0 8px 18px rgba(0,0,0,0.5), 0 0 24px rgba(220,184,108,0.12);
+}
+.dyn-pcard.is-heir { border-color: rgba(220,184,108,0.55); }
+.dyn-pcard.is-deceased { opacity: 0.62; filter: grayscale(0.4); }
+.dyn-pcard.is-selected {
+  transform: translateY(-2px);
+  border-color: var(--dyn-gold);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.6), 0 0 0 1px rgba(220,184,108,0.40) inset, 0 0 28px rgba(220,184,108,0.20);
+}
+.dyn-pcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,184,108,0.20) inset;
+}
+
+.dyn-pcard-portrait {
+  position: relative;
+  height: 168px;
+  background: #0a0806;
+  overflow: hidden;
+}
+.dyn-pcard-portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: contrast(1.05) saturate(0.92) brightness(0.92);
+}
+.dyn-pcard-portrait .ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 56px;
+  font-weight: 600;
+  color: rgba(220,184,108,0.32);
+  text-shadow: 0 0 22px rgba(220,184,108,0.18);
+}
+.dyn-pcard-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent 50%, rgba(8,6,4,0.85) 100%),
+    radial-gradient(80% 60% at 50% 0%, rgba(220,184,108,0.08), transparent 60%);
+  pointer-events: none;
+}
+.dyn-pcard-crown {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  z-index: 3;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--dyn-gold);
+  text-shadow: 0 0 12px var(--dyn-gold-glow);
+}
+
+.dyn-pcard-body { padding: 10px 12px 12px; position: relative; z-index: 3; }
+.dyn-pcard-name {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #f5e6b8;
+  line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dyn-pcard-role {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-top: 3px;
+}
+.dyn-pcard-dates {
+  margin-top: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  font-family: 'EB Garamond', serif;
+  font-size: 11px;
+  color: rgba(220,184,108,0.65);
+  font-style: italic;
+}
+.dyn-pcard-dates b { color: var(--dyn-gold); font-weight: 600; font-style: normal; font-family: 'Cinzel', serif; font-size: 10px; }
+
+.dyn-pair {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+.dyn-pair-link {
+  position: relative;
+  align-self: center;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+  margin: 0 -1px;
+  pointer-events: none;
+}
+.dyn-pair-link::before {
+  content: '';
+  position: absolute; top: 50%;
+  left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--dyn-gold-deep), var(--dyn-gold), var(--dyn-gold-deep));
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px var(--dyn-gold-glow);
+}
+.dyn-pair-link::after {
+  content: '✦';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: var(--dyn-gold);
+  text-shadow: 0 0 8px var(--dyn-gold-glow);
+  background: var(--dyn-night);
+  padding: 0 2px;
+}
+
+.dyn-pair-info {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(220,184,108,0.65);
+  white-space: nowrap;
+}
+
+.dyn-children-link {
+  width: 100%;
+  height: 28px;
+  position: relative;
+  margin-top: -8px;
+  margin-bottom: 4px;
+  pointer-events: none;
+}
+
+/* Chronicle */
+.dyn-chronicle {
+  background: linear-gradient(180deg, rgba(18,14,10,0.85), rgba(8,6,4,0.92));
+  border: 1px solid rgba(168,140,80,0.35);
+  padding: 22px 24px 24px;
+  position: relative;
+}
+.dyn-chronicle::before {
+  content: ''; position: absolute; inset: 8px;
+  border: 1px solid rgba(220,184,108,0.10);
+  pointer-events: none;
+}
+.dyn-chron-list {
+  position: relative;
+  padding-left: 22px;
+}
+.dyn-chron-list::before {
+  content: '';
+  position: absolute;
+  left: 6px; top: 4px; bottom: 4px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--dyn-gold-deep), rgba(168,140,80,0.10));
+  box-shadow: 0 0 8px rgba(220,184,108,0.10);
+}
+.dyn-chron-item {
+  position: relative;
+  padding: 8px 0 12px;
+  border-bottom: 1px solid rgba(168,140,80,0.10);
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.dyn-chron-item:last-child { border-bottom: none; }
+.dyn-chron-item::before {
+  content: '';
+  position: absolute;
+  left: -20px; top: 16px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--dyn-gold);
+  box-shadow: 0 0 10px var(--dyn-gold-glow);
+  border: 2px solid var(--dyn-night);
+}
+.dyn-chron-item.birth::before    { background: #5a8a6a; }
+.dyn-chron-item.marriage::before { background: var(--dyn-gold); }
+.dyn-chron-item.rise::before     { background: #d2a04a; }
+.dyn-chron-item.death::before    { background: #8c2a2a; }
+
+.dyn-chron-day {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--dyn-gold);
+  text-align: right;
+}
+.dyn-chron-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(247,228,173,0.88);
+}
+.dyn-chron-text b { color: #f5e6b8; font-weight: 600; }
+.dyn-chron-empty {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: rgba(220,184,108,0.55);
+  padding: 14px 0;
+}
+
+/* RIGHT RAIL : CHARACTER CODEX */
+.dyn-codex-pane {
+  position: sticky;
+  top: 14px;
+  background: linear-gradient(180deg, rgba(18,14,10,0.92), rgba(8,6,4,0.96));
+  border: 1px solid rgba(168,140,80,0.4);
+  box-shadow: 0 18px 38px rgba(0,0,0,0.55);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.dyn-codex-pane::-webkit-scrollbar { width: 6px; }
+.dyn-codex-pane::-webkit-scrollbar-thumb { background: rgba(168,140,80,0.35); border-radius: 4px; }
+
+.dyn-codex-empty {
+  padding: 80px 30px;
+  text-align: center;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: rgba(220,184,108,0.45);
+  line-height: 1.6;
+}
+
+.dyn-cp-portrait {
+  position: relative;
+  height: 320px;
+  background: #0a0806;
+  overflow: hidden;
+  border-bottom: 1px solid var(--dyn-rule);
+}
+.dyn-cp-portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 25%;
+  filter: contrast(1.05) saturate(0.95) brightness(0.94);
+}
+.dyn-cp-portrait .ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 96px;
+  color: rgba(220,184,108,0.30);
+}
+.dyn-cp-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(8,6,4,0.95) 100%);
+}
+.dyn-cp-arch {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 60px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dyn-cp-body { padding: 20px 22px 24px; }
+.dyn-cp-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 6px;
+}
+.dyn-cp-name {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #f5e6b8;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  text-shadow: 0 0 12px rgba(220,184,108,0.10);
+}
+.dyn-cp-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(220,184,108,0.70);
+  margin-bottom: 14px;
+}
+.dyn-cp-tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 18px;
+}
+.dyn-cp-tag {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid rgba(168,140,80,0.35);
+  background: rgba(168,140,80,0.06);
+  color: rgba(220,184,108,0.78);
+}
+.dyn-cp-tag.gold {
+  background: linear-gradient(180deg, rgba(220,184,108,0.20), rgba(168,140,80,0.08));
+  border-color: var(--dyn-gold);
+  color: #f7e4ad;
+}
+
+.dyn-cp-section {
+  border-top: 1px solid rgba(168,140,80,0.18);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+.dyn-cp-sec-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  margin-bottom: 10px;
+}
+.dyn-cp-quote {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(247,228,173,0.85);
+  font-style: italic;
+  border-left: 2px solid var(--dyn-gold);
+  padding-left: 12px;
+}
+
+/* Stat radar */
+.dyn-cp-radar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.dyn-cp-radar svg { flex-shrink: 0; }
+.dyn-cp-radar-legend {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+  flex: 1;
+}
+.dyn-cp-radar-legend-row {
+  display: flex; justify-content: space-between;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  color: rgba(220,184,108,0.78);
+}
+.dyn-cp-radar-legend-row b { color: var(--dyn-gold); font-weight: 600; }
+
+/* Family ties micro avatars */
+.dyn-cp-ties { display: flex; flex-direction: column; gap: 8px; }
+.dyn-cp-tie-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.dyn-cp-tie-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dyn-gold-deep);
+  width: 64px;
+  flex-shrink: 0;
+}
+.dyn-cp-mini {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid rgba(168,140,80,0.25);
+  border-radius: 30px;
+  background: rgba(168,140,80,0.04);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dyn-cp-mini:hover { border-color: var(--dyn-gold); background: rgba(220,184,108,0.10); }
+.dyn-cp-mini-portrait {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4) center/cover no-repeat;
+  border: 1px solid rgba(220,184,108,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  color: var(--dyn-gold);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.dyn-cp-mini-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.dyn-cp-mini-name {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: #f3e6c4;
+}
+
+.dyn-cp-actions {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.dyn-cp-action {
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(247,228,173,0.78);
+  padding-left: 14px;
+  position: relative;
+}
+.dyn-cp-action::before {
+  content: '↳';
+  position: absolute; left: 0;
+  color: var(--dyn-gold-deep);
+}
+
+.dyn-cp-loc {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  color: rgba(220,184,108,0.70);
+}
+.dyn-cp-loc.travel { color: #d49866; }
+
 /* ── OVERVIEW ─────────────────────────────────────────── */
 .gp-ov-grid {
   display: grid;
@@ -1444,7 +2909,7 @@
 
 /* ── RESPONSIVE ───────────────────────────────────────── */
 @media (max-width: 960px) {
-  .gp-stat-strip { grid-template-columns: repeat(3, 1fr); }
+  .gp-stat-strip { grid-template-columns: repeat(4, 1fr); }
   .gp-ov-grid { grid-template-columns: 1fr 1fr; }
   .gp-ov-card.wide  { grid-column: span 2; }
   .gp-ov-card.full  { grid-column: span 2; }
@@ -1459,52 +2924,1063 @@
   .gp-ov-card.wide, .gp-ov-card.full { grid-column: span 1; }
   .gp-title { font-size: 36px; }
 }
+
+/* ─────────────────────────────────────────────────────────────── */
+/*   COURT OF AELORIA — STYLIZED OVERLAY                          */
+/*   Heavy art-directed redesign. Loads on top of existing styles. */
+/* ─────────────────────────────────────────────────────────────── */
+
+:root {
+  --court-stone:    #1a1410;
+  --court-stone-2:  #221a14;
+  --court-deep:     #0a0709;
+  --court-vellum:   #d9c79a;
+  --court-vellum-d: #b6a47a;
+  --court-ember:    #d49545;
+  --court-ember-d:  #7a3f18;
+  --court-shadow:   #04030a;
+  --court-rule:     rgba(200,160,64,0.32);
+  --court-rule-soft:rgba(200,160,64,0.15);
+}
+
+/* Hide the original page-body soft background so the court can take over */
+body.gp-body-court { background: var(--court-deep); }
+body.gp-body-court .page-body { padding-top: var(--nav-h); position: relative; isolation: isolate; }
+
+/* ── COURT CONTAINER ─────────────────────────────────── */
+.court {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% -8%, rgba(212,149,69,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 12% 30%, rgba(158,36,22,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 60%, rgba(106,74,138,0.04) 0%, transparent 55%),
+    linear-gradient(180deg, #08060c 0%, #050309 60%, #04030a 100%);
+}
+.court::before {
+  /* faint star/dust noise across the whole page */
+  content: '';
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.85   0 0 0 0 0.7   0 0 0 0 0.4   0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── DUST CANVAS LAYER ───────────────────────────────── */
+.court-dust {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+/* ── CATHEDRAL LIGHT SHAFTS ──────────────────────────── */
+.court-shafts { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.court-shafts .shaft {
+  position: absolute;
+  top: -10%;
+  width: 320px;
+  height: 140vh;
+  background: linear-gradient(180deg,
+    rgba(212,149,69,0.0) 0%,
+    rgba(212,149,69,0.10) 18%,
+    rgba(212,149,69,0.05) 55%,
+    rgba(212,149,69,0.0) 100%);
+  filter: blur(28px);
+  transform-origin: top center;
+  transform: rotate(8deg);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  animation: shaftBreathe 9s ease-in-out infinite;
+}
+.court-shafts .shaft-1 { left: 12%;  width: 240px; transform: rotate(6deg);  animation-delay: 0s; }
+.court-shafts .shaft-2 { left: 48%;  width: 380px; transform: rotate(-4deg); animation-delay: -3s; opacity: 0.4; }
+.court-shafts .shaft-3 { left: 78%;  width: 200px; transform: rotate(10deg); animation-delay: -6s; opacity: 0.5; }
+@keyframes shaftBreathe {
+  0%,100% { opacity: 0.30; transform: translateY(0) rotate(var(--r,8deg)); }
+  50%     { opacity: 0.65; transform: translateY(-8px) rotate(var(--r,8deg)); }
+}
+
+/* ── HANGING SIDE BANNERS ────────────────────────────── */
+.court-banner {
+  position: absolute;
+  top: var(--nav-h);
+  width: 70px;
+  height: clamp(360px, 56vh, 620px);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.78;
+  transform-origin: top center;
+}
+.court-banner-left  { left: 14px;  animation: bannerSwayL 11s ease-in-out infinite; }
+.court-banner-right { right: 14px; animation: bannerSwayR 13s ease-in-out infinite; }
+.court-banner .cloth {
+  position: absolute;
+  inset: 0;
+  /* Real cloth texture beneath, color-graded via multiply + gradient on top */
+  background-image:
+    linear-gradient(180deg,
+      rgba(40,8,8,0.55) 0%,
+      rgba(60,12,10,0.5) 30%,
+      rgba(40,8,8,0.6) 70%,
+      rgba(20,4,4,0.95) 100%),
+    url('/static/illustrations/ui/god/banner-cloth.png');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-blend-mode: multiply, normal;
+  border-left: 1px solid rgba(200,160,64,0.42);
+  border-right: 1px solid rgba(200,160,64,0.42);
+  box-shadow:
+    inset 0 0 60px rgba(0,0,0,0.6),
+    inset 6px 0 18px rgba(255,180,100,0.04),
+    inset -6px 0 18px rgba(0,0,0,0.5);
+  clip-path: polygon(0 0, 100% 0, 100% 92%, 50% 100%, 0 92%);
+  filter: contrast(0.95) saturate(0.85) brightness(0.78);
+}
+.court-banner .cloth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.45;
+  clip-path: inherit;
+}
+.court-banner .crown {
+  position: absolute;
+  top: 0; left: -8px; right: -8px; height: 22px;
+  background: linear-gradient(180deg, #6e5018 0%, #2a1d08 100%);
+  border-bottom: 1px solid rgba(200,160,64,0.5);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,210,140,0.2);
+}
+.court-banner .crown::after {
+  content: '';
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, -2px);
+  width: 8px; height: 8px;
+  background: var(--gold-bright);
+  box-shadow: 0 0 10px rgba(224,186,96,0.7);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.court-banner .tassel {
+  position: absolute;
+  top: 100%; left: 50%; transform: translate(-50%, -12px);
+  width: 6px; height: 28px;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 0 12px rgba(200,160,64,0.4);
+}
+@keyframes bannerSwayL {
+  0%,100% { transform: rotate(-0.5deg); }
+  50%     { transform: rotate(0.7deg); }
+}
+@keyframes bannerSwayR {
+  0%,100% { transform: rotate(0.5deg); }
+  50%     { transform: rotate(-0.7deg); }
+}
+
+/* ── THE THRONE (HERO REPLACEMENT) ───────────────────── */
+.throne {
+  position: relative;
+  z-index: 4;
+  padding: 92px 0 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+.throne-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/static/illustrations/ui/god/throne-hall.png');
+  background-size: cover;
+  background-position: center 40%;
+  filter: contrast(1.1) saturate(0.7) brightness(0.4);
+  opacity: 0.52;
+  z-index: -2;
+}
+.throne-bg::after {
+  /* Strong overlay so the AI image always reads as a backdrop, never as the subject */
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(212,149,69,0.15) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(4,3,8,0.45) 0%, rgba(4,3,8,0.6) 50%, rgba(4,3,8,0.92) 100%),
+    repeating-linear-gradient(180deg,
+      rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 3px);
+  mix-blend-mode: multiply;
+}
+.throne-vignette {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 30%, transparent 35%, rgba(4,3,8,0.85) 95%);
+  z-index: -1;
+  pointer-events: none;
+}
+.throne-pillars {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.42;
+  pointer-events: none;
+}
+.throne-pillars svg { width: 100%; height: 100%; }
+
+.throne-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 64px 28px 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.throne-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.62em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+  margin-bottom: 18px;
+  text-shadow: 0 0 12px rgba(200,160,64,0.18);
+}
+.throne-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(48px, 7.4vw, 108px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--text);
+  line-height: 1;
+  margin: 0 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 36px);
+  text-shadow:
+    0 0 60px rgba(212,149,69,0.18),
+    0 0 14px rgba(212,149,69,0.10),
+    0 4px 26px rgba(0,0,0,0.85);
+}
+.throne-title-text {
+  background: linear-gradient(180deg, #f0d899 0%, #c8a040 55%, #7a5c22 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6));
+  animation: titlePulse 7s ease-in-out infinite;
+}
+@keyframes titlePulse {
+  0%,100% { filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 12px rgba(212,149,69,0.10)); }
+  50%     { filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 22px rgba(212,149,69,0.22)); }
+}
+.throne-glyph {
+  font-family: 'Cinzel', serif;
+  font-size: 0.42em;
+  color: var(--gold);
+  opacity: 0.75;
+  text-shadow: 0 0 14px rgba(200,160,64,0.4);
+}
+.throne-rule {
+  display: flex; align-items: center; justify-content: center;
+  margin: 4px auto 14px; max-width: 720px;
+}
+.throne-rule svg { width: 100%; height: 18px; opacity: 0.85; }
+.throne-decree {
+  font-family: 'Crimson Text', serif;
+  font-size: 19px;
+  font-style: italic;
+  color: var(--text-sec);
+  margin: 0 auto 32px;
+  max-width: 720px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+/* CREST MEDALLION */
+.throne-crest {
+  position: relative;
+  width: 220px; height: 220px;
+  margin: 0 auto 12px;
+  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.7));
+}
+.throne-crest svg { width: 100%; height: 100%; display: block; }
+.throne-crest .ring-outer { animation: crestRotate 90s linear infinite; transform-origin: 110px 110px; }
+.throne-crest .ring-inner { animation: crestRotateRev 70s linear infinite; transform-origin: 110px 110px; }
+.throne-crest .crest-glow { animation: crestGlow 6s ease-in-out infinite; transform-origin: 110px 110px; }
+@keyframes crestRotate    { from { transform: rotate(0); }     to { transform: rotate(360deg); } }
+@keyframes crestRotateRev { from { transform: rotate(0); }     to { transform: rotate(-360deg); } }
+@keyframes crestGlow {
+  0%,100% { opacity: 0.45; }
+  50%     { opacity: 0.85; }
+}
+
+/* ── BRAZIER STRIP (replaces stat-strip visually) ────── */
+.gp-stat-strip {
+  position: relative;
+  z-index: 4;
+  background: transparent;
+  border: none;
+  margin-top: 36px;
+  padding: 0 28px 36px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 14px;
+  backdrop-filter: none;
+}
+.gp-stat-strip::before, .gp-stat-strip::after { content: none; }
+.gp-stat {
+  position: relative;
+  padding: 22px 14px 18px;
+  border: 1px solid rgba(200,160,64,0.18);
+  border-top: none; border-bottom: none;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(212,149,69,0.2) 0%, transparent 65%),
+    linear-gradient(180deg, rgba(20,14,10,0.72) 0%, rgba(8,6,8,0.94) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(212,149,69,0.18),
+    inset 0 -1px 0 rgba(212,149,69,0.10),
+    0 4px 18px rgba(0,0,0,0.55);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s;
+}
+.gp-stat::before {
+  /* the "brazier flame" — a soft pulsing ember at the top */
+  content: '';
+  position: absolute;
+  top: -28px; left: 50%; transform: translateX(-50%);
+  width: 70%; height: 60px;
+  background: radial-gradient(ellipse, rgba(255,180,80,0.45) 0%, rgba(255,140,60,0.16) 35%, transparent 70%);
+  filter: blur(8px);
+  animation: emberFlicker 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.gp-stat::after {
+  content: '';
+  position: absolute;
+  inset: 0 8px;
+  border-left: 1px solid rgba(200,160,64,0.10);
+  border-right: 1px solid rgba(200,160,64,0.10);
+  pointer-events: none;
+}
+.gp-stat:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(212,149,69,0.32),
+    inset 0 -1px 0 rgba(212,149,69,0.16),
+    0 6px 26px rgba(0,0,0,0.7);
+}
+.gp-stat-val {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1;
+  text-shadow:
+    0 0 22px rgba(224,186,96,0.45),
+    0 1px 0 rgba(0,0,0,0.6);
+  letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+}
+.gp-stat-lbl {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(200,160,64,0.6);
+  margin-top: 8px;
+  text-align: center;
+  position: relative; z-index: 1;
+}
+@keyframes emberFlicker {
+  0%,100% { opacity: 0.85; transform: translateX(-50%) scale(1); }
+  30%     { opacity: 1.0;  transform: translateX(-50%) scale(1.05); }
+  60%     { opacity: 0.7;  transform: translateX(-50%) scale(0.97); }
+}
+
+/* ── CARVED STONE FRIEZE DIVIDER ─────────────────────── */
+.court-frieze {
+  position: relative;
+  z-index: 4;
+  height: 64px;
+  margin: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(8,6,10,0.55) 50%, transparent 100%),
+    linear-gradient(180deg, rgba(20,14,12,0.55), rgba(12,9,9,0.55)),
+    url('/static/illustrations/ui/god/stone-frieze.png');
+  background-size: cover, cover, cover;
+  background-position: center, center, center 35%;
+  background-blend-mode: normal, multiply, normal;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  filter: saturate(0.55) contrast(1.05) brightness(0.85);
+}
+.court-frieze::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8,6,10,0.55) 0%, transparent 28%, transparent 72%, rgba(8,6,10,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.court-frieze::after {
+  /* central horizontal carved hairline — the SVG sits centered above this */
+  content: '';
+  position: absolute;
+  top: 50%; left: 4%; right: 4%;
+  transform: translateY(-50%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212,149,69,0.5) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.court-frieze svg { position: relative; z-index: 1; height: 36px; width: auto; opacity: 0.92; filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6)); }
+
+/* ── LEDGER (the new tab bar) ────────────────────────── */
+.gp-tabbar {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 600;
+  background:
+    linear-gradient(180deg, rgba(14,10,12,0.96) 0%, rgba(8,6,8,0.99) 100%);
+  border-top: 1px solid rgba(200,160,64,0.42);
+  border-bottom: 1px solid rgba(200,160,64,0.18);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(212,149,69,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.6),
+    0 8px 32px rgba(0,0,0,0.55);
+  padding: 0 28px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  backdrop-filter: blur(12px);
+}
+.gp-tabbar::before {
+  content: '';
+  position: absolute; left: 0; right: 0; top: 0; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='80' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.gp-tab {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(200,160,64,0.42);
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.25s, border-color 0.25s, background 0.25s, text-shadow 0.25s;
+}
+.gp-tab::before {
+  content: '';
+  position: absolute;
+  left: 6px; right: 6px; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,160,64,0.05), transparent);
+  pointer-events: none;
+  transition: opacity 0.25s, background 0.25s;
+  opacity: 0;
+}
+.gp-tab:hover { color: var(--gold-bright); background: rgba(200,160,64,0.05); }
+.gp-tab:hover::before { opacity: 1; background: linear-gradient(90deg, transparent, rgba(200,160,64,0.45), transparent); }
+.gp-tab.active {
+  color: var(--gold-bright);
+  text-shadow: 0 0 14px rgba(212,149,69,0.42);
+  border-bottom-color: var(--gold);
+  background: linear-gradient(180deg, rgba(200,160,64,0.10) 0%, rgba(200,160,64,0.02) 100%);
+}
+.gp-tab.active::before { opacity: 1; background: linear-gradient(90deg, transparent, rgba(212,149,69,0.7), transparent); }
+.gp-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  bottom: -7px;
+  width: 10px; height: 10px;
+  background: var(--gold);
+  box-shadow: 0 0 14px rgba(212,149,69,0.7);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.gp-tab-icon { font-size: 13px; opacity: 0.8; filter: drop-shadow(0 0 4px rgba(212,149,69,0.3)); }
+.gp-tab-count {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--gold);
+  opacity: 0.7;
+  min-width: 14px;
+  background: rgba(200,160,64,0.08);
+  padding: 1px 6px;
+  border: 1px solid rgba(200,160,64,0.18);
+}
+.gp-tab.active .gp-tab-count { opacity: 1; background: rgba(200,160,64,0.16); border-color: rgba(200,160,64,0.45); }
+
+/* ── COURT PAGES (panel container) ───────────────────── */
+.gp-panels {
+  position: relative;
+  z-index: 4;
+  min-height: 80vh;
+  padding: 0 0 80px;
+}
+.gp-panel { display: none; }
+.gp-panel.active { display: block; animation: pageFadeIn 0.5s cubic-bezier(.2,.8,.2,1); }
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── COURT SECTION (parchment page replacement) ──────── */
+.gp-section {
+  position: relative;
+  padding: 56px 0;
+  border-bottom: 1px solid rgba(200,160,64,0.07);
+}
+.gp-section:last-child { border-bottom: none; }
+.gp-section::before {
+  /* horizontal hairline at top of each section */
+  content: '';
+  position: absolute;
+  top: 0; left: 12%; right: 12%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,160,64,0.30), transparent);
+  pointer-events: none;
+}
+.gp-section .gp-container { position: relative; }
+
+/* Subtle parchment-fiber wash on alternating sections (very dim, just a feel of paper underneath) */
+.gp-section:nth-of-type(odd)::after {
+  content: '';
+  position: absolute;
+  inset: 8px 0;
+  pointer-events: none;
+  background-image: url('/static/illustrations/ui/god/parchment-tile.png');
+  background-size: 720px 720px;
+  background-repeat: repeat;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  filter: saturate(0.4) hue-rotate(-10deg);
+  z-index: 0;
+}
+.gp-section .gp-container { z-index: 1; }
+
+.gp-sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  padding: 0 0 14px;
+}
+.gp-sec-head::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background:
+    linear-gradient(90deg, rgba(200,160,64,0.45) 0%, rgba(200,160,64,0.12) 30%, transparent 70%);
+}
+.gp-sec-title {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  text-shadow: 0 0 20px rgba(212,149,69,0.18), 0 1px 0 rgba(0,0,0,0.6);
+  position: relative;
+  padding-left: 20px;
+}
+.gp-sec-title::before {
+  /* small heraldic glyph before each section title */
+  content: '✦';
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--gold);
+  opacity: 0.75;
+}
+.gp-sec-count {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── ORNATE CARD UPGRADE ─────────────────────────────── */
+.gp-ov-card,
+.gp-faction-card,
+.gp-pop-card,
+.gp-char-card,
+.gp-action-card,
+.gp-event-card,
+.gp-religion-card,
+.gp-knowledge-card {
+  position: relative;
+  background:
+    linear-gradient(165deg, rgba(20,14,18,0.92) 0%, rgba(10,8,12,0.95) 100%);
+  border: 1px solid rgba(200,160,64,0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(212,149,69,0.10),
+    inset 0 0 0 1px rgba(0,0,0,0.4),
+    0 4px 22px rgba(0,0,0,0.55);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), border-color 0.35s, box-shadow 0.35s;
+}
+.gp-ov-card::before,
+.gp-faction-card::before,
+.gp-pop-card::before,
+.gp-char-card::before,
+.gp-action-card::before,
+.gp-event-card::before,
+.gp-religion-card::before,
+.gp-knowledge-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(200,160,64,0.06);
+  pointer-events: none;
+  transition: border-color 0.35s;
+}
+.gp-ov-card:hover,
+.gp-faction-card:hover,
+.gp-pop-card:hover,
+.gp-char-card:hover,
+.gp-action-card:hover,
+.gp-event-card:hover,
+.gp-religion-card:hover,
+.gp-knowledge-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(200,160,64,0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(212,149,69,0.18),
+    inset 0 0 0 1px rgba(0,0,0,0.4),
+    0 8px 38px rgba(0,0,0,0.7),
+    0 0 28px rgba(212,149,69,0.10);
+}
+.gp-ov-card:hover::before,
+.gp-faction-card:hover::before,
+.gp-pop-card:hover::before,
+.gp-char-card:hover::before,
+.gp-action-card:hover::before,
+.gp-event-card:hover::before,
+.gp-religion-card:hover::before,
+.gp-knowledge-card:hover::before {
+  border-color: rgba(200,160,64,0.18);
+}
+
+/* gilded corners — applied via outer wrapper to special cards */
+.gp-ornate-corners {
+  position: relative;
+}
+.gp-ornate-corners::before,
+.gp-ornate-corners::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 22px;
+  border: 1px solid rgba(212,149,69,0.55);
+  pointer-events: none;
+}
+.gp-ornate-corners::before { top: -1px; left: -1px;  border-right: none;  border-bottom: none; }
+.gp-ornate-corners::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+/* ── LEDGER MARKERS (replaces gp-ov-label upgrade) ─── */
+.gp-ov-label {
+  position: relative;
+  padding-left: 10px;
+}
+.gp-ov-label::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  width: 4px; height: 4px;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(212,149,69,0.6);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  opacity: 0.6;
+}
+
+/* ── CHARACTER PORTRAIT FRAME UPGRADE ─────────────── */
+.gp-char-card { padding: 16px 18px; }
+.gp-char-name {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.06em;
+}
+
+/* ── FACTION CARD UPGRADE ───────────────────────────── */
+.gp-faction-card { padding: 0; }
+.gp-faction-card .gp-faction-card-body { padding: 14px 16px 16px; }
+.gp-faction-card .gp-faction-img-wrap { position: relative; }
+.gp-faction-card .gp-faction-img-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 35%,
+    rgba(8,6,10,0.6) 80%,
+    rgba(8,6,10,0.95) 100%);
+  pointer-events: none;
+}
+.gp-faction-card .gp-faction-img-wrap::before {
+  content: '';
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,149,69,0.6), transparent);
+  z-index: 1;
+}
+.gp-faction-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6), 0 0 18px rgba(212,149,69,0.12);
+}
+
+/* ── PILLS / BADGES UPGRADE ─────────────────────────── */
+.gp-pill {
+  position: relative;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(200,160,64,0.08);
+  border: 1px solid rgba(200,160,64,0.32);
+  color: var(--gold);
+  box-shadow: inset 0 1px 0 rgba(212,149,69,0.12);
+}
+.gp-pill.red    { background: rgba(158,36,22,0.10); border-color: rgba(158,36,22,0.4);   color: #d76450; box-shadow: inset 0 1px 0 rgba(255,160,140,0.08); }
+.gp-pill.green  { background: rgba(58,154,82,0.10); border-color: rgba(58,154,82,0.4);   color: #6ab07a; box-shadow: inset 0 1px 0 rgba(160,220,160,0.08); }
+
+/* ── EMPTY STATE UPGRADE ────────────────────────────── */
+.gp-empty {
+  border: 1px dashed rgba(200,160,64,0.20);
+  padding: 40px 28px;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(200,160,64,0.04), transparent 70%);
+  font-family: 'Crimson Text', serif;
+  font-style: italic;
+}
+
+/* ── MOTHERBOARD / SPREADSHEET UPGRADE ──────────────── */
+.gp-mb-grid table { font-family: 'EB Garamond', serif; }
+.gp-mb-grid th {
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.18em !important;
+  background: linear-gradient(180deg, rgba(20,14,18,0.95), rgba(10,8,12,0.95)) !important;
+  color: var(--gold) !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+}
+
+/* ── TABS RESPONSIVE TWEAK ──────────────────────────── */
+@media (max-width: 1100px) {
+  .court-banner-left, .court-banner-right { display: none; }
+  .throne-inner { padding-left: 18px; padding-right: 18px; }
+  .throne-title { letter-spacing: 0.10em; }
+}
+
+@media (max-width: 720px) {
+  .throne { padding-top: 78px; }
+  .throne-title { gap: 14px; }
+  .throne-glyph { font-size: 0.34em; }
+  .throne-decree { font-size: 16px; padding: 0 14px; }
+  .throne-crest { width: 180px; height: 180px; }
+  .gp-stat-strip { padding: 0 14px 24px; gap: 8px; }
+  .gp-stat-val { font-size: 24px; }
+  .gp-tabbar { padding: 0 14px; }
+  .court-shafts { display: none; }
+}
+
+/* ── COURT MODAL UPGRADE ─────────────────────────────── */
+.gp-modal-backdrop {
+  background: rgba(2,1,4,0.92);
+  backdrop-filter: blur(10px);
+}
+.gp-modal {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(212,149,69,0.10) 0%, transparent 55%),
+    linear-gradient(160deg, #15101a 0%, #0a0710 100%);
+  border: 1px solid rgba(212,149,69,0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(212,149,69,0.18),
+    inset 0 0 0 1px rgba(0,0,0,0.5),
+    0 30px 90px rgba(0,0,0,0.95),
+    0 0 64px rgba(212,149,69,0.08);
+}
+.gp-modal::before, .gp-modal::after {
+  content: '';
+  position: absolute;
+  width: 28px; height: 28px;
+  border: 1px solid rgba(212,149,69,0.6);
+  pointer-events: none;
+}
+.gp-modal::before { top: -1px; left: -1px;  border-right: none;  border-bottom: none; }
+.gp-modal::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+.gp-modal-name {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 22px rgba(212,149,69,0.18), 0 1px 0 rgba(0,0,0,0.6);
+}
+.gp-modal-faction { color: var(--gold-bright); text-shadow: 0 0 12px rgba(212,149,69,0.35); }
+
+/* ── COURT SCROLLBAR ─────────────────────────────────── */
+.court ::-webkit-scrollbar { width: 10px; height: 10px; }
+.court ::-webkit-scrollbar-track {
+  background: rgba(8,6,8,0.6);
+  border-left: 1px solid rgba(200,160,64,0.08);
+}
+.court ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5a4218 0%, #3a2a10 100%);
+  border: 1px solid rgba(200,160,64,0.32);
+  box-shadow: inset 0 1px 0 rgba(212,149,69,0.18);
+}
+.court ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7a5e26 0%, #4a3614 100%);
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .court-shafts .shaft,
+  .court-banner,
+  .gp-stat::before,
+  .throne-title-text,
+  .throne-crest .ring-outer,
+  .throne-crest .ring-inner,
+  .throne-crest .crest-glow,
+  .gp-panel.active {
+    animation: none !important;
+  }
+  .court-dust { display: none; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ── HERO ──────────────────────────────────────────────── -->
-<div class="gp-hero">
-  <div class="gp-hero-bg"></div>
-  <div class="gp-hero-vignette"></div>
-  <div class="gp-container gp-crown">
-    <div class="gp-eyebrow">Aeloria · Divine Interface · Living World</div>
-    <h1 class="gp-title">GOD PANEL</h1>
-    <p class="gp-subtitle">All that breathes, conspires, and bleeds — laid bare before the divine eye.</p>
-    <div class="gp-ornament"><span class="gp-ornament-diamond">✦</span></div>
+<!-- ── COURT OF AELORIA ─────────────────────────────────────── -->
+<div class="court">
+
+  <!-- ambient cathedral light shafts -->
+  <div class="court-shafts" aria-hidden="true">
+    <span class="shaft shaft-1"></span>
+    <span class="shaft shaft-2"></span>
+    <span class="shaft shaft-3"></span>
   </div>
-  <div class="gp-container">
+
+  <!-- floating dust motes (canvas) -->
+  <canvas class="court-dust" id="court-dust" aria-hidden="true"></canvas>
+
+  <!-- side hanging banners -->
+  <div class="court-banner court-banner-left" aria-hidden="true">
+    <div class="crown"></div>
+    <div class="cloth"></div>
+    <div class="tassel"></div>
+  </div>
+  <div class="court-banner court-banner-right" aria-hidden="true">
+    <div class="crown"></div>
+    <div class="cloth"></div>
+    <div class="tassel"></div>
+  </div>
+
+  <!-- ── THRONE HERO ──────────────────────────────────────── -->
+  <header class="throne">
+    <div class="throne-bg" aria-hidden="true"></div>
+    <div class="throne-vignette" aria-hidden="true"></div>
+
+    <!-- SVG receding pillar silhouettes (always present, work even without AI image) -->
+    <div class="throne-pillars" aria-hidden="true">
+      <svg viewBox="0 0 1600 600" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="pillar-grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%"  stop-color="#1a1410" stop-opacity="0"/>
+            <stop offset="40%" stop-color="#1a1410" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#04030a" stop-opacity="0.95"/>
+          </linearGradient>
+          <linearGradient id="pillar-edge" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%"  stop-color="rgba(212,149,69,0)"/>
+            <stop offset="60%" stop-color="rgba(212,149,69,0.35)"/>
+            <stop offset="100%" stop-color="rgba(212,149,69,0)"/>
+          </linearGradient>
+        </defs>
+        <!-- distant pillars -->
+        <g fill="url(#pillar-grad)">
+          <rect x="120"  y="60"  width="60"  height="540"/>
+          <rect x="280"  y="80"  width="50"  height="520"/>
+          <rect x="430"  y="100" width="42"  height="500"/>
+          <rect x="570"  y="120" width="34"  height="480"/>
+
+          <rect x="1420" y="60"  width="60"  height="540"/>
+          <rect x="1280" y="80"  width="50"  height="520"/>
+          <rect x="1140" y="100" width="42"  height="500"/>
+          <rect x="1000" y="120" width="34"  height="480"/>
+        </g>
+        <!-- pillar warm edges -->
+        <g fill="url(#pillar-edge)">
+          <rect x="120" y="60"  width="3" height="540"/>
+          <rect x="280" y="80"  width="3" height="520"/>
+          <rect x="430" y="100" width="3" height="500"/>
+          <rect x="1477" y="60"  width="3" height="540"/>
+          <rect x="1327" y="80"  width="3" height="520"/>
+          <rect x="1179" y="100" width="3" height="500"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="throne-inner">
+      <div class="throne-eyebrow">Aeloria · Throne of the Watcher · Living World</div>
+
+      <h1 class="throne-title">
+        <span class="throne-glyph throne-glyph-l">❦</span>
+        <span class="throne-title-text">GOD&nbsp;PANEL</span>
+        <span class="throne-glyph throne-glyph-r">❦</span>
+      </h1>
+
+      <!-- elegant filigree rule -->
+      <div class="throne-rule" aria-hidden="true">
+        <svg viewBox="0 0 720 18" preserveAspectRatio="xMidYMid meet">
+          <g fill="none" stroke="rgba(212,149,69,0.7)" stroke-width="1">
+            <path d="M0,9 L300,9"/>
+            <path d="M420,9 L720,9"/>
+            <circle cx="360" cy="9" r="4"/>
+            <circle cx="360" cy="9" r="1.4" fill="rgba(212,149,69,0.9)" stroke="none"/>
+            <path d="M335,9 L350,4 M335,9 L350,14 M385,9 L370,4 M385,9 L370,14"/>
+            <path d="M310,6 q5,3 0,6"/>
+            <path d="M410,6 q-5,3 0,6"/>
+          </g>
+        </svg>
+      </div>
+
+      <p class="throne-decree">All that breathes, conspires, and bleeds — laid bare before the divine eye.</p>
+
+      <!-- CREST MEDALLION -->
+      <div class="throne-crest" aria-hidden="true">
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <radialGradient id="crest-glow-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stop-color="rgba(255,200,120,0.55)"/>
+              <stop offset="55%" stop-color="rgba(212,149,69,0.16)"/>
+              <stop offset="100%" stop-color="rgba(212,149,69,0)"/>
+            </radialGradient>
+            <linearGradient id="crest-gold" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%"  stop-color="#f0d899"/>
+              <stop offset="55%" stop-color="#c8a040"/>
+              <stop offset="100%" stop-color="#7a5c22"/>
+            </linearGradient>
+          </defs>
+
+          <!-- outer halo -->
+          <circle class="crest-glow" cx="110" cy="110" r="100" fill="url(#crest-glow-grad)"/>
+
+          <!-- outer rotating ring with tick marks -->
+          <g class="ring-outer" stroke="url(#crest-gold)" fill="none">
+            <circle cx="110" cy="110" r="98" stroke-width="0.6" opacity="0.55"/>
+            <circle cx="110" cy="110" r="92" stroke-width="0.4" opacity="0.4"/>
+            <g stroke-width="1" opacity="0.7">
+              <line x1="110" y1="6"   x2="110" y2="14"/>
+              <line x1="110" y1="206" x2="110" y2="214"/>
+              <line x1="6"   y1="110" x2="14"  y2="110"/>
+              <line x1="206" y1="110" x2="214" y2="110"/>
+              <line x1="36"  y1="36"  x2="42"  y2="42"  opacity="0.5"/>
+              <line x1="184" y1="36"  x2="178" y2="42"  opacity="0.5"/>
+              <line x1="36"  y1="184" x2="42"  y2="178" opacity="0.5"/>
+              <line x1="184" y1="184" x2="178" y2="178" opacity="0.5"/>
+            </g>
+          </g>
+
+          <!-- inner counter-rotating filigree -->
+          <g class="ring-inner" stroke="url(#crest-gold)" fill="none" opacity="0.85">
+            <circle cx="110" cy="110" r="78" stroke-width="0.8"/>
+            <g stroke-width="0.8">
+              <path d="M110,32 q14,10 0,22 q-14,-10 0,-22"/>
+              <path d="M110,166 q14,10 0,22 q-14,-10 0,-22"/>
+              <path d="M32,110 q10,14 22,0 q-10,-14 -22,0"/>
+              <path d="M166,110 q10,14 22,0 q-10,-14 -22,0"/>
+            </g>
+          </g>
+
+          <!-- central seal -->
+          <g>
+            <circle cx="110" cy="110" r="42" fill="rgba(8,6,10,0.85)" stroke="url(#crest-gold)" stroke-width="1.2"/>
+            <circle cx="110" cy="110" r="36" fill="none" stroke="url(#crest-gold)" stroke-width="0.5" opacity="0.6"/>
+            <!-- All-seeing eye / star motif (hand-drawn so no AI tells) -->
+            <g stroke="url(#crest-gold)" fill="none" stroke-width="1">
+              <path d="M84,110 q26,-22 52,0 q-26,22 -52,0"/>
+              <circle cx="110" cy="110" r="9" fill="url(#crest-gold)" stroke="none"/>
+              <circle cx="110" cy="110" r="3.5" fill="#04030a" stroke="none"/>
+              <circle cx="110" cy="110" r="1.2" fill="url(#crest-gold)" stroke="none"/>
+            </g>
+            <!-- four cardinal star points -->
+            <g fill="url(#crest-gold)">
+              <polygon points="110,68 113,78 110,82 107,78"/>
+              <polygon points="110,138 113,142 110,152 107,142"/>
+              <polygon points="78,110 88,107 92,110 88,113"/>
+              <polygon points="142,110 132,107 128,110 132,113"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- BRAZIER STAT STRIP -->
     <div class="gp-stat-strip" id="gp-stats">
       <div class="gp-stat"><div class="gp-stat-val" id="gs-day">—</div><div class="gp-stat-lbl">World Day</div></div>
+      <div class="gp-stat"><div class="gp-stat-val" id="gs-wdate">—</div><div class="gp-stat-lbl">World Date</div></div>
       <div class="gp-stat"><div class="gp-stat-val" id="gs-events">—</div><div class="gp-stat-lbl">Active Events</div></div>
+      <div class="gp-stat"><div class="gp-stat-val" id="gs-tense">—</div><div class="gp-stat-lbl">Tensions</div></div>
       <div class="gp-stat"><div class="gp-stat-val" id="gs-factions">—</div><div class="gp-stat-lbl">Factions</div></div>
       <div class="gp-stat"><div class="gp-stat-val" id="gs-pop">—</div><div class="gp-stat-lbl">Population</div></div>
       <div class="gp-stat"><div class="gp-stat-val" id="gs-chars">—</div><div class="gp-stat-lbl">Characters</div></div>
       <div class="gp-stat"><div class="gp-stat-val" id="gs-pending">—</div><div class="gp-stat-lbl">Pending Inputs</div></div>
     </div>
+
+    <!-- carved frieze divider -->
+    <div class="court-frieze" aria-hidden="true">
+      <svg viewBox="0 0 800 36" preserveAspectRatio="xMidYMid meet">
+        <g fill="none" stroke="rgba(212,149,69,0.7)" stroke-width="1">
+          <path d="M40,18 q40,-14 80,0 q40,14 80,0 q40,-14 80,0 q40,14 80,0"/>
+          <path d="M440,18 q40,-14 80,0 q40,14 80,0 q40,-14 80,0 q40,14 80,0"/>
+          <circle cx="400" cy="18" r="6"/>
+          <circle cx="400" cy="18" r="2" fill="rgba(212,149,69,0.95)" stroke="none"/>
+          <path d="M380,18 L390,12 M380,18 L390,24 M420,18 L410,12 M420,18 L410,24"/>
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ── LEDGER (the codex tab spine) ─────────────────────── -->
+  <div class="gp-tabbar" id="gp-tabbar"></div>
+
+  <!-- ── COURT PAGES ──────────────────────────────────────── -->
+  <div class="gp-panels">
+    <div id="gp-panel-motherboard" class="gp-panel"></div>
+    <div id="gp-panel-overview"   class="gp-panel active"></div>
+    <div id="gp-panel-rulers"     class="gp-panel"></div>
+    <div id="gp-panel-events"     class="gp-panel"></div>
+    <div id="gp-panel-intel"      class="gp-panel"></div>
+    <div id="gp-panel-dynasties"  class="gp-panel"></div>
+    <div id="gp-panel-factions"   class="gp-panel"></div>
+    <div id="gp-panel-population" class="gp-panel"></div>
+    <div id="gp-panel-religion"   class="gp-panel"></div>
+    <div id="gp-panel-knowledge"  class="gp-panel"></div>
+    <div id="gp-panel-actions"    class="gp-panel"></div>
+    <div id="gp-panel-images"     class="gp-panel"></div>
+    <div id="gp-panel-controls"   class="gp-panel"></div>
   </div>
 </div>
 
-<!-- ── TAB BAR ────────────────────────────────────────────── -->
-<div class="gp-tabbar" id="gp-tabbar"></div>
-
-<!-- ── PANEL CONTAINERS ───────────────────────────────────── -->
-<div class="gp-panels">
-  <div id="gp-panel-overview"   class="gp-panel active"></div>
-  <div id="gp-panel-rulers"     class="gp-panel"></div>
-  <div id="gp-panel-events"     class="gp-panel"></div>
-  <div id="gp-panel-factions"   class="gp-panel"></div>
-  <div id="gp-panel-population"  class="gp-panel"></div>
-  <div id="gp-panel-characters"  class="gp-panel"></div>
-  <div id="gp-panel-religion"    class="gp-panel"></div>
-  <div id="gp-panel-knowledge"   class="gp-panel"></div>
-  <div id="gp-panel-actions"     class="gp-panel"></div>
-  <div id="gp-panel-images"      class="gp-panel"></div>
-  <div id="gp-panel-controls"    class="gp-panel"></div>
-</div>
-
-<!-- ── RULER MODAL ────────────────────────────────────────── -->
+<!-- ── RULER MODAL ──────────────────────────────────────────── -->
 <div class="gp-modal-backdrop" id="gp-modal-bd" onclick="gpCloseModal(event)">
   <div class="gp-modal" id="gp-modal">
     <button class="gp-modal-close" onclick="gpCloseModal()">×</button>
@@ -1516,16 +3992,96 @@
 
 {% block scripts %}
 <script>
+/* ── COURT AMBIENCE ────────────────────────────────────────
+   Dust motes drifting through cathedral light. Self-contained,
+   honors prefers-reduced-motion, and stops itself when tab hidden. */
+(function courtAmbience(){
+  document.body.classList.add('gp-body-court');
+  const canvas = document.getElementById('court-dust');
+  if (!canvas) return;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0, dpr = 1, particles = [];
+  const COUNT_DESKTOP = 70;
+  const COUNT_MOBILE  = 28;
+
+  function makeParticle() {
+    const size = 0.3 + Math.random() * 1.6;
+    return {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: size,
+      vx: -0.04 - Math.random() * 0.18,        // drift left
+      vy:  0.02 + Math.random() * 0.12,        // gentle fall
+      a:  0.05 + Math.random() * 0.35,         // base alpha
+      ph: Math.random() * Math.PI * 2,         // shimmer phase
+      sp: 0.002 + Math.random() * 0.006        // shimmer speed
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = canvas.getBoundingClientRect();
+    w = r.width; h = r.height;
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = w < 720 ? COUNT_MOBILE : COUNT_DESKTOP;
+    particles = Array.from({length: count}, makeParticle);
+  }
+
+  let lastT = 0, running = true;
+  function tick(t) {
+    if (!running) return;
+    const dt = Math.min(48, t - lastT || 16);
+    lastT = t;
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.vx * dt * 0.06;
+      p.y += p.vy * dt * 0.06;
+      p.ph += p.sp * dt;
+      if (p.x < -8 || p.y > h + 8) {
+        p.x = w + Math.random() * 60;
+        p.y = -8 - Math.random() * 40;
+      }
+      const shimmer = 0.6 + Math.sin(p.ph) * 0.4;
+      const alpha = Math.max(0, Math.min(1, p.a * shimmer));
+      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      grd.addColorStop(0,   `rgba(255,210,140,${alpha})`);
+      grd.addColorStop(0.5, `rgba(212,149,69,${alpha * 0.4})`);
+      grd.addColorStop(1,   'rgba(212,149,69,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  resize();
+  window.addEventListener('resize', () => { resize(); }, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden;
+    if (running) { lastT = 0; requestAnimationFrame(tick); }
+  });
+  requestAnimationFrame(tick);
+})();
+</script>
+<script>
 (function () {
 'use strict';
 
 const TABS = [
+  { id: 'motherboard', label: 'Motherboard', icon: '⬢' },
   { id: 'overview',    label: 'Overview',    icon: '◈' },
   { id: 'rulers',      label: 'Rulers',      icon: '♛' },
   { id: 'events',      label: 'Events',      icon: '⚔' },
+  { id: 'intel',       label: 'Intel',       icon: '▦' },
+  { id: 'dynasties',   label: 'Bloodlines',  icon: '⚜' },
   { id: 'factions',    label: 'Factions',    icon: '⚑' },
   { id: 'population',  label: 'Population',  icon: '◉' },
-  { id: 'characters',  label: 'Characters',  icon: '◎' },
   { id: 'religion',    label: 'Religion',    icon: '✦' },
   { id: 'knowledge',   label: 'Fog of War',  icon: '👁' },
   { id: 'actions',     label: 'Daily Log',   icon: '📜' },
@@ -1587,12 +4143,14 @@ function buildTabs(state, pending) {
   ].filter(Boolean));
 
   const counts = {
+    motherboard: '',
     overview:    '',
     rulers:      (state.leadership_state||[]).length,
     events:      (state.active_events||[]).length + (state.active_tensions||[]).length,
+    intel:       Object.keys(state||{}).length,
+    dynasties:   (state.house_characters||[]).length,
     factions:    factionSet.size,
     population:  (state.population_state||[]).length,
-    characters:  (state.house_characters||[]).length,
     religion:    (state.belief_currents||[]).length + (state.religious_factions||[]).length,
     knowledge:   (state.faction_knowledge||[]).length,
     actions:     (state.faction_actions||[]).length,
@@ -1607,6 +4165,26 @@ function buildTabs(state, pending) {
       ${counts[t.id] !== '' ? `<span class="gp-tab-count">${counts[t.id]}</span>` : ''}
     </button>
   `).join('');
+}
+
+function gpEventInsight(e, state) {
+  const txt = `${e?.name||''} ${e?.summary||''} ${e?.consequences||''}`.toLowerCase();
+  const seer = state?.seer_state || {};
+  const strain = num(seer.fatigue) > 70 || num(state?.instability) > 0.6;
+  const lines = [];
+  if (/war|battle|siege|invasion|raid|campaign/.test(txt)) {
+    lines.push('Military pressure is shaping current choices across multiple actors.');
+  } else if (/trade|gold|food|market|supply|resource|tribute/.test(txt)) {
+    lines.push('Material systems are influencing political behavior in the present tick.');
+  } else if (/faith|omen|seer|prophecy|cult|monastery|ritual/.test(txt)) {
+    lines.push('Belief and interpretation are actively altering decision posture.');
+  } else {
+    lines.push('This event is currently active and still transmitting second-order effects.');
+  }
+  if (e?.involved?.length) lines.push(`Primary actors: ${(e.involved||[]).slice(0,4).join(', ')}.`);
+  if (e?.stage) lines.push(`Current stage is ${e.stage}, so this remains in-play rather than resolved.`);
+  if (strain) lines.push('Signal quality is under strain; this reading is stable but not absolute.');
+  return clamp(lines.slice(0, 4).join(' '), 320);
 }
 
 window.gpShowPanel = function(id) {
@@ -1628,7 +4206,9 @@ function buildStats(state, pending) {
   ].filter(Boolean));
 
   document.getElementById('gs-day').textContent     = state.tick ?? '—';
+  document.getElementById('gs-wdate').textContent  = state.world_date || '—';
   document.getElementById('gs-events').textContent  = (state.active_events||[]).length;
+  document.getElementById('gs-tense').textContent   = (state.active_tensions||[]).length;
   document.getElementById('gs-factions').textContent= factionSet.size;
   document.getElementById('gs-pop').textContent     = pop > 999999 ? (pop/1000000).toFixed(1)+'M' : fmt(pop);
   document.getElementById('gs-chars').textContent   = chars;
@@ -2036,6 +4616,7 @@ function buildEvents(state) {
 
   function eventCard(e, isPrimary=false) {
     const sev = num(e.severity);
+    const insight = gpEventInsight(e, state);
     return `
       <div class="gp-event-card ${sev>=15?'sev-high':''} ${isPrimary?'sev-prime':''}">
         <div class="gp-event-sev">
@@ -2052,6 +4633,7 @@ function buildEvents(state) {
           </div>
           <p class="gp-event-summary">${esc(clamp(e.summary||'',360))}</p>
           ${e.consequences ? `<p class="gp-event-consequences">↳ ${esc(clamp(e.consequences,240))}</p>` : ''}
+          <p class="gp-event-consequences" style="font-style:normal;color:var(--text-sec)">Analysis: ${esc(insight)}</p>
           ${(e.involved||[]).length ? `<div class="gp-involved">${(e.involved||[]).map(x=>`<span class="gp-involved-tag">${esc(x)}</span>`).join('')}</div>` : ''}
         </div>
       </div>`;
@@ -2081,10 +4663,1066 @@ function buildEvents(state) {
   `;
 }
 
-/* ── CHARACTERS ───────────────────────────────────────────── */
-let gCharFilter = { race: '', house: '' };
-let gCharState  = {};
+function buildIntelPanel(state) {
+  const entries = Object.entries(state || {}).sort((a,b)=>a[0].localeCompare(b[0]));
+  const decisionRows = gpCollectDecisionRows(state);
+  const head = `
+    <div class="gp-kpi-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px">
+      <div class="gp-ov-card"><div class="gp-ov-label">Tick</div><div class="gp-ov-val">${esc(state.tick??'—')}</div></div>
+      <div class="gp-ov-card"><div class="gp-ov-label">Active Events</div><div class="gp-ov-val">${(state.active_events||[]).length}</div></div>
+      <div class="gp-ov-card"><div class="gp-ov-label">Tensions</div><div class="gp-ov-val">${(state.active_tensions||[]).length}</div></div>
+      <div class="gp-ov-card"><div class="gp-ov-label">State Keys</div><div class="gp-ov-val">${entries.length}</div></div>
+    </div>`;
+  const rows = entries.map(([k,v]) => {
+    const type = Array.isArray(v) ? 'array' : (v===null?'null':typeof v);
+    const size = Array.isArray(v) ? `${v.length} items` : (v && typeof v==='object' ? `${Object.keys(v).length} keys` : String(v));
+    return `<tr>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(k)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(type)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(clamp(size,120))}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('gp-panel-intel').innerHTML = gpSection(
+    'Engine Intel Spreadsheet',
+    `${entries.length} keys`,
+    `${head}
+    ${gpSection('Faction Lifecycle Fire Log', null, `<div class="gp-alerts">${gpLifecycleRows(state)}</div>`)}
+    ${gpDecisionFireLog(decisionRows)}
+    <div style="border:1px solid var(--border);background:var(--surface);max-height:60vh;overflow:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead style="position:sticky;top:0;background:var(--surface2)">
+          <tr>
+            <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Key</th>
+            <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Type</th>
+            <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Size/Value</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`
+  );
+}
 
+function gpCollectDecisionRows(state) {
+  const rows = [];
+  const add = (source, item) => {
+    if (!item || typeof item !== 'object') return;
+    const actor = item.actor || item.faction || item.source_faction || item.source || item.name || 'Unknown';
+    const target = item.target_faction || item.target || item.destination || '';
+    const reason = item.reason || item.priority_tier || item.cause || item.status || '';
+    const summary = item.summary || item.action_summary || item.detail || item.description || '';
+    rows.push({
+      source,
+      actor,
+      action: item.action || item.type || item.op_id || 'fired',
+      reason,
+      target,
+      summary,
+      tick: item.tick ?? state.tick ?? '',
+      meta: item.meta || item.metrics || {}
+    });
+  };
+
+  [
+    ['Core Decision', state.decision_log],
+    ['Military', state.military_faction_decisions],
+    ['Economy', state.economic_pressure_decisions],
+    ['Diplomacy', state.diplomatic_faction_decisions],
+    ['Intrigue Decision', state.intrigue_decisions],
+    ['Intrigue Action', state.intrigue_actions],
+    ['Treaty', state.treaty_tick_outcomes],
+    ['Tributary', state.tributary_report?.payments],
+    ['Marriage', state.marriage_events],
+    ['Succession', state.succession_events],
+    ['Birth', state.birth_events],
+    ['Death', state.death_events],
+    ['Legitimacy', state.legitimacy_events],
+    ['Assassination', state.assassination_reports],
+    ['Sabotage', state.sabotage_reports],
+    ['Blackmail', state.blackmail_reports],
+    ['Counterintel', state.counterintelligence_report]
+  ].forEach(([source, list]) => {
+    if (Array.isArray(list)) list.forEach(item => add(source, item));
+  });
+
+  const lifecycle = state.faction_lifecycle_report || {};
+  [
+    ['Faction Collapse', lifecycle.collapsed],
+    ['Civil War', lifecycle.civil_wars],
+    ['Minor Faction', lifecycle.emerging_factions],
+    ['Vassalage', lifecycle.vassalage],
+    ['Reunification', lifecycle.reunifications],
+    ['New Kingdom', lifecycle.new_kingdoms],
+  ].forEach(([source, list]) => {
+    if (Array.isArray(list)) list.forEach(item => add(source, item));
+  });
+
+  return rows.sort((a,b) => String(a.source).localeCompare(String(b.source)) || String(a.actor).localeCompare(String(b.actor)));
+}
+
+function gpLifecycleRows(state) {
+  const report = state.faction_lifecycle_report || {};
+  const rows = [
+    ...(report.collapsed || []).map(r => ['Collapse', r.faction, r.reason || r.status]),
+    ...(report.civil_wars || []).map(r => ['Civil War', r.parent_faction, `${r.splinter_faction} split at ${r.flashpoint_region}`]),
+    ...(report.emerging_factions || []).map(r => ['Minor Faction', r.faction || r.region, r.reason || r.status]),
+    ...(report.vassalage || []).map(r => ['Vassalage', r.subordinate_faction, `Subordinate to ${r.dominant_faction}`]),
+    ...(report.reunifications || []).map(r => ['Reunification', r.claimed_by, `Restored ${r.kingdom}`]),
+    ...(report.new_kingdoms || []).map(r => ['New Kingdom', r.founded_by, `Founded ${r.new_kingdom}`]),
+  ];
+  return rows.length ? rows.map(([kind, who, detail]) => `
+    <div class="gp-alert info">
+      <div class="gp-alert-icon">*</div>
+      <div class="gp-alert-text"><strong>${esc(kind)}: ${esc(who || 'Unknown')}</strong>${esc(detail || '')}</div>
+    </div>`).join('') : emptyState('No faction lifecycle transitions fired this tick.');
+}
+
+function gpDecisionFireLog(rows) {
+  const body = rows.length ? rows.map((r) => {
+    const why = r.reason || (r.meta && Object.keys(r.meta).length ? Object.entries(r.meta).slice(0,2).map(([k,v])=>`${k}: ${typeof v === 'object' ? JSON.stringify(v).slice(0,80) : v}`).join(' · ') : 'No explicit reason recorded');
+    const detail = r.summary || (r.target ? `Target: ${r.target}` : '');
+    return `<tr>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border);color:var(--gold)">${esc(r.source)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(r.actor)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(r.action)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border)">${esc(why)}</td>
+      <td style="padding:7px 9px;border-bottom:1px solid var(--border);color:var(--text-sec)">${esc(clamp(detail,160))}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5" style="padding:12px;color:var(--text-muted)">No decision fire rows recorded this tick.</td></tr>`;
+
+  return `
+    <div style="margin-bottom:14px">
+      <div class="gp-sec-head" style="margin:0 0 8px">
+        <div class="gp-sec-title">Decision Fire Log</div>
+        <div class="gp-sec-count">${rows.length} fired</div>
+      </div>
+      <div style="border:1px solid var(--border);background:var(--surface);max-height:340px;overflow:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead style="position:sticky;top:0;background:var(--surface2)">
+            <tr>
+              <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">System</th>
+              <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Who</th>
+              <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Fired</th>
+              <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Reason</th>
+              <th style="text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)">Description</th>
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function escAttr(v) {
+  return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
+function gpSectionMini(title, html) {
+  return `<div style="border:1px solid var(--border);background:var(--surface);padding:14px">
+    <div class="gp-sec-title" style="margin-bottom:12px">${esc(title)}</div>${html}
+  </div>`;
+}
+
+function gpBuildFamilyModel(state) {
+  const chars = (Array.isArray(state.house_characters) ? state.house_characters : []).filter(c => c && typeof c === 'object');
+  const byName = {};
+  chars.forEach(c => { if (c.name) byName[c.name] = c; });
+  const byHouse = {};
+  chars.forEach(c => {
+    const house = c.house || 'Unknown House';
+    if (!byHouse[house]) byHouse[house] = { house, members: [], children: [], marriages: [], faction: c.faction || '' };
+    byHouse[house].members.push(c);
+    if (!byHouse[house].faction && c.faction) byHouse[house].faction = c.faction;
+    if (Array.isArray(c.parents) && c.parents.length) byHouse[house].children.push(c);
+  });
+
+  const addMarriage = (row, source) => {
+    if (!row || typeof row !== 'object') return;
+    const names = [
+      row.mother || row.partner_a || row.a || row.spouse_a?.name || row.spouse_a,
+      row.father || row.partner_b || row.b || row.spouse_b?.name || row.spouse_b,
+    ].filter(Boolean).map(String);
+    if (names.length < 2) return;
+    const houses = names.map(n => byName[n]?.house).filter(Boolean);
+    houses.forEach(house => {
+      if (!byHouse[house]) return;
+      if (byHouse[house].marriages.some(m => m.id === (row.marriage_id || `${names[0]}|${names[1]}|${row.since_tick||row.start_tick||''}`))) return;
+      byHouse[house].marriages.push({
+        id: row.marriage_id || `${names[0]}|${names[1]}|${row.since_tick||row.start_tick||''}`,
+        names,
+        houses,
+        since: row.since_tick ?? row.start_tick ?? row.tick ?? '',
+        source,
+        type: row.marriage_type || row.type || 'marriage',
+      });
+    });
+  };
+  (state.character_marriages || []).forEach(m => addMarriage(m, 'character_marriages'));
+  (state.noble_marriages || []).forEach(m => {
+    const pair = {
+      marriage_id: m.marriage_id,
+      partner_a: gpFindHouseHeadName(chars, m.house_a),
+      partner_b: gpFindHouseHeadName(chars, m.house_b),
+      start_tick: m.start_tick,
+      type: 'noble marriage',
+    };
+    addMarriage(pair, 'noble_marriages');
+  });
+  (state.marriage_events || []).forEach(m => {
+    const pair = {
+      spouse_a: m.spouse_a?.name,
+      spouse_b: m.spouse_b?.name,
+      tick: state.tick,
+      type: m.faction_effects?.type || 'marriage event',
+    };
+    addMarriage(pair, 'marriage_events');
+  });
+
+  const houses = Object.values(byHouse).sort((a,b)=>b.members.length-a.members.length || a.house.localeCompare(b.house));
+  return { houses, byHouse, byName };
+}
+
+function gpFindHouseHeadName(chars, house) {
+  if (!house) return '';
+  const members = chars.filter(c => c.house === house);
+  const head = members.find(c => String(c.coreRole||'').toLowerCase()==='leader') || members[0];
+  return head?.name || '';
+}
+
+function gpHouseLore(house, data, state) {
+  const explicit = data.members.map(c => c.house_lore || c.family_lore || c.house_background || c.background).find(Boolean);
+  if (explicit) return explicit;
+  const faction = data.faction || 'an unsettled faction';
+  const leader = data.members.find(c => String(c.coreRole||'').toLowerCase()==='leader') || data.members[0] || {};
+  const oldest = data.members.slice().sort((a,b)=>num(b.age)-num(a.age))[0] || {};
+  const marriages = data.marriages.length;
+  const children = data.children.length;
+  const traits = data.members.flatMap(c => Array.isArray(c.traits) ? c.traits : (c.bias ? [c.bias] : [])).filter(Boolean);
+  const traitLine = traits.length ? `Its reputation bends toward ${[...new Set(traits)].slice(0,3).join(', ')}.` : 'Its reputation is still being written by the engine of the world.';
+  const origin = house.startsWith('House ') || house.startsWith('Clan ') ? house : `the ${house} line`;
+  return `${origin} serves ${faction} as a living bloodline rather than a static entry in the codex. ${leader.name ? `${leader.name} is the current visible head, while ${oldest.name || 'older kin'} carries the oldest memory of the line.` : 'Its current head is not clearly recorded.'} ${marriages ? `${marriages} marriage bond${marriages===1?'':'s'} tie it into the wider noble web.` : 'No formal marriage bond is recorded yet.'} ${children ? `${children} child record${children===1?'':'s'} now extend the line forward.` : 'No birth record has extended the line yet.'} ${traitLine}`;
+}
+
+function gpCharacterSort(a,b) {
+  const rank = { Leader:0, Heir:1, 'Power Role':2, Advisor:3, Agent:4, Minor:8 };
+  return (rank[a.coreRole] ?? 5) - (rank[b.coreRole] ?? 5) || num(b.age)-num(a.age) || String(a.name||'').localeCompare(String(b.name||''));
+}
+
+function gpBirthDate(c, state) {
+  if (c.birth_tick !== undefined) return `Day ${c.birth_tick}`;
+  if (c.born_tick !== undefined) return `Day ${c.born_tick}`;
+  const ev = (state.birth_events || []).find(e => e.child?.name === c.name);
+  if (ev?.tick !== undefined) return `Day ${ev.tick}`;
+  for (const h of (state.tick_history || [])) {
+    const hev = (h.birth_events || []).find(e => e.child?.name === c.name);
+    if (hev) return `Day ${h.tick ?? hev.tick ?? '?'}`;
+  }
+  if (num(c.age) === 0 && Array.isArray(c.parents)) return `Recent birth`;
+  return c.age !== undefined ? `Age ${c.age}` : 'Unknown';
+}
+
+function gpMarriageDateFor(c, state) {
+  const name = c.name;
+  const m = (state.character_marriages || []).find(row => [row.mother,row.father,row.partner_a,row.partner_b,row.a,row.b].includes(name));
+  if (m) return m.since_tick !== undefined ? `Day ${m.since_tick}` : 'Recorded';
+  return c.spouse ? 'Recorded' : 'None';
+}
+
+function gpMarriageDateRaw(c, state) {
+  const name = c.name;
+  const m = (state.character_marriages || []).find(row => [row.mother,row.father,row.partner_a,row.partner_b,row.a,row.b].includes(name));
+  if (!m) return null;
+  return m.since_tick ?? m.start_tick ?? null;
+}
+
+function gpDeathDate(c, state) {
+  if (c.death_tick !== undefined) return `Day ${c.death_tick}`;
+  if (c.died_tick !== undefined)  return `Day ${c.died_tick}`;
+  return null;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DYNASTIES — illuminated codex unifying Families + Characters.
+   Three tiers: Bloodlines → Houses → Dynasty Stage.
+   ════════════════════════════════════════════════════════════ */
+const DYN_BAD_TRAITS = ['ailing','dying','unstable','critical','exhausted','wounded','deceased','dead'];
+
+const gDyn = {
+  state: null,
+  view: 'races',     // 'races' | 'houses' | 'house'
+  race: '',
+  house: '',
+  char: '',
+  liveFilter: 'all', // 'all' | 'living' | 'leaders' | 'heirs'
+  search: '',
+};
+
+function buildDynasties(state) {
+  gDyn.state = state;
+  renderDynasties();
+}
+window.buildDynasties = buildDynasties;
+
+window.gDynNav = function(view, race, house, char) {
+  gDyn.view  = view  || 'races';
+  gDyn.race  = race  || '';
+  gDyn.house = house || '';
+  if (char !== undefined) gDyn.char = char || '';
+  if (view === 'races')  { gDyn.race = ''; gDyn.house = ''; gDyn.char = ''; }
+  if (view === 'houses') { gDyn.house = ''; gDyn.char = ''; }
+  renderDynasties();
+  document.getElementById('gp-panel-dynasties')?.scrollIntoView({block:'start', behavior:'smooth'});
+};
+
+window.gDynSelectHouseByChar = function(name) {
+  if (!gDyn.state) return;
+  const chars = gDyn.state.house_characters || [];
+  const c = chars.find(x => x && x.name === name);
+  if (!c) return;
+  gDyn.view = 'house';
+  gDyn.race = c.race || gDyn.race || 'Human';
+  gDyn.house = c.house || '';
+  gDyn.char = name;
+  renderDynasties();
+};
+
+window.gDynSelectChar = function(name) {
+  if (!gDyn.state) return;
+  // jump houses if the chosen kin lives elsewhere
+  const all = gDyn.state.house_characters || [];
+  const c = all.find(x => x && x.name === name);
+  if (c && c.house && c.house !== gDyn.house) {
+    gDyn.race = c.race || gDyn.race;
+    gDyn.house = c.house;
+    gDyn.char = name;
+    renderDynasties();
+    return;
+  }
+  gDyn.char = name;
+  renderDyn_house();
+};
+
+window.gDynLiveFilter = function(v) {
+  gDyn.liveFilter = v;
+  renderDyn_house();
+};
+
+window.gDynSearchChange = function(v) {
+  gDyn.search = String(v || '').toLowerCase().trim();
+  renderDynasties();
+};
+
+window.gDynSearchSubmit = function(ev) {
+  if (ev && ev.key !== 'Enter') return;
+  const q = (gDyn.search || '').toLowerCase();
+  if (!q) return;
+  const chars = gDyn.state?.house_characters || [];
+  const hit = chars.find(c => String(c.name||'').toLowerCase().includes(q));
+  if (hit) {
+    gDyn.view = 'house';
+    gDyn.race = hit.race || '';
+    gDyn.house = hit.house || '';
+    gDyn.char = hit.name || '';
+    gDyn.search = '';
+    renderDynasties();
+  }
+};
+
+function renderDynasties() {
+  const panel = document.getElementById('gp-panel-dynasties');
+  if (!panel) return;
+  panel.innerHTML = `
+    <div class="gp-section">
+      <div class="gp-container dyn-root">
+        <div class="dyn-shell">
+          ${renderDynCrumb()}
+          <div id="dyn-body"></div>
+        </div>
+      </div>
+    </div>`;
+  if (gDyn.view === 'races')  renderDyn_races();
+  else if (gDyn.view === 'houses') renderDyn_houses();
+  else renderDyn_house();
+}
+
+function renderDynCrumb() {
+  const sep = `<span class="dyn-crumb-sep">›</span>`;
+  let bc = `<button class="dyn-crumb-step ${gDyn.view==='races'?'is-current':''}" onclick="gDynNav('races')">Bloodlines</button>`;
+  if (gDyn.race)  bc += sep + `<button class="dyn-crumb-step ${gDyn.view==='houses'?'is-current':''}" onclick="gDynNav('houses','${escAttr(gDyn.race)}')">${esc(gDyn.race)}</button>`;
+  if (gDyn.house) bc += sep + `<button class="dyn-crumb-step ${gDyn.view==='house'?'is-current':''}" onclick="gDynNav('house','${escAttr(gDyn.race)}','${escAttr(gDyn.house)}')">${esc(gDyn.house)}</button>`;
+  return `<div class="dyn-crumb">
+    ${bc}
+    <div class="dyn-crumb-spacer"></div>
+    <div class="dyn-search">
+      <span class="dyn-search-icon">⌕</span>
+      <input type="text" placeholder="search a name…"
+        value="${esc(gDyn.search || '')}"
+        oninput="gDynSearchChange(this.value)"
+        onkeydown="gDynSearchSubmit(event)">
+    </div>
+  </div>`;
+}
+
+function dynCornerSVG(cls) {
+  return `<svg class="dyn-corner ${cls}" viewBox="0 0 24 24" fill="none" stroke="rgba(220,184,108,0.85)" stroke-width="0.9">
+    <path d="M2 22 L2 14 Q2 2 14 2 L22 2"/>
+    <path d="M5 18 L5 13 Q5 5 13 5 L18 5" opacity="0.55"/>
+    <circle cx="9" cy="9" r="1.6" fill="rgba(220,184,108,0.85)" stroke="none"/>
+  </svg>`;
+}
+
+function dynFlourishSVG() {
+  return `<svg class="dyn-hero-rule" viewBox="0 0 560 16" preserveAspectRatio="none">
+    <line x1="0" y1="8" x2="240" y2="8" stroke="rgba(168,140,80,0.55)" stroke-width="0.8"/>
+    <line x1="320" y1="8" x2="560" y2="8" stroke="rgba(168,140,80,0.55)" stroke-width="0.8"/>
+    <g transform="translate(280,8)" fill="none" stroke="rgba(220,184,108,0.95)" stroke-width="1.0">
+      <circle r="6"/>
+      <circle r="3" fill="rgba(220,184,108,0.20)"/>
+      <path d="M-30 0 Q-22 -6 -16 0 Q-10 6 -2 0" />
+      <path d="M30 0 Q22 -6 16 0 Q10 6 2 0" />
+    </g>
+  </svg>`;
+}
+
+function dynLoreFlourishSVG() {
+  return `<svg class="dyn-lore-flourish" viewBox="0 0 220 14" preserveAspectRatio="none">
+    <line x1="0" y1="7" x2="90" y2="7" stroke="rgba(160,120,42,0.7)" stroke-width="0.8"/>
+    <line x1="130" y1="7" x2="220" y2="7" stroke="rgba(160,120,42,0.7)" stroke-width="0.8"/>
+    <g transform="translate(110,7)" fill="none" stroke="rgba(160,120,42,0.95)" stroke-width="1">
+      <circle r="4"/>
+      <circle r="1.6" fill="rgba(160,120,42,0.6)"/>
+      <path d="M-14 0 Q-10 -3 -6 0"/>
+      <path d="M14 0 Q10 -3 6 0"/>
+    </g>
+  </svg>`;
+}
+
+function dynRaceArchSVG() {
+  return `<svg class="dyn-cp-arch" viewBox="0 0 360 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 0 L0 30 Q180 -20 360 30 L360 0 Z" fill="rgba(8,6,4,0.92)"/>
+    <path d="M0 30 Q180 -20 360 30" fill="none" stroke="rgba(220,184,108,0.65)" stroke-width="0.8"/>
+    <circle cx="180" cy="6" r="2.5" fill="rgba(220,184,108,0.85)"/>
+  </svg>`;
+}
+
+/* ── TIER 1 : BLOODLINES ──────────────────────────────────── */
+function renderDyn_races() {
+  const state = gDyn.state || {};
+  const chars = state.house_characters || [];
+  const RACE_ORDER = ['Human','Dwarf','High Elf','Dark Elf','Orc','Goblin'];
+  const allRaces = [...new Set(chars.map(c=>c.race||'').filter(Boolean))];
+  const races = [...RACE_ORDER.filter(r=>allRaces.includes(r)), ...allRaces.filter(r=>!RACE_ORDER.includes(r))];
+
+  const cards = (races.length?races:RACE_ORDER).map(race => {
+    const lore = RACE_LORE[race] || {};
+    const houseSet = new Set(chars.filter(c=>c.race===race).map(c=>c.house).filter(Boolean));
+    const charCount = chars.filter(c=>c.race===race).length;
+    const factionSet = new Set(chars.filter(c=>c.race===race).map(c=>c.faction).filter(Boolean));
+    const slug = charSlug(race);
+    return `
+      <div class="dyn-blood-card" onclick="gDynNav('houses','${escAttr(race)}')">
+        ${dynCornerSVG('tl')}${dynCornerSVG('tr')}${dynCornerSVG('bl')}${dynCornerSVG('br')}
+        <div class="dyn-blood-img" style="background-image:url('/static/illustrations/races/${slug}.png')"></div>
+        <div class="dyn-blood-veil"></div>
+        <div class="dyn-blood-foil"></div>
+        <div class="dyn-blood-body">
+          <div class="dyn-blood-name">${esc(race)}</div>
+          <div class="dyn-blood-home">${esc(lore.homeland || '—')}</div>
+          <div class="dyn-blood-stats">
+            <div><b>${houseSet.size}</b> houses</div>
+            <div><b>${charCount}</b> characters</div>
+            <div><b>${factionSet.size}</b> factions</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('dyn-body').innerHTML = `
+    <div class="dyn-hero">
+      <div class="dyn-hero-eyebrow">The Codex of</div>
+      <h1 class="dyn-hero-title">Bloodlines</h1>
+      <div class="dyn-hero-sub">Lineages, marriages, and the long memory of Aeloria</div>
+      ${dynFlourishSVG()}
+    </div>
+    <div class="dyn-blood-grid">${cards}</div>
+  `;
+}
+
+/* ── TIER 2 : HOUSES OF [RACE] ────────────────────────────── */
+function renderDyn_houses() {
+  const state = gDyn.state || {};
+  const race  = gDyn.race;
+  const lore  = RACE_LORE[race] || {};
+  const model = gpBuildFamilyModel(state);
+  const houses = model.houses
+    .filter(h => h.members.some(c => (c.race||'') === race))
+    .sort((a,b) => b.members.length - a.members.length || a.house.localeCompare(b.house));
+
+  const slug = charSlug(race);
+  const cards = houses.map(h => {
+    const head = h.members.find(c => String(c.coreRole||'').toLowerCase()==='leader') || h.members[0] || {};
+    const heirs = h.members.filter(c => String(c.coreRole||'').toLowerCase()==='heir').length;
+    const houseSlug = charSlug(h.house);
+    const initial = (h.house.replace(/^(House|Clan)\s+/,'')[0] || '?').toUpperCase();
+    return `
+      <div class="dyn-house-card" onclick="gDynNav('house','${escAttr(race)}','${escAttr(h.house)}')">
+        <div class="dyn-house-portrait">
+          <img src="/static/illustrations/houses/${houseSlug}.png" loading="lazy"
+            onerror="this.style.display='none'">
+          <div class="dyn-house-sigil">${esc(initial)}</div>
+        </div>
+        <div class="dyn-house-body">
+          <div class="dyn-house-name">${esc(h.house)}</div>
+          <div class="dyn-house-faction">${esc(h.faction || 'Unaligned')}</div>
+          <div class="dyn-house-stats">
+            <div class="dyn-house-stat"><b>${h.members.length}</b><span>members</span></div>
+            <div class="dyn-house-stat"><b>${heirs}</b><span>heirs</span></div>
+            <div class="dyn-house-stat"><b>${h.marriages.length}</b><span>bonds</span></div>
+          </div>
+          <div class="dyn-house-head">Head · ${esc(head.name || 'Unknown')}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('dyn-body').innerHTML = `
+    <div class="dyn-race-banner">
+      <div class="dyn-race-portrait">
+        <img src="/static/illustrations/races/${slug}.png" loading="lazy"
+          onerror="this.style.display='none'">
+      </div>
+      <div class="dyn-race-text">
+        <div class="dyn-race-eyebrow">Of the bloodline</div>
+        <div class="dyn-race-name">${esc(race)}</div>
+        <div class="dyn-race-home">${esc(lore.homeland || '—')}</div>
+        <div class="dyn-race-lore">${esc(lore.description || 'No record survives in the codex.')}</div>
+      </div>
+    </div>
+    <div class="dyn-section-rule">
+      <span class="dyn-rule-glyph">⚜</span>
+      Sworn Houses
+      <span class="dyn-rule-glyph">⚜</span>
+    </div>
+    ${houses.length
+      ? `<div class="dyn-houses-grid">${cards}</div>`
+      : emptyState('No houses of this bloodline are recorded yet.')}
+  `;
+}
+
+/* ── TIER 3 : THE DYNASTY STAGE ──────────────────────────── */
+function renderDyn_house() {
+  const state = gDyn.state || {};
+  const model = gpBuildFamilyModel(state);
+  const data  = model.byHouse[gDyn.house];
+  if (!data) {
+    document.getElementById('dyn-body').innerHTML = emptyState('That house has no surviving record.');
+    return;
+  }
+  // pre-select a sensible character if none selected
+  const chars = data.members.slice();
+  if (!gDyn.char || !chars.find(c => c.name === gDyn.char)) {
+    const head = chars.find(c => String(c.coreRole||'').toLowerCase()==='leader') || chars[0] || {};
+    gDyn.char = head.name || '';
+  }
+
+  document.getElementById('dyn-body').innerHTML = `
+    <div class="dyn-stage">
+      ${renderDyn_roster(data)}
+      <div class="dyn-codex">
+        ${renderDyn_lore(data, state)}
+        ${renderDyn_tree(data, state)}
+        ${renderDyn_chronicle(data, state)}
+      </div>
+      ${renderDyn_codexPane(data, state)}
+    </div>
+  `;
+}
+
+function dynIsDeceased(c) {
+  if (c.is_dead || c.deceased) return true;
+  if (gpDeathDate(c, gDyn.state)) return true;
+  const traits = (c.traits||[]).map(t=>String(t).toLowerCase());
+  if (traits.includes('deceased') || traits.includes('dead')) return true;
+  return false;
+}
+
+function dynRoleTagClass(c) {
+  const r = String(c.coreRole||'').toLowerCase();
+  if (r === 'leader')        return 'gold';
+  if (r === 'heir')          return 'heir';
+  if (r === 'power role')    return 'power';
+  if (r === 'advisor')       return 'advisor';
+  return 'minor';
+}
+
+/* — left rail: roster — */
+function renderDyn_roster(data) {
+  const filt = gDyn.liveFilter;
+  let members = data.members.slice().sort(gpCharacterSort);
+  if (filt === 'living')  members = members.filter(c => !dynIsDeceased(c));
+  if (filt === 'leaders') members = members.filter(c => ['leader'].includes(String(c.coreRole||'').toLowerCase()));
+  if (filt === 'heirs')   members = members.filter(c => ['heir'].includes(String(c.coreRole||'').toLowerCase()));
+
+  const head = data.members.find(c => String(c.coreRole||'').toLowerCase()==='leader') || data.members[0] || {};
+  const initial = (data.house.replace(/^(House|Clan)\s+/,'')[0] || '?').toUpperCase();
+
+  const rows = members.map(c => {
+    const img = c.portrait_image || '';
+    const isRuler = String(c.coreRole||'').toLowerCase()==='leader';
+    const isSel = c.name === gDyn.char;
+    const isDead = dynIsDeceased(c);
+    const tagCls = dynRoleTagClass(c);
+    return `<div class="dyn-member ${isSel?'is-selected':''} ${isDead?'is-deceased':''}"
+        onclick="gDynSelectChar('${escAttr(c.name)}')">
+      <div class="dyn-member-portrait ${isRuler?'is-ruler':''}"
+        style="${img?`background-image:url('${esc(img)}')`:''}">
+        ${img?'':esc((c.name||'?')[0])}
+      </div>
+      <div class="dyn-member-info">
+        <div class="dyn-member-name">${esc(c.name || 'Unknown')}</div>
+        <div class="dyn-member-meta">${esc(c.coreRole || c.role || '—')} · ${c.age!=null?'Age '+Math.floor(c.age):'?'}</div>
+      </div>
+      <div class="dyn-member-tag ${tagCls}"></div>
+    </div>`;
+  }).join('') || `<div class="dyn-codex-empty" style="padding:30px 20px">No members match this filter.</div>`;
+
+  return `<div class="dyn-roster">
+    <div class="dyn-roster-head">
+      <div class="dyn-roster-crest">${esc(initial)}</div>
+      <div class="dyn-roster-name">${esc(data.house)}</div>
+      <div class="dyn-roster-sub">${esc(data.faction || 'Unaligned')}</div>
+    </div>
+    <div class="dyn-roster-filters">
+      ${['all','living','leaders','heirs'].map(f =>
+        `<button class="dyn-chip ${filt===f?'is-active':''}" onclick="gDynLiveFilter('${f}')">${f}</button>`
+      ).join('')}
+    </div>
+    <div class="dyn-roster-list">${rows}</div>
+  </div>`;
+}
+
+/* — center: lore — */
+function renderDyn_lore(data, state) {
+  const head = data.members.find(c => String(c.coreRole||'').toLowerCase()==='leader') || data.members[0] || {};
+  const heirs = data.members.filter(c => String(c.coreRole||'').toLowerCase()==='heir').length;
+  const living = data.members.filter(c => !dynIsDeceased(c)).length;
+  const lore = HOUSE_LORE[data.house]?.description || gpHouseLore(data.house, data, state);
+  const motto = data.members.map(c => c.house_motto || c.family_motto).find(Boolean) || '';
+
+  return `<div class="dyn-lore-card">
+    <div class="dyn-lore-eyebrow">${esc(data.faction || 'Unaligned')} · noble line</div>
+    <div class="dyn-lore-name">${esc(data.house)}</div>
+    ${motto ? `<div class="dyn-lore-mott">"${esc(motto)}"</div>` : `<div class="dyn-lore-mott">a living bloodline of ${esc(data.faction || 'Aeloria')}</div>`}
+    ${dynLoreFlourishSVG()}
+    <div class="dyn-lore-text">${esc(lore)}</div>
+    <div class="dyn-lore-stats">
+      <div class="dyn-lore-stat"><b>${data.members.length}</b><span>Members</span></div>
+      <div class="dyn-lore-stat"><b>${living}</b><span>Living</span></div>
+      <div class="dyn-lore-stat"><b>${heirs}</b><span>Heirs</span></div>
+      <div class="dyn-lore-stat"><b>${data.marriages.length}</b><span>Marriages</span></div>
+      <div class="dyn-lore-stat"><b>${data.children.length}</b><span>Born to line</span></div>
+    </div>
+  </div>`;
+}
+
+/* — center: dynasty tree — */
+function dynRoman(n) {
+  const map = ['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  return map[n] || String(n);
+}
+
+function dynPCard(c, state, opts={}) {
+  const img = c.portrait_image || '';
+  const initial = esc((c.name || '?')[0]);
+  const isRuler = String(c.coreRole||'').toLowerCase()==='leader';
+  const isHeir  = String(c.coreRole||'').toLowerCase()==='heir';
+  const isDead  = dynIsDeceased(c);
+  const isSel   = gDyn.char === c.name;
+  const cls = [
+    'dyn-pcard',
+    isRuler ? 'is-ruler' : '',
+    isHeir  ? 'is-heir'  : '',
+    isDead  ? 'is-deceased' : '',
+    isSel   ? 'is-selected' : '',
+  ].filter(Boolean).join(' ');
+  const death = gpDeathDate(c, state);
+  return `<div class="${cls}" onclick="gDynSelectChar('${escAttr(c.name||'')}')">
+    <div class="dyn-pcard-portrait">
+      ${img ? `<img src="${esc(img)}" alt="${esc(c.name||'')}" onerror="this.style.display='none'">` : ''}
+      ${img ? '' : `<div class="ph">${initial}</div>`}
+      ${isRuler ? `<div class="dyn-pcard-crown">♛</div>` : ''}
+    </div>
+    <div class="dyn-pcard-body">
+      <div class="dyn-pcard-name">${esc(c.name || 'Unknown')}</div>
+      <div class="dyn-pcard-role">${esc(c.coreRole || c.role || 'House member')}</div>
+      <div class="dyn-pcard-dates">
+        <span>Born <b>${esc(gpBirthDate(c, state).replace(/^Day\s+/,'Day '))}</b></span>
+        ${death ? `<span>Died <b>${esc(death)}</b></span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDyn_tree(data, state) {
+  const members = data.members.slice();
+  const byName = {};
+  members.forEach(c => { if (c.name) byName[c.name] = c; });
+
+  const depthMemo = {};
+  const depthOf = (c, seen=new Set()) => {
+    if (!c?.name) return 0;
+    if (depthMemo[c.name] !== undefined) return depthMemo[c.name];
+    if (seen.has(c.name)) return 0;
+    seen.add(c.name);
+    const parents = Array.isArray(c.parents) ? c.parents.map(p => byName[p]).filter(Boolean) : [];
+    if (!parents.length) return depthMemo[c.name] = 0;
+    return depthMemo[c.name] = 1 + Math.max(...parents.map(p => depthOf(p, seen)));
+  };
+  const byDepth = {};
+  members.forEach(c => {
+    const d = Math.min(5, depthOf(c));
+    (byDepth[d] = byDepth[d] || []).push(c);
+  });
+
+  // Pre-pair generation 0 with marriages so you see the bond inline
+  const placedNames = new Set();
+  const generations = [];
+  const depths = Object.keys(byDepth).map(Number).sort((a,b)=>a-b);
+
+  depths.forEach(d => {
+    const peers = (byDepth[d] || []).slice().sort(gpCharacterSort);
+    const out = [];
+    peers.forEach(c => {
+      if (placedNames.has(c.name)) return;
+      const partner = data.marriages
+        .map(m => m.names.find(n => n !== c.name && byName[n] && (byName[n].house === data.house) ))
+        .filter(Boolean)
+        .map(n => byName[n])
+        .find(p => p && Math.min(5, depthOf(p)) === d && !placedNames.has(p.name));
+      if (partner && partner.name !== c.name) {
+        const m = data.marriages.find(mm => mm.names.includes(c.name) && mm.names.includes(partner.name));
+        out.push({ kind: 'pair', a: c, b: partner, marriage: m });
+        placedNames.add(c.name); placedNames.add(partner.name);
+      } else {
+        out.push({ kind: 'solo', c });
+        placedNames.add(c.name);
+      }
+    });
+    generations.push({ depth: d, items: out });
+  });
+
+  if (!members.length) {
+    return `
+      <div class="dyn-codex-head"><h3>Bloodline Tree</h3><span class="rule"></span><span class="count">0 generations</span></div>
+      <div class="dyn-tree-frame">${emptyState('No members are recorded for this line.')}</div>`;
+  }
+
+  const inner = generations.map((gen, idx) => {
+    const cards = gen.items.map(item => {
+      if (item.kind === 'pair') {
+        const since = item.marriage?.since;
+        const dayLine = since !== '' && since !== undefined && since !== null
+          ? `Wed · Day ${esc(since)}`
+          : `Wed · day unrecorded`;
+        return `<div class="dyn-pair">
+          ${dynPCard(item.a, state)}
+          <div class="dyn-pair-link">
+            <div class="dyn-pair-info">${esc(dayLine)}</div>
+          </div>
+          ${dynPCard(item.b, state)}
+        </div>`;
+      }
+      return dynPCard(item.c, state);
+    }).join('');
+    return `<div class="dyn-gen">
+      <div class="dyn-gen-label">
+        <span class="roman">${dynRoman(idx+1)}</span>
+        Generation ${esc(idx+1)} · ${gen.items.length} ${gen.items.length===1?'figure':'figures'}
+        <span class="rule"></span>
+      </div>
+      <div class="dyn-gen-row">${cards}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="dyn-codex-head">
+      <h3>Bloodline Tree</h3>
+      <span class="rule"></span>
+      <span class="count">${generations.length} ${generations.length===1?'generation':'generations'}</span>
+    </div>
+    <div class="dyn-tree-frame">
+      <div class="dyn-tree-scroll">${inner}</div>
+    </div>`;
+}
+
+/* — center: chronicle — */
+function renderDyn_chronicle(data, state) {
+  const events = [];
+  data.members.forEach(c => {
+    if (c.birth_tick !== undefined) events.push({ tick: num(c.birth_tick), kind: 'birth', text: `<b>${esc(c.name)}</b> is born to the line.` });
+    const dt = c.death_tick ?? c.died_tick;
+    if (dt !== undefined) events.push({ tick: num(dt), kind: 'death', text: `<b>${esc(c.name)}</b> passes from the line.` });
+    if (String(c.coreRole||'').toLowerCase()==='leader' && c.startDay !== undefined) {
+      events.push({ tick: num(c.startDay), kind: 'rise', text: `<b>${esc(c.name)}</b> takes the seat of the house.` });
+    }
+  });
+  data.marriages.forEach(m => {
+    if (m.since !== '' && m.since !== undefined && m.since !== null) {
+      events.push({ tick: num(m.since), kind: 'marriage', text: `<b>${esc(m.names.join(' &amp; '))}</b> are wed (${esc(m.type||'marriage')}).` });
+    }
+  });
+  events.sort((a,b) => b.tick - a.tick);
+
+  const items = events.slice(0, 14).map(e => `
+    <div class="dyn-chron-item ${e.kind}">
+      <div class="dyn-chron-day">Day ${esc(e.tick)}</div>
+      <div class="dyn-chron-text">${e.text}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="dyn-codex-head">
+      <h3>Chronicle of the Line</h3>
+      <span class="rule"></span>
+      <span class="count">${events.length} ${events.length===1?'entry':'entries'}</span>
+    </div>
+    <div class="dyn-chronicle">
+      ${events.length
+        ? `<div class="dyn-chron-list">${items}</div>`
+        : `<div class="dyn-chron-empty">No dated events have entered the chronicle for this line.</div>`}
+    </div>`;
+}
+
+/* — right rail: character codex pane — */
+function renderDyn_codexPane(data, state) {
+  const c = data.members.find(x => x.name === gDyn.char);
+  if (!c) {
+    return `<div class="dyn-codex-pane">
+      <div class="dyn-codex-empty">Choose a member from the roster to open their codex page.</div>
+    </div>`;
+  }
+
+  const img = c.portrait_image || '';
+  const isRuler = String(c.coreRole||'').toLowerCase()==='leader';
+  const isHeir  = String(c.coreRole||'').toLowerCase()==='heir';
+  const death = gpDeathDate(c, state);
+
+  // Family ties
+  const byName = {};
+  (state.house_characters || []).forEach(x => { if (x?.name) byName[x.name] = x; });
+  const parents = (Array.isArray(c.parents) ? c.parents : []).map(n => byName[n]).filter(Boolean);
+  const children = (state.house_characters || []).filter(x => Array.isArray(x.parents) && x.parents.includes(c.name));
+  const spouseNames = data.marriages
+    .filter(m => m.names.includes(c.name))
+    .flatMap(m => m.names.filter(n => n !== c.name));
+  const spouses = [...new Set(spouseNames)].map(n => byName[n]).filter(Boolean);
+
+  const tieMini = (p) => {
+    const pi = p.portrait_image || '';
+    return `<div class="dyn-cp-mini" onclick="gDynSelectChar('${escAttr(p.name)}')">
+      <div class="dyn-cp-mini-portrait" style="${pi?`background-image:url('${esc(pi)}')`:''}">${pi?'':esc((p.name||'?')[0])}</div>
+      <div class="dyn-cp-mini-name">${esc(p.name)}</div>
+    </div>`;
+  };
+
+  // Stat radar (5-point)
+  const STAT = [
+    { key: 'influenceScore', label: 'Inf', color: '#c8a040' },
+    { key: 'morality',       label: 'Mor', color: '#3a9a52' },
+    { key: 'ambition',       label: 'Amb', color: '#9e2416' },
+    { key: 'loyalty',        label: 'Loy', color: '#486a9a' },
+    { key: 'intelligence',   label: 'Int', color: '#6a4a8a' },
+  ];
+  const cx = 75, cy = 75, R = 60;
+  const angle = i => -Math.PI/2 + i * (2*Math.PI/STAT.length);
+  const ring = STAT.map((_,i) => {
+    const a = angle(i);
+    return `${cx + R*Math.cos(a)},${cy + R*Math.sin(a)}`;
+  }).join(' ');
+  const ringMid = STAT.map((_,i) => {
+    const a = angle(i);
+    return `${cx + (R*0.6)*Math.cos(a)},${cy + (R*0.6)*Math.sin(a)}`;
+  }).join(' ');
+  const ringInner = STAT.map((_,i) => {
+    const a = angle(i);
+    return `${cx + (R*0.3)*Math.cos(a)},${cy + (R*0.3)*Math.sin(a)}`;
+  }).join(' ');
+  const fill = STAT.map((s,i) => {
+    const a = angle(i);
+    const v = num(c[s.key]) / 100;
+    return `${cx + (R*v)*Math.cos(a)},${cy + (R*v)*Math.sin(a)}`;
+  }).join(' ');
+  const spokes = STAT.map((_,i) => {
+    const a = angle(i);
+    return `<line x1="${cx}" y1="${cy}" x2="${cx + R*Math.cos(a)}" y2="${cy + R*Math.sin(a)}" stroke="rgba(168,140,80,0.18)" stroke-width="0.6"/>`;
+  }).join('');
+
+  const radar = `
+    <svg viewBox="0 0 150 150" width="150" height="150">
+      <polygon points="${ring}" fill="none" stroke="rgba(168,140,80,0.35)" stroke-width="0.7"/>
+      <polygon points="${ringMid}" fill="none" stroke="rgba(168,140,80,0.20)" stroke-width="0.5"/>
+      <polygon points="${ringInner}" fill="none" stroke="rgba(168,140,80,0.15)" stroke-width="0.5"/>
+      ${spokes}
+      <polygon points="${fill}" fill="rgba(220,184,108,0.20)" stroke="rgba(220,184,108,0.85)" stroke-width="1"/>
+      ${STAT.map((s,i) => {
+        const a = angle(i);
+        const x = cx + R*Math.cos(a), y = cy + R*Math.sin(a);
+        const lx = cx + (R+10)*Math.cos(a), ly = cy + (R+10)*Math.sin(a);
+        return `<circle cx="${x}" cy="${y}" r="2.5" fill="${s.color}"/>
+          <text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle"
+            font-family="Cinzel" font-size="8" letter-spacing="2" fill="rgba(220,184,108,0.7)">${s.label}</text>`;
+      }).join('')}
+    </svg>`;
+
+  const legend = STAT.map(s => `
+    <div class="dyn-cp-radar-legend-row">
+      <span>${esc(s.label === 'Inf' ? 'Influence' : s.label === 'Mor' ? 'Morality' : s.label === 'Amb' ? 'Ambition' : s.label === 'Loy' ? 'Loyalty' : 'Intelligence')}</span>
+      <b>${num(c[s.key])}</b>
+    </div>`).join('');
+
+  // location string
+  let locHtml = '';
+  if (c.location) {
+    if (c.destination) {
+      locHtml = `<div class="dyn-cp-loc travel">⟶ ${esc(c.location)} → ${esc(c.destination)}${c.ticks_to_arrive>0?' · '+c.ticks_to_arrive+' ticks':''}</div>`;
+    } else {
+      locHtml = `<div class="dyn-cp-loc">◈ ${esc(c.location)}</div>`;
+    }
+  }
+
+  const tagsHtml = [
+    isRuler ? `<span class="dyn-cp-tag gold">♛ Sovereign</span>` : '',
+    isHeir  ? `<span class="dyn-cp-tag gold">⌬ Heir</span>` : '',
+    death ? `<span class="dyn-cp-tag">† ${esc(death)}</span>` : '',
+    c.bias ? `<span class="dyn-cp-tag">${esc(c.bias)}</span>` : '',
+    c.race ? `<span class="dyn-cp-tag">${esc(c.race)}</span>` : '',
+    c.age != null ? `<span class="dyn-cp-tag">Age ${Math.floor(c.age)}</span>` : '',
+  ].filter(Boolean).join('');
+
+  return `<div class="dyn-codex-pane">
+    <div class="dyn-cp-portrait">
+      ${img ? `<img src="${esc(img)}" alt="${esc(c.name)}">` : `<div class="ph">${esc((c.name||'?')[0])}</div>`}
+      ${dynRaceArchSVG()}
+    </div>
+    <div class="dyn-cp-body">
+      <div class="dyn-cp-eyebrow">${esc(data.house)} · ${esc(data.faction || 'unaligned')}</div>
+      <div class="dyn-cp-name">${esc(c.name || 'Unknown')}</div>
+      <div class="dyn-cp-title">${esc(c.coreRole || c.role || 'House member')}</div>
+      <div class="dyn-cp-tags">${tagsHtml}</div>
+      ${locHtml}
+
+      <div class="dyn-cp-section">
+        <div class="dyn-cp-sec-label">Character Reading</div>
+        <div class="dyn-cp-radar">
+          ${radar}
+          <div class="dyn-cp-radar-legend">${legend}</div>
+        </div>
+      </div>
+
+      ${c.currentGoal ? `
+        <div class="dyn-cp-section">
+          <div class="dyn-cp-sec-label">Current Pursuit</div>
+          <div class="dyn-cp-quote">${esc(clamp(c.currentGoal, 240))}</div>
+        </div>` : ''}
+
+      ${(c.recentActions||[]).length ? `
+        <div class="dyn-cp-section">
+          <div class="dyn-cp-sec-label">Recent Actions</div>
+          <div class="dyn-cp-actions">
+            ${(c.recentActions||[]).slice(0,4).map(a => `<div class="dyn-cp-action">${esc(clamp(a,140))}</div>`).join('')}
+          </div>
+        </div>` : ''}
+
+      <div class="dyn-cp-section">
+        <div class="dyn-cp-sec-label">Family Ties</div>
+        <div class="dyn-cp-ties">
+          <div class="dyn-cp-tie-row">
+            <span class="dyn-cp-tie-label">Parents</span>
+            ${parents.length ? parents.map(tieMini).join('') : `<span style="color:rgba(220,184,108,0.4);font-style:italic;font-family:'EB Garamond',serif;font-size:12px">unrecorded</span>`}
+          </div>
+          <div class="dyn-cp-tie-row">
+            <span class="dyn-cp-tie-label">Spouse</span>
+            ${spouses.length ? spouses.map(tieMini).join('') : `<span style="color:rgba(220,184,108,0.4);font-style:italic;font-family:'EB Garamond',serif;font-size:12px">unwed</span>`}
+          </div>
+          <div class="dyn-cp-tie-row">
+            <span class="dyn-cp-tie-label">Children</span>
+            ${children.length ? children.map(tieMini).join('') : `<span style="color:rgba(220,184,108,0.4);font-style:italic;font-family:'EB Garamond',serif;font-size:12px">none of record</span>`}
+          </div>
+        </div>
+      </div>
+
+      <div class="dyn-cp-section">
+        <div class="dyn-cp-sec-label">Birth · Marriage</div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.10em;color:rgba(220,184,108,0.78)">
+          Born · <b style="color:var(--dyn-gold);font-weight:600">${esc(gpBirthDate(c, state))}</b><br>
+          Married · <b style="color:var(--dyn-gold);font-weight:600">${esc(gpMarriageDateFor(c, state))}</b>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildMotherboard(state, pending) {
+  const events = (state.active_events||[]);
+  const primary = state.primary_event || {};
+  const subsystems = [
+    ['Military', (state.military_faction_decisions||[]).length],
+    ['Economy', (state.economic_pressure_decisions||[]).length],
+    ['Diplomacy', (state.diplomatic_faction_decisions||[]).length],
+    ['Intrigue', (state.intrigue_decisions||[]).length],
+    ['Treaties', (state.treaties||[]).length],
+    ['Tributary', (state.tributary_pacts||[]).length],
+    ['Lifecycle', Object.values(state.faction_lifecycle_report||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0)],
+    ['Vacant Thrones', (state.vacant_thrones||[]).filter(t=>['vacant','contested'].includes(t.status||'vacant')).length],
+    ['Extinct Factions', (state.collapsed_factions||[]).length],
+    ['Belief', (state.belief_currents||[]).length + (state.religious_factions||[]).length],
+    ['Characters', (state.house_characters||[]).length],
+    ['Leadership', (state.leadership_state||[]).length],
+    ['Pending Inputs', (pending||[]).length]
+  ];
+  const subsystemCards = subsystems.map(([name, count]) => `
+    <div class="gp-ov-card">
+      <div class="gp-ov-label">${esc(name)}</div>
+      <div class="gp-ov-val">${esc(count)}</div>
+    </div>`).join('');
+
+  const eventRows = [primary, ...events].filter(e => e && (e.name || e.summary)).slice(0, 14).map(e => `
+    <div class="gp-event-card">
+      <div class="gp-event-sev">
+        <div class="gp-event-sev-num">${esc(e.severity ?? 0)}</div>
+        <div class="gp-event-sev-label">SEV</div>
+      </div>
+      <div class="gp-event-body">
+        <div class="gp-event-name">${esc(e.name || 'Unnamed Event')}</div>
+        <p class="gp-event-summary">${esc(clamp(e.summary || '', 260))}</p>
+        <p class="gp-event-consequences" style="font-style:normal;color:var(--text-sec)">Brief: ${esc(gpEventInsight(e, state))}</p>
+      </div>
+    </div>`).join('');
+
+  const keyRows = Object.entries(state||{}).sort((a,b)=>a[0].localeCompare(b[0])).slice(0, 180).map(([k,v]) => {
+    const t = Array.isArray(v)?'array':(v===null?'null':typeof v);
+    const s = Array.isArray(v)?`${v.length} items`:(v&&typeof v==='object'?`${Object.keys(v).length} keys`:String(v));
+    return `<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${esc(k)}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${esc(t)}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${esc(clamp(s,110))}</td></tr>`;
+  }).join('');
+
+  document.getElementById('gp-panel-motherboard').innerHTML = `
+    ${gpSection('Motherboard Bus', `Day ${esc(state.tick ?? '—')}`, `<div class="gp-ov-grid">${subsystemCards}</div>`)}
+    ${gpSection('Faction Lifecycle Bus', `Tick ${esc(state.faction_lifecycle_report?.tick ?? state.tick ?? '—')}`, `<div class="gp-alerts">${gpLifecycleRows(state)}</div>`)}
+    ${gpSection('Live Event Bus', `${events.length + (primary.name?1:0)} feeds`, eventRows || emptyState('No active event feeds.'))}
+    ${gpSection('State Sheet (Core 180 Keys)', null, `
+      <div style="border:1px solid var(--border);background:var(--surface);max-height:62vh;overflow:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead style="position:sticky;top:0;background:var(--surface2)">
+            <tr><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border)">Key</th><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border)">Type</th><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border)">Size/Value</th></tr>
+          </thead>
+          <tbody>${keyRows}</tbody>
+        </table>
+      </div>
+    `)}
+  `;
+}
+
+/* ── DYNASTY LORE LIBRARY ─────────────────────────────────────
+   Race & house lore consumed by the Dynasties tab. */
 const RACE_LORE = {
   "Human": {
     homeland: "Twin Cities, Tidefall, Dreadwind Islands",
@@ -2235,156 +5873,6 @@ const HOUSE_LORE = {
 function charSlug(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
-
-function renderCharacters() {
-  const state    = gCharState;
-  const allChars = (state.house_characters||[]).slice().sort((a,b)=>num(b.influenceScore)-num(a.influenceScore));
-  const panel    = document.getElementById('gp-panel-characters');
-
-  const RACE_ORDER = ['Human','Dwarf','High Elf','Dark Elf','Orc','Goblin'];
-  const allRaces   = [...new Set(allChars.map(c=>c.race||'').filter(Boolean))];
-  const races      = [...RACE_ORDER.filter(r=>allRaces.includes(r)), ...allRaces.filter(r=>!RACE_ORDER.includes(r))];
-
-  const houseMap = {};
-  allChars.forEach(c => {
-    const h = c.house||''; if (!h) return;
-    if (!houseMap[h]) houseMap[h] = { faction:c.faction||'', race:c.race||'', count:0 };
-    houseMap[h].count++;
-  });
-
-  // breadcrumb
-  const crumbSep = `<span class="gp-crumb-sep">›</span>`;
-  let breadcrumb = `<button class="gp-crumb-btn" data-crumb="">Races</button>`;
-  if (gCharFilter.race)  breadcrumb += crumbSep + `<button class="gp-crumb-btn" data-crumb="${esc(gCharFilter.race)}">${esc(gCharFilter.race)}</button>`;
-  if (gCharFilter.house) breadcrumb += crumbSep + `<span class="gp-crumb-current">${esc(gCharFilter.house)}</span>`;
-
-  // ── Races view ─────────────────────────────────────────────
-  if (!gCharFilter.race) {
-    panel.innerHTML = `<div class="gp-section"><div class="gp-container">
-      <div class="gp-crumb-bar" style="margin-bottom:24px">${breadcrumb}</div>
-      <div class="gp-coa-race-grid">
-        ${races.map(race => `
-          <div class="gp-coa-card" data-race="${esc(race)}">
-            <img src="/static/illustrations/races/${charSlug(race)}.png" loading="lazy"
-              onerror="this.style.display='none'"
-              style="width:100%;height:300px;object-fit:cover;object-position:center;border-radius:3px 3px 0 0;display:block;opacity:0.9">
-            <div class="gp-coa-body">
-              <div class="gp-coa-name">${esc(race)}</div>
-              <div class="gp-coa-sub">${allChars.filter(c=>c.race===race).length} characters</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div></div>`;
-    return;
-  }
-
-  // ── Houses view ────────────────────────────────────────────
-  if (!gCharFilter.house) {
-    const visible = Object.keys(houseMap).sort().filter(h => houseMap[h].race === gCharFilter.race);
-    const raceLore = RACE_LORE[gCharFilter.race] || {};
-    const loreBlock = raceLore.description ? `
-      <div class="gp-lore-block" style="margin-bottom:36px">
-        <div class="gp-lore-homeland">${esc(raceLore.homeland||'')}</div>
-        <p class="gp-lore-text">${esc(raceLore.description)}</p>
-      </div>` : '';
-    panel.innerHTML = `<div class="gp-section"><div class="gp-container">
-      <div class="gp-crumb-bar" style="margin-bottom:24px">${breadcrumb}</div>
-      ${loreBlock}
-      <div class="gp-section-label" style="margin-bottom:14px">Houses &amp; Clans</div>
-      <div class="gp-coa-house-grid">
-        ${visible.length ? visible.map(house => `
-          <div class="gp-coa-card" data-house="${esc(house)}">
-            <img src="/static/illustrations/houses/${charSlug(house)}.png" loading="lazy"
-              onerror="this.style.display='none'"
-              style="width:100%;height:180px;object-fit:cover;object-position:center;border-radius:3px 3px 0 0;display:block;opacity:0.9">
-            <div class="gp-coa-body">
-              <div class="gp-coa-name">${esc(house)}</div>
-              <div class="gp-coa-sub">${esc(houseMap[house].faction)} · ${houseMap[house].count} members</div>
-            </div>
-          </div>`).join('') : emptyState('No houses recorded for this race.')}
-      </div>
-    </div></div>`;
-    return;
-  }
-
-  // ── Characters view ────────────────────────────────────────
-  const houseLore = HOUSE_LORE[gCharFilter.house] || {};
-  const houseLoreBlock = houseLore.description ? `
-    <div class="gp-lore-block" style="margin-bottom:36px">
-      <div class="gp-lore-homeland">${esc(houseLore.faction||'')}</div>
-      <p class="gp-lore-text">${esc(houseLore.description)}</p>
-    </div>` : '';
-  const filtered = allChars.filter(c => c.house === gCharFilter.house);
-  const STAT_COLORS = { influenceScore:'#c8a040', morality:'#3a9a52', ambition:'#9e2416', loyalty:'#486a9a', intelligence:'#6a4a8a' };
-  panel.innerHTML = `<div class="gp-section"><div class="gp-container">
-    <div class="gp-crumb-bar" style="margin-bottom:24px">${breadcrumb}</div>
-    ${houseLoreBlock}
-    <div class="gp-section-label" style="margin-bottom:14px">Members</div>
-    <div class="gp-char-grid">
-      ${filtered.length ? filtered.map(c => `
-        <div class="gp-char-card">
-          <div class="gp-char-rank">#${allChars.indexOf(c)+1}</div>
-          <div class="gp-char-head">
-            <div>
-              <div class="gp-char-name">${esc(c.name)}</div>
-              <div class="gp-char-sub">${esc(c.house||c.faction||'—')} · ${esc(c.coreRole||c.role||'Unknown')}</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-              ${c.bias?`<span class="gp-bias-${esc(c.bias.split(' ')[0])}" style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.14em;text-transform:uppercase">${esc(c.bias)}</span>`:''}
-              ${c.race?`<span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">${esc(c.race)}</span>`:''}
-              ${c.age!=null?`<span style="font-family:'Cinzel',serif;font-size:7px;color:var(--text-muted)">Age ${Math.floor(c.age)}</span>`:''}
-            </div>
-          </div>
-          ${c.location?`<div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;color:${c.destination?'#c87840':'var(--text-muted)'};margin-bottom:5px">
-            ${c.destination?`⟶ ${esc(c.location)} → ${esc(c.destination)}${c.ticks_to_arrive>0?' ('+c.ticks_to_arrive+' ticks)':''}`:`◈ ${esc(c.location)}`}
-          </div>`:''}
-          ${c.currentGoal?`<div class="gp-char-goal">${esc(clamp(c.currentGoal,140))}</div>`:''}
-          ${c.status&&c.status!==c.currentGoal?`<div style="font-family:'Crimson Text',serif;font-size:12px;font-style:italic;color:var(--text-muted);margin-bottom:6px">${esc(clamp(c.status,100))}</div>`:''}
-          <div class="gp-char-stats">
-            ${['influenceScore','morality','ambition','loyalty','intelligence'].map(k=>`
-              <div class="gp-char-stat">
-                <div class="gp-char-stat-val">${num(c[k])}</div>
-                <div class="gp-char-stat-bar"><div class="gp-char-stat-fill" style="width:${pct(c[k])}%;background:${STAT_COLORS[k]}"></div></div>
-                <div class="gp-char-stat-lbl">${k==='influenceScore'?'Inf':k==='morality'?'Mor':k==='ambition'?'Amb':k==='loyalty'?'Loy':'Int'}</div>
-              </div>`).join('')}
-          </div>
-          ${(c.recentActions||[]).length?`<div style="margin-top:8px;font-family:'Crimson Text',serif;font-size:12px;font-style:italic;color:var(--text-muted)">↳ ${(c.recentActions||[]).slice(0,2).map(esc).join(' · ')}</div>`:''}
-        </div>`).join('') : emptyState('No characters found.')}
-    </div>
-  </div></div>`;
-}
-
-function buildCharacters(state) {
-  gCharState = state;
-  renderCharacters();
-}
-window.buildCharacters = buildCharacters;
-
-// Single delegated listener on the panel — survives innerHTML rewrites
-document.addEventListener('click', function(e) {
-  const panel = document.getElementById('gp-panel-characters');
-  if (!panel || !panel.contains(e.target)) return;
-
-  const card = e.target.closest('[data-race]');
-  if (card) {
-    gCharFilter.race  = card.dataset.race;
-    gCharFilter.house = '';
-    renderCharacters();
-    return;
-  }
-  const hcard = e.target.closest('[data-house]');
-  if (hcard) {
-    gCharFilter.house = hcard.dataset.house;
-    renderCharacters();
-    return;
-  }
-  const crumb = e.target.closest('[data-crumb]');
-  if (crumb) {
-    gCharFilter.race  = crumb.dataset.crumb;
-    gCharFilter.house = '';
-    renderCharacters();
-  }
-});
 
 /* ── DAILY ACTION LOG ─────────────────────────────────────── */
 function buildActions(state) {
@@ -2817,12 +6305,14 @@ async function gpLoad() {
 
   buildTabs(state, pending);
   buildStats(state, pending);
+  buildMotherboard(state, pending);
   buildOverview(state, pending);
   buildRulers(state);
   buildEvents(state);
+  buildIntelPanel(state);
+  buildDynasties(state);
   buildFactions(state);
   buildPopulation(state);
-  buildCharacters(state);
   buildReligion(state);
   buildKnowledge(state);
   buildActions(state);

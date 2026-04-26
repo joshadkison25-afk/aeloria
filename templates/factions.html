@@ -262,6 +262,36 @@
     .profile-layout { grid-template-columns: 1fr; }
     .profile-sidebar { position: static; }
   }
+
+  .faction-world-pulse {
+    max-width: 1200px;
+    margin: -20px auto 36px;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 10px;
+  }
+  .faction-pulse-cell {
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(201, 169, 110, 0.07), rgba(10, 10, 12, 0.96));
+    box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.08);
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .faction-pulse-val {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .faction-pulse-lbl {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
 </style>
 {% endblock %}
 
@@ -269,13 +299,26 @@
 
 <!-- GRID VIEW -->
 <div id="grid-view" class="view">
-  <div class="page-hero">
-    <div class="container">
-      <p class="section-label">Powers of Aeloria</p>
-      <h1 class="section-title" style="font-size:48px">THE FACTIONS</h1>
-      <p class="section-subtitle">Fourteen factions. Fourteen agendas. None of them know the full truth.</p>
+  <header class="cine-hero cine-hero--epic" data-bg="/static/illustrations/ui/heroes/factions.png">
+    <div class="cine-hero-bg"></div>
+    <div class="cine-hero-veil"></div>
+    <div class="cine-hero-rays" aria-hidden="true"></div>
+    <div class="cine-hero-fog"  aria-hidden="true"></div>
+    <div class="cine-hero-grain" aria-hidden="true"></div>
+    <div class="cine-hero-vignette" aria-hidden="true"></div>
+    <div class="cine-hero-inner">
+      <p class="cine-kicker">Powers of Aeloria</p>
+      <h1 class="cine-title">The Factions</h1>
+      <div class="cine-rule">
+        <span class="cine-rule-diamond"></span>
+        Fourteen banners hold the realm
+        <span class="cine-rule-diamond"></span>
+      </div>
+      <p class="cine-flourish">Fourteen factions. Fourteen agendas. None of them know the full truth.</p>
     </div>
-  </div>
+  </header>
+
+  <div class="faction-world-pulse" id="faction-pulse" aria-label="Living world snapshot"></div>
 
   <section class="section">
     <div class="container">
@@ -306,157 +349,559 @@
 
 {% block scripts %}
 <script>
-const FACTION_DATA = {
-  "Shadow Court": {
-    type:"Kingdom", leader:"Queen Lythara the Veiled",
-    tagline:"Ancient, sovereign, and unknowable — the Dread Elves of Faerwood do not rule by fear so much as by the certainty that resistance is futile.",
-    overview:["The Shadow Court is the oldest continuous power in Aeloria, predating the Fractured Age by three millennia. From the depths of Faerwood, the Dread Elves have watched empires rise and collapse like tides, outlasting them all through patience, secrecy, and a willingness to do what other factions cannot bring themselves to do.","Their society is organized into clans — Velorn, Nythariel, and Arkenor being the three great houses — each with their own territories within the dark forest and their own interpretation of the Queen's will. Clan politics are subtle and lethal.","To outsiders, the Shadow Court presents a single face: Queen Lythara's, veiled and unreadable. Behind that veil, the clans maneuver constantly, each seeking to position themselves closest to the throne when the inevitable succession comes."],
-    history:["The Dread Elves did not always dwell in Faerwood. Ancient texts speak of a great exile, a severing from the elder elven courts that drove Lythara's ancestors into the dark forest. What they were exiled for is not recorded anywhere outside Faerwood.","During the Fractured Age, the Shadow Court remained neutral through the first two civil wars, emerging each time as power brokers rather than combatants. Lythara's grandmother, Queen Seraveth, established the doctrine still followed today: Faerwood does not bleed for others' ambitions, but it always collects the debt."],
-    characters:[{name:"Queen Lythara the Veiled",title:"Queen of the Shadow Court",status:"Alive",desc:"Has ruled for four centuries. Her face has not been seen in living memory."},{name:"Thalor",title:"Blade Warden of Faerwood",status:"Alive",desc:"A cursed warrior bound to Faerwood's eastern border. His loyalty is to the forest, not the throne."}],
-    relationships:[{faction:"Glenhaven Elves",type:"war",desc:"Wayfarer war-bands have entered Faerwood's eastern fringe. Open war within weeks."},{faction:"Twin Cities",type:"complex",desc:"The Shadow Court funds certain Twin Cities merchants quietly. Political influence without visibility."},{faction:"Dreadwind Islands",type:"complex",desc:"Clan Velorn sent a figure by ship to an unknown destination. The pirates may be involved."}],
-    locations:[{name:"The Faerwood",desc:"A vast dark forest, nearly impenetrable to outsiders."},{name:"The Black Glades",desc:"The innermost region of Faerwood, where Lythara's court holds session."},{name:"The Whispering Paths",desc:"Labyrinthine trails that appear and vanish — only Dread Elves may navigate them reliably."}]
-  },
-  "Lostfeld Dwarves": {
-    type:"Kingdom", leader:"Thane Ulric Ironmaul",
-    tagline:"Built into the bones of the mountain, Lostfeld endures — though what stirs in the deep stone may test even dwarven endurance.",
-    overview:["Lostfeld is the greatest dwarven stronghold in the known world, carved into the northern mountains over eight hundred years. Its halls run miles deep, its forges have burned continuously for four centuries.","Dwarven society in Lostfeld is stratified by craft and clan, with the Thane holding absolute authority in times of crisis. Ironmaul has declared a crisis — his authority is accordingly unchecked. The reformer movement challenges this reading of the law.","The schism between Ironmaul's traditionalists and the reformers is the sharpest internal conflict Lostfeld has faced since the founding. At stake is the question of what Lostfeld owes to those sealed in its deep districts — and what is sealed beneath them."],
-    history:["Lostfeld was founded by Brammir Stonehelm, whose legend holds he led three hundred dwarves into unmapped mountains and returned three years later with a city.","The sealed districts were created during the Second Collapse, when something in the deep mines produced effects requiring permanent quarantine. The official history says it was a gas seep. The reformers say otherwise."],
-    characters:[{name:"Thane Ulric Ironmaul",title:"Thane of Lostfeld",status:"Alive",desc:"Powerful, pragmatic, and increasingly uncertain. His hesitation on the collapse order has revealed a limit no one expected."},{name:"Kessa Stonebraid",title:"Reformer Leader",status:"Alive",desc:"Trapped in the threshold antechamber. Reportedly in communication with something in the deep stone, and listening willingly."},{name:"Brammir Stonehelm",title:"Founder of Lostfeld",status:"Dead",desc:"Historical. Founded Lostfeld. His legend underpins every claim to authority Ironmaul makes."}],
-    relationships:[{faction:"Twin Cities",type:"alliance",desc:"Trade agreements provide Lostfeld with surface goods. Currently strained by Lostfeld's instability."},{faction:"Gloomspire Assassin Gnomes",type:"neutral",desc:"Lostfeld tolerates the gnome passage monopoly because the alternative is isolation."}],
-    locations:[{name:"Lostfeld",desc:"The great mountain city — miles of carved halls, forges, and sealed districts."},{name:"The Forge of Brammir",desc:"The founding forge, burning since the city's first year."},{name:"The Sealed Districts",desc:"Quarantined levels deep in the mountain. Families have lived and died within them for generations."}]
-  },
-  "Glenhaven Elves": {
-    type:"Kingdom", leader:"Sovereign Elowen Silverleaf",
-    tagline:"Patient and ancient, the Glenhaven Elves have always chosen peace — until now.",
-    overview:["Glenhaven is the elder elven court of the south, a civilization built in the canopy of vast silver-leafed forests. Where the Shadow Court embodies elven darkness, Glenhaven represents their capacity for grace — long memory, deep craft, and a philosophy of stewardship over conquest.","The Wayfarers are Glenhaven's most distinctive institution: warrior-monks who serve as scouts, diplomats, and when necessary, soldiers. Their discipline is total. Elowen has deployed three war-bands into Faerwood's eastern fringe.","Glenhaven's War-Readers have determined that the Shadow Court's raid was preordained in shadow-script. For Elowen, this is not a political judgment but a cosmological one."],
-    history:["Glenhaven was established by Elenion Darkleaf following the Sundering that separated the elder elves from their northern kin. Elenion's decision to settle the southern forests rather than attempt reclamation defined Glenhaven's character: permanence over ambition.","Glenhaven's last open war was the War with the Wildwood. The victory established a generation of relative peace. Elowen has governed since before that war ended."],
-    characters:[{name:"Sovereign Elowen Silverleaf",title:"Sovereign of Glenhaven",status:"Alive",desc:"Has not slept in six days. Reading War-Reader scrolls each dawn. Preparing for something after the war."},{name:"Elenion Darkleaf",title:"First Sovereign of Glenhaven",status:"Dead",desc:"Historical founder. Chose the southern forests. Her decisions still govern Glenhaven's philosophy."}],
-    relationships:[{faction:"Shadow Court",type:"war",desc:"War-bands deployed into Faerwood. The War-Readers have declared it preordained."},{faction:"Twin Cities",type:"alliance",desc:"Long-standing mutual defense agreement."},{faction:"Lostfeld Dwarves",type:"alliance",desc:"Allies since the War with the Wildwood. Warm by elven standards — formal and reliable."}],
-    locations:[{name:"Glenhaven",desc:"The silver-leafed canopy city, built among enormous elder trees."},{name:"The Sylvan Court",desc:"Elowen's seat of governance — an open-air hall in the highest canopy."},{name:"The Silverflow River",desc:"Defines Glenhaven's eastern border and feeds the silver-leafed forest."}]
-  },
-  "Twin Cities": {
-    type:"Kingdom", leader:"King Roderic Thorne II",
-    tagline:"Two cities, one throne, three heirs, and a court that has mistaken performance for policy.",
-    overview:["Eresteron and Eldoria sit beside each other at Aeloria's center — two cities grown so large they have merged at their edges while insisting they remain distinct. Eresteron is the older city, home to the throne. Eldoria is the commercial city, home to the merchants, the port, and increasingly, the real power.","King Roderic Thorne II has reigned for thirty years, maintaining the balance between old families and new money through a combination of genuine skill and deliberate vagueness about his intentions.","The succession question has consumed the court. Roderic has two known sons: Aldric, pragmatic and ambitious; and Caeris, who has now vanished. That Roderic has done nothing publicly in response to either suggests either paralysis or a more sophisticated game."],
-    history:["The Twin Cities began as a single settlement split by a trade dispute in the Fourth Century. The Thorne dynasty unified them under a single crown two hundred years ago — politically, if not practically.","The Tidefall Compact represents the first formal power-sharing agreement between the Twin Cities and an outside faction in three generations. It was signed by Aldric rather than the King."],
-    characters:[{name:"King Roderic Thorne II",title:"King of the Twin Cities",status:"Alive",desc:"Performing frailty or genuinely frail. No one is certain which."},{name:"Prince Aldric Thorne",title:"Crown Prince",status:"Alive",desc:"Signed the Tidefall compact without royal authorization. Now co-governs Eldoria."},{name:"Prince Caeris Thorne",title:"Second Prince",status:"Unknown",desc:"Missing. Reportedly went north with a gnome guide, carrying a letter bearing the King's true signet."}],
-    relationships:[{faction:"Tidefall",type:"complex",desc:"Aldric's compact has created a formal alliance that bypasses the throne."},{faction:"Glenhaven Elves",type:"alliance",desc:"Mutual defense. Reliable in practice."},{faction:"Lostfeld Dwarves",type:"alliance",desc:"Primary trade partner. Lostfeld's instability is causing concern in Eldoria's merchant class."}],
-    locations:[{name:"Eresteron",desc:"The elder city — seat of the throne, home to the nobility."},{name:"Eldoria",desc:"The commercial city — ports, merchants, and the real economic engine."}]
-  },
-  "Tidefall": {
-    type:"Faction", leader:"Admiral Electorate",
-    tagline:"An elected war council that governs by maritime law — and now wants the rest of Aeloria to join them.",
-    overview:["Tidefall is built on clifftops at Aeloria's southwestern coast, its towers overlooking a natural harbor that handles more tonnage than any other port in the known world. Its government — the Admiral Electorate — is a council of seven, elected from captains and merchant houses every seven years.","Tidefall's ambitions have always been larger than its territory. The compact with Prince Aldric is the latest expression of a strategy building for two decades: accumulate legal cover, cultivate internal allies in rival states, and wait for the right moment.","The Admiral Electorate's critics say Tidefall is a merchant empire dressed in democratic clothing. Its supporters say it is the only government in Aeloria that has never started a war it didn't intend to win."],
-    history:["Tidefall was established by survivors of a maritime disaster two centuries ago — a fleet that lost its home port to the sea and built a new one on the nearest cliffs.","The seven-year election cycle has produced remarkably stable governance. The current Admiral has won three consecutive elections. Each time, the opposition has become smaller."],
-    characters:[{name:"Admiral Electorate",title:"Head of the Tidefall Council",status:"Alive",desc:"Known by title rather than name. The compact with Aldric is their greatest political achievement."}],
-    relationships:[{faction:"Twin Cities",type:"complex",desc:"The compact with Aldric creates formal power-sharing. Ships now sit in Eldoria's harbor with legal cover."},{faction:"Dreadwind Islands",type:"rivalry",desc:"Both compete for maritime supremacy. The pirates raid Tidefall-adjacent shipping lanes."}],
-    locations:[{name:"Tidefall",desc:"The clifftop city — towers, harbor, and the Admiralty Hall."}]
-  },
-  "Dreadwind Islands": {
-    type:"Faction", leader:"Pirate King Rowen",
-    tagline:"A scattered archipelago of exiles and outcasts, unified by a man who claims a throne that may or may not exist.",
-    overview:["The Dreadwind Islands are four rugged islands off Aeloria's western coast. Their inhabitants — a mix of political exiles, escaped sailors, and opportunists — have developed a culture that prizes pragmatism, loyalty to crew over flag, and a deep suspicion of authority.","Pirate King Rowen arrived seven years ago and within three unified the four islands through naval victories, theatrical diplomacy, and a genealogical document claiming descent from the last king of a sunken coastal kingdom. Whether the document is genuine is debated. Whether it matters is not."],
-    history:["The Dreadwind Islands have never been formally governed. Rowen is the first to hold all four.","The claim to a sunken kingdom connects the Islands to a broader legend about coastal settlements that disappeared beneath the sea — the same event that stranded the ancestors of Tidefall on their clifftops."],
-    characters:[{name:"Pirate King Rowen",title:"Pirate King of the Dreadwind Islands",status:"Alive",desc:"Claims a throne backed by questionable documents and genuine naval power."}],
-    relationships:[{faction:"Tidefall",type:"rivalry",desc:"Maritime competitors. Rowen and the Admiral have exchanged formal insults on three occasions."},{faction:"Shadow Court",type:"complex",desc:"A Clan Velorn figure was seen boarding a ship at a Faerwood coastal inlet. Destination unknown."}],
-    locations:[{name:"Dreadwind Isles",desc:"Four rugged, storm-battered islands off the western coast."}]
-  },
-  "Dur Khadur": {
-    type:"Faction", leader:"The Dark Council",
-    tagline:"Mercenaries and forbidden scholars who align with power rather than principle.",
-    overview:["Dur Khadur sits in the far east, a city built on arid terrain most factions consider uninhabitable. It is not a kingdom, not quite a state — it is a city of contractors, governed by a rotating council of those whose contracts are currently largest.","The Dark Council sells expertise, soldiers, and silence to any faction that can pay. Its scholars work in areas other institutions will not touch. Its mercenary companies have fought on every side of the last four major conflicts."],
-    history:["Dur Khadur has existed in some form for three centuries, always governed by whoever currently holds the largest contract. Its founding is attributed to a scholar expelled from the Monastery of Druids for pursuing research the Grand Druid called 'an invitation to things that should not be invited.'"],
-    characters:[],
-    relationships:[{faction:"Farrock",type:"alliance",desc:"Farrock uses Dur Khadur mercenaries. Dur Khadur gets a steady contract."},{faction:"Monastery of Druids",type:"rivalry",desc:"Historical. The Monastery expelled Dur Khadur's founder."}],
-    locations:[{name:"Dur Khadur",desc:"The eastern city — arid, practical, home to expertise polite society will not acknowledge needing."},{name:"The Sultan's Gardens",desc:"A private district within Dur Khadur. Its purpose is not publicly discussed."}]
-  },
-  "Farrock": {
-    type:"Faction", leader:"Unknown",
-    tagline:"A fortress state that has survived by exploiting the gap between what alliances promise and what they deliver.",
-    overview:["Farrock is a fortress city in the southeast, built on a defensible plateau overlooking trade routes connecting three major factions. Its governance is opaque — records refer to a Lord-Commander, but no individual has been publicly identified in that role for two decades.","Farrock's survival strategy is transactional: favorable rates for factions it wants to cultivate, extortionate rates for those it wants to pressure."],
-    history:["Farrock appears in trade records from the Third Century as a waystation; it appears in military records from the Fourth Century as a fortified position that was notably not captured during the eastern campaigns."],
-    characters:[],
-    relationships:[{faction:"Dur Khadur",type:"alliance",desc:"Mercenary soldiers for passage rights. Both benefit. Neither trusts the other."}],
-    locations:[{name:"Farrock",desc:"The plateau fortress — high walls, controlled passes, and a Lord-Commander no one has publicly met."}]
-  },
-  "Gilgeth & Groth Orcs": {
-    type:"Faction", leader:"Various War-Chiefs",
-    tagline:"Two orc cities bound by blood and divided by ambition, now at open war over a mystery neither has solved.",
-    overview:["Gilgeth and Groth are the two great orc cities, built within a day's march of each other. They share a language, a religion, and a history — and have been rivals for supremacy for four centuries.","The opioid crisis among orc war-bands has changed the character of orc society. Caravan addiction began as a trade problem and has become a military one: war-bands are unreliable, aggressive, and incapable of patient coordination.","The killing of joint caravans at Ashmark Ridge — blamed by each city on the other — has ignited a war both war-chiefs know is premature. Neither can stop it."],
-    history:["Gilgeth was founded first, by the clan that won the original territorial dispute. Groth was founded three generations later by the losing clan, who refused to assimilate.","The War with the Wildwood was the only period when Gilgeth and Groth fought as a unified force. Their combined war-bands were the most effective offensive unit in that conflict."],
-    characters:[],
-    relationships:[{faction:"Gloomspire Assassin Gnomes",type:"rivalry",desc:"The gnomes supplied glass-blades that addicted the war-bands. The gnomes have since vanished into the passes."},{faction:"Vilefin Goblins",type:"rivalry",desc:"The goblins scavenge in orc territory. Relations have always been hostile."}],
-    locations:[{name:"Gilgeth",desc:"The older orc city — larger, more established, convinced of its primacy."},{name:"Groth",desc:"The younger orc city — hungrier, more aggressive."},{name:"Ashmark Ridge",desc:"The site of the first open battle. Forty dead. Crows that did not feed on the bodies."}]
-  },
-  "Gloomspire Assassin Gnomes": {
-    type:"Order", leader:"The Syndicate",
-    tagline:"The only faction that can cross the mountain passes — they built their empire on glass and keep it through necessity.",
-    overview:["The Gloomspire Gnome Syndicate operates in the space between all other factions, moving through mountain passes no other organization can navigate. This geographical monopoly is the foundation of all their power.","Their public business is glass — exquisite craft glass, optical instruments, and specialized glasswork healers and scholars require. The glass trade funds operations and provides a reason for their couriers to be everywhere. Their private business is considerably more varied.","The gnomes' relationship to the Monastery of Druids is the deepest open secret in Aeloria: the Syndicate is the Monastery's covert arm."],
-    history:["The Gloomspire gnomes have occupied their mountain position since before recorded history. Their founding mythology credits them with discovering the passes rather than building them.","The glass monopoly was established formally in the Third Century through trade agreements that looked, at signing, like minor commercial arrangements. By the time their significance was clear, the gnomes were too useful to remove."],
-    characters:[],
-    relationships:[{faction:"Monastery of Druids",type:"alliance",desc:"The Syndicate operates as the Monastery's covert arm."},{faction:"Gilgeth & Groth Orcs",type:"complex",desc:"The gnomes supplied glass-blades that addicted orc war-bands. The gnomes have retreated. The orcs are not satisfied."},{faction:"Twin Cities",type:"alliance",desc:"A gnome courier was seen leaving the Twin Cities palace the night Caeris disappeared."}],
-    locations:[{name:"Gloomspire",desc:"The gnome city within the mountain passes — its exact location not published in any approved map."}]
-  },
-  "Monastery of Druids": {
-    type:"Order", leader:"The Grand Druid",
-    tagline:"Nature worship, dark ritual, and a divine mandate that the Grand Druid alone interprets.",
-    overview:["The Monastery of Druids at Stonebreak occupies a position of formal neutrality and practical influence. It serves as a hospital, a library, a center of agricultural knowledge — and beneath all of this, an institution with its own agenda never fully disclosed to any secular power.","Something is happening at Stonebreak. A novice who began speaking an unknown tongue has been sequestered. The scriptorium has been locked. Scholars turned away. The standing stones pulse green at night."],
-    history:["The Monastery was founded in the First Age, predating most current political structures. Its original purpose was preservation — of knowledge, of natural sites, of the old ways before the Fractured Age made everything contingent.","The expulsion of what became Dur Khadur's founding scholar represents the Monastery's most public disciplinary action. The nature of the research that prompted it has been removed from public archive."],
-    characters:[],
-    relationships:[{faction:"Gloomspire Assassin Gnomes",type:"alliance",desc:"The Syndicate operates as the Monastery's covert arm."},{faction:"Dur Khadur",type:"rivalry",desc:"Historical. The Monastery expelled Dur Khadur's founder."}],
-    locations:[{name:"Stonebreak Monastery",desc:"The Monastery itself — scriptorium locked, standing stones pulsing green."},{name:"The Hollowstones",desc:"A ring of standing stones used in ritual practice. Currently active in undocumented ways."}]
-  },
-  "Vilefin Goblins": {
-    type:"Faction", leader:"Elder Skrix",
-    tagline:"Cunning scavengers who have survived in the margins of every political order by being too useful to eliminate.",
-    overview:["The Vilefin Goblins occupy the Rock Plains, building an intricate network of tunnels, caches, and relay points that serves their primary industry: salvage, intelligence, and the sale of both.","Goblin society is organized around extended family units called warrens, each operating semi-independently under the nominal authority of Elder Skrix. The warrens cooperate when cooperation serves everyone and compete when it doesn't."],
-    history:["The Vilefin name comes from their original territory along a fish-heavy river that was redirected by construction projects in the Third Century. The goblins adapted, as they always have."],
-    characters:[{name:"Elder Skrix",title:"Chief Negotiator",status:"Alive",desc:"Forty years of dealing with surface factions has made Skrix the most experienced political survivor in Aeloria."}],
-    relationships:[{faction:"Gilgeth & Groth Orcs",type:"rivalry",desc:"Orcs consider goblin scavenging an insult. Goblins consider orc territory full of useful things."},{faction:"Twin Cities",type:"neutral",desc:"The goblins occasionally sell intelligence to Twin Cities merchants."}],
-    locations:[{name:"Rock Plains",desc:"The flat terrain the goblins have made their own — tunnel networks beneath, warrens scattered throughout."}]
-  },
-  "Ice Dragons": {
-    type:"Faction", leader:"Frostwarden Elders",
-    tagline:"Ancient beyond reckoning, the Ice Dragons watch the north from the Dragonscar Peaks — and something has made them move.",
-    overview:["The Ice Dragons are not a faction in the political sense. They do not negotiate, trade, or seek alliance. They are a fact of the northern landscape: permanent, cold, and indifferent to the ambitions of the smaller creatures below them.","The Frostwarden Elders are the eldest of the Ice Dragon clans. They have not moved from their positions on the highest peaks in living memory. Three weeks ago, they moved one step south, in unison, after a period of total stillness."],
-    history:["The Ice Dragons' history is the history of the northern peaks, which is older than any written record.","The one documented interaction between the Ice Dragons and a political faction occurred three hundred years ago, when a Lostfeld mining expedition reached an altitude the dragons considered theirs. The expedition returned with three survivors who declined to describe what had happened."],
-    characters:[],
-    relationships:[{faction:"Lostfeld Dwarves",type:"neutral",desc:"The mining incident three centuries ago established an informal territorial boundary. Both sides observe it without discussing it."}],
-    locations:[{name:"Dragonscar Peaks",desc:"The great northern mountain range. The peaks are permanently iced and the air at their heights does not support human life."},{name:"Frostvale",desc:"A small settlement in a valley between the peaks — the closest human habitation to the dragon territories."}]
-  },
-  "Vampires": {
-    type:"Faction", leader:"Hidden",
-    tagline:"Integrated, charming, and predatory — an open secret that polite society has agreed not to examine.",
-    overview:["The vampires of Aeloria do not exist in the way that most factions exist. There is no vampire nation, no formal government. There is instead a distributed population of undead individuals inserted into the elite structures of every major faction.","The extent of vampire integration into Aeloric society is not officially known. Certain noble families in the Twin Cities have held their wealth for suspiciously long periods. Certain advisors have been described in documents spanning centuries."],
-    history:["The first written reference to vampires in Aeloria appears in Monastery archives from the Second Age, described as 'the long ones who drink.' The Monastery's subsequent response to this description has been redacted."],
-    characters:[],
-    relationships:[{faction:"Twin Cities",type:"complex",desc:"Certain noble families and advisors. The King's relationship to this presence is not publicly documented."},{faction:"Shadow Court",type:"complex",desc:"Both operate in darkness and take long views."}],
-    locations:[]
-  }
+/* ── AELORIA CANON LORE ────────────────────────────────────────
+   Hand-authored faction encyclopedias. Each canon entry is registered
+   under multiple aliases so that whichever name the live state uses,
+   the right page renders. */
+const _CANON = {};
+
+_CANON["Shadow Court"] = {
+  type:"Kingdom", leader:"Queen Lyathra the Veiled",
+  tagline:"The Shadow Court of Faerwood is not ruled — it is observed, manipulated, and quietly reshaped.",
+  overview:[
+    "Faerwood's canopy is so thick that sunlight rarely touches the forest floor. Beneath it, the Dread Elves have built a civilization of hidden paths, veiled structures, and silent watchers. Nothing in Faerwood is accidental — every movement, alliance, and death is part of a larger unseen design.",
+    "Outsiders believe Faerwood is isolationist. They are wrong. Faerwood does not isolate — it infiltrates.",
+    "Power inside the Court is split between three rival houses locked in a constant cold war: House Verlorn (the oldest lineage and current rulers, slipping), House Nightborn (assassins and executioners who want a more aggressive Faerwood), and House Shadowveil (information brokers whose spies almost certainly know more about other factions than those factions know about themselves)."
+  ],
+  history:[
+    "The Dread Elves value control over strength and will avoid open war until victory is certain long before the first blade is drawn. Their warfare has always been assassination, sabotage, and psychological pressure rather than open battle.",
+    "Faerwood has no public scripture; its rituals are not worship but interpretation — of signs, of patterns, of dreams. The Veilkin advise the houses on what those patterns mean. The houses obey them more often than they admit.",
+    "The Hollowlost — once human or elf, now ritually stripped of identity — serve the Shadow Throne as unquestioning enforcers."
+  ],
+  characters:[
+    {name:"Queen Lyathra the Veiled",title:"Sovereign of the Shadow Court",status:"Alive",desc:"The veiled queen of Faerwood. She rules through opacity. Centuries of rivals have mistaken her stillness for passivity. Almost all of them are dead."},
+    {name:"House Verlorn",title:"Rulers (oldest lineage)",status:"Active",desc:"Authority based on legacy rather than strength — and that authority is slipping."},
+    {name:"House Nightborn",title:"Executioners",status:"Active",desc:"Masters of assassination and fear. They believe Faerwood should act more aggressively."},
+    {name:"House Shadowveil",title:"Manipulators",status:"Active",desc:"Information brokers. Their spy network reaches every other faction in Aeloria."},
+    {name:"The Veilkin",title:"Pale interpreters of dreams and omens",status:"Active",desc:"Soft-spoken, feared even by the houses they advise."},
+    {name:"The Hollowlost",title:"Ritually unmade enforcers",status:"Active",desc:"Once human or elf — now stripped of identity, bound to the Shadow Throne."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"complex",desc:"Faerwood does not isolate — it infiltrates. Influence networks reach into the merchant quarters of both Eresteron and Eldoria."},
+    {faction:"Glenhaven",type:"complex",desc:"The two elven civilizations are mirror images: one rules the canopy by stewardship, the other rules the dark by design."}
+  ],
+  locations:[
+    {name:"Faerwood",desc:"Dense ancient forest under perpetual twilight canopy. Outsiders rarely leave it."}
+  ]
 };
+
+_CANON["Lostfeld"] = {
+  type:"Kingdom", leader:"High Thane Babadu Goldfinger-Duke",
+  tagline:"Lostfeld is built on wealth beneath the earth.",
+  overview:[
+    "The Dwarven Holds of Lostfeld are a clan-stable mountain civilization rooted in mining, craft, and ancestral tradition. Authority rests with the Goldfinger-Duke clan, but the great clans share the high seats of the holds.",
+    "Lostfeld trades wealth for influence and prefers transactions to alliances. It will defend its passes ferociously, but it will not march for another faction's cause without a price agreed in writing — usually in iron, sometimes in gold."
+  ],
+  history:[
+    "Generations of clan continuity have produced one of the most internally stable factions in Aeloria. Lostfeld remembers debts in stone and grudges in iron, and it has the long memory to wait either out."
+  ],
+  characters:[
+    {name:"High Thane Babadu Goldfinger-Duke",title:"High Thane of Lostfeld",status:"Alive",desc:"The current head of the Goldfinger-Duke clan and the seated High Thane of the holds."},
+    {name:"Goldfinger-Duke Clan",title:"Ruling clan",status:"Active",desc:"Holds the High Seat. Wealth, mercantile reach, and political dominance."},
+    {name:"Runewarden Clan",title:"Keepers of the deep stones",status:"Active",desc:"Traditional, runic, and slow to bend."},
+    {name:"Ironmaul Clan",title:"Heavy infantry and forge-masters",status:"Active",desc:"The hammer of Lostfeld. Defensive, disciplined, brutal in close stone."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"alliance",desc:"Standing trade — surface goods up, finished steel and gold down. Currently steady."},
+    {faction:"Dur Khadur",type:"complex",desc:"Trade rivalry across the mountain crossroads. Both prefer to settle disputes by ledger rather than levy."}
+  ],
+  locations:[
+    {name:"Lostfeld",desc:"Mountain strongholds carved into the southern ridges — forges, vaults, and clan seats."}
+  ]
+};
+
+_CANON["Glenhaven"] = {
+  type:"Kingdom", leader:"High Sovereign Thalorien (House Wood)",
+  tagline:"A realm untouched by the ambitions of men. Glenhaven does not rule its forest — it protects it.",
+  overview:[
+    "The Wood Elves of Glenhaven exist in harmony with nature, not as its rulers but as its protectors. Their cities are grown rather than built, hidden within massive trees and woven into the land itself.",
+    "Glenhaven remembers a time before the rise of human kingdoms, and does not consider those kingdoms permanent. It rarely interferes in the affairs of Aeloria — but when it does, it is always with purpose.",
+    "Three houses share the council. House Wood (the Wardens) are the traditional leaders and enforce isolation. House Darkleaf (the Radicals) believe outsiders must eventually be removed and form the Glenguard, the Sovereign's personal bodyguard, led by Eryndor Darkleaf as a hereditary office. House Mistafae (the Seers) are mystics who interpret nature, dreams, and ancient magic."
+  ],
+  history:[
+    "Glenhaven values balance, preservation, patience, and memory. Its warriors fight by guerrilla tactics, ambushes, and terrain mastery — not pitched battle.",
+    "Once stability breaks in Glenhaven, it takes many ticks to restore. The forest does not forgive quickly."
+  ],
+  characters:[
+    {name:"High Sovereign Thalorien",title:"Sovereign of Glenhaven (House Wood)",status:"Alive",desc:"The seated head of House Wood and the realm. Slow to act, impossible to surprise."},
+    {name:"Eryndor Darkleaf",title:"Captain of the Glenguard (House Darkleaf)",status:"Alive",desc:"Right hand to the Sovereign by birthright. Leads the Glenguard."},
+    {name:"House Wood",title:"Wardens · Ruling House",status:"Active",desc:"Maintain balance and enforce isolation."},
+    {name:"House Darkleaf",title:"Radicals · Glenguard",status:"Active",desc:"Believe outsiders are a threat to the forest and should be removed permanently."},
+    {name:"House Mistafae",title:"Seers",status:"Active",desc:"Interpret nature, dreams, and ancient magic. Often guide major decisions."}
+  ],
+  relationships:[
+    {faction:"Shadow Court",type:"complex",desc:"Two opposite philosophies of elven civilization, sharing more history than either acknowledges."},
+    {faction:"Twin Cities",type:"neutral",desc:"Long border, light contact. Honored when respected, lethal when violated."}
+  ],
+  locations:[
+    {name:"Glenhaven",desc:"Ancient living forest. The Greenwood Enclave — natural stronghold of the Wood Elves."}
+  ]
+};
+
+_CANON["Twin Cities"] = {
+  type:"Kingdom", leader:"High King Eldaric III (House Aurand)",
+  tagline:"The High Kingdom of the Twin Cities — central authority of the human realms, increasingly strained by internal division and prolonged peace.",
+  overview:[
+    "A unified kingdom formed from two former rival states after the Orc Wars six generations ago. Still powerful, still legitimate — but the seam between its two halves has never fully closed.",
+    "The Crown holds Eresteron and Eldoria together by precedent, taxation, and the weight of House Aurand's name. The two duchies see the world differently and have begun saying so out loud."
+  ],
+  history:[
+    "House Aurand brokered the unification at the end of the Orc Wars. The kingdom has held under that same line for six generations.",
+    "Its stability has always rested on the loyalty of Eresteron's farmlands and the prestige of Eldoria's nobility. Neither feels guaranteed any longer."
+  ],
+  characters:[
+    {name:"High King Eldaric III",title:"High King of the Twin Cities (House Aurand)",status:"Alive",desc:"Holds the unified throne. The legitimacy of his kingdom rests on a settlement his great-grandfather signed."}
+  ],
+  relationships:[
+    {faction:"Eresteron",type:"alliance",desc:"Loyal but increasingly resentful. Eresteron feeds the kingdom and is beginning to ask why it serves."},
+    {faction:"Eldoria",type:"complex",desc:"Cultural heart, political schemer. Works around the Crown rather than against it."},
+    {faction:"Glenhaven",type:"neutral",desc:"Long peace, sealed by mutual disinterest in each other's lands."}
+  ],
+  locations:[
+    {name:"Eresteron",desc:"Fertile plains, agricultural heartland — the duchy that feeds the kingdom."},
+    {name:"Eldoria",desc:"Rolling hills, cultural and noble center — the duchy that decorates and schemes within it."}
+  ]
+};
+
+_CANON["Eresteron"] = {
+  type:"Duchy", leader:"Lord Nuhoom Braafhart (House Braafhart)",
+  tagline:"Eresteron is the backbone of the High Kingdom's survival — and it remembers that it feeds the kingdom.",
+  overview:[
+    "Vast farmlands, disciplined rural communities, and a culture rooted in duty have made Eresteron the primary food supplier to the Twin Cities and surrounding regions. Its people are loyal — but not blind.",
+    "They remember when they were independent. Eresteron supported the unification during the Orc Wars and has remained one of House Aurand's most reliable allies — but growing taxation, political neglect, and the excess of the western merchants have begun to erode that loyalty.",
+    "They do not seek rebellion. But they have begun to question why they serve."
+  ],
+  history:[
+    "Eresteron's population is almost entirely human, with a strong emphasis on lineage, family honor, and land ownership. Generations remain tied to the same soil, creating deep-rooted identity and stability.",
+    "House Braafhart is a noble line built on honor, duty, and agricultural stewardship — loyal to the Crown, increasingly frustrated by its weakness and dependence."
+  ],
+  characters:[
+    {name:"Lord Nuhoom Braafhart",title:"Lord of Eresteron (House Braafhart)",status:"Alive",desc:"The seated head of House Braafhart. Holds the duchy's food, its levies, and its quiet patience."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"alliance",desc:"Loyal vassal of the High Kingdom — the loyalty itself is the slow-burning question."},
+    {faction:"Eldoria",type:"alliance",desc:"Sister duchy. Separated by culture and appetite, joined by the same crown."}
+  ],
+  locations:[
+    {name:"Eresteron",desc:"Fertile plains and agricultural heartland."}
+  ]
+};
+
+_CANON["Eldoria"] = {
+  type:"Duchy", leader:"Lady Briania LeFleur (House LeFleur)",
+  tagline:"Eldoria is not the strongest duchy — but it is the most refined.",
+  overview:[
+    "Known for its nobility, artistry, and political maneuvering, Eldoria acts as the cultural heart of the human world. Its influence spreads not through force, but through prestige, alliances, and quiet manipulation.",
+    "Unlike Eresteron, Eldoria does not question the Crown openly. It works around it.",
+    "Eldorian humans are aristocratic and politically aware, with strong emphasis on status, presentation, and influence."
+  ],
+  history:[
+    "Power inside Eldoria is a noble web. House LeFleur is elegant, calculated, and politically dominant. House Bower is a land-rich traditionalist line that often resists LeFleur influence. House Binx are merchant-aligned nobles who bridge trade and aristocracy. House Dale is a militaristic line — less politically influential but respected for battlefield capability."
+  ],
+  characters:[
+    {name:"Lady Briania LeFleur",title:"Lady of Eldoria (House LeFleur)",status:"Alive",desc:"Holds Eldoria through alliances and social power rather than force."},
+    {name:"House LeFleur",title:"Ruling House",status:"Active",desc:"Elegant, calculated, politically dominant."},
+    {name:"House Bower",title:"Land-rich traditionalists",status:"Active",desc:"Deep roots in older nobility. Often resist LeFleur influence."},
+    {name:"House Binx",title:"Merchant nobility",status:"Active",desc:"Bridge trade and aristocracy. Pragmatic and opportunistic."},
+    {name:"House Dale",title:"Militaristic line",status:"Active",desc:"Respected for battlefield capability."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"complex",desc:"Conditional loyalty. Eldoria works around the Crown rather than against it."},
+    {faction:"Eresteron",type:"alliance",desc:"Sister duchy. Different temperaments, same throne."}
+  ],
+  locations:[
+    {name:"Eldoria",desc:"Rolling hills — cultural and noble center of the human world."}
+  ]
+};
+
+_CANON["Tidefall"] = {
+  type:"Electorate", leader:"Grand Admiral Levi Ver Meer",
+  tagline:"Tidefall controls the sea — and the wealth that flows through it.",
+  overview:[
+    "A collection of powerful naval houses governs Tidefall through an elected admiral system. Trade, fleets, and influence define their power. They do not conquer land. They control everything that connects it.",
+    "House Ver Meer holds the current Admiralty. House Highland-Dusken commands coastal defense and the military fleets. House Fish dominates the trade guilds. House McGowan runs privateers and shadow operations."
+  ],
+  history:[
+    "Tidefall once held the Saltborn Crown as a hereditary maritime monarchy. The Admiral Electorate ousted that line in living memory — its last sitting High Lord was Blacktide. His son still flies a black sail in the Dreadwind Isles, and there is still a bounty on him in every Tidefall harbor."
+  ],
+  characters:[
+    {name:"Grand Admiral Levi Ver Meer",title:"Admiral of the Electorate (House Ver Meer)",status:"Alive",desc:"Currently elected to lead the council of admirals. Controls the largest fleet in the Electorate."},
+    {name:"House Ver Meer",title:"Naval command and political leadership",status:"Active",desc:"Currently holds the Admiralty."},
+    {name:"House Highland-Dusken",title:"Coastal defense and military fleets",status:"Active",desc:"The Electorate's standing teeth at sea."},
+    {name:"House Fish",title:"Trade guild dominance",status:"Active",desc:"Owns the routes that owe the council."},
+    {name:"House McGowan",title:"Privateers and shadow operations",status:"Active",desc:"The hand the Admiralty does not officially have."}
+  ],
+  relationships:[
+    {faction:"Dreadwind Isles",type:"war",desc:"Open hostility. The Dreadwind Fleet is led by the heir of the deposed Saltborn line. Bounty in force."},
+    {faction:"Twin Cities",type:"alliance",desc:"Trade partner and political customer."}
+  ],
+  locations:[
+    {name:"Tidefall",desc:"Coastal cities of the naval trade empire."}
+  ]
+};
+
+_CANON["Dreadwind Isles"] = {
+  type:"Faction", leader:"Ronan Blacktide (House Blacktide)",
+  tagline:"The Blacktide Fleet — a lawless naval power, and the rightful heir to a stolen crown.",
+  overview:[
+    "The Dreadwind Isles are a scattered pirate kingdom standing in open opposition to Tidefall's Admiral Electorate.",
+    "Ronan Blacktide is the son of Tidefall's last High Lord — the holder of the Saltborn Crown — who was ousted by the Admiral Electorate. The Blacktide Fleet does not raid for treasure alone. It raids for legitimacy."
+  ],
+  history:[
+    "There is a standing bounty on Ronan Blacktide in every Tidefall harbor: dead or alive."
+  ],
+  characters:[
+    {name:"Ronan Blacktide",title:"Master of the Blacktide Fleet (House Blacktide)",status:"Alive",desc:"Heir to the deposed Saltborn line. Carries the bounty and the grudge."}
+  ],
+  relationships:[
+    {faction:"Tidefall",type:"war",desc:"Personal and political. Ronan's claim is older than the Admiral Electorate's title."}
+  ],
+  locations:[
+    {name:"Dreadwind Isles",desc:"Coastal pirate islands — the seat of the Blacktide Fleet."}
+  ]
+};
+
+_CANON["Dur Khadur"] = {
+  type:"Trade Monarchy", leader:"Trade Prince Seran Gross (House Gross)",
+  tagline:"A human kingdom built on trade and wealth across harsh lands.",
+  overview:[
+    "Dur Khadur is a human-led trade monarchy with a fortress capital at the eastern crossroads of the continent. Wealth, caravans, and fortified vaults — not standing armies — define its power.",
+    "The Trade Throne is held by House Gross by mercantile election within the noble houses. House Delonious, House Galfazzar, and House Vercenti share influence in the council."
+  ],
+  history:[
+    "Dur Khadur aligns with power, not principle. Its standing armies serve commerce — they fight to protect trade routes and territory, not for conquest or ideology. Sieging Dur Khadur itself requires a 3–5x normal force advantage; the fortress design rewards the defender heavily."
+  ],
+  characters:[
+    {name:"Trade Prince Seran Gross",title:"Trade Prince (House Gross)",status:"Alive",desc:"Holder of the Trade Throne by mercantile election."},
+    {name:"House Gross",title:"Ruling Merchant House",status:"Active",desc:"Currently holds the Trade Throne."},
+    {name:"House Delonious",title:"Major merchant noble line",status:"Active",desc:"One of the great trading houses of Dur Khadur."},
+    {name:"House Galfazzar",title:"Major merchant noble line",status:"Active",desc:"Council vote and caravan reach."},
+    {name:"House Vercenti",title:"Lesser merchant noble line",status:"Active",desc:"Smaller seat, sharper tongue."}
+  ],
+  relationships:[
+    {faction:"Lostfeld",type:"complex",desc:"Trade rivals across the mountain crossroads. Both prefer ledgers to levies."},
+    {faction:"Tidefall",type:"complex",desc:"Caravan wealth meets seaborne wealth. They watch each other carefully."}
+  ],
+  locations:[
+    {name:"Dur Khadur",desc:"Desert trade empire and fortress city at the mountain crossroads."}
+  ]
+};
+
+_CANON["Varkuun"] = {
+  type:"Mercenary State", leader:"High Marshal Ashali Van Cleave (House Van Cleave)",
+  tagline:"Farrock is built for war. The Varkuun mercenary companies are its standing trade.",
+  overview:[
+    "Farrock is a militarized human plains-state and standalone power. It exists as an independent fortress that profits from war on whatever side it can — through the Varkuun, its disciplined mercenary companies.",
+    "House Van Cleave is the sole ruling line: a military appointment with no rival dynasties. The Marshal commands the pass and the contracts."
+  ],
+  history:[
+    "Farrock believes humanity must not grow weak in times of peace. The Varkuun keep the muscle warm by selling it. Sieging Varkuun itself is tactically brutal — the fortress design rewards the defender heavily."
+  ],
+  characters:[
+    {name:"High Marshal Ashali Van Cleave",title:"High Marshal (House Van Cleave)",status:"Alive",desc:"Holds Farrock and the Varkuun contracts. Sole ruling house."},
+    {name:"House Van Cleave",title:"Sole Ruling House",status:"Active",desc:"Military appointment. No rival dynasties."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"complex",desc:"Frequent customer of Varkuun contracts. Frequent worry to the Crown."},
+    {faction:"Tidefall",type:"complex",desc:"Naval wealth and land-based steel. Useful to each other; never close."}
+  ],
+  locations:[
+    {name:"Varkuun",desc:"The fortress-state of Farrock — militarized plains, expansionist temperament."}
+  ]
+};
+
+_CANON["Groth Clans"] = {
+  type:"Clan Confederation", leader:"Warchief Drogath Mijid (Clan Mijid)",
+  tagline:"Groth is not a kingdom. It is a proving ground.",
+  overview:[
+    "Across scorched rock plains and brutal terrain, the Orc clans of Groth live by one law: strength. Leadership is earned through victory, and weakness is removed without hesitation.",
+    "They were the force that once nearly broke the human kingdoms. They remember that.",
+    "Three clans contend for dominance: Clan Mijid (the current dominant Warlords — disciplined and strategic), Clan Ashfang (savage Raiders who thrive in chaos and war), and Clan Syncar (calculating Tacticians focused on long-term victory)."
+  ],
+  history:[
+    "Orcish leadership is decided by combat. Promotions, demotions, and successions are routinely settled in the same hour. Groth values strength, honor, dominance, and survival above any other principle."
+  ],
+  characters:[
+    {name:"Warchief Drogath Mijid",title:"Warchief of Groth (Clan Mijid)",status:"Alive",desc:"Currently dominant. Disciplined and strategic where most of his clan is brutal."},
+    {name:"Clan Mijid",title:"Warlords · Dominant Clan",status:"Active",desc:"Disciplined, strategic, currently on top."},
+    {name:"Clan Ashfang",title:"Raiders",status:"Active",desc:"Savage and aggressive. Thrive in chaos and war."},
+    {name:"Clan Syncar",title:"Tacticians",status:"Active",desc:"More calculated. Focus on long-term victory."}
+  ],
+  relationships:[
+    {faction:"Gilgeth Clans",type:"rivalry",desc:"Two orc realms. Same blood, different philosophies. Constant friction."}
+  ],
+  locations:[
+    {name:"Groth",desc:"Harsh badlands — a war-torn proving ground."}
+  ]
+};
+
+_CANON["Gilgeth Clans"] = {
+  type:"Iron Dominion", leader:"High Warlord Kragor Blackblood (Clan Blackblood)",
+  tagline:"Gilgeth is what Groth could become — if it chose order over chaos.",
+  overview:[
+    "Built within mountain ranges and fortified cities, the Orcs of Gilgeth are structured, disciplined, and strategic. They do not rush into war. They prepare for it.",
+    "The Iron Dominion is held by three clans in strict hierarchy: Clan Blackblood (Rulers — dominant and controlling), Clan Ironhide (Defenders — masters of fortification and endurance), and Clan Redtusk (Aggressors — pushing for expansion and war)."
+  ],
+  history:[
+    "Gilgeth blends strength with discipline. Its succession is decided by elder council vote within the dominant clan, not single combat — one of the few orcish realms to govern by deliberation rather than blood."
+  ],
+  characters:[
+    {name:"High Warlord Kragor Blackblood",title:"High Warlord of Gilgeth (Clan Blackblood)",status:"Alive",desc:"Holds the Iron Dominion through strict hierarchy and patient preparation."},
+    {name:"Clan Blackblood",title:"Rulers",status:"Active",desc:"Dominant and controlling. Maintain strict hierarchy."},
+    {name:"Clan Ironhide",title:"Defenders",status:"Active",desc:"Masters of fortification and endurance."},
+    {name:"Clan Redtusk",title:"Aggressors",status:"Active",desc:"Push for expansion and war."}
+  ],
+  relationships:[
+    {faction:"Groth Clans",type:"rivalry",desc:"Distant kin. Gilgeth sees Groth as undisciplined; Groth sees Gilgeth as cautious."}
+  ],
+  locations:[
+    {name:"Gilgeth",desc:"Mountain strongholds — fortified Iron Dominion territory."}
+  ]
+};
+
+_CANON["Stonebreak Monastery"] = {
+  type:"Order", leader:"Grand Druid Varak",
+  tagline:"Guardians of balance and nature — and, quietly, the unseen hand behind the Gloomspire Syndicate.",
+  overview:[
+    "Stonebreak is a druid monastery hidden in the wildlands — a sanctuary of healing, ritual, and old observation. Its formal posture is neutral. Its actual reach is not.",
+    "The Grand Druid alone interprets the Monastery's mandate. The Gloomspire Assassin Gnomes operate as Stonebreak's secret hand — a hidden network of contract assassins moving where druids cannot be seen to move."
+  ],
+  history:[
+    "Stonebreak's stance is older than the current great houses. It does not announce its alliances. When it intervenes, an assassin is more likely than an army."
+  ],
+  characters:[
+    {name:"Grand Druid Varak",title:"Grand Druid of Stonebreak",status:"Alive",desc:"Holds the Monastery's mandate. Speaks for the wildlands and, quietly, for the Gloomspire."},
+    {name:"Gloomspire Syndicate",title:"Assassin order — secret hand of Stonebreak",status:"Active",desc:"Hidden network of gnome contract killers. Officially independent. Functionally not."}
+  ],
+  relationships:[
+    {faction:"Glenhaven",type:"complex",desc:"Two ancient guardians of the wild — the same instinct, different methods."}
+  ],
+  locations:[
+    {name:"Stonebreak",desc:"Druid monastery and wildlands sanctuary."}
+  ]
+};
+
+_CANON["Vilefin"] = {
+  type:"Clan Confederation", leader:"Speaker Grikk Bloodware (Clan Bloodware)",
+  tagline:"Vilefin survives where others cannot. Its strength is unpredictability.",
+  overview:[
+    "A brutal, resource-starved region where Goblin clans fight, invent, and adapt constantly. Their warfare is traps, ambushes, and cunning rather than open battle.",
+    "Three clans share the rock plains: Clan Bloodware (currently speaking for the confederation), Clan Cogtooth, and Clan Rustfang. Power moves between them by communal speaker system rather than by blood succession."
+  ],
+  history:[
+    "The Scrap Clans of Vilefin endure scarcity by inventing through it. Their adaptations are usually ugly, occasionally brilliant, and always cheaper than other factions expect."
+  ],
+  characters:[
+    {name:"Speaker Grikk Bloodware",title:"Speaker of the Scrap Clans (Clan Bloodware)",status:"Alive",desc:"Currently speaks for the confederation. Speakership is communal, not hereditary."},
+    {name:"Clan Bloodware",title:"Currently dominant",status:"Active",desc:"Holds the speakership."},
+    {name:"Clan Cogtooth",title:"Tinker-clan",status:"Active",desc:"Builders and breakers."},
+    {name:"Clan Rustfang",title:"Raider-clan",status:"Active",desc:"Mobility and ambush specialists."}
+  ],
+  relationships:[
+    {faction:"Gilgeth Clans",type:"rivalry",desc:"Goblin scavenging in orc territory; orc patrols in goblin warrens. Constant low-grade conflict."},
+    {faction:"Groth Clans",type:"rivalry",desc:"Same edge, different orc neighbour."}
+  ],
+  locations:[
+    {name:"Vilefin",desc:"Rock plains and harsh wasteland — the territory of the Scrap Clans."}
+  ]
+};
+
+_CANON["The Wintermark"] = {
+  type:"Kingdom", leader:"High Lord Kaelen Adkison (House Adkison)",
+  tagline:"Frostvale does not survive. It endures.",
+  overview:[
+    "Carved into frozen mountains and battered by endless storms, the Wintermark of Frostvale is a land where weakness is not punished — it is simply erased.",
+    "Generations have lived and died in the same brutal conditions, forging a people who do not bend, do not break, and do not forget. They were not always isolated; long before the rise of the Twin Cities, Frostvale's warriors marched south as conquerors. Now the Wintermark stands alone — not because it fell, but because the world grew softer, and Frostvale did not follow.",
+    "The realm is held by four houses. House Adkison rules — the oldest surviving bloodline, chosen not by wealth or politics but by endurance. House McIntosh keeps tradition and the ancient war rites. House Holter wardens the mountain passes. House Duval tracks threats long before they reach Frostvale."
+  ],
+  history:[
+    "Frostvale humans are hardened beyond their southern kin — larger, slower to trust, built for survival. Every adult is expected to fight. Every child is raised to endure. Inheritance, not combat, decides succession.",
+    "Winter campaigns into the Wintermark are nearly impossible; supply lines collapse before sieges can be sustained."
+  ],
+  characters:[
+    {name:"High Lord Kaelen Adkison",title:"High Lord of the Wintermark (House Adkison)",status:"Alive",desc:"Holds the seat by endurance. Tested constantly, not questioned."},
+    {name:"House Adkison",title:"Ruling House",status:"Active",desc:"The oldest surviving bloodline of Frostvale and one of the oldest in Aeloria."},
+    {name:"House McIntosh",title:"Keepers of tradition and ancient war rites",status:"Active",desc:"Train Frostvale's warriors in the old ways."},
+    {name:"House Holter",title:"Wardens of the mountain passes",status:"Active",desc:"Control movement in and out. The first line of defense."},
+    {name:"House Duval",title:"Hunters and scouts",status:"Active",desc:"Track threats long before they reach Frostvale."}
+  ],
+  relationships:[
+    {faction:"Twin Cities",type:"complex",desc:"Distant respect, sharper memory. The Wintermark has not forgotten the south."},
+    {faction:"Lostfeld",type:"alliance",desc:"Mountain neighbours bound by terrain and ancient cooperation."}
+  ],
+  locations:[
+    {name:"Frostvale",desc:"Capital city of the Wintermark — frozen highlands, glacial mountain passes."}
+  ]
+};
+
+/* ── Faction key aliases ───────────────────────────────────────
+   Some areas of the engine use legacy or alternate names for the
+   same canon faction. We register every alias so live state always
+   resolves to the right lore card. */
+const FACTION_DATA = {};
+const _ALIAS = {
+  "Shadow Court":              ["Shadow Court", "Faerwood", "Faerwood Shadow Court"],
+  "Lostfeld":                  ["Lostfeld", "Lostfeld Dwarves"],
+  "Glenhaven":                 ["Glenhaven", "Glenhaven Elves", "Glenwood", "Greenwood Enclave"],
+  "Twin Cities":               ["Twin Cities", "High Kingdom of the Twin Cities", "House Aurand"],
+  "Eresteron":                 ["Eresteron", "Duchy of Eresteron", "House Braafhart"],
+  "Eldoria":                   ["Eldoria", "Duchy of Eldoria", "House LeFleur"],
+  "Tidefall":                  ["Tidefall", "Admiral Electorate"],
+  "Dreadwind Isles":           ["Dreadwind Isles", "Dreadwind Islands", "Blacktide Fleet", "House Blacktide"],
+  "Dur Khadur":                ["Dur Khadur", "Trade Monarchy of Dur Khadur", "House Gross"],
+  "Varkuun":                   ["Varkuun", "Farrock", "The Varkuun", "House Van Cleave"],
+  "Groth Clans":               ["Groth Clans", "Groth", "War Clans of Groth"],
+  "Gilgeth Clans":             ["Gilgeth Clans", "Gilgeth", "Iron Dominion of Gilgeth"],
+  "Stonebreak Monastery":      ["Stonebreak Monastery", "Stonebreak", "Monastery of Druids", "Druid Monastery", "Gloomspire Assassin Gnomes", "Gloomspire Syndicate"],
+  "Vilefin":                   ["Vilefin", "Vilefin Goblins", "Scrap Clans of Vilefin"],
+  "The Wintermark":            ["The Wintermark", "Wintermark", "Frostvale", "Wintermark of Frostvale", "House Adkison"]
+};
+Object.entries(_ALIAS).forEach(([canon, aliases]) => {
+  const data = _CANON[canon];
+  if (!data) return;
+  aliases.forEach(name => { FACTION_DATA[name] = data; });
+});
 
 const MORALE_COLORS = { Rising:"#4aad6a", Stable:"#5a7aaa", Declining:"#c08040", Critical:"#c04040" };
 let worldState = null;
 
+function renderFactionPulse(state, pendingLen) {
+  const el = document.getElementById('faction-pulse');
+  if (!el || !state) return;
+  const factions = liveFactionNames(state).length;
+  const events = (state.active_events || []).length;
+  const tensions = (state.active_tensions || []).length;
+  const chars = (state.house_characters || []).length;
+  const pop = (state.population_state || []).reduce((s, r) => s + Number(r.population || 0), 0);
+  const fmtPop = pop > 999999 ? (pop / 1e6).toFixed(1) + 'M' : pop.toLocaleString();
+  const cells = [
+    ['World Day', state.tick ?? '—'],
+    ['World Date', state.world_date || '—'],
+    ['Factions', String(factions)],
+    ['Active Events', String(events)],
+    ['Tensions', String(tensions)],
+    ['Characters', String(chars)],
+    ['Population', fmtPop],
+    ['Pending Omens', String(pendingLen ?? 0)]
+  ];
+  el.innerHTML = cells.map(([lbl, val]) => `
+    <div class="faction-pulse-cell">
+      <div class="faction-pulse-val">${escHtml(val)}</div>
+      <div class="faction-pulse-lbl">${escHtml(lbl)}</div>
+    </div>
+  `).join('');
+}
+
 async function loadFactions() {
-  const r = await fetch('/api/state');
-  worldState = await r.json();
+  const r = await fetch('/api/god/panel');
+  const data = await r.json();
+  worldState = data.state || {};
+  const pending = data.pending_interventions || [];
+  renderFactionPulse(worldState, pending.length);
   renderCards(worldState);
+}
+
+function escHtml(v) {
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function jsArg(v) {
+  return String(v ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function identityRows(state) {
+  const fi = state.faction_identities || {};
+  if (Array.isArray(fi)) return fi.filter(x => x && typeof x === 'object');
+  if (fi && typeof fi === 'object') {
+    return Object.entries(fi).map(([name, row]) => ({ ...(row || {}), faction: name, name }));
+  }
+  return [];
+}
+
+function powerFromState(state, fname) {
+  const legacy = (state.faction_power || []).find(f => f.faction === fname);
+  if (legacy) return legacy;
+  const fp = (state.faction_power_state || []).find(f => f.faction === fname);
+  if (!fp) return null;
+  return {
+    faction: fname,
+    military: Math.round((fp.militaryPower || 0) / 10),
+    political: Math.round((fp.politicalInfluence || 0) / 10),
+    economic: Math.round((fp.economicPower || 0) / 10),
+    influence: Math.round((fp.religiousInfluence || 0) / 10),
+  };
+}
+
+function buildLiveFactionLore(state, fname) {
+  if (FACTION_DATA[fname]) return FACTION_DATA[fname];
+  const identity = identityRows(state).find(r => (r.faction || r.name) === fname) || {};
+  const leadRow = (state.leadership_state || []).find(r => r.faction === fname) || {};
+  const ruler = leadRow.currentRuler || {};
+  const newKingdom = (state.new_kingdom_claims || []).find(k => k.new_kingdom === fname) || {};
+  const emergent = (state.emerging_factions || []).find(f => f.faction === fname) || {};
+  const held = (state.locations || []).filter(l => l.controller === fname);
+  const rels = (state.relationships || []).filter(r => r.faction_a === fname || r.faction_b === fname);
+  const chars = (state.house_characters || []).filter(c => c.faction === fname);
+  const type = identity.type || (newKingdom.new_kingdom ? 'Kingdom' : emergent.faction ? 'Minor Faction' : 'Faction');
+  const leader = ruler.name || ruler.title || identity.leader || 'Unsettled leadership';
+  const origin = newKingdom.old_kingdom
+    ? `It was founded out of territory once tied to ${newKingdom.old_kingdom}, without restoring that vacant throne.`
+    : emergent.origin_faction
+      ? `It emerged from unrest against ${emergent.origin_faction}.`
+      : (identity.description || `${fname} is a live faction generated by the simulation.`);
+  return {
+    type,
+    leader,
+    tagline: newKingdom.new_kingdom
+      ? `${fname} has been proclaimed as a new kingdom, separate from the old throne it rose beside.`
+      : `${fname} is now active in the living state of Aeloria.`,
+    overview: [
+      origin,
+      held.length ? `Current holdings: ${held.map(l => l.name).filter(Boolean).join(', ')}.` : 'No settled holdings are recorded yet.',
+      ruler.name ? `${leader} currently holds authority as ${ruler.title || 'ruler'}.` : 'Its leadership is provisional or not yet fully recorded.'
+    ],
+    history: [
+      newKingdom.tick ? `Founded on Day ${newKingdom.tick}.` : `First detected in the live world state on Day ${state.tick || 0}.`,
+      identity.origin_faction ? `Origin faction: ${identity.origin_faction}.` : 'Its long history has not yet been written into the codex.'
+    ],
+    characters: chars.slice(0, 8).map(c => ({
+      name: c.name || 'Unknown',
+      title: c.role || c.coreRole || 'House figure',
+      status: c.status || 'Alive',
+      desc: c.traits?.length ? c.traits.slice(0, 4).join(', ') : 'No character note recorded yet.'
+    })),
+    relationships: rels.map(r => {
+      const other = r.faction_a === fname ? r.faction_b : r.faction_a;
+      return { faction: other, type: r.type || 'neutral', desc: `Trust ${r.trust ?? '—'} · Hostility ${r.hostility ?? '—'}` };
+    }),
+    locations: held.map(l => ({ name: l.name || 'Unknown', desc: l.description || l.region_type || 'Controlled territory.' })),
+  };
+}
+
+function liveFactionNames(state) {
+  const collapsed = new Set((state.collapsed_factions || []).map(f => f.faction).filter(Boolean));
+  const names = new Set(Object.keys(FACTION_DATA));
+  identityRows(state).forEach(r => names.add(r.faction || r.name));
+  (state.leadership_state || []).forEach(r => names.add(r.faction));
+  (state.faction_power_state || []).forEach(r => names.add(r.faction));
+  (state.faction_resources || []).forEach(r => names.add(r.faction));
+  (state.faction_morale || []).forEach(r => names.add(r.faction));
+  (state.new_kingdom_claims || []).forEach(r => names.add(r.new_kingdom));
+  (state.emerging_factions || []).forEach(r => names.add(r.faction));
+  return [...names].filter(Boolean).filter(n => !collapsed.has(n)).sort();
 }
 
 function renderCards(state) {
   const morale = {};
   (state.faction_morale||[]).forEach(f => morale[f.faction]=f);
-  const power = {};
-  (state.faction_power||[]).forEach(f => power[f.faction]=f);
   const resources = {};
   (state.faction_resources||[]).forEach(f => resources[f.faction]=f);
   const tensions = state.active_tensions||[];
 
-  document.getElementById('factions-grid').innerHTML = Object.keys(FACTION_DATA).map(fname => {
-    const lore = FACTION_DATA[fname];
+  document.getElementById('factions-grid').innerHTML = liveFactionNames(state).map(fname => {
+    const lore = buildLiveFactionLore(state, fname);
     const m = morale[fname];
-    const p = power[fname];
+    const p = powerFromState(state, fname);
     const r = resources[fname];
     const ms = m ? m.status : 'Stable';
     const ft = tensions.filter(t => t.factions.toLowerCase().includes(fname.split(' ')[0].toLowerCase()));
@@ -476,37 +921,36 @@ function renderCards(state) {
       `).join('')}
     </div>` : '';
 
-    return `<div class="faction-card" onclick="showProfile('${fname.replace(/'/g,"\\'")}')">
-      <div class="fc-type">${lore.type}</div>
-      <div class="fc-name">${fname}</div>
-      <div class="fc-leader">${lore.leader}</div>
+    return `<div class="faction-card" onclick="showProfile('${jsArg(fname)}')">
+      <div class="fc-type">${escHtml(lore.type)}</div>
+      <div class="fc-name">${escHtml(fname)}</div>
+      <div class="fc-leader">${escHtml(lore.leader)}</div>
       <div class="fc-badges"><span class="badge badge-${ms}">${ms}</span></div>
-      ${m ? `<div class="fc-status">${m.reason}</div>` : ''}
-      ${r ? `<div class="fc-pressure">${r.pressure}</div>` : ''}
+      ${m ? `<div class="fc-status">${escHtml(m.reason)}</div>` : ''}
+      ${r ? `<div class="fc-pressure">${escHtml(r.pressure)}</div>` : ''}
       ${bars}
       ${resourceBlock}
-      ${ft.length ? `<div style="margin-top:12px;font-size:11px;color:var(--critical)">⚔ ${ft[0].factions}</div>` : ''}
+      ${ft.length ? `<div style="margin-top:12px;font-size:11px;color:var(--critical)">⚔ ${escHtml(ft[0].factions)}</div>` : ''}
     </div>`;
   }).join('');
 }
 
 function showProfile(fname) {
-  const lore = FACTION_DATA[fname];
-  if (!lore) return;
   const s = worldState || {};
+  const lore = buildLiveFactionLore(s, fname);
+  if (!lore) return;
   const morale = {}; (s.faction_morale||[]).forEach(f => morale[f.faction]=f);
-  const power = {};  (s.faction_power||[]).forEach(f => power[f.faction]=f);
   const resources = {}; (s.faction_resources||[]).forEach(f => resources[f.faction]=f);
   const liveRels = {}; (s.relationships||[]).forEach(r => { liveRels[r.faction_a+'|'+r.faction_b]=r.type; liveRels[r.faction_b+'|'+r.faction_a]=r.type; });
   const allEvents = s.recent_events||[];
   const allTensions = s.active_tensions||[];
   const allTrades = s.trade_routes||[];
   const m = morale[fname];
-  const p = power[fname];
+  const p = powerFromState(s, fname);
   const r = resources[fname];
   const ms = m ? m.status : 'Stable';
 
-  const relatedEvents = allEvents.filter(e => e.text.toLowerCase().includes(fname.split(' ')[0].toLowerCase()) || e.region.toLowerCase().includes(fname.split(' ')[0].toLowerCase())).slice(0,3);
+  const relatedEvents = allEvents.filter(e => String(e.text || e.summary || '').toLowerCase().includes(fname.split(' ')[0].toLowerCase()) || String(e.region || '').toLowerCase().includes(fname.split(' ')[0].toLowerCase())).slice(0,3);
   const tensions = allTensions.filter(t => t.factions.toLowerCase().includes(fname.split(' ')[0].toLowerCase()));
   const trades = allTrades.filter(t => t.from === fname || t.to === fname);
 
@@ -564,7 +1008,7 @@ function showProfile(fname) {
           ${m ? `<div style="background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--gold);padding:16px 20px;font-family:'Crimson Text',serif;font-size:15px;color:var(--text-sec);line-height:1.6;margin-bottom:16px">${m.reason}</div>` : ''}
           ${r ? `<div style="background:var(--surface2);border:1px solid var(--border);padding:14px 18px;font-size:14px;color:var(--text-sec);margin-bottom:12px"><strong style="color:var(--gold)">Resource Pressure</strong><br>${r.pressure}</div>` : ''}
           ${tensions.map(t=>`<div style="background:var(--red-dim);border:1px solid rgba(201,55,44,0.2);padding:14px 18px;font-size:14px;color:var(--text-sec);margin-bottom:10px"><strong style="color:var(--critical)">⚔ ${t.factions}</strong><br>${t.description}</div>`).join('')}
-          ${relatedEvents.length ? `<div>${relatedEvents.map(e=>`<div class="event-row"><span class="event-region">${e.region}</span><span class="event-text">${e.text}</span></div>`).join('')}</div>` : ''}
+          ${relatedEvents.length ? `<div>${relatedEvents.map(e=>`<div class="event-row"><span class="event-region">${escHtml(e.region || '')}</span><span class="event-text">${escHtml(e.text || e.summary || '')}</span></div>`).join('')}</div>` : ''}
         </div>
 
         ${lore.characters.length ? `<div class="profile-section">

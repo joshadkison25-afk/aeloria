@@ -91,24 +91,32 @@
 
 {% block content %}
 <div class="embed-shell">
-  <section class="embed-hero">
-    <div class="embed-hero-inner">
-      <div class="embed-copy">
-        <p class="section-label">Interactive Atlas</p>
-        <h1 class="section-title" style="font-size:48px">THE MAP OF AELORIA</h1>
-        <p class="section-subtitle">This page now embeds the React + Leaflet atlas directly into the main website, with hover states, clickable regions, zooming, and a live region sidebar.</p>
+  <header class="cine-hero cine-hero-compact" data-bg="/static/illustrations/ui/heroes/world.png">
+    <div class="cine-hero-bg"></div>
+    <div class="cine-hero-veil"></div>
+    <div class="cine-hero-rays" aria-hidden="true"></div>
+    <div class="cine-hero-fog"  aria-hidden="true"></div>
+    <div class="cine-hero-grain" aria-hidden="true"></div>
+    <div class="cine-hero-vignette" aria-hidden="true"></div>
+    <div class="cine-hero-inner">
+      <p class="cine-kicker">Interactive Atlas</p>
+      <h1 class="cine-title">The Map of Aeloria</h1>
+      <div class="cine-rule">
+        <span class="cine-rule-diamond"></span>
+        Hover, click, traverse
+        <span class="cine-rule-diamond"></span>
       </div>
-
-      <div class="embed-actions">
-        <a class="btn btn-secondary" href="http://localhost:3000/map" target="_blank" rel="noreferrer">Open In New Tab</a>
+      <p class="cine-flourish">A living atlas with hover states, clickable regions, zooming, and a live region sidebar.</p>
+      <div style="margin-top:24px">
+        <a class="btn btn-secondary" href="{{ map_iframe_url|default(map_public_url, true) }}" target="_blank" rel="noreferrer">Open In New Tab</a>
       </div>
     </div>
-  </section>
+  </header>
 
   <div class="embed-frame-wrap">
     <div class="embed-frame">
       <iframe
-        src="http://localhost:3000/map"
+        src="{{ map_iframe_url|default(map_public_url, true) }}"
         title="Aeloria Interactive Map"
         loading="lazy"
         referrerpolicy="no-referrer"
@@ -117,7 +125,7 @@
   </div>
 
   <div class="embed-note">
-    The embedded atlas runs from the Next.js app on <code>localhost:3000</code>. If the frame is blank, start the Next server in <code>C:\Users\Josh\Desktop\aeloria</code> with <code>npm.cmd run dev</code>.
+    The embedded atlas is served from <code>{{ map_public_url }}</code> (set <code>MAP_PUBLIC_URL</code> in <code>.env</code> if needed). If the frame is blank, start the Next server with <code>npm run dev</code>.
   </div>
 </div>
 {% endblock %}

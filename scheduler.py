@@ -12,6 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
+from aeloria_llm import openai_model_name, resolve_aeloria_llm_provider
 from audio_pipeline import generate_weekly_story
 from notifier import send_tick_notification
 
@@ -79,6 +80,13 @@ CONTAINER_PRESERVE_KEYS = {
     "character_marriages",
     "tributary_pacts",
     "ruler_legitimacy_scores",
+    "faction_lifecycle_report",
+    "collapsed_factions",
+    "civil_wars",
+    "emerging_factions",
+    "vacant_thrones",
+    "reunification_claims",
+    "new_kingdom_claims",
 }
 
 def is_valid_world(world: dict) -> bool:
@@ -2331,11 +2339,19 @@ def _normalize_faction_power_state(prev_state, new_state):
 
     AXES = ("militaryPower", "economicPower", "politicalInfluence", "religiousInfluence")
 
+    collapsed_factions = {
+        row.get("faction")
+        for row in new_state.get("collapsed_factions", [])
+        if isinstance(row, dict) and row.get("faction")
+    }
+
     rows = []
     seen: set = set()
     all_factions = set(FACTION_SEEDS) | set(prev_rows) | set(incoming)
 
     for faction in all_factions:
+        if faction in collapsed_factions:
+            continue
         if faction in seen:
             continue
         seen.add(faction)
@@ -3648,7 +3664,7 @@ def _normalize_trade_routes(new_state):
 
 
 def _normalize_relationships(prev_state, new_state):
-    VALID_TYPES = {"alliance", "rivalry", "neutral", "war"}
+    VALID_TYPES = {"alliance", "rivalry", "neutral", "war", "tributary"}
 
     prev_rows: dict = {}
     prev_rels = prev_state.get("relationships", [])
@@ -3772,7 +3788,7 @@ def _normalize_relationships(prev_state, new_state):
             "alliance_level": alliance_level,
         })
 
-    new_state["relationships"] = normalized[:30]
+    new_state["relationships"] = normalized[:80]
 
 
 def _normalize_faction_identities(new_state):
@@ -3797,7 +3813,7 @@ def _normalize_faction_identities(new_state):
                 "personality": row.get("personality", ""),
             }
         )
-    new_state["faction_identities"] = identities[:20]
+    new_state["faction_identities"] = identities[:50]
 
 
 def _normalize_region_control(new_state):
@@ -4289,6 +4305,11 @@ _FACTION_ALIASES = {
 def _normalize_leadership_state(prev_state, new_state):
     current_tick = int(new_state.get("tick", prev_state.get("tick", 0) if prev_state else 0))
     defaults = {row["faction"]: row for row in _default_leadership_state()}
+    collapsed_factions = {
+        row.get("faction")
+        for row in new_state.get("collapsed_factions", [])
+        if isinstance(row, dict) and row.get("faction")
+    }
 
     def _alias_rows(rows):
         out = []
@@ -4311,7 +4332,11 @@ def _normalize_leadership_state(prev_state, new_state):
     }
     factions = list(dict.fromkeys([*defaults.keys(), *prev_rows.keys(), *incoming_rows.keys()]))
     normalized = []
-    for faction in factions[:20]:
+    for faction in factions:
+        if faction in collapsed_factions:
+            continue
+        if len(normalized) >= 60:
+            break
         base = defaults.get(faction, {"faction": faction, "currentRuler": {}, "rulerHistory": [], "dynasties": []})
         prev = prev_rows.get(faction, base)
         row = incoming_rows.get(faction, prev)
@@ -6711,18 +6736,22 @@ def _canonicalize_world_state(prev_state, state):
     return normalized
 
 
-def _call_claude(prev_state, pending_lore):
-    from anthropic import Anthropic
+# Appended to the shared tick user message when using OpenAI (nudge tool/continuity; same base prompt as Claude).
+_OPENAI_TICK_TOOL_CONTINUITY = (
+    "You must call update_world_state exactly once with the complete next-tick world JSON. "
+    "Preserve schema and causal continuity with the previous state; increment tick and world_date; no free-form prose—only the tool call."
+)
 
-    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
+def _build_simulation_user_content(prev_state, pending_lore) -> str:
+    """Single tick user prompt for both Claude and OpenAI (no provider-specific lines here)."""
     pending_text = ""
     if pending_lore:
         entries = "\n---\n".join(item.get("text", "") for item in pending_lore)
         pending_text = f"\n\nGOD LORE INJECTED THIS TICK:\n{entries}"
 
     if prev_state:
-        user_content = (
+        return (
             f"Previous world state:\n{json.dumps(prev_state, indent=2)}"
             f"{pending_text}\n\n"
             "Simulate the next day.\n"
@@ -6749,17 +6778,79 @@ def _call_claude(prev_state, pending_lore):
             "plus faction_resources, population_state, leadership_state, house_characters, trade_routes, faction_identities, region_control, relationships with trust/hostility, "
             "faction_knowledge, remembered_events, seer_journey, seer_state, ruler_states, belief_currents, and religious_factions."
         )
-    else:
-        user_content = (
-            "Generate the initial world state for tick 0, representing the first simulated day. "
-            "Seed the world with several ongoing tensions already in motion rather than isolated incidents. "
-            "The world is in a state of uneasy tension across all factions. "
-            "Initialize believable resource baselines, population_state baselines, leadership_state baselines, house_characters baselines, active trade relationships, faction identities, region control, "
-            "relationship trust/hostility, faction knowledge limits, remembered events, an initial Seer state, ruler archetypes, "
-            "and the earliest seeds of belief and interpretation."
-            f"{pending_text}"
-        )
+    return (
+        "Generate the initial world state for tick 0, representing the first simulated day. "
+        "Seed the world with several ongoing tensions already in motion rather than isolated incidents. "
+        "The world is in a state of uneasy tension across all factions. "
+        "Initialize believable resource baselines, population_state baselines, leadership_state baselines, house_characters baselines, active trade relationships, faction identities, region control, "
+        "relationship trust/hostility, faction knowledge limits, remembered events, an initial Seer state, ruler archetypes, "
+        "and the earliest seeds of belief and interpretation."
+        f"{pending_text}"
+    )
 
+
+def _world_state_openai_tool():
+    """Maps WORLD_STATE_TOOL to OpenAI Chat Completions function format."""
+    return {
+        "type": "function",
+        "function": {
+            "name": WORLD_STATE_TOOL["name"],
+            "description": WORLD_STATE_TOOL["description"],
+            "parameters": WORLD_STATE_TOOL["input_schema"],
+        },
+    }
+
+
+def _strip_nulls_from_model_obj(raw_input):
+    # Strip null bytes that models occasionally embed in long string fields.
+    # json.dumps → replace → json.loads is the safest round-trip approach.
+    try:
+        clean_json = json.dumps(raw_input).replace("\x00", "")
+        return json.loads(clean_json)
+    except Exception:
+        return raw_input
+
+
+def _finalize_llm_state(prev_state, raw_input):
+    result = _normalize_state(prev_state, raw_input)
+    result["real_timestamp"] = datetime.now().isoformat()
+    return result
+
+
+def _call_openai(prev_state, pending_lore):
+    from openai import OpenAI
+
+    api_key = (os.getenv("OPENAI_API_KEY") or "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
+
+    user_content = _build_simulation_user_content(prev_state, pending_lore) + "\n\n" + _OPENAI_TICK_TOOL_CONTINUITY
+
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model=openai_model_name(),
+        max_tokens=16384,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_content},
+        ],
+        tools=[_world_state_openai_tool()],
+        tool_choice={"type": "function", "function": {"name": "update_world_state"}},
+    )
+    message = response.choices[0].message
+    tcalls = message.tool_calls
+    if not tcalls or not tcalls[0].function.arguments:
+        raise RuntimeError("OpenAI did not return a valid update_world_state tool call")
+    raw_input = json.loads(tcalls[0].function.arguments)
+    raw_input = _strip_nulls_from_model_obj(raw_input)
+    return _finalize_llm_state(prev_state, raw_input)
+
+
+def _call_claude(prev_state, pending_lore):
+    from anthropic import Anthropic
+
+    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    user_content = _build_simulation_user_content(prev_state, pending_lore)
     response = client.messages.create(
         model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
         max_tokens=8192,
@@ -6770,23 +6861,46 @@ def _call_claude(prev_state, pending_lore):
     )
 
     raw_input = response.content[0].input
-    # Strip null bytes that Claude occasionally embeds in long string fields.
-    # json.dumps → replace → json.loads is the safest round-trip approach.
-    try:
-        clean_json = json.dumps(raw_input).replace("\x00", "")
-        raw_input = json.loads(clean_json)
-    except Exception:
-        pass  # if stripping fails, proceed with original
-
-    result = _normalize_state(prev_state, raw_input)
-    result["real_timestamp"] = datetime.now().isoformat()
-    return result
+    raw_input = _strip_nulls_from_model_obj(raw_input)
+    return _finalize_llm_state(prev_state, raw_input)
 
 
-def _generate_narrative_synopsis(state):
+def _llm_prose_user_message(prompt: str, max_tokens: int) -> str:
+    """
+    Chronicle and synopsis: one user message, no system prompt. Same `prompt` for both providers;
+    OpenAI gets a short continuity line appended to preserve voice.
+    """
+    prov = resolve_aeloria_llm_provider()
+    if prov == "openai":
+        from openai import OpenAI
+
+        api_key = (os.getenv("OPENAI_API_KEY") or "").strip()
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+        client = OpenAI(api_key=api_key)
+        p = (
+            prompt
+            + "\n\nContinuity: keep the same dark literary Aeloria narrative voice; no meta-commentary, no preface, no out-of-world framing."
+        )
+        response = client.chat.completions.create(
+            model=openai_model_name(),
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": p}],
+        )
+        return (response.choices[0].message.content or "").strip()
+
     from anthropic import Anthropic
 
     client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    response = client.messages.create(
+        model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return (response.content[0].text or "").strip()
+
+
+def _generate_narrative_synopsis(state):
     try:
         chronicles = []
         if HISTORY_DIR.exists():
@@ -6814,12 +6928,7 @@ Do not list every event. Find the narrative spine: the core conflict, the key pl
 Write in a dark, literary, present-tense voice.
 Use specific character and place names. End on the tension that defines this moment in history."""
 
-        response = client.messages.create(
-            model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
-            max_tokens=800,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
+        text = _llm_prose_user_message(prompt, 800)
         SYNOPSIS_FILE.write_text(text, encoding="utf-8")
         logger.info(f"Narrative synopsis updated for tick {current_tick}")
         return text
@@ -6829,27 +6938,15 @@ Use specific character and place names. End on the tension that defines this mom
 
 
 def _generate_chronicle(state):
-    from anthropic import Anthropic
-
-    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     try:
-        response = client.messages.create(
-            model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
-            max_tokens=1200,
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        "You are the narrator of Aeloria. Write 2-3 evocative paragraphs describing what happened "
-                        "this day in the world. Write in past tense, literary prose, as if narrating an epic fantasy novel. "
-                        f"Draw from these events: {json.dumps(state, indent=2)}. "
-                        "Do not use bullet points. Be specific with character names and place names. "
-                        "Write in a dark, cinematic tone."
-                    ),
-                }
-            ],
+        prompt = (
+            "You are the narrator of Aeloria. Write 2-3 evocative paragraphs describing what happened "
+            "this day in the world. Write in past tense, literary prose, as if narrating an epic fantasy novel. "
+            f"Draw from these events: {json.dumps(state, indent=2)}. "
+            "Do not use bullet points. Be specific with character names and place names. "
+            "Write in a dark, cinematic tone."
         )
-        text = response.content[0].text
+        text = _llm_prose_user_message(prompt, 1200)
         HISTORY_DIR.mkdir(exist_ok=True)
         chronicle_path = HISTORY_DIR / f"chronicle_{state['tick']}.txt"
         chronicle_path.write_text(text, encoding="utf-8")
@@ -7148,6 +7245,9 @@ def updateWorld(world, prev_world=None):
     from diplomatic_faction_decisions import run_diplomatic_faction_decisions
     run_diplomatic_faction_decisions(world)
 
+    from faction_lifecycle import run_faction_lifecycle
+    run_faction_lifecycle(world, prev_world or {})
+
     _apply_tick_lifecycle_report(world)
 
     return world
@@ -7166,8 +7266,13 @@ def run_tick():
                 prev_state = {}
             pending_lore = _load_pending_lore()
 
+            _prov = resolve_aeloria_llm_provider()
+            logger.info("Aeloria LLM provider: %s", _prov)
             try:
-                new_state = _call_claude(prev_state, pending_lore)
+                if _prov == "openai":
+                    new_state = _call_openai(prev_state, pending_lore)
+                else:
+                    new_state = _call_claude(prev_state, pending_lore)
             except Exception as llm_exc:
                 # Keep the world moving even if external LLM calls are unavailable
                 # (for example: exhausted API credits, timeouts, provider outages).

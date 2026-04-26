@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { regions } from '@/data/regions';
+import type { RegionDefinition } from '@/data/regions';
+import { getDataBounds, regionPathD, findRegionAtViewPoint, worldStateKeyForRegion } from '@/lib/mapGeography';
 import { buildHexLandMask } from '@/lib/mapLandMask';
 
 type HexTile = { id: string; x: number; y: number; row: number; col: number };
@@ -12,6 +15,7 @@ type LoreResponse = { locations?: LoreLocation[] };
 type WorldRegionRow = {
   name?: string;
   controller?: string;
+  canonical_faction?: string;
   factionId?: string;
   owner?: string;
 };
@@ -104,7 +108,8 @@ function buildHexGrid(): HexTile[] {
   let index = 0;
   for (let row = 0; ; row += 1) {
     const y = row * HEX_VERTICAL_STEP;
-    if (y > VIEWBOX_HEIGHT + HEX_HEIGHT) break;
+    // Extra vertical extent so the bottom of the art (incl. ocean) gets full coverage without shifting old hex indices
+    if (y > VIEWBOX_HEIGHT + 2 * HEX_HEIGHT) break;
     const rowOffset = row % 2 === 0 ? 0 : HEX_WIDTH * 0.5;
     for (let col = 0; ; col += 1) {
       const x = col * HEX_HORIZONTAL_STEP + rowOffset;
@@ -310,8 +315,11 @@ function locationForHex(x: number, y: number): MapLocation | null {
   return insideBest || nearest;
 }
 
-/** Lore atlas under `public/`. Replace the file or set `NEXT_PUBLIC_MAP_ATLAS_URL` (e.g. `/map/aeloria-atlas.png`). */
-const MAP_ATLAS_SRC = process.env.NEXT_PUBLIC_MAP_ATLAS_URL || '/aeloria-lore-map-v2.png';
+/**
+ * Basemap in `public/`. Default: your paint reference (`aeloria-basemap-paint.png`). Override with
+ * `NEXT_PUBLIC_MAP_ATLAS_URL` (e.g. `/aeloria-basemap-isometric.png` or OpenAI output).
+ */
+const MAP_ATLAS_SRC = process.env.NEXT_PUBLIC_MAP_ATLAS_URL || '/aeloria-basemap-paint.png';
 
 type MapView = { x: number; y: number; k: number };
 
@@ -542,8 +550,23 @@ function useMapViewport() {
   };
 }
 
+function regionControllerLabel(world: WorldResponse | null, r: RegionDefinition): string {
+  if (!world?.regions) return '—';
+  const key = worldStateKeyForRegion(r);
+  const row = world.regions[key] as WorldRegionRow | undefined;
+  if (!row) return '—';
+  return String(row.controller || row.canonical_faction || '—');
+}
+
 export default function FantasyMap() {
   const hexTiles = useMemo(() => buildHexGrid(), []);
+  const dataBounds = useMemo(() => getDataBounds(regions), []);
+  /** On by default so the hex layer covers land + water for painting. */
+  const [showStrategicHex, setShowStrategicHex] = useState(true);
+  /** When false, lore region shapes are for hit-test / hover only — no sim faction wash. */
+  const [showPoliticalTints, setShowPoliticalTints] = useState(false);
+  const [hoveredRegion, setHoveredRegion] = useState<RegionDefinition | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<RegionDefinition | null>(null);
   const [world, setWorld] = useState<WorldResponse | null>(null);
   const [loreLocations, setLoreLocations] = useState<LoreLocation[]>([]);
   const [configMode, setConfigMode] = useState<ConfigMode>('core');
@@ -638,13 +661,6 @@ export default function FantasyMap() {
   }, [activeLocationId, speciesByLocation]);
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[MapDebug] selected hex locationId:', activeLocationId || null);
-    // eslint-disable-next-line no-console
-    console.log('[MapDebug] species options for location:', locationFactionOptions);
-  }, [activeLocationId, locationFactionOptions]);
-
-  useEffect(() => {
     // Auto-select a paint faction when nothing is selected (lore for this location, else any).
     if (!selectedFactionId) {
       setSelectedFactionId(locationFactionOptions[0]?.id || allPaintFactionOptions[0]?.id || '');
@@ -672,18 +688,18 @@ export default function FantasyMap() {
     setLayoutsByConfig((prev) => {
       if (prev[configKey]) return prev;
       const seeded: Record<string, string | null> = {};
-      for (const hex of hexTiles) seeded[hex.id] = backendOwnership?.[hex.id] ?? null;
+      for (const hex of hexTiles) seeded[hex.id] = null;
       return { ...prev, [configKey]: seeded };
     });
-  }, [backendOwnership, configKey, hexTiles]);
+  }, [configKey, hexTiles]);
 
   const effectiveOwnership = useMemo(() => {
     const layout = layoutsByConfig[configKey];
     if (layout) return layout;
     const seeded: Record<string, string | null> = {};
-    for (const hex of hexTiles) seeded[hex.id] = backendOwnership?.[hex.id] ?? null;
+    for (const hex of hexTiles) seeded[hex.id] = null;
     return seeded;
-  }, [backendOwnership, configKey, hexTiles, layoutsByConfig]);
+  }, [configKey, hexTiles, layoutsByConfig]);
   const factionByHex = effectiveOwnership;
 
   const mapViewport = useMapViewport();
@@ -822,8 +838,6 @@ export default function FantasyMap() {
       if (!response.ok) throw new Error('Failed to load lore data.');
       const payload = (await response.json()) as LoreResponse;
       const locations = payload.locations || [];
-      // eslint-disable-next-line no-console
-      console.log('[MapDebug] lore API response:', payload);
       setLoreLocations(locations);
     } catch (error) {
       console.error('Could not load lore data:', error);
@@ -933,6 +947,30 @@ export default function FantasyMap() {
     reset: resetMapView,
   } = mapViewport;
 
+  const polSvgRef = useRef<SVGSVGElement | null>(null);
+
+  const updatePoliticalHover = useCallback((clientX: number, clientY: number, svg: SVGSVGElement) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((clientX - rect.left) / Math.max(1, rect.width)) * VIEWBOX_WIDTH;
+    const y = ((clientY - rect.top) / Math.max(1, rect.height)) * VIEWBOX_HEIGHT;
+    setHoveredRegion(findRegionAtViewPoint(x, y, regions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT));
+  }, [dataBounds]);
+
+  const politicalFill = useCallback(
+    (r: RegionDefinition) => {
+      const id = (() => {
+        if (!world?.regions) return null;
+        const key = worldStateKeyForRegion(r);
+        const row = world.regions[key] as WorldRegionRow | undefined;
+        if (!row) return null;
+        return row.controller || row.canonical_faction || null;
+      })();
+      if (id) return colorForFaction(String(id));
+      return 'rgba(55, 55, 62, 0.38)';
+    },
+    [world],
+  );
+
   return (
     <div className="fantasy-map-shell">
       <aside className="fantasy-map-sidebar">
@@ -942,9 +980,57 @@ export default function FantasyMap() {
             Realm map
           </h2>
           <p className="fantasy-map-sidebar__description" style={{ fontSize: '0.88rem' }}>
-            Top-down atlas with a dense hex grid for territory. Scroll to zoom, middle-drag to pan, or arrow keys / WASD to move. Saved layouts record{' '}
-            <code>metadata.mapGrid</code> (v2) so future grid changes can be handled explicitly.
+            Map loads with a <strong>blank</strong> canvas: paint on the hex layer, or turn on tints. Scroll to
+            zoom, middle-drag to pan, WASD to move.
           </p>
+
+          <div className="fantasy-map-sidebar__card" style={{ marginTop: 8 }}>
+            <label
+              className="fantasy-map-sidebar__item"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+            >
+              <span>Sim political tints (regions)</span>
+              <input
+                type="checkbox"
+                checked={showPoliticalTints}
+                onChange={(e) => setShowPoliticalTints(e.target.checked)}
+              />
+            </label>
+            <label
+              className="fantasy-map-sidebar__item"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 6 }}
+            >
+              <span>Strategic hex grid (paint)</span>
+              <input
+                type="checkbox"
+                checked={showStrategicHex}
+                onChange={(e) => setShowStrategicHex(e.target.checked)}
+              />
+            </label>
+            {selectedRegion && (
+              <div style={{ marginTop: 10, fontSize: '0.85rem', lineHeight: 1.5 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <strong>{selectedRegion.name}</strong>
+                  <button
+                    type="button"
+                    className="fantasy-map-sidebar__item"
+                    style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                    onClick={() => setSelectedRegion(null)}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div style={{ marginTop: 6, color: 'rgba(246,235,209,0.75)' }}>{selectedRegion.description}</div>
+                <div style={{ marginTop: 8 }}>
+                  <span style={{ color: 'rgba(246,235,209,0.6)' }}>Controller: </span>
+                  {regionControllerLabel(world, selectedRegion)}
+                </div>
+              </div>
+            )}
+            {hoveredRegion && !selectedRegion && (
+              <p style={{ marginTop: 8, fontSize: '0.8rem', opacity: 0.75 }}>Hover: {hoveredRegion.name}</p>
+            )}
+          </div>
 
           <div className="fantasy-map-sidebar__card" style={{ marginTop: 8 }}>
             <h3 className="fantasy-map-sidebar__label" style={{ marginTop: 0 }}>
@@ -1232,12 +1318,75 @@ export default function FantasyMap() {
                   onLoad={reapplyMapBounds}
                 />
                 <svg
+                  ref={polSvgRef}
+                  viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+                  preserveAspectRatio="none"
+                  className="fantasy-map-political"
+                  onPointerMove={(e) => {
+                    if (showStrategicHex) return;
+                    updatePoliticalHover(e.clientX, e.clientY, e.currentTarget);
+                  }}
+                  onPointerLeave={() => {
+                    if (!showStrategicHex) setHoveredRegion(null);
+                  }}
+                  onClick={(e) => {
+                    if (showStrategicHex) return;
+                    const el = e.currentTarget;
+                    const rect = el.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * VIEWBOX_WIDTH;
+                    const y = ((e.clientY - rect.top) / Math.max(1, rect.height)) * VIEWBOX_HEIGHT;
+                    setSelectedRegion(
+                      findRegionAtViewPoint(x, y, regions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT),
+                    );
+                  }}
+                  style={{ pointerEvents: showStrategicHex ? 'none' : 'auto' }}
+                >
+                  {regions.map((r) => {
+                    const d = regionPathD(r, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
+                    const isH = hoveredRegion?.id === r.id;
+                    const isS = selectedRegion?.id === r.id;
+                    const simFill = politicalFill(r);
+                    const fill = showPoliticalTints ? simFill : 'transparent';
+                    const fillOpacity = showPoliticalTints
+                      ? isS
+                        ? 0.55
+                        : isH
+                          ? 0.5
+                          : 0.34
+                      : 0;
+                    const stroke = showPoliticalTints
+                      ? isS
+                        ? 'rgba(255,250,220,0.85)'
+                        : isH
+                          ? 'rgba(200,220,255,0.75)'
+                          : 'rgba(0,0,0,0.35)'
+                      : isS
+                        ? 'rgba(255,250,220,0.9)'
+                        : isH
+                          ? 'rgba(200,220,255,0.55)'
+                          : 'transparent';
+                    return (
+                      <path
+                        key={r.id}
+                        d={d}
+                        fill={fill}
+                        fillOpacity={fillOpacity}
+                        stroke={stroke}
+                        strokeWidth={showPoliticalTints && !isH && !isS ? 0.28 : isH || isS || showPoliticalTints ? 0.4 : 0}
+                        vectorEffect="non-scaling-stroke"
+                        style={{ transition: 'fill-opacity 0.12s, stroke 0.12s' }}
+                      />
+                    );
+                  })}
+                </svg>
+                <svg
                   viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
                   preserveAspectRatio="none"
                   className="fantasy-map-hexes"
                   onMouseDown={() => setIsMouseDown(true)}
                   onMouseUp={() => setIsMouseDown(false)}
                   onMouseLeave={() => setIsMouseDown(false)}
+                  style={{ pointerEvents: showStrategicHex ? 'auto' : 'none' }}
                 >
                   {hexTiles.map((hex) => {
                     const isSea = landByHex != null && landByHex[hex.id] === false;
@@ -1245,21 +1394,45 @@ export default function FantasyMap() {
                     const factionId = factionByHex?.[hex.id] ?? null;
                     const hasManualLocation = Object.prototype.hasOwnProperty.call(locationByHex, hex.id);
                     const manualLocation = hasManualLocation ? locationByHex[hex.id] : null;
+                    const geometryLocationId = locationForHex(hex.x, hex.y)?.id || null;
                     const resolvedLocationId =
-                      manualLocation === '' ? null : manualLocation || locationForHex(hex.x, hex.y)?.id || null;
+                      manualLocation === ''
+                        ? null
+                        : manualLocation || (isLocationPaintMode ? geometryLocationId : null);
                     const factionFill = factionId ? colorForFaction(factionId) : null;
                     const locationFill = resolvedLocationId
                       ? locationColors[resolvedLocationId] || colorForFaction(`location-${resolvedLocationId}`)
                       : null;
-                    const fill = isSea ? 'rgba(36, 74, 110, 0.44)' : factionFill ? factionFill : locationFill ? locationFill : '#222';
-                    const fillOpacity = isSea ? (isHovered ? 0.18 : 0.1) : factionFill ? 1 : locationFill ? 0.5 : 0.22;
-                    const stroke = isSea
-                      ? isHovered
-                        ? 'rgba(172, 218, 255, 0.5)'
-                        : 'rgba(136, 184, 228, 0.2)'
-                      : isHovered
-                        ? 'rgba(188, 240, 255, 0.95)'
-                        : 'rgba(200, 215, 255, 0.35)';
+                    const hasPaint = Boolean(factionFill || (resolvedLocationId && hasManualLocation));
+                    const fill = isSea
+                      ? 'transparent'
+                      : factionFill
+                        ? factionFill
+                        : locationFill
+                          ? locationFill
+                          : 'transparent';
+                    const baseOp = isSea
+                      ? 0
+                      : factionFill
+                        ? 1
+                        : locationFill
+                          ? 0.5
+                          : 0;
+                    const fillOpacity = hasPaint || (locationFill && !isSea) ? baseOp : 0;
+                    const isEmpty = fillOpacity === 0;
+                    const stroke = (() => {
+                      if (isHovered) {
+                        return isSea ? 'rgba(160, 210, 255, 0.7)' : 'rgba(188, 240, 255, 0.9)';
+                      }
+                      if (isEmpty) {
+                        // Land + water: same grid weight so ocean isn’t a dead zone
+                        return isSea
+                          ? 'rgba(200, 220, 255, 0.34)'
+                          : 'rgba(210, 218, 240, 0.36)';
+                      }
+                      if (isSea) return 'rgba(150, 195, 240, 0.45)';
+                      return 'rgba(200, 215, 255, 0.38)';
+                    })();
                     return (
                       <polygon
                         key={hex.id}
@@ -1267,7 +1440,7 @@ export default function FantasyMap() {
                         fill={fill}
                         fillOpacity={isHovered ? Math.min(fillOpacity + 0.12, 1) : fillOpacity}
                         stroke={stroke}
-                        strokeWidth={isSea ? 0.045 : 0.06}
+                        strokeWidth={0.07}
                         vectorEffect="non-scaling-stroke"
                         style={{ cursor: 'pointer', pointerEvents: 'auto' }}
                         onMouseEnter={() => {
@@ -1278,15 +1451,6 @@ export default function FantasyMap() {
                         onClick={() => {
                           setSelectedHexId(hex.id);
                           handleHexPaintClick(hex);
-                          // eslint-disable-next-line no-console
-                          console.log('Hex clicked:', {
-                            id: hex.id,
-                            row: hex.row,
-                            col: hex.col,
-                            location: activeLocationName || 'Unclaimed',
-                            factionId: factionId ?? null,
-                            factionName: (factionId ? factionNameById.get(factionId) : null) || factionId || 'Unclaimed',
-                          });
                         }}
                       />
                     );

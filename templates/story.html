@@ -99,11 +99,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="story-wrap">
-  <div class="story-eyebrow">The Story So Far</div>
-  <div class="story-title">Aeloria</div>
-  <div class="story-date" id="story-date">Loading…</div>
+<header class="cine-hero" data-bg="/static/illustrations/ui/heroes/story.png">
+  <div class="cine-hero-bg"></div>
+  <div class="cine-hero-veil"></div>
+  <div class="cine-hero-rays" aria-hidden="true"></div>
+  <div class="cine-hero-fog"  aria-hidden="true"></div>
+  <div class="cine-hero-grain" aria-hidden="true"></div>
+  <div class="cine-hero-vignette" aria-hidden="true"></div>
+  <div class="cine-hero-inner">
+    <p class="cine-kicker">The Story So Far</p>
+    <h1 class="cine-title">Aeloria</h1>
+    <div class="cine-rule">
+      <span class="cine-rule-diamond"></span>
+      <span id="story-date">Loading…</span>
+      <span class="cine-rule-diamond"></span>
+    </div>
+  </div>
+</header>
 
+<div class="story-wrap">
   <div class="story-divider">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--gold-dim)">
       <path d="M8 1l1.5 4.5H14l-3.75 2.75 1.5 4.5L8 10l-3.75 2.75 1.5-4.5L2 5.5h4.5z"/>

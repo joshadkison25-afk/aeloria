@@ -244,6 +244,7 @@ def _make_child(
         "role": "Child of the line",
         "status": "alive",
         "age": 0.0,
+        "birth_tick": int(state.get("tick", 0) or 0),
         "sex": random.choice(["male", "female"]),
         "race": race,
         "influenceScore": _inherit_int(

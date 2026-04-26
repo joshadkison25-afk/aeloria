@@ -153,6 +153,87 @@
     display: none;
   }
 
+  /* ── Current Chapter (Story So Far) ─────────────────────── */
+  .chronicle-chapter-spread {
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201, 169, 110, 0.07), transparent 55%),
+      linear-gradient(180deg, rgba(12, 10, 14, 0.98) 0%, rgba(8, 7, 10, 0.99) 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(201, 169, 110, 0.06),
+      0 24px 80px rgba(0, 0, 0, 0.45);
+    padding: 40px 44px 48px;
+    margin-bottom: 8px;
+  }
+  .chronicle-chapter-kicker {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .chronicle-chapter-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(26px, 3.2vw, 36px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .chronicle-chapter-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .chronicle-chapter-stat {
+    min-width: 120px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: rgba(6, 6, 8, 0.85);
+  }
+  .chronicle-chapter-stat-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .chronicle-chapter-stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .chronicle-chapter-body {
+    font-family: 'Crimson Text', serif;
+    font-size: 20px;
+    line-height: 1.95;
+    color: var(--text-sec);
+    max-width: 52rem;
+  }
+  .chronicle-chapter-body p + p {
+    margin-top: 1.35em;
+  }
+  .chronicle-chapter-empty {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .chronicle-chapter-footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
   .chronicle-section-title {
     font-family: 'Cinzel', serif;
     font-size: 28px;
@@ -701,15 +782,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="chronicle-hero">
-  <div class="container">
-    <div class="section-header" style="margin-bottom:0">
-      <p class="section-label">The Chronicle of Aeloria</p>
-      <h1 class="section-title" style="font-size:52px">THE LIVING BOOK</h1>
-      <p class="section-subtitle">Being a true account of events in the Fractured Age, as recorded by those who survived long enough to name them.</p>
+<header class="cine-hero cine-hero--epic" data-bg="/static/illustrations/ui/heroes/chronicle.png">
+  <div class="cine-hero-bg"></div>
+  <div class="cine-hero-veil"></div>
+  <div class="cine-hero-rays" aria-hidden="true"></div>
+  <div class="cine-hero-fog"  aria-hidden="true"></div>
+  <div class="cine-hero-grain" aria-hidden="true"></div>
+  <div class="cine-hero-vignette" aria-hidden="true"></div>
+  <div class="cine-hero-inner">
+    <p class="cine-kicker">The Chronicle of Aeloria</p>
+    <h1 class="cine-title">The Living Book</h1>
+    <div class="cine-rule">
+      <span class="cine-rule-diamond"></span>
+      The Fractured Age
+      <span class="cine-rule-diamond"></span>
     </div>
+    <p class="cine-flourish">A true account of events as recorded by those who survived long enough to name them.</p>
   </div>
-</div>
+</header>
 
 <div class="chronicle-filterbar">
   <div class="chronicle-filterbar-inner">
@@ -724,7 +814,13 @@
   </div>
 
   <div class="chronicle-card-grid" id="chronicle-card-grid">
-    <button class="chronicle-section-card active" type="button" data-chronicle-section="history">
+    <button class="chronicle-section-card" type="button" data-chronicle-section="chapter">
+      <div class="chronicle-card-type">Living Narrative</div>
+      <div class="chronicle-card-name">Current Chapter</div>
+      <div class="chronicle-card-copy">The Story So Far — the monthly synopsis of the realm, written from the living simulation and refreshed each tick.</div>
+      <div class="chronicle-card-meta"></div>
+    </button>
+    <button class="chronicle-section-card" type="button" data-chronicle-section="history">
       <div class="chronicle-card-type">Chronicle Section</div>
       <div class="chronicle-card-name">History</div>
       <div class="chronicle-card-copy">The living timeline of Aeloria, collected as chapter records across the Fractured Age.</div>
@@ -812,8 +908,14 @@ let chronicleEntries = [];
 let chronicleSection = 'history';
 let worldState = null;
 let selectedRulerFaction = '';
+let storyPayload = { exists: false, text: '' };
 
 const CHRONICLE_SECTIONS = {
+  chapter: {
+    title: 'Current Chapter',
+    copy: 'The Story So Far — a readable synopsis of the realm as of the latest tick. This is the same narrative that once lived on the Story page; it is now the opening spread of the Chronicle.',
+    mode: 'story'
+  },
   history: {
     title: 'History',
     copy: 'The living chapter record of Aeloria, arranged as a continuous historical ledger.',
@@ -935,6 +1037,23 @@ function syncChronicleSectionUi() {
 }
 
 function sectionStatMarkup(meta) {
+  if (chronicleSection === 'chapter') {
+    const words = storyPayload.exists
+      ? String(storyPayload.text || '').trim().split(/\s+/).filter(Boolean).length
+      : 0;
+    const stats = [
+      { label: 'World Day', value: String(worldState?.tick ?? '—') },
+      { label: 'World Date', value: worldState?.world_date || '—' },
+      { label: 'Words', value: String(words) },
+      { label: 'Mode', value: 'Living Synopsis' }
+    ];
+    return stats.map(stat => `
+    <div class="chronicle-intro-stat">
+      <div class="chronicle-intro-stat-label">${escapeHtml(stat.label)}</div>
+      <div class="chronicle-intro-stat-value">${escapeHtml(stat.value)}</div>
+    </div>
+  `).join('');
+  }
   const archive = buildSectionLibrary();
   const section = archive[chronicleSection] || { records: [] };
   const records = section.records || [];
@@ -958,6 +1077,18 @@ function syncChronicleCardMeta() {
     const section = button.dataset.chronicleSection;
     const meta = button.querySelector('.chronicle-card-meta');
     if (!meta) return;
+
+    if (section === 'chapter') {
+      const ready = !!(storyPayload.exists && String(storyPayload.text || '').trim());
+      const words = ready
+        ? String(storyPayload.text || '').trim().split(/\s+/).filter(Boolean).length
+        : 0;
+      meta.innerHTML = `
+        <span class="chronicle-card-badge ${ready ? 'is-live' : 'is-empty'}">${ready ? 'Synopsis Ready' : 'Awaiting Tick'}</span>
+        <span class="chronicle-card-badge">${ready ? `${words} words` : '—'}</span>
+      `;
+      return;
+    }
 
     const count = archive[section]?.records?.length || 0;
     const label = count === 1 ? 'record' : 'records';
@@ -1089,6 +1220,14 @@ function buildSectionLibrary() {
   ]).slice(0, 8);
 
   return {
+    chapter: {
+      records: [],
+      catalog: [
+        { label: 'Source', value: 'Tick-generated synopsis' },
+        { label: 'Endpoint', value: '/api/story' },
+        { label: 'Status', value: storyPayload.exists && String(storyPayload.text || '').trim() ? 'Written' : 'Awaiting first tick' }
+      ]
+    },
     history: {
       records: chronicleEntries
     },
@@ -1347,10 +1486,53 @@ function renderRulersArchive() {
   });
 }
 
+function renderCurrentChapter() {
+  const container = document.getElementById('chronicle-list');
+  const tick = worldState?.tick ?? '—';
+  const date = worldState?.world_date || '';
+  const searchBlob = `${tick} ${date} ${storyPayload.text || ''}`.toLowerCase();
+
+  if (!storyPayload.exists || !String(storyPayload.text || '').trim()) {
+    container.innerHTML = `
+      <div class="chronicle-chapter-spread" data-search="${escapeHtml(searchBlob)}">
+        <div class="chronicle-chapter-kicker">The Story So Far</div>
+        <h2 class="chronicle-chapter-title">The quill has not yet touched the page</h2>
+        <p class="chronicle-chapter-empty">The world has not yet told its story. Advance a simulation tick to generate the first chapter — it will appear here and in the monthly synopsis file.</p>
+      </div>`;
+    return;
+  }
+
+  const paras = String(storyPayload.text || '').trim().split(/\n\n+/).filter(Boolean);
+  container.innerHTML = `
+    <div class="chronicle-chapter-spread" data-search="${escapeHtml(searchBlob)}">
+      <div class="chronicle-chapter-kicker">The Story So Far</div>
+      <h2 class="chronicle-chapter-title">Aeloria — as the realm remembers this season</h2>
+      <div class="chronicle-chapter-stats">
+        <div class="chronicle-chapter-stat">
+          <div class="chronicle-chapter-stat-label">World Day</div>
+          <div class="chronicle-chapter-stat-value">${escapeHtml(String(tick))}</div>
+        </div>
+        <div class="chronicle-chapter-stat">
+          <div class="chronicle-chapter-stat-label">In-World Date</div>
+          <div class="chronicle-chapter-stat-value">${escapeHtml(date || '—')}</div>
+        </div>
+      </div>
+      <div class="chronicle-chapter-body">
+        ${paras.map(p => `<p>${escapeHtml(p.trim())}</p>`).join('')}
+      </div>
+      <div class="chronicle-chapter-footer">Updated each tick · Reflects the world as of the last recorded month in the simulation</div>
+    </div>`;
+}
+
 function renderSection() {
   const sectionMeta = CHRONICLE_SECTIONS[chronicleSection] || CHRONICLE_SECTIONS.history;
   const library = buildSectionLibrary()[chronicleSection] || { records: [] };
   renderCatalog(sectionMeta, library);
+
+  if (chronicleSection === 'chapter') {
+    renderCurrentChapter();
+    return;
+  }
 
   if (sectionMeta.mode === 'entries') {
     renderChronicle(visibleChronicleEntries());
@@ -1386,14 +1568,25 @@ function setChronicleSection(section, { replaceHistory = false } = {}) {
 
 async function loadChronicle() {
   try {
-    const [chronicleResponse, stateResponse] = await Promise.all([
+    const [chronicleResponse, stateResponse, storyResponse] = await Promise.all([
       fetch('/api/chronicle'),
-      fetch('/api/state')
+      fetch('/api/state'),
+      fetch('/api/story')
     ]);
     chronicleEntries = await chronicleResponse.json();
     worldState = await stateResponse.json();
+    storyPayload = await storyResponse.json();
+    if (!storyPayload || typeof storyPayload !== 'object') storyPayload = { exists: false, text: '' };
+
     syncChronicleCardMeta();
-    const initialSection = new URL(window.location.href).searchParams.get('section') || 'history';
+
+    const url = new URL(window.location.href);
+    let initialSection = url.searchParams.get('section') || '';
+    if (!initialSection && url.hash === '#chapter') initialSection = 'chapter';
+    if (!initialSection) {
+      initialSection = (storyPayload.exists && String(storyPayload.text || '').trim()) ? 'chapter' : 'history';
+    }
+    if (!CHRONICLE_SECTIONS[initialSection]) initialSection = 'history';
     setChronicleSection(initialSection, { replaceHistory: true });
   } catch (error) {
     document.getElementById('chronicle-list').innerHTML = '<div class="chronicle-empty">The chronicle could not be loaded.</div>';

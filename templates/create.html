@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aeloria — World Creator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/aeloria-cinematic.css?v=20260426-cine-1">
+  <script defer src="/static/js/aeloria-cinematic.js?v=20260426-cine-1"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,9 +35,11 @@
     }
     .bg-map {
       position: fixed; inset: 0; z-index: 0;
-      background-image: url('/static/illustrations/ui/aeloria-lore-map-labeled.png');
-      background-size: cover; background-position: center;
-      opacity: 0.04; filter: saturate(0) contrast(1.2); pointer-events: none;
+      background-image: url('/static/illustrations/ui/heroes/create.png');
+      background-size: cover; background-position: 50% 52%;
+      opacity: 0.18; filter: saturate(1.0) contrast(1.18) brightness(0.55); pointer-events: none;
+      animation: cineHeroBreathe 60s ease-in-out infinite alternate;
+      transform-origin: 50% 50%;
     }
 
     /* ── Header ── */
@@ -223,7 +227,7 @@
     @keyframes dotPulse{0%,100%{transform:scale(0.6);opacity:0.4}50%{transform:scale(1);opacity:1}}
   </style>
 </head>
-<body>
+<body class="cine">
 <div class="bg"></div>
 <div class="bg-map"></div>
 

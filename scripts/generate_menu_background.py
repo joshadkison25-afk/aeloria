@@ -23,12 +23,22 @@ SIZE = (os.getenv("OPENAI_IMAGE_SIZE") or "1536x1024").strip()
 OUT_FILE = ROOT / "public" / "aeloria-menu-cinematic-bg.png"
 
 PROMPT = (
-    "Cinematic dark-fantasy main menu background for a strategy game called Aeloria, wide composition, "
-    "no text, no logos, no UI elements. Colossal mountain citadel and ancient city lights in a misty valley, "
-    "moonlit clouds, dramatic god rays, distant floating embers, deep blue-black sky with subtle stars, "
-    "warm amber torchlight accents, epic atmospheric depth, painterly but high-detail, elegant and moody, "
-    "designed to sit behind menu panels without distracting readability, strong center-left focal area and "
-    "calmer right side for UI, ultra high quality concept art style."
+    "Cinematic AAA-game main menu key art for a dark high-fantasy living-world strategy game called "
+    "Aeloria. Ultra-wide painterly oil-painting composition, no text, no logos, no UI elements, no "
+    "characters in the foreground. A divine vantage point at twilight looking down across an entire "
+    "ancient realm: in the middle distance a colossal weathered stone citadel crowns a shadowed mountain, "
+    "warm amber torchlight glowing along its battlements and spilling from arched cathedral windows; "
+    "below it, a winding silver river cuts through misty valleys threaded with smaller walled kingdoms "
+    "whose ramparts glitter with distant firelight; jagged blue-black peaks fade into atmospheric haze "
+    "on the horizon; ancient forests on the slopes, the suggestion of a road winding into the distance. "
+    "Above, a dramatic broken-cloud sky parted by colossal golden god rays, a single immense pale moon "
+    "(or a soft solar disc) just rising behind the citadel, faint constellations and slow drifting embers, "
+    "wisps of low fog. Cinematic painterly concept-art style — deep blue-black with rich warm amber and "
+    "bronze torchlight accents, profound stillness, sacred and mysterious, immense atmospheric depth and "
+    "scale. Strong focal area in the center-left third (citadel + god rays); calmer, darker right third "
+    "with simpler silhouettes intentionally reserved for menu UI. Inspired by classic high-fantasy book "
+    "covers and AAA RPG title screens (Elden Ring, Baldur's Gate 3, Skyrim) — painterly, timeless, never "
+    "photo-real, never AI-stylized. No text or logos anywhere in the image."
 )
 
 

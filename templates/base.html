@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}Aeloria{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aeloria-cinematic.css') }}?v=20260426-cine-2"/>
+  <script defer src="{{ url_for('static', filename='js/aeloria-cinematic.js') }}?v=20260426-cine-2"></script>
   {% block head %}{% endblock %}
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -453,7 +455,7 @@
     }
   </style>
 </head>
-<body>
+<body class="cine">
 
 <!-- NAV -->
 <nav class="nav">
@@ -471,7 +473,7 @@
       <span class="nav-date" id="nav-date">—</span>
       <span class="nav-tick-pill" id="nav-tick">Tick —</span>
     </div>
-    <a href="/menu" class="nav-link" style="margin-left:auto;border:1px solid rgba(201,169,110,0.3);padding:5px 14px;">Main Menu</a>
+    <a href="/menu" class="nav-link nav-menu-btn">Main Menu</a>
     <button class="nav-hamburger" onclick="openMobileNav()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>

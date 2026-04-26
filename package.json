@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:all": "concurrently -k -n next,flask -c cyan,magenta \"npm run dev\" \"cross-env FLASK_DEBUG=1 python app.py\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -17,6 +18,8 @@
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

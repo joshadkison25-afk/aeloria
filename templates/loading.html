@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aeloria — Shaping the World</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/aeloria-cinematic.css?v=20260426-cine-1">
+  <script defer src="/static/js/aeloria-cinematic.js?v=20260426-cine-1"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,12 +30,14 @@
     /* ── Background layers ── */
     .bg-map {
       position: fixed; inset: 0; z-index: 0;
-      background-image: url('/static/illustrations/ui/aeloria-lore-map-labeled.png');
-      background-size: cover; background-position: center;
-      opacity: 0; filter: saturate(0.3) contrast(1.1);
-      transition: opacity 2s ease;
+      background-image: url('/static/illustrations/ui/heroes/loading.png');
+      background-size: cover; background-position: 50% 52%;
+      opacity: 0; filter: saturate(1.05) contrast(1.18) brightness(0.62);
+      transition: opacity 2.4s ease;
+      animation: cineHeroBreathe 60s ease-in-out infinite alternate;
+      transform-origin: 50% 50%;
     }
-    .bg-map.visible { opacity: 0.18; }
+    .bg-map.visible { opacity: 0.55; }
 
     .bg-vignette {
       position: fixed; inset: 0; z-index: 1;
@@ -74,11 +78,21 @@
     }
 
     .main-title {
-      font-family: 'Cinzel', serif; font-size: clamp(36px, 5vw, 72px);
-      font-weight: 700; color: var(--text); letter-spacing: 0.08em; line-height: 1;
-      text-shadow: 0 0 60px rgba(201,169,110,0.2), 0 4px 24px rgba(0,0,0,0.8);
+      font-family: 'Cinzel', serif; font-size: clamp(46px, 6.4vw, 88px);
+      font-weight: 600; letter-spacing: 0.20em; text-indent: 0.20em; line-height: 1;
       margin-bottom: 14px;
-      opacity: 0; animation: fadeUp 0.9s ease 0.5s forwards;
+      background: linear-gradient(180deg, #fff7df 0%, #f4ead0 28%, #e7c285 60%, #b8893f 86%, #7a5520 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter:
+        drop-shadow(0 0 38px rgba(231,194,133,0.30))
+        drop-shadow(0 4px 0 rgba(0,0,0,0.45));
+      opacity: 0; animation: fadeUp 0.9s ease 0.5s forwards, brandPulse 6.5s ease-in-out 1.4s infinite;
+    }
+    @keyframes brandPulse {
+      0%, 100% { filter: drop-shadow(0 0 28px rgba(231,194,133,0.22)) drop-shadow(0 4px 0 rgba(0,0,0,0.45)); }
+      50%      { filter: drop-shadow(0 0 56px rgba(255,215,150,0.50)) drop-shadow(0 4px 0 rgba(0,0,0,0.45)); }
     }
 
     .subtitle {
@@ -197,7 +211,7 @@
     .ornament-diamond { color: rgba(201,169,110,0.5); font-size: 12px; }
   </style>
 </head>
-<body>
+<body class="cine">
 
 <div class="bg-map" id="bg-map"></div>
 <div class="bg-vignette"></div>

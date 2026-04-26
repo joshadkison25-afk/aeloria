@@ -10,6 +10,8 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, send_from_directory
 
+from aeloria_llm import complete_chat_anthropic_format
+
 load_dotenv()
 
 logging.basicConfig(
@@ -35,6 +37,11 @@ IMAGE_GENERATION_STATE_FILE = BASE_DIR / "image_generation_state.json"
 MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/map")
 
 app = Flask(__name__)
+
+
+@app.context_processor
+def _inject_map_public_url():
+    return {"map_public_url": MAP_PUBLIC_URL}
 
 BATTLE_PATTERNS = [
     r"\bbattle\b",
@@ -745,16 +752,33 @@ def api_custom_world():
     return jsonify({"ok": True, "factions": len(world["factions"])})
 
 
-@app.route("/map")
-def map_page():
-    # Force browser to pick up the current Next map bundle when dev cache gets sticky.
-    # Uses Map.tsx mtime as a stable cache-buster that updates whenever map code changes.
-    map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
+@app.route("/atlas-embed")
+def atlas_embed():
+    """Alias: same full-page embed as /map."""
+    return redirect("/map", code=302)
+
+
+def _map_embed_context() -> dict:
+    """Next map URL with cache-buster for the iframe (Map.tsx mtime)."""
+    try:
+        map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
+    except OSError:
+        map_ts = 0
     parsed = urlsplit(MAP_PUBLIC_URL)
     query = dict(parse_qsl(parsed.query, keep_blank_values=True))
     query["cb"] = str(map_ts)
-    target = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
-    return redirect(target, code=302)
+    map_iframe_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+    return {
+        "active_page": "map",
+        "map_public_url": MAP_PUBLIC_URL,
+        "map_iframe_url": map_iframe_url,
+    }
+
+
+@app.route("/map")
+def map_page():
+    # Full Flask page (nav + hero + iframe). The interactive map still runs inside Next.js; this is not a redirect to port 3000 alone.
+    return render_template("map.html", **_map_embed_context())
 
 
 @app.route("/codex")
@@ -784,7 +808,8 @@ def leadership_page():
 
 @app.route("/story")
 def story_page():
-    return render_template("story.html", active_page="story")
+    """The monthly synopsis now lives in Chronicle → Current Chapter."""
+    return redirect("/chronicle?section=chapter", code=302)
 
 
 @app.route("/intel")
@@ -1052,15 +1077,12 @@ Speak naturally — not like a narrator, like a person."""
     messages.append({"role": "user", "content": message})
 
     try:
-        from anthropic import Anthropic
-        client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        response = client.messages.create(
-            model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
-            max_tokens=400,
+        reply = complete_chat_anthropic_format(
             system=sys_prompt,
-            messages=messages
+            messages=messages,
+            max_tokens=400,
+            openai_continuity="Continuity: stay in character; no meta or out-of-world framing.",
         )
-        reply = response.content[0].text
 
         history.append({"role": "user", "content": message, "timestamp": datetime.now().isoformat()})
         history.append({"role": "assistant", "content": reply, "timestamp": datetime.now().isoformat()})
@@ -1157,14 +1179,13 @@ Current world state: {json.dumps(state, indent=2)}
 Write 2-3 sentences of prediction. Be specific. Assign a probability (e.g. 70% chance of...)."""
 
     try:
-        from anthropic import Anthropic
-        client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        response = client.messages.create(
-            model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
+        text = complete_chat_anthropic_format(
+            system=None,
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
-            messages=[{"role": "user", "content": prompt}]
+            openai_continuity="Continuity: keep the same analytical, in-world forecast tone.",
         )
-        return jsonify({"prediction": response.content[0].text})
+        return jsonify({"prediction": text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

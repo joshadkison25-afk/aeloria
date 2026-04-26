@@ -1,4 +1,5 @@
 anthropic
+openai>=1.0.0
 flask
 apscheduler
 watchdog

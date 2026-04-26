@@ -483,13 +483,26 @@
 
 {% block content %}
 <div id="codex-grid-view" class="codex-view">
-  <div class="page-hero">
-    <div class="container">
-      <p class="section-label">The Codex of Aeloria</p>
-      <h1 class="section-title" style="font-size:48px">ALL THAT IS KNOWN</h1>
-      <p class="section-subtitle">All that is believed. All that has been recorded. Search the living record and open any entry in full.</p>
-      <div class="filter-row" id="codex-filters"></div>
+  <header class="cine-hero" data-bg="/static/illustrations/ui/heroes/codex.png">
+    <div class="cine-hero-bg"></div>
+    <div class="cine-hero-veil"></div>
+    <div class="cine-hero-rays" aria-hidden="true"></div>
+    <div class="cine-hero-fog"  aria-hidden="true"></div>
+    <div class="cine-hero-grain" aria-hidden="true"></div>
+    <div class="cine-hero-vignette" aria-hidden="true"></div>
+    <div class="cine-hero-inner">
+      <p class="cine-kicker">The Codex of Aeloria</p>
+      <h1 class="cine-title">All That Is Known</h1>
+      <div class="cine-rule">
+        <span class="cine-rule-diamond"></span>
+        The living record
+        <span class="cine-rule-diamond"></span>
+      </div>
+      <p class="cine-flourish">All that is believed. All that has been recorded. Search the living record and open any entry in full.</p>
     </div>
+  </header>
+  <div class="container" style="padding-top:24px">
+    <div class="filter-row" id="codex-filters"></div>
   </div>
 
   <section class="section">
@@ -552,230 +565,380 @@ const CODEX_CATEGORIES = [
 ];
 
 const CODEX_ENTRIES = [
+  /* ── KINGDOMS ───────────────────────────────────────── */
   {
     id: "shadow-court",
     name: "Shadow Court",
     category: "Kingdoms",
     kind: "Kingdom",
-    summary: "The oldest continuous power in Aeloria, ruling Faerwood through patience, secrecy, and the certainty of consequence.",
-    subtitle: "Ancient sovereigns of Faerwood, older than the current age and far less interested in being understood than obeyed.",
-    facts: { Leader: "Queen Lythara the Veiled", Base: "The Black Glades", Status: "Enduring", Type: "Kingdom" },
+    summary: "The Shadow Court of Faerwood is not ruled — it is observed, manipulated, and quietly reshaped.",
+    subtitle: "Sovereigns of Faerwood, governing through patience, secrecy, and the certainty that resistance is futile.",
+    facts: { Leader: "Queen Lyathra the Veiled", Base: "Faerwood", Status: "Enduring", Type: "Kingdom" },
     body: [
-      "The Shadow Court is less a court than a continuity of rule. Dynasties elsewhere fall apart under pressure; the Dread Elves withdraw, adapt, and emerge with their ledgers balanced. Their power rests on memory, on old bargains, and on the knowledge that Faerwood always seems to know more than outsiders intended to reveal.",
-      "Clan politics define the daily shape of power. Velorn, Nythariel, and Arkenor each carry distinct ambitions, and Queen Lythara's genius lies in keeping those ambitions productive rather than catastrophic. The result is a kingdom that appears still from outside while moving constantly within.",
-      "To the rest of Aeloria, the Shadow Court represents a nightmare and a necessity. No faction trusts them. Almost every faction still prefers having them in the world to imagining what might fill the void if they vanished."
+      "Faerwood's canopy is so thick that sunlight rarely touches the forest floor. Beneath it, the Dread Elves have built a civilization of hidden paths, veiled structures, and silent watchers. Outsiders believe Faerwood is isolationist; they are wrong. Faerwood does not isolate — it infiltrates.",
+      "Power is split between three rival houses locked in a constant cold war: House Verlorn (the oldest line and current rulers, slipping), House Nightborn (assassins and executioners who want a more aggressive Faerwood), and House Shadowveil (information brokers whose spies almost certainly know more about other factions than those factions know about themselves).",
+      "The Veilkin advise the houses on omens and patterns; the Hollowlost — once human or elf, ritually stripped of identity — serve the Throne as unquestioning enforcers."
     ],
-    sidebar: { LiveFaction: "Shadow Court", Related: ["Faerwood", "Queen Lythara the Veiled", "Glenhaven Elves", "Thalor"] }
-  },
-  {
-    id: "lostfeld-dwarves",
-    name: "Lostfeld Dwarves",
-    category: "Kingdoms",
-    kind: "Kingdom",
-    summary: "A mountain kingdom built on craft, endurance, and a deep problem that has finally begun to speak back.",
-    subtitle: "The great dwarven holdfast of the north, now facing the first crisis in centuries that cannot be solved with iron alone.",
-    facts: { Leader: "Thane Ulric Ironmaul", Base: "Lostfeld", Status: "Besieged from below", Type: "Kingdom" },
-    body: [
-      "Lostfeld is the architectural answer to dwarven psychology: layered, disciplined, magnificent, and suspicious of waste. Every corridor exists for a reason. Every forge remembers the hands that fed it. Even its rituals carry the logic of engineering.",
-      "That order now trembles. The sealed districts have ceased to behave like history and have begun to behave like prophecy. Reformers, loyalists, and the nameless thing beneath the stone all claim some version of the future, and Ironmaul can no longer keep them separated.",
-      "Among surface powers, Lostfeld has always been the ally you wanted in a crisis. The terror of the current moment is that Lostfeld itself has become the crisis."
-    ],
-    sidebar: { LiveFaction: "Lostfeld Dwarves", Related: ["Thane Ulric Ironmaul", "Kessa Stonebraid", "Forge of Brammir", "Stonebreak Monastery"] }
-  },
-  {
-    id: "glenhaven-elves",
-    name: "Glenhaven Elves",
-    category: "Kingdoms",
-    kind: "Kingdom",
-    summary: "A silver-canopied realm whose grace has hardened into military precision without entirely losing its sorrow.",
-    subtitle: "The green kingdom of the south-east, where memory and discipline now prepare themselves for a war no one can stop by pretending it has not begun.",
-    facts: { Leader: "Sovereign Elowen Silverleaf", Base: "Glenhaven", Status: "Mobilizing", Type: "Kingdom" },
-    body: [
-      "Glenhaven's elegance often misleads outsiders into thinking it is soft. It is not. Its beauty is cultivated the way a sword edge is honed: deliberately, repeatedly, and for a purpose. The realm's ceremonial grace conceals an astonishing capacity for endurance.",
-      "Sovereign Elowen's court is shaped by ritual, omen-reading, and a political culture that prizes restraint over spectacle. That restraint has become ominous in recent months, as war-bands move with little public declaration and even the silence of the court begins to feel weaponized.",
-      "If the Shadow Court is feared for secrecy, Glenhaven is feared for conviction. Once its elders agree on meaning, they rarely pause to ask whether the rest of the world is ready for the consequences."
-    ],
-    sidebar: { LiveFaction: "Glenhaven Elves", Related: ["Sovereign Elowen Silverleaf", "Faerwood", "Silverflow River", "Twin Cities"] }
+    sidebar: { LiveFaction: "Shadow Court", Related: ["Faerwood", "Queen Lyathra the Veiled", "House Verlorn", "House Nightborn", "House Shadowveil"] }
   },
   {
     id: "twin-cities",
     name: "Twin Cities",
     category: "Kingdoms",
     kind: "Kingdom",
-    summary: "A single crown ruling two cities that no longer agree on what loyalty should cost.",
-    subtitle: "Eresteron and Eldoria, joined politically and split by appetite, succession, and the increasingly dangerous intelligence of their own heirs.",
-    facts: { Leader: "King Roderic Thorne II", Base: "Eresteron & Eldoria", Status: "Fracturing", Type: "Kingdom" },
+    summary: "The High Kingdom of the Twin Cities — a unified human realm formed from two former rival states after the Orc Wars six generations ago.",
+    subtitle: "Eresteron and Eldoria under one crown, held together by precedent, taxation, and the weight of House Aurand.",
+    facts: { Leader: "High King Eldaric III (House Aurand)", Base: "Eresteron & Eldoria", Status: "Strained", Type: "Kingdom" },
     body: [
-      "The Twin Cities are the most visibly civilized power in Aeloria and perhaps the least internally coherent. Eresteron contains the old throne, the old houses, and the old manners. Eldoria contains the money, the maritime ambition, and a growing impatience with inherited slowness.",
-      "King Roderic has held the machine together by allowing every faction at court to believe he sees farther than he admits. That worked while his sons remained manageable. It works less well now that one has begun negotiating like a second king and another has vanished into the north carrying questions no courtier can answer.",
-      "The kingdom still looks stable from a distance. Up close, every corridor is full of listeners."
+      "Central authority of the human realms. Still powerful, still legitimate — but the seam between its two halves has never fully closed. Eresteron's farmlands feed the kingdom; Eldoria's nobility decorates and schemes within it.",
+      "House Aurand brokered the unification at the end of the Orc Wars and has held the throne for six generations. Its stability rests on the loyalty of the duchies. Neither feels guaranteed any longer.",
+      "The kingdom looks stable from a distance. Up close, both duchies are beginning to ask the wrong questions out loud."
     ],
-    sidebar: { LiveFaction: "Twin Cities", Related: ["King Roderic Thorne II", "Prince Aldric Thorne", "Prince Caeris Thorne", "Tidefall"] }
+    sidebar: { LiveFaction: "Twin Cities", Related: ["High King Eldaric III", "House Aurand", "Eresteron", "Eldoria"] }
   },
+  {
+    id: "the-wintermark",
+    name: "The Wintermark",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "Frostvale does not survive. It endures.",
+    subtitle: "The Wintermark of Frostvale — frozen highlands, four houses, one of the oldest unbroken bloodlines in Aeloria.",
+    facts: { Leader: "High Lord Kaelen Adkison (House Adkison)", Base: "Frostvale", Status: "Resilient", Type: "Kingdom" },
+    body: [
+      "Carved into frozen mountains and battered by endless storms, the Wintermark is a land where weakness is not punished — it is simply erased. Generations have lived and died in the same brutal conditions, forging a people who do not bend, do not break, and do not forget.",
+      "House Adkison rules — chosen not by wealth or politics but by endurance. House McIntosh keeps the ancient war rites. House Holter wardens the mountain passes. House Duval tracks threats long before they reach Frostvale.",
+      "Long before the rise of the Twin Cities, Frostvale's warriors marched south as conquerors. The Wintermark stands alone now — not because it fell, but because the world grew softer, and Frostvale did not follow."
+    ],
+    sidebar: { LiveFaction: "The Wintermark", Related: ["High Lord Kaelen Adkison", "House Adkison", "Frostvale"] }
+  },
+  {
+    id: "lostfeld",
+    name: "Lostfeld",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "The Dwarven Holds of Lostfeld — a clan-stable mountain civilization built on wealth beneath the earth.",
+    subtitle: "Mining, craft, and ancestral tradition. Lostfeld trades wealth for influence and prefers transactions to alliances.",
+    facts: { Leader: "High Thane Babadu Goldfinger-Duke", Base: "Lostfeld", Status: "Stable", Type: "Kingdom" },
+    body: [
+      "Authority rests with Clan Goldfinger-Duke, but the great clans share the high seats: Goldfinger-Duke at the High Seat (wealth and political dominance), Runewarden as keepers of the deep stones (traditional, runic, slow to bend), and Ironmaul as forge-masters and heavy infantry (the hammer of Lostfeld).",
+      "Lostfeld will defend its passes ferociously, but it will not march for another faction's cause without a price agreed in writing — usually in iron, sometimes in gold.",
+      "Generations of clan continuity have produced one of the most internally stable factions in Aeloria. It remembers debts in stone and grudges in iron, and it has the long memory to wait either out."
+    ],
+    sidebar: { LiveFaction: "Lostfeld", Related: ["High Thane Babadu Goldfinger-Duke", "Clan Goldfinger-Duke", "Clan Ironmaul", "Clan Runewarden"] }
+  },
+  {
+    id: "glenhaven",
+    name: "Glenhaven",
+    category: "Kingdoms",
+    kind: "Kingdom",
+    summary: "The Greenwood Enclave — a realm untouched by the ambitions of men. Glenhaven does not rule its forest; it protects it.",
+    subtitle: "Three houses, one council, and a memory older than every human kingdom.",
+    facts: { Leader: "High Sovereign Thalorien (House Wood)", Base: "Glenhaven", Status: "Stable", Type: "Kingdom" },
+    body: [
+      "The Wood Elves of Glenhaven exist in harmony with nature — not as its rulers but as its protectors. Their cities are grown rather than built, hidden within massive trees and woven into the land itself.",
+      "Three houses share the council. House Wood (the Wardens) leads and enforces isolation. House Darkleaf (the Radicals) believes outsiders must eventually be removed and forms the Glenguard, the Sovereign's personal bodyguard, led by Eryndor Darkleaf as a hereditary office. House Mistafae (the Seers) interpret nature, dreams, and ancient magic.",
+      "Glenhaven rarely interferes in the affairs of Aeloria — but when it does, it is always with purpose. Once stability breaks here, it takes many ticks to restore."
+    ],
+    sidebar: { LiveFaction: "Glenhaven", Related: ["High Sovereign Thalorien", "House Wood", "House Darkleaf", "House Mistafae", "Eryndor Darkleaf"] }
+  },
+  {
+    id: "dur-khadur",
+    name: "Dur Khadur",
+    category: "Kingdoms",
+    kind: "Trade Monarchy",
+    summary: "A human trade monarchy built on caravans and fortified vaults at the eastern crossroads.",
+    subtitle: "Wealth as power. The Trade Throne is held by mercantile election within House Gross.",
+    facts: { Leader: "Trade Prince Seran Gross (House Gross)", Base: "Dur Khadur", Status: "Wealthy", Type: "Kingdom" },
+    body: [
+      "Dur Khadur is a human-led trade monarchy with a fortress capital at the mountain crossroads of the continent. Wealth, caravans, and fortified vaults — not standing armies — define its power.",
+      "The Trade Throne is held by House Gross by mercantile election. House Delonious, House Galfazzar, and House Vercenti share influence in the council.",
+      "Dur Khadur aligns with power, not principle. Its standing armies serve commerce — they fight to protect trade routes and territory, not for conquest or ideology."
+    ],
+    sidebar: { LiveFaction: "Dur Khadur", Related: ["Trade Prince Seran Gross", "House Gross", "House Delonious", "House Galfazzar", "House Vercenti"] }
+  },
+
+  /* ── FACTIONS ───────────────────────────────────────── */
   {
     id: "tidefall",
     name: "Tidefall",
     category: "Factions",
-    kind: "Settlement",
-    summary: "A cliff-built maritime republic whose political confidence grows every time a monarchy hesitates.",
-    subtitle: "Harbor towers, elected admirals, and a government that believes sea power is simply a clearer form of truth.",
-    facts: { Leader: "Admiral Electorate", Base: "Tidefall", Status: "Positioned", Type: "Settlement" },
+    kind: "Electorate",
+    summary: "Tidefall controls the sea — and the wealth that flows through it.",
+    subtitle: "A naval Electorate of houses, not a kingdom. They do not conquer land. They control everything that connects it.",
+    facts: { Leader: "Grand Admiral Levi Ver Meer", Base: "Tidefall", Status: "Positioned", Type: "Faction" },
     body: [
-      "Tidefall is governed by captains, merchants, and those rare people capable of being both. Its republican mythology is sincere, though not innocent. Every election is also a consolidation of fleets, contracts, and quiet obligations stretching far beyond the harbor cliffs.",
-      "The city thinks in shipping lanes, provisions, and leverage. While inland courts argue over legitimacy, Tidefall asks who can actually move grain, steel, and soldiers when weather turns ugly. The answer is usually Tidefall.",
-      "Its recent entanglement with the Twin Cities is not an aberration. It is the result of decades of waiting for someone inside the throne room to mistake access for control."
+      "Powerful naval houses govern Tidefall through an elected admiral system. House Ver Meer holds the current Admiralty and the largest fleet. House Highland-Dusken commands coastal defense and the military fleets. House Fish dominates the trade guilds. House McGowan runs privateers and shadow operations.",
+      "Tidefall once held the Saltborn Crown as a hereditary maritime monarchy. The Admiral Electorate ousted that line in living memory — its last sitting High Lord was Blacktide. His son still flies a black sail in the Dreadwind Isles.",
+      "There is still an active bounty on the Blacktide heir in every Tidefall harbor: dead or alive."
     ],
-    sidebar: { LiveFaction: "Tidefall", Related: ["Admiral Electorate", "Twin Cities", "Dreadwind Islands"] }
+    sidebar: { LiveFaction: "Tidefall", Related: ["Grand Admiral Levi Ver Meer", "House Ver Meer", "House Highland-Dusken", "House Fish", "House McGowan", "Saltborn Crown"] }
   },
   {
-    id: "dreadwind-islands",
-    name: "Dreadwind Islands",
+    id: "dreadwind-isles",
+    name: "Dreadwind Isles",
     category: "Factions",
-    kind: "Faction",
-    summary: "A pirate kingdom made of exiles, storms, and a ruler whose silences matter more than most kings' speeches.",
-    subtitle: "The western isles, assembled by Rowen into something halfway between an accident of history and a deliberate state.",
-    facts: { Leader: "Pirate King Rowen", Base: "Dreadwind Isles", Status: "Watching the sea floor", Type: "Faction" },
+    kind: "Pirate Kingdom",
+    summary: "The Blacktide Fleet — a lawless naval power and the rightful heir to a stolen crown.",
+    subtitle: "Ronan Blacktide raids Tidefall lanes by both grudge and birthright.",
+    facts: { Leader: "Ronan Blacktide (House Blacktide)", Base: "Dreadwind Isles", Status: "At war with Tidefall", Type: "Faction" },
     body: [
-      "The Dreadwind Islands survive by refusing to become predictable. Their crews prize improvisation, local loyalty, and the ability to convert catastrophe into an opportunity before anyone else has named the catastrophe yet.",
-      "Rowen imposed coherence without ruining the archipelago's instincts. That is his particular genius. He can unify raiders without asking them to stop being raiders, and he can turn fragments of legend into something sturdy enough for people to die under willingly.",
-      "Now that the islands have found something old beneath the water near Tidefall, their greatest challenge is no longer unification. It is deciding whether knowledge is worth more as treasure, threat, or proof."
+      "Ronan Blacktide is the son of Tidefall's last High Lord — the holder of the Saltborn Crown — who was ousted by the Admiral Electorate. The Blacktide Fleet does not raid for treasure alone. It raids for legitimacy.",
+      "There is a standing bounty on Ronan Blacktide in every Tidefall harbor: dead or alive.",
+      "He has not denied the bounty. He has not fought it either."
     ],
-    sidebar: { LiveFaction: "Dreadwind Islands", Related: ["Pirate King Rowen", "Tidefall", "Sinking Island"] }
+    sidebar: { LiveFaction: "Dreadwind Isles", Related: ["Ronan Blacktide", "House Blacktide", "Tidefall", "Saltborn Crown"] }
   },
   {
-    id: "queen-lythara",
-    name: "Queen Lythara the Veiled",
+    id: "varkuun",
+    name: "Varkuun · Farrock",
+    category: "Factions",
+    kind: "Mercenary State",
+    summary: "Farrock is built for war. The Varkuun mercenary companies are its standing trade.",
+    subtitle: "An independent human fortress-state that profits from war on whatever side it can.",
+    facts: { Leader: "High Marshal Ashali Van Cleave (House Van Cleave)", Base: "Varkuun (Farrock)", Status: "Aggressive", Type: "Faction" },
+    body: [
+      "Farrock is a militarized human plains-state and standalone power. It exists as an independent fortress that profits from war on whatever side it can — through the Varkuun, its disciplined mercenary companies.",
+      "House Van Cleave is the sole ruling line: a military appointment with no rival dynasties. The Marshal commands the pass and the contracts.",
+      "Sieging Varkuun itself is tactically brutal — the fortress design rewards the defender heavily."
+    ],
+    sidebar: { LiveFaction: "Varkuun", Related: ["High Marshal Ashali Van Cleave", "House Van Cleave", "Farrock"] }
+  },
+  {
+    id: "vilefin",
+    name: "Vilefin",
+    category: "Factions",
+    kind: "Clan Confederation",
+    summary: "The Scrap Clans of Vilefin survive where others cannot. Their strength is unpredictability.",
+    subtitle: "A brutal, resource-starved goblin confederation. Three clans share the rock plains by communal speakership rather than blood succession.",
+    facts: { Leader: "Speaker Grikk Bloodware (Clan Bloodware)", Base: "Vilefin", Status: "Volatile", Type: "Faction" },
+    body: [
+      "A brutal, resource-starved region where Goblin clans fight, invent, and adapt constantly. Their warfare is traps, ambushes, and cunning rather than open battle.",
+      "Three clans share the rock plains: Clan Bloodware (currently speaking for the confederation), Clan Cogtooth (tinkers and engineers), and Clan Rustfang (raider specialists). Power moves between them by communal speaker system rather than by blood.",
+      "Their adaptations are usually ugly, occasionally brilliant, and always cheaper than other factions expect."
+    ],
+    sidebar: { LiveFaction: "Vilefin", Related: ["Speaker Grikk Bloodware", "Clan Bloodware", "Clan Cogtooth", "Clan Rustfang"] }
+  },
+  {
+    id: "groth-clans",
+    name: "Groth Clans",
+    category: "Factions",
+    kind: "War Clans",
+    summary: "Groth is not a kingdom. It is a proving ground.",
+    subtitle: "Across scorched rock plains, the Orc clans of Groth live by one law: strength.",
+    facts: { Leader: "Warchief Drogath Mijid (Clan Mijid)", Base: "Groth", Status: "Aggressive", Type: "Faction" },
+    body: [
+      "Leadership is earned through victory, and weakness is removed without hesitation. Three clans contend for dominance: Clan Mijid (the current Warlords — disciplined and strategic), Clan Ashfang (savage Raiders who thrive in chaos), and Clan Syncar (calculating Tacticians focused on long-term victory).",
+      "Groth values strength, honor, dominance, and survival above any other principle. Successions are routinely settled in single combat within the same hour they are challenged.",
+      "They were the force that once nearly broke the human kingdoms. They remember that."
+    ],
+    sidebar: { LiveFaction: "Groth Clans", Related: ["Warchief Drogath Mijid", "Clan Mijid", "Clan Ashfang", "Clan Syncar"] }
+  },
+  {
+    id: "gilgeth-clans",
+    name: "Gilgeth Clans",
+    category: "Factions",
+    kind: "Iron Dominion",
+    summary: "Gilgeth is what Groth could become — if it chose order over chaos.",
+    subtitle: "Disciplined orc strength, structured by hierarchy and elder council vote.",
+    facts: { Leader: "High Warlord Kragor Blackblood (Clan Blackblood)", Base: "Gilgeth", Status: "Disciplined", Type: "Faction" },
+    body: [
+      "Built within mountain ranges and fortified cities, the Orcs of Gilgeth are structured, disciplined, and strategic. They do not rush into war. They prepare for it.",
+      "Three clans rule by strict hierarchy: Clan Blackblood (Rulers — dominant and controlling), Clan Ironhide (Defenders — masters of fortification and endurance), and Clan Redtusk (Aggressors — pushing for expansion and war).",
+      "Succession is decided by elder council vote within the dominant clan, not single combat — one of the few orcish realms governed by deliberation rather than blood."
+    ],
+    sidebar: { LiveFaction: "Gilgeth Clans", Related: ["High Warlord Kragor Blackblood", "Clan Blackblood", "Clan Ironhide", "Clan Redtusk"] }
+  },
+  {
+    id: "stonebreak-monastery",
+    name: "Stonebreak Monastery",
+    category: "Factions",
+    kind: "Order",
+    summary: "Guardians of balance and nature — and, quietly, the unseen hand behind the Gloomspire Syndicate.",
+    subtitle: "A druid monastery in the wildlands. Officially neutral. Reach considerably greater than that.",
+    facts: { Leader: "Grand Druid Varak", Base: "Stonebreak", Status: "Neutral", Type: "Order" },
+    body: [
+      "Stonebreak is a druid monastery hidden in the wildlands — a sanctuary of healing, ritual, and old observation. Its formal posture is neutral. Its actual reach is not.",
+      "The Grand Druid alone interprets the Monastery's mandate. The Gloomspire Assassin Gnomes operate as Stonebreak's secret hand — a hidden network of contract killers moving where druids cannot be seen to move.",
+      "When Stonebreak intervenes, an assassin is more likely than an army."
+    ],
+    sidebar: { LiveFaction: "Stonebreak Monastery", Related: ["Grand Druid Varak", "Gloomspire Syndicate", "Gnomes"] }
+  },
+
+  /* ── CHARACTERS ──────────────────────────────────────── */
+  {
+    id: "queen-lyathra",
+    name: "Queen Lyathra the Veiled",
     category: "Characters",
-    kind: "Character",
+    kind: "Sovereign",
     summary: "The hidden sovereign of the Shadow Court, whose restraint has outlived empires.",
     subtitle: "A queen never seen plainly, and therefore imagined constantly.",
     facts: { Faction: "Shadow Court", Status: "Alive", Location: "Faerwood", Type: "Character" },
     body: [
-      "Lythara governs through opacity. Her power comes not only from what she knows, but from the discipline with which she refuses to confirm what others desperately want to believe about her.",
-      "For centuries, rivals have mistaken her stillness for passivity. Almost all of them are dead. The rest now advise caution in tones they wish they had learned younger.",
-      "The current war footing inside Faerwood has placed unusual pressure on her authority. That does not mean she is losing control. It means she has chosen not to display where control actually resides."
+      "Lyathra governs through opacity. Her power comes not only from what she knows, but from the discipline with which she refuses to confirm what others desperately want to believe about her.",
+      "Centuries of rivals have mistaken her stillness for passivity. Almost all of them are dead.",
+      "She balances three rival houses against each other so precisely that none can move without the other two noticing — and most of the time, neither can she."
     ],
-    sidebar: { LiveCharacter: "Queen Lythara the Veiled", Related: ["Shadow Court", "Faerwood", "Thalor"] }
+    sidebar: { LiveCharacter: "Queen Lyathra the Veiled", Related: ["Shadow Court", "House Verlorn", "House Nightborn", "House Shadowveil"] }
   },
   {
-    id: "ulric-ironmaul",
-    name: "Thane Ulric Ironmaul",
+    id: "high-king-eldaric-iii",
+    name: "High King Eldaric III",
     category: "Characters",
-    kind: "Character",
-    summary: "A ruler forged for siege now discovering that endurance alone cannot govern revelation.",
-    subtitle: "The dwarf who kept Lostfeld rigid long enough to survive, and perhaps rigid enough to crack.",
-    facts: { Faction: "Lostfeld Dwarves", Status: "Alive", Location: "Lostfeld", Type: "Character" },
+    kind: "Sovereign",
+    summary: "Holder of the unified throne of the Twin Cities — the latest of House Aurand's six-generation reign.",
+    subtitle: "His kingdom rests on a settlement his great-grandfather signed, and his court remembers it daily.",
+    facts: { Faction: "Twin Cities", Status: "Alive", Location: "Eresteron", Type: "Character" },
     body: [
-      "Ironmaul is what every frightened city asks for before it understands the bill. He is disciplined, unsentimental, and capable of making decisions others call cruel until they later admit those decisions probably saved them.",
-      "He became Thane because Lostfeld needed certainty. The tragedy of the present hour is that certainty has become counterfeit. The gate opened anyway. The bar bent anyway. Men who once trusted the rhythm of his orders now watch his face for signs that he has started imagining failure.",
-      "He has not broken. He has merely run out of believable lies."
+      "Eldaric III sits at the apex of the High Kingdom. The throne unifies Eresteron and Eldoria, but the duchies have begun saying out loud what they once only whispered.",
+      "He is the institutional answer to a problem his ancestors created — and the political instrument both duchies will try to use as that problem sharpens."
     ],
-    sidebar: { LiveCharacter: "Thane Ulric Ironmaul", Related: ["Lostfeld Dwarves", "Kessa Stonebraid", "Forge of Brammir"] }
+    sidebar: { LiveCharacter: "High King Eldaric III", Related: ["Twin Cities", "House Aurand", "Lord Nuhoom Braafhart", "Lady Briania LeFleur"] }
   },
   {
-    id: "elowen-silverleaf",
-    name: "Sovereign Elowen Silverleaf",
+    id: "high-lord-kaelen-adkison",
+    name: "High Lord Kaelen Adkison",
     category: "Characters",
-    kind: "Character",
-    summary: "A sovereign whose grief has become discipline, and whose restraint feels increasingly deliberate.",
-    subtitle: "The ruler of Glenhaven, reading omens like military dispatches.",
-    facts: { Faction: "Glenhaven Elves", Status: "Alive", Location: "Glenhaven", Type: "Character" },
+    kind: "Sovereign",
+    summary: "The seated High Lord of the Wintermark — chosen by endurance, tested constantly, never questioned.",
+    subtitle: "Head of the oldest surviving bloodline in Aeloria.",
+    facts: { Faction: "The Wintermark", Status: "Alive", Location: "Frostvale", Type: "Character" },
     body: [
-      "Elowen governs with the composure of someone who has already accepted the worst and continued anyway. That makes her frightening. Panic can be manipulated. Conviction rarely can.",
-      "Her court reads shadow-script, listens to War-Readers, and interprets the land with theological seriousness. Yet Elowen is not abstract. She sees clearly the cost of war and moves toward it only when convinced that delay will cost more.",
-      "Reports from recent ticks suggest exhaustion without collapse. She is not fraying. She is narrowing."
+      "Kaelen leads from a seat older than most other kingdoms. Authority in the Wintermark is not granted; it is outlasted.",
+      "He is the embodiment of the realm's core principle: weakness is not punished, simply erased."
     ],
-    sidebar: { LiveCharacter: "Sovereign Elowen Silverleaf", Related: ["Glenhaven Elves", "Faerwood", "Frostvale"] }
+    sidebar: { LiveCharacter: "High Lord Kaelen Adkison", Related: ["The Wintermark", "House Adkison", "Frostvale"] }
   },
   {
-    id: "caeris-thorne",
-    name: "Prince Caeris Thorne",
+    id: "high-sovereign-thalorien",
+    name: "High Sovereign Thalorien",
     category: "Characters",
-    kind: "Character",
-    summary: "The absent prince whose disappearance has made him politically larger than he ever was in court.",
-    subtitle: "Northbound, letter-bearing, and increasingly central to questions the throne would prefer remain hypothetical.",
-    facts: { Faction: "Twin Cities", Status: "Unknown", Location: "Frostvale", Type: "Character" },
+    kind: "Sovereign",
+    summary: "Sovereign of Glenhaven — slow to act, impossible to surprise, and patient beyond mortal comprehension.",
+    subtitle: "Head of House Wood. Speaks for the council; defers to the forest.",
+    facts: { Faction: "Glenhaven", Status: "Alive", Location: "Glenhaven", Type: "Character" },
     body: [
-      "Caeris was once easy to underestimate. He had all the surface features of a secondary prince: charming, unplaced, useful as leverage and little more. That interpretation ended the moment he vanished.",
-      "His route north, the courier tied to his departure, and the signet-ring rumors surrounding his mission have elevated him from court ornament to narrative fault line. Every faction now asks not merely where he is, but whose future he has gone to authorize.",
-      "Whatever answer emerges, it will not be a small one."
+      "Thalorien holds the seat of House Wood and presides over the council of three houses. Decisions are slow because the consequences are long.",
+      "He rarely intervenes in human affairs. When he does, he means to settle them."
     ],
-    sidebar: { LiveCharacter: "Prince Caeris Thorne", Related: ["Twin Cities", "Frostvale", "Gloomspire Assassin Gnomes"] }
+    sidebar: { LiveCharacter: "High Sovereign Thalorien", Related: ["Glenhaven", "House Wood", "House Darkleaf", "House Mistafae"] }
   },
+  {
+    id: "ronan-blacktide",
+    name: "Ronan Blacktide",
+    category: "Characters",
+    kind: "Pirate Lord",
+    summary: "Heir to Tidefall's deposed Saltborn Crown. Master of the Blacktide Fleet. Wanted in every Tidefall port.",
+    subtitle: "A pirate king with a legitimate grievance — and a hereditary one.",
+    facts: { Faction: "Dreadwind Isles", Status: "Alive", Location: "Dreadwind Isles", Type: "Character" },
+    body: [
+      "Ronan's father was the last High Lord of Tidefall and the holder of the Saltborn Crown, before he was ousted by the Admiral Electorate.",
+      "Ronan has not asked for the crown back. He has simply gone to sea with the line still in his name and the bounty still in force.",
+      "Tidefall has tried to forget him. He has not allowed it."
+    ],
+    sidebar: { LiveCharacter: "Ronan Blacktide", Related: ["Dreadwind Isles", "House Blacktide", "Saltborn Crown", "Tidefall"] }
+  },
+  {
+    id: "trade-prince-seran-gross",
+    name: "Trade Prince Seran Gross",
+    category: "Characters",
+    kind: "Trade Prince",
+    summary: "Holder of the Trade Throne of Dur Khadur by mercantile election within House Gross.",
+    subtitle: "He sells where others fight. He fortifies where others pray.",
+    facts: { Faction: "Dur Khadur", Status: "Alive", Location: "Dur Khadur", Type: "Character" },
+    body: [
+      "Seran governs the trade monarchy through caravans, contracts, and the council of the great merchant houses.",
+      "His instinct is to align with power, not principle. His armies serve commerce."
+    ],
+    sidebar: { LiveCharacter: "Trade Prince Seran Gross", Related: ["Dur Khadur", "House Gross", "House Delonious", "House Galfazzar"] }
+  },
+  {
+    id: "grand-admiral-levi-ver-meer",
+    name: "Grand Admiral Levi Ver Meer",
+    category: "Characters",
+    kind: "Admiral",
+    summary: "Currently elected to lead Tidefall's Admiral Electorate. Master of the largest fleet in the council.",
+    subtitle: "House Ver Meer's sitting Admiral. The man who walks the harbor the Saltborn Crown was lost in.",
+    facts: { Faction: "Tidefall", Status: "Alive", Location: "Tidefall", Type: "Character" },
+    body: [
+      "Levi commands the Electorate from House Ver Meer's Admiralty. The bounty on Ronan Blacktide is signed in his name.",
+      "He governs by transactions and quiet leverage — and by knowing precisely how much of Tidefall's legitimacy depends on him not losing the war the Blacktide Fleet refuses to stop."
+    ],
+    sidebar: { LiveCharacter: "Grand Admiral Levi Ver Meer", Related: ["Tidefall", "House Ver Meer", "Saltborn Crown", "Dreadwind Isles"] }
+  },
+
+  /* ── PLACES ──────────────────────────────────────────── */
   {
     id: "faerwood",
     name: "Faerwood",
     category: "Places",
     kind: "Place",
-    summary: "The dark forest at the center of too many prophecies to count as scenery any longer.",
-    subtitle: "Ancient woodland, political instrument, and defensive intelligence in the shape of terrain.",
+    summary: "Dense ancient forest under perpetual twilight canopy — the seat of the Shadow Court.",
+    subtitle: "Outsiders rarely leave it. The forest itself seems to collaborate with the houses inside it.",
     facts: { Region: "West", Control: "Shadow Court", Danger: "Deadly", Type: "Place" },
     body: [
-      "The Faerwood refuses the ordinary language of geography. Roads change. Paths appear where no one remembers cutting them. Certain groves produce silence so complete that travelers begin speaking louder just to prove they still exist.",
-      "The Shadow Court's long survival is inseparable from the forest itself. Outsiders argue over whether the Court merely knows Faerwood intimately or whether the forest actively collaborates. Those distinctions matter mostly to people not yet lost in it.",
-      "Recent mobilization along its eastern fringe has turned Faerwood from background threat into immediate strategic reality."
+      "Faerwood refuses the ordinary language of geography. Roads change. Paths appear where no one remembers cutting them. Certain groves produce silence so complete that travelers begin speaking louder just to prove they still exist.",
+      "The Shadow Court's long survival is inseparable from the forest itself. Outsiders argue over whether the Court merely knows Faerwood intimately or whether the forest actively collaborates. Those distinctions matter mostly to people not yet lost in it."
     ],
-    sidebar: { Related: ["Shadow Court", "Queen Lythara the Veiled", "Thalor", "Glenhaven Elves"] }
+    sidebar: { Related: ["Shadow Court", "Queen Lyathra the Veiled", "House Verlorn", "House Nightborn", "House Shadowveil"] }
   },
   {
-    id: "dragonscar-peaks",
-    name: "Dragonscar Peaks",
+    id: "frostvale",
+    name: "Frostvale",
     category: "Places",
     kind: "Place",
-    summary: "The northern mountains where altitude, weather, and myth all become indistinguishable.",
-    subtitle: "Ice, stone, and the nearest thing Aeloria has to immortal witnesses.",
-    facts: { Region: "North", Control: "Ice Dragons", Danger: "Deadly", Type: "Place" },
+    summary: "Capital city of the Wintermark — frozen highlands, glacial passes, and the seat of House Adkison.",
+    subtitle: "The northernmost capital in Aeloria, and the hardest to march on.",
+    facts: { Region: "North", Control: "The Wintermark", Danger: "Severe", Type: "Place" },
     body: [
-      "The Dragonscar Peaks define northern imagination. For most people they are border, warning, and legend at once. Maps mark them. Few people meaningfully know them.",
-      "The Ice Dragons occupying the range have done little to clarify matters. Their stillness has always been interpreted as indifference right up until the moment it ceases to be stillness.",
-      "Every omen traveling south from the Peaks arrives half translated and twice feared."
+      "Carved into frozen mountains and battered by endless storms. The mountain passes are wardened by House Holter and the wilds beyond by House Duval's hunters.",
+      "Winter campaigns into Frostvale are nearly impossible — supply lines collapse before sieges can be sustained."
     ],
-    sidebar: { Related: ["Ice Dragons", "Frostvale", "Northern Watchtowers"] }
+    sidebar: { Related: ["The Wintermark", "House Adkison", "House Holter", "House Duval"] }
   },
   {
-    id: "stonebreak-monastery",
-    name: "Stonebreak Monastery",
+    id: "stonebreak",
+    name: "Stonebreak",
     category: "Places",
     kind: "Place",
-    summary: "A neutral sanctuary whose archives and rituals increasingly look like the front edge of a buried emergency.",
-    subtitle: "The druidic seat of healing, preservation, secrecy, and whatever is now waking beneath its oldest stones.",
-    facts: { Region: "Center", Control: "Monastery of Druids", Danger: "Uneasy", Type: "Place" },
+    summary: "The druid monastery in the wildlands — sanctuary, archive, and the unseen hand behind the Gloomspire Syndicate.",
+    subtitle: "Officially a place of healing and preservation. Quietly, the patron of Aeloria's deadliest assassins.",
+    facts: { Region: "Center", Control: "Stonebreak Monastery", Danger: "Uneasy", Type: "Place" },
     body: [
-      "Stonebreak presents itself as a place where the world can be studied without being worsened by that study. Its halls preserve texts, herbs, rites, and memories other factions would gladly simplify into doctrine or profit.",
-      "Neutrality has made the monastery useful. Secrecy has made it powerful. Recent developments suggest those two gifts are no longer comfortably separable.",
-      "When the Grand Druid ends a fast suddenly, people notice. When a scriptorium closes and the stones begin pulsing, people start praying their neighbors noticed too."
+      "Stonebreak's halls preserve texts, herbs, rites, and old observation. Its couriers and pilgrims move freely through territories most factions cannot.",
+      "Its alliance with the Gloomspire is the deepest open secret in Aeloria. Officially, no monastery has assassins."
     ],
-    sidebar: { Related: ["Monastery of Druids", "Lostfeld Dwarves", "The Hollowstones"] }
+    sidebar: { Related: ["Stonebreak Monastery", "Grand Druid Varak", "Gloomspire Syndicate"] }
+  },
+
+  /* ── LORE ───────────────────────────────────────────── */
+  {
+    id: "saltborn-crown",
+    name: "The Saltborn Crown",
+    category: "Lore",
+    kind: "Relic",
+    summary: "Tidefall's hereditary maritime crown — once worn by the Blacktide line, lost to the Admiral Electorate in living memory.",
+    subtitle: "A crown that is no longer worn — and a war the new owners cannot quite admit they are still fighting.",
+    facts: { Category: "Relic", Scope: "Tidefall / Dreadwind", Status: "Contested", Type: "Lore" },
+    body: [
+      "The Saltborn Crown represented the hereditary High Lordship of Tidefall before the city restructured itself as an Electorate. The last man to wear it was Blacktide.",
+      "His son sails under the Dreadwind Isles' black flag with a standing bounty in every Tidefall port. The Electorate insists the crown is symbolic. The Blacktide Fleet insists it is unfinished."
+    ],
+    sidebar: { Related: ["Tidefall", "Dreadwind Isles", "Ronan Blacktide", "Grand Admiral Levi Ver Meer", "House Blacktide"] }
   },
   {
-    id: "fractured-age",
-    name: "The Fractured Age",
+    id: "orc-wars",
+    name: "The Orc Wars",
     category: "Lore",
     kind: "History",
-    summary: "The age born from civil collapse, inherited division, and the habit of treating survival as a temporary substitute for peace.",
-    subtitle: "The current era of Aeloria: politically crowded, historically wounded, and permanently vulnerable to old debts resurfacing in new clothing.",
-    facts: { Category: "History", Scope: "Aeloria-wide", Status: "Ongoing", Type: "Lore" },
+    summary: "Six generations ago, the Orc clans of Groth and Gilgeth nearly broke the human kingdoms. They remember it. So do the survivors.",
+    subtitle: "The conflict that forged the High Kingdom of the Twin Cities and that still shapes every standing alliance in the south.",
+    facts: { Category: "History", Scope: "Aeloria-wide", Status: "Concluded · Remembered", Type: "Lore" },
     body: [
-      "The Fractured Age is not one war remembered collectively. It is the aftermath of many wars remembered selectively. Kingdoms cite different beginnings because admitting the true beginning would mean admitting the first betrayal mattered more than the official victory.",
-      "Borders hardened, then softened, then hardened again. Alliances became hereditary myths. Entire regions learned to think of instability as normal weather.",
-      "The present crisis is best understood not as an interruption of the Fractured Age but as one of its more honest chapters."
+      "The Orc Wars were the closest the human realms ever came to total collapse. The unification of Eresteron and Eldoria under House Aurand was directly produced by them — the original two rival states were forced into one crown to survive the war.",
+      "The orc clans did not lose. They withdrew. Groth still trains for the next campaign; Gilgeth still prepares for it.",
+      "Most of the standing human alliances on the continent trace back to lines drawn during this war."
     ],
-    sidebar: { Related: ["Twin Cities", "Lostfeld Dwarves", "Shadow Court", "The Chronicle of Aeloria"] }
-  },
-  {
-    id: "sinking-island",
-    name: "The Sinking Island",
-    category: "Lore",
-    kind: "Mystery",
-    summary: "A vanished place still exerting pressure on charts, myths, and the ambitions of everyone who thinks the sea keeps secrets permanently.",
-    subtitle: "Known in whispers, mapped poorly, and tied to old claims no one can quite afford to dismiss.",
-    facts: { Category: "Mystery", Scope: "Western Sea", Status: "Unresolved", Type: "Lore" },
-    body: [
-      "Stories of the Sinking Island shift depending on who tells them. In some, it was a kingdom judged. In others, a city that bargained incorrectly. In a few, the island did not sink at all but moved somewhere depth cannot quite explain.",
-      "Modern political interest in the legend has sharpened as maritime powers discover more anomalies beneath the western approaches. Once treasure hunters arrive, sober historians are never far behind, and neither are opportunists.",
-      "The danger of mysteries like this is that eventually they stop being metaphors."
-    ],
-    sidebar: { Related: ["Dreadwind Islands", "Tidefall", "Pirate King Rowen"] }
+    sidebar: { Related: ["Twin Cities", "House Aurand", "Groth Clans", "Gilgeth Clans", "Frostvale"] }
   }
 ];
 

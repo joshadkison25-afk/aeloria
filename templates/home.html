@@ -1746,6 +1746,489 @@
       justify-content: flex-start;
     }
   }
+
+  /* ─────────────────────────────────────────────────────────────
+     EPIC OVERLAY — purely additive atmosphere & ornament.
+     No existing rules are overridden; layout stays identical.
+     Honors prefers-reduced-motion at the bottom of this block.
+     ───────────────────────────────────────────────────────────── */
+
+  .home-screen {
+    animation: epicPageIgnite 1.6s cubic-bezier(.16,.84,.32,1) both;
+  }
+
+  @keyframes epicPageIgnite {
+    from { opacity: 0; filter: brightness(0.55) saturate(0.7); transform: translateY(6px); }
+    to   { opacity: 1; filter: brightness(1) saturate(1);     transform: translateY(0); }
+  }
+
+  /* Cinematic depth: warm-cool side vignette + crown light from above */
+  .home-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 28% at 50% 0%, rgba(255,210,140,0.08), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(120,60,20,0.10), transparent 75%),
+      radial-gradient(ellipse 32% 90% at 0% 50%,  rgba(0,0,0,0.55), transparent 60%),
+      radial-gradient(ellipse 32% 90% at 100% 50%, rgba(0,0,0,0.55), transparent 60%);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+  }
+
+  /* Aged-vellum film grain across everything — extremely subtle */
+  .home-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>");
+    background-size: 220px 220px;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Cathedral light shafts inside the map stage ─────────── */
+  .home-map-stage > .epic-shafts {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+  }
+  .epic-shafts svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .epic-shaft {
+    transform-origin: 50% 0%;
+    animation: epicShaftBreathe 9s ease-in-out infinite alternate;
+  }
+  .epic-shaft:nth-child(2) { animation-delay: 1.4s; animation-duration: 11s; }
+  .epic-shaft:nth-child(3) { animation-delay: 2.7s; animation-duration: 13s; }
+  .epic-shaft:nth-child(4) { animation-delay: 0.6s; animation-duration: 10s; }
+
+  @keyframes epicShaftBreathe {
+    from { opacity: 0.42; transform: scaleY(0.96) translateY(-1%); }
+    to   { opacity: 0.78; transform: scaleY(1.04) translateY(0); }
+  }
+
+  /* ── Ambient dust motes (canvas, full screen) ─────────────── */
+  .epic-dust {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.55;
+  }
+
+  /* ── Ornate corner brackets layer ─────────────────────────── */
+  /* Containers we attach brackets into; ensure they create a stacking context */
+  .home-codex-rail,
+  .home-intel-rail,
+  .center-event-modal,
+  .command-bar-frame {
+    position: relative;
+  }
+  .epic-corners {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .epic-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    color: rgba(218, 184, 128, 0.85);
+    filter: drop-shadow(0 0 6px rgba(255, 200, 130, 0.18));
+    opacity: 0.9;
+  }
+  .epic-corner svg { width: 100%; height: 100%; display: block; }
+  .epic-corner.tl { top: 4px;    left: 4px; }
+  .epic-corner.tr { top: 4px;    right: 4px;  transform: scaleX(-1); }
+  .epic-corner.bl { bottom: 4px; left: 4px;   transform: scaleY(-1); }
+  .epic-corner.br { bottom: 4px; right: 4px;  transform: scale(-1, -1); }
+
+  /* Slightly larger ornaments for the central modal */
+  .center-event-modal .epic-corner { width: 26px; height: 26px; }
+
+  /* ── Side-rail crown sigil (golden droplet under the title row) ── */
+  .home-codex-rail .epic-rail-crest,
+  .home-intel-rail .epic-rail-crest {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 6;
+    color: rgba(218, 184, 128, 0.75);
+    filter: drop-shadow(0 1px 4px rgba(255, 190, 110, 0.22));
+  }
+
+  /* Hairline gold edge along the inner border of side rails */
+  .home-codex-rail::after,
+  .home-intel-rail::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    bottom: 18px;
+    width: 1px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(218, 184, 128, 0.32) 14%,
+      rgba(218, 184, 128, 0.55) 50%,
+      rgba(218, 184, 128, 0.32) 86%,
+      transparent 100%);
+    pointer-events: none;
+    z-index: 5;
+    box-shadow: 0 0 8px rgba(255, 200, 130, 0.18);
+  }
+  .home-codex-rail::after { right: 0; }
+  .home-intel-rail::after { left:  0; }
+
+  /* ── Modal: title shimmer + ambient gold halo ─────────────── */
+  .center-event-modal {
+    box-shadow:
+      0 32px 84px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(218, 184, 128, 0.16),
+      0 0 56px rgba(218, 184, 128, 0.08),
+      inset 0 0 28px rgba(201, 169, 110, 0.07);
+  }
+
+  .center-event-title {
+    text-shadow:
+      0 0 18px rgba(218, 184, 128, 0.20),
+      0 1px 0 rgba(0, 0, 0, 0.55);
+    animation: epicTitlePulse 7.5s ease-in-out infinite alternate;
+  }
+  @keyframes epicTitlePulse {
+    from { text-shadow: 0 0 14px rgba(218, 184, 128, 0.14), 0 1px 0 rgba(0,0,0,0.55); }
+    to   { text-shadow: 0 0 30px rgba(255, 210, 150, 0.36), 0 1px 0 rgba(0,0,0,0.55); }
+  }
+
+  .center-event-kicker {
+    color: rgba(232, 200, 144, 0.95);
+    text-shadow: 0 0 8px rgba(218, 184, 128, 0.25);
+  }
+
+  /* ── Codex rail: subtle living shimmer + iconography lift ── */
+  .home-codex-link {
+    transition: color 0.18s ease, border-color 0.18s ease,
+                transform 0.18s ease, text-shadow 0.18s ease,
+                background 0.22s ease;
+  }
+  .home-codex-link:hover {
+    background: linear-gradient(90deg, rgba(218,184,128,0.06), transparent 60%);
+  }
+  .home-codex-link:hover .home-codex-icon {
+    color: #f2dca6;
+    filter: drop-shadow(0 0 8px rgba(255, 210, 150, 0.45));
+  }
+  .home-codex-link:hover .home-codex-label {
+    color: #f4e4be;
+    text-shadow: 0 0 10px rgba(255, 210, 150, 0.30);
+  }
+
+  .home-codex-title {
+    text-shadow: 0 0 12px rgba(218, 184, 128, 0.22);
+  }
+
+  /* ── Intel rail: pressure number gets an ember halo ─────── */
+  .pressure-number {
+    text-shadow:
+      0 0 16px rgba(255, 165, 80, 0.22),
+      0 0 4px  rgba(255, 200, 120, 0.18);
+    animation: epicEmberPulse 4.5s ease-in-out infinite alternate;
+  }
+  @keyframes epicEmberPulse {
+    from { text-shadow: 0 0 10px rgba(255,165,80,0.16), 0 0 3px rgba(255,200,120,0.14); }
+    to   { text-shadow: 0 0 22px rgba(255,180,90,0.40), 0 0 6px rgba(255,210,140,0.28); }
+  }
+
+  /* ── Map atlas: corner brackets + faint inner crown light ── */
+  .home-map-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 22% at 50% -2%, rgba(255, 215, 150, 0.10), transparent 70%);
+    mix-blend-mode: screen;
+  }
+  .home-map-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 1px rgba(218, 184, 128, 0.10),
+      inset 0 0 120px rgba(0, 0, 0, 0.55);
+  }
+
+  /* ── Command bar: warmer floor, ember sigil, action hover ── */
+  .command-bar-frame {
+    background:
+      linear-gradient(180deg, rgba(28,18,10,0.55), rgba(0,0,0,0.85)),
+      radial-gradient(ellipse 60% 100% at 16% 50%, rgba(255,165,80,0.08), transparent 60%);
+    border-top: 1px solid rgba(218, 184, 128, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 210, 150, 0.06),
+      0 -8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .command-bar-influence .command-influence-sigil {
+    animation: epicSigilEmber 3.6s ease-in-out infinite alternate;
+  }
+  @keyframes epicSigilEmber {
+    from {
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.02),
+        0 0 8px rgba(218, 184, 128, 0.18);
+    }
+    to {
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.05),
+        0 0 22px rgba(255, 180, 100, 0.50);
+    }
+  }
+
+  .command-action {
+    transition: transform 0.22s ease, filter 0.22s ease, color 0.18s ease;
+  }
+  .command-action:hover {
+    filter: drop-shadow(0 0 18px rgba(255, 200, 130, 0.22));
+    transform: translateY(-1px);
+  }
+  .command-action:hover .command-action-icon {
+    filter: drop-shadow(0 0 8px rgba(255, 210, 150, 0.45));
+  }
+
+  /* ── Focus card portrait: gentle gold breath ──────────────── */
+  .seer-focus-portrait {
+    box-shadow:
+      0 0 0 1px rgba(218, 184, 128, 0.20),
+      0 0 16px rgba(218, 184, 128, 0.10);
+    animation: epicFocusBreath 6s ease-in-out infinite alternate;
+  }
+  @keyframes epicFocusBreath {
+    from { box-shadow: 0 0 0 1px rgba(218,184,128,0.16), 0 0 12px rgba(218,184,128,0.08); }
+    to   { box-shadow: 0 0 0 1px rgba(218,184,128,0.28), 0 0 24px rgba(255,200,130,0.20); }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     EPIC OVERLAY — TIER II
+     Torchlight that follows the cursor, drifting ground fog,
+     swaying heraldic banners, constellation twinkle, rising embers,
+     distant lightning flicker, and a cinematic title sweep.
+     ───────────────────────────────────────────────────────────── */
+
+  /* Torchlight — soft warm halo that tracks the cursor across the screen */
+  .epic-torch {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+    background:
+      radial-gradient(circle 280px at var(--tx, 50%) var(--ty, 50%),
+        rgba(255, 200, 130, 0.10) 0%,
+        rgba(255, 170, 80, 0.06)  35%,
+        rgba(255, 140, 50, 0.02)  60%,
+        transparent                72%);
+    mix-blend-mode: screen;
+    transition: opacity 0.4s ease;
+    opacity: 0;
+  }
+  .epic-torch.is-live { opacity: 1; }
+  /* Cursor-follow torchlight disabled by request */
+  .epic-torch { display: none !important; }
+
+  /* Volumetric ground fog hugging the bottom of the map */
+  .home-map-stage > .epic-fog {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: -8%;
+    height: 38%;
+    z-index: 5;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.55;
+    background:
+      radial-gradient(ellipse 60% 100% at 20% 100%, rgba(220, 180, 130, 0.22), transparent 70%),
+      radial-gradient(ellipse 70% 100% at 80% 100%, rgba(200, 150, 100, 0.18), transparent 70%),
+      radial-gradient(ellipse 100% 80% at 50% 100%, rgba(140, 100, 70, 0.20), transparent 75%);
+    filter: blur(18px);
+    animation: epicFogDrift 24s ease-in-out infinite alternate;
+  }
+  @keyframes epicFogDrift {
+    from { transform: translate3d(-3%, 1%, 0) scale(1.02); }
+    to   { transform: translate3d(3%, -1%, 0) scale(1.06); }
+  }
+
+  /* ── Constellation stars in the upper portion of the map ── */
+  .home-map-stage > .epic-stars {
+    position: absolute;
+    inset: 0 0 50% 0;
+    z-index: 4;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.7;
+  }
+  .epic-stars svg { width: 100%; height: 100%; display: block; }
+  .epic-star { animation: epicStarTwinkle 4s ease-in-out infinite; }
+  @keyframes epicStarTwinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.85); transform-origin: center; }
+    50%      { opacity: 0.95; transform: scale(1.15); transform-origin: center; }
+  }
+
+  /* ── Rising embers (gold sparks) layer ──────────────────── */
+  .epic-spark-field {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 100%;
+    z-index: 7;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .epic-spark {
+    position: absolute;
+    bottom: 60px;
+    width: 3px;
+    height: 3px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255,220,150,1), rgba(255,170,90,0.6) 50%, transparent 75%);
+    box-shadow: 0 0 8px rgba(255, 200, 120, 0.85);
+    opacity: 0;
+    animation: epicSparkRise 6s ease-out forwards;
+  }
+  @keyframes epicSparkRise {
+    0%   { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+    8%   { opacity: 0.95; }
+    70%  { opacity: 0.75; }
+    100% { transform: translate3d(var(--sx, 0px), -88vh, 0) scale(0.4); opacity: 0; }
+  }
+
+  /* ── Lightning flicker (rare distant flash) ─────────────── */
+  .epic-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 50% at 50% 30%,
+      rgba(220, 230, 255, 0.18), transparent 70%);
+    mix-blend-mode: screen;
+    opacity: 0;
+  }
+  .epic-flash.is-flashing { animation: epicFlash 1.4s ease-out forwards; }
+  @keyframes epicFlash {
+    0%   { opacity: 0; }
+    6%   { opacity: 0.9; }
+    14%  { opacity: 0.05; }
+    22%  { opacity: 0.65; }
+    32%  { opacity: 0.0; }
+    100% { opacity: 0; }
+  }
+
+  /* ── Cinematic light sweep across the modal title ───────── */
+  .center-event-title {
+    position: relative;
+    overflow: hidden;
+  }
+  .center-event-title::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -40%;
+    width: 28%;
+    background: linear-gradient(105deg,
+      transparent 0%,
+      rgba(255, 230, 170, 0.0) 30%,
+      rgba(255, 230, 170, 0.55) 50%,
+      rgba(255, 230, 170, 0.0) 70%,
+      transparent 100%);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    animation: epicTitleSweep 9s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes epicTitleSweep {
+    0%, 70%, 100% { left: -40%; opacity: 0; }
+    78%           { opacity: 1; }
+    92%           { opacity: 1; }
+    100%          { left: 130%; opacity: 0; }
+  }
+
+  /* ── Faint runes in the deep corners of the screen ──────── */
+  .epic-rune {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    z-index: 5;
+    pointer-events: none;
+    color: rgba(218, 184, 128, 0.5);
+    filter: drop-shadow(0 0 10px rgba(255, 200, 130, 0.16));
+    animation: epicRuneBreath 8s ease-in-out infinite alternate;
+    opacity: 0.45;
+  }
+  .epic-rune svg { width: 100%; height: 100%; display: block; }
+  .epic-rune.tl { top: 14px;    left: 14px; }
+  .epic-rune.tr { top: 14px;    right: 14px;  transform: scaleX(-1); }
+  .epic-rune.bl { bottom: 78px; left: 14px;   transform: scaleY(-1); }
+  .epic-rune.br { bottom: 78px; right: 14px;  transform: scale(-1, -1); }
+  @keyframes epicRuneBreath {
+    from { opacity: 0.20; }
+    to   { opacity: 0.55; }
+  }
+
+  /* ── Map atlas: slow living breath ── */
+  .home-atlas-map {
+    animation: epicAtlasBreath 14s ease-in-out infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  @keyframes epicAtlasBreath {
+    from { transform: scale(1.00); }
+    to   { transform: scale(1.035); }
+  }
+
+  /* ── Reduced-motion respect (extended) ────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .home-screen,
+    .epic-shaft,
+    .center-event-title,
+    .pressure-number,
+    .seer-focus-portrait,
+    .command-bar-influence .command-influence-sigil,
+    .epic-star,
+    .epic-rune,
+    .home-atlas-map,
+    .home-map-stage > .epic-fog,
+    .center-event-title::before {
+      animation: none !important;
+    }
+    .epic-dust,
+    .epic-spark-field,
+    .epic-torch,
+    .epic-flash {
+      display: none !important;
+    }
+  }
+
+  /* Remove the previous banner motif entirely */
+  .epic-banner-row { display: none !important; }
+
 </style>
 {% endblock %}
 
@@ -4044,34 +4527,290 @@ function getSeerState(state) {
   return { status, location, destination };
 }
 
+function getSeerContext(state) {
+  const safeState = state || {};
+  const seerState = (safeState.seer_state && typeof safeState.seer_state === 'object') ? safeState.seer_state : {};
+  const seerJourney = (safeState.seer_journey && typeof safeState.seer_journey === 'object') ? safeState.seer_journey : {};
+  const activeEvents = Array.isArray(safeState.active_events) ? safeState.active_events : [];
+  const activeTensions = Array.isArray(safeState.active_tensions) ? safeState.active_tensions : [];
+  const warOutcomes = Array.isArray(safeState.war_outcomes) ? safeState.war_outcomes : [];
+  const primary = safeState.primary_event || {};
+
+  const severityFromEvents = activeEvents.reduce((max, event) => {
+    const sev = Number(event?.severity || 0);
+    return Number.isFinite(sev) ? Math.max(max, sev) : max;
+  }, 0);
+  const explicitWeight = Number(safeState.event_weight);
+  const eventWeight = Number.isFinite(explicitWeight) && explicitWeight > 0
+    ? explicitWeight
+    : Math.max(1, Number(primary.severity || 0), severityFromEvents);
+
+  const explicitTension = Number(safeState.tension_level);
+  const tensionLevel = Number.isFinite(explicitTension)
+    ? Math.max(0, Math.min(1, explicitTension))
+    : Math.max(0, Math.min(1, (activeEvents.length * 0.08) + (activeTensions.length * 0.12)));
+
+  const explicitInstability = Number(safeState.instability);
+  const instability = Number.isFinite(explicitInstability)
+    ? Math.max(0, Math.min(1, explicitInstability))
+    : Math.max(0, Math.min(1, (eventWeight / 20) * 0.7 + tensionLevel * 0.3));
+
+  const prophecyActive = typeof safeState.prophecy_active === 'boolean'
+    ? safeState.prophecy_active
+    : !/without prophecy/i.test(`${primary.name || ''} ${primary.summary || ''}`);
+
+  const warState = typeof safeState.war_state === 'boolean'
+    ? safeState.war_state
+    : warOutcomes.length > 0 || activeEvents.some(event => /war|battle|siege|invasion|campaign/i.test(`${event?.name || ''} ${event?.summary || ''}`));
+
+  let tone = 'calm';
+  if (eventWeight >= 17) tone = 'overwhelming';
+  else if (eventWeight >= 13) tone = 'strained';
+  else if (eventWeight >= 9) tone = 'intense';
+  else if (eventWeight >= 5) tone = 'warning';
+
+  const normalize01 = (value, fallback = 0.5) => {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return fallback;
+    if (num > 1) return Math.max(0, Math.min(1, num / 100));
+    return Math.max(0, Math.min(1, num));
+  };
+
+  const confidence = normalize01(
+    seerState.confidence ?? safeState.seer_confidence,
+    Math.max(0.35, 1 - instability * 0.6)
+  );
+  const trust = normalize01(seerState.trust ?? safeState.seer_trust, 0.72);
+  const fatigue = normalize01(seerState.fatigue ?? safeState.seer_fatigue, Math.min(0.85, eventWeight / 24));
+  const corruption = normalize01(seerState.corruption ?? safeState.seer_corruption, 0.08);
+  const focus = (seerState.focus || seerJourney.destination || seerJourney.target || '').toString().trim();
+  const mood = (seerState.mood || safeState.seer_mood || (tensionLevel > 0.7 ? 'tense' : 'calm')).toString().toLowerCase();
+  const age = Number(seerState.age ?? safeState.seer_age ?? safeState.tick ?? 0);
+
+  return {
+    eventWeight,
+    tensionLevel,
+    instability,
+    prophecyActive,
+    warState,
+    tone,
+    confidence,
+    trust,
+    fatigue,
+    corruption,
+    focus,
+    mood,
+    age
+  };
+}
+
+function getRecentSeerMemories(state) {
+  const safeState = state || {};
+  if (Array.isArray(safeState.last_3_seer_outputs)) {
+    return safeState.last_3_seer_outputs.filter(Boolean).map(String);
+  }
+  if (Array.isArray(safeState.seer_memory)) {
+    return safeState.seer_memory.filter(Boolean).map(String).slice(-3);
+  }
+  return [];
+}
+
+function seerMemoryLine(base, state) {
+  const memories = getRecentSeerMemories(state);
+  if (!memories.length) return '';
+  const text = `${base}`.toLowerCase();
+  const relevant = memories.find((m) => {
+    const mm = m.toLowerCase();
+    if (/monestary|monastery|druid|stonebreak/.test(mm)) {
+      return /monestary|monastery|druid|stonebreak/.test(text);
+    }
+    return false;
+  });
+  if (!relevant) return '';
+  return 'I remember waking in bright light on a monastery floor, but I treat that memory as a wound in perception, not proof of what this moment means.';
+}
+
+function seerWrap(base, context, state) {
+  let text = String(base || '');
+  const lines = [];
+
+  // Low confidence introduces explicit uncertainty.
+  if (context.confidence < 0.35) {
+    text = `${text} I may be mistaken in parts of this reading.`;
+  }
+
+  // Focused observations prioritize the selected region naturally.
+  if (context.focus) {
+    text = `${text} I keep returning to ${context.focus}, even when other noise presses at the edges.`;
+  }
+
+  // Trust controls reverence versus distance.
+  if (context.trust < 0.35) {
+    text = text.replace(/\bYour will\b/g, 'Your command').replace(/\bYour silence\b/g, 'Your distance');
+  } else if (context.trust > 0.75 && !/\bYour\s/.test(text)) {
+    text = `${text} I offer this to You without concealment.`;
+  }
+
+  // Mood shades the delivery style.
+  if (context.mood === 'tense') {
+    text = text.replace('I see', 'I witness').replace('I keep', 'I hold');
+  } else if (context.mood === 'uneasy') {
+    text = `${text} I do not trust the quiet edges.`;
+  }
+
+  // Age adds reflective awareness.
+  if (context.age >= 120) {
+    text = `${text} I have watched enough cycles to know complexity can hide inside simple reports.`;
+  } else if (context.age >= 40) {
+    text = `${text} I read this with the caution that only time has taught me.`;
+  }
+
+  lines.push(text);
+  const memoryLine = seerMemoryLine(base, state);
+  if (memoryLine) lines.push(memoryLine);
+  if (!context.prophecyActive) {
+    lines.push('I feel the space where prophecy should stand, and Your silence weighs more than any banner.');
+  }
+  if (context.tensionLevel >= 0.72) {
+    lines.push('I witness pressure tightening across decisions already in motion, even when no one names it plainly.');
+  }
+  if (context.instability >= 0.78) {
+    lines.push('I may be mistaken at the edges; when I look too long, the shape refuses to stay still.');
+  } else if (context.instability >= 0.55) {
+    lines.push('It is unclear at the margins, and I will not hide that uncertainty from You.');
+  }
+
+  if (context.corruption > 0.4) {
+    lines.push('There is interference in my sight. I see the same edge twice, and not the same way both times.');
+  }
+
+  // Rare observer prompt: only when confidence is low, tension is rising, or focus is active.
+  // Throttled to avoid overuse.
+  const shouldAskObserver =
+    (context.confidence < 0.38 || context.tensionLevel >= 0.66 || !!context.focus) &&
+    (context.eventWeight % 4 === 0) &&
+    (Math.floor((context.age || 0) / 2) % 3 === 0);
+  if (shouldAskObserver) {
+    if (context.focus && context.tensionLevel >= 0.66) {
+      lines.push('Should I remain fixed here, or widen my sight?');
+    } else if (context.confidence < 0.38) {
+      lines.push('Do You wish me to look deeper?');
+    } else {
+      lines.push('Should I remain fixed here?');
+    }
+  }
+
+  const visionStrain = context.fatigue > 0.62 || context.tone === 'strained' || context.instability > 0.7;
+  const applyStrainCadence = (input) => {
+    const value = String(input || '').replace(/\s+/g, ' ').trim();
+    if (!visionStrain) return value;
+    // Slight shortening and minor fragmentation while preserving readability.
+    return value
+      .replace(/\bI would rather\b/g, 'I prefer')
+      .replace(/\bI do not yet\b/g, 'I do not')
+      .replace(/, and /g, '. And ')
+      .replace(/\. ([A-Z])/g, '.\n$1');
+  };
+
+  if (context.tone === 'warning') {
+    return applyStrainCadence(lines.join(' '));
+  }
+  if (context.tone === 'intense') {
+    const intenseText = lines.join(' ').replace('I see', 'I witness');
+    return applyStrainCadence(intenseText);
+  }
+  if (context.tone === 'strained') {
+    const strained = `${lines.join(' ')} I hold what I can. I do not hold all of it.`;
+    return applyStrainCadence(strained);
+  }
+  if (context.tone === 'overwhelming') {
+    const overwhelming = `${lines.join(' ')} The frame of the world feels unstable in my sight. I keep speaking only what I can still hold in the present moment.`;
+    return applyStrainCadence(overwhelming);
+  }
+  return applyStrainCadence(lines.join(' '));
+}
+
 function buildSeerPrimary(thread, state, seer) {
+  const ctx = getSeerContext(state);
   if (!thread) {
-    return 'I do not have one clean matter to place before you yet. I am listening, but the reports are scattered and I would rather be slow than pretend certainty.';
+    return seerWrap(
+      'I do not yet hold one clean thread worthy of Your hand. I listen, but the signs arrive unevenly, and I would rather be slow than false before You.',
+      ctx,
+      state
+    );
   }
 
   const place = inferScope(`${thread.name} ${thread.summary}`, state);
-  const stage = thread.stage ? ` I believe it is in a ${thread.stage} stage` : ' I do not yet trust the stage of it';
-  const trend = thread.trend ? ` and it is moving ${thread.trend}` : '';
-  const severity = thread.severity ? ` Its weight is severe enough that I cannot treat it as background pressure: ${thread.severity} on the scale.` : '';
-  const locationLine = place ? ` I am watching ${place} most closely.` : ` From ${seer.location}, I am trying to separate report from rumor.`;
+  const seed = normalizeSeedFromContext(ctx, `${thread.name} ${thread.summary || ''}`);
+  const openLine = pickVariant(seed, [
+    `I keep returning to ${thread.name}.`,
+    `${thread.name} is still the clearest pressure in my sight.`,
+    `My attention remains fixed on ${thread.name}.`
+  ]);
+  const locationLine = place
+    ? pickVariant(seed + 3, [
+        `The strongest signal is around ${place}.`,
+        `Most of what I can verify points back to ${place}.`,
+        `The pressure gathers around ${place}.`
+      ])
+    : pickVariant(seed + 5, [
+        `From ${seer.location}, I can separate some report from rumor, but not all.`,
+        `I read this from ${seer.location}, where the noise is still thick.`,
+        `From ${seer.location}, the outline is visible but incomplete.`
+      ]);
+  const readLine = thread.summary
+    ? shortenSentence(`What I can confirm now: ${thread.summary}`, 165)
+    : pickVariant(seed + 7, [
+        'Its outline is visible, but I will not claim more than that.',
+        'I can name its presence, not its full meaning.',
+        'I see the shape of it, but not every cause beneath it.'
+      ]);
+  const pressureLine = Number(thread.severity || 0) >= 8
+    ? pickVariant(seed + 11, [
+        'It carries real weight in the present moment.',
+        'This is not background noise anymore.',
+        'It is pressing decisions now, not later.'
+      ])
+    : pickVariant(seed + 13, [
+        'It is present, but not yet at full force.',
+        'I read it as active, though still contained.',
+        'It moves quietly, but it does move.'
+      ]);
 
-  return `I have one matter in front of me: ${thread.name}.${locationLine}${stage}${trend}.${severity} What I can say plainly is this: ${thread.summary || 'the shape is visible, but its meaning is not yet safe to name.'}`;
+  return seerWrap(
+    `${openLine} ${locationLine} ${readLine} ${pressureLine}`,
+    ctx,
+    state
+  );
 }
 
 function buildSeerSecondary(thread, state, seer) {
+  const ctx = getSeerContext(state);
   const tension = state.active_tensions?.[0];
   if (thread) {
     const place = inferScope(`${thread.name} ${thread.summary}`, state);
-    return `I am also keeping one lesser thread in view: ${thread.name}.${place ? ` It touches ${place}.` : ''} I have not put it first because the signs are less complete, but I do not think it is harmless. ${thread.summary || ''}`;
+    return seerWrap(
+      `I keep a lesser thread in view as well: ${thread.name}.${place ? ` It brushes against ${place}.` : ''} I do not place it first because the signs are incomplete, yet I do not believe it harmless. ${thread.summary || ''}`,
+      ctx,
+      state
+    );
   }
   if (tension?.description) {
-    return `There is pressure beneath the surface, but it comes to me through other mouths: ${tension.description} I may be late to its true meaning.`;
+    return seerWrap(
+      `There is pressure beneath the surface, reaching me through other mouths: ${tension.description} I may be late to its true meaning, and I will not hide that from You.`,
+      ctx,
+      state
+    );
   }
-  return 'What I am unsure of is larger than what I know. I will keep the surface narrow until something earns the center.';
+  return seerWrap(
+    'What I do not understand is larger than what I do. I keep the surface narrow until something earns the center of Your attention.',
+    ctx,
+    state
+  );
 }
 
 function buildSeerFocusThought(primary, secondary, seer) {
-  const source = primary?.summary || secondary?.summary || `He remains near ${seer.location || 'the road'} and is still separating report from omen.`;
+  const source = primary?.summary || secondary?.summary || `I remain near ${seer.location || 'the road'}, still separating report from omen while Your silence gathers weight.`;
   const cleaned = String(source)
     .replace(/\s+/g, ' ')
     .replace(/\s+—\s+/g, ' ')
@@ -4087,9 +4826,9 @@ function buildCenterEventTitle(primary, seer) {
 }
 
 function buildSeerQuote(primary, secondary, seer) {
-  const source = primary?.name || primary?.summary || secondary?.name || secondary?.summary || `The road still points toward ${seer.location || 'the unknown'}.`;
+  const source = primary?.summary || secondary?.summary || `I remain on the road near ${seer.location || 'the unknown'}.`;
   const cleaned = shortenSentence(cleanName(source).replace(/\.$/, ''), 68);
-  return `“${cleaned}”`;
+  return `“I witness this now: ${cleaned}”`;
 }
 
 function shortenSentence(text, maxLength = 110) {
@@ -4228,14 +4967,15 @@ function renderDreamTargets(state) {
   const characters = state.character_updates || [];
   const fallbackNames = [
     'The Seer',
-    'Kessa Stonebraid',
-    'Grand Druid Varek',
-    'Thane Ironmaul',
-    'Elder Ashveil',
-    'Caeris Thorne',
-    'Rowen',
-    'Lady Orryn',
-    'Admiral'
+    'Queen Lyathra the Veiled',
+    'High King Eldaric III',
+    'High Lord Kaelen Adkison',
+    'High Thane Babadu Goldfinger-Duke',
+    'High Sovereign Thalorien',
+    'Trade Prince Seran Gross',
+    'Grand Admiral Levi Ver Meer',
+    'Ronan Blacktide',
+    'Grand Druid Varak'
   ];
   const names = characters.length
     ? characters.map(char => ({
@@ -4371,33 +5111,115 @@ async function handleIntent() {
   const input = document.getElementById('intent-input').value.trim();
   const primary = getPrimaryThread(worldState);
   const secondary = getSecondaryThread(worldState);
-  let response = '';
+  const ctx = getSeerContext(worldState);
+  let response = await composeSeerIntentResponse({
+    intent: activeIntent,
+    input,
+    primary,
+    secondary,
+    ctx,
+    state: worldState
+  });
 
-  if (activeIntent === 'continue') {
-    response = primary
-      ? `I will stay with ${primary.name}. I think this is still the right thread to hold, because the consequences have not settled. I will watch for the next decision, not the loudest rumor.`
-      : 'I will keep listening until one matter becomes clear enough to deserve the center.';
-  } else if (activeIntent === 'clarify') {
-    const thread = findThread(input) || primary;
-    response = thread
-      ? `I will clarify ${thread.name}. I can tell you what I believe I see: ${thread.summary || 'the event is known, but the cause is still incomplete.'} I cannot yet tell you who understands it correctly.`
-      : 'I need a clearer point to clarify. Give me one event, name, or pressure, and I will hold myself to it.';
-  } else if (activeIntent === 'inspect') {
-    response = inspectRegion(input);
-  } else if (activeIntent === 'expand') {
-    const thread = findThread(input) || primary || secondary;
-    response = thread
-      ? `I will open one deeper layer beneath ${thread.name}. The visible report is this: ${thread.summary || 'the surface is still forming.'} Beneath it, I would watch the people named in it, because they will act from partial knowledge before the truth is settled.`
-      : 'I cannot expand what has not been named. Give me one thread, and I will go one layer deeper.';
-  } else if (activeIntent === 'send') {
-    response = await sendSeer(input);
+  addSeerMessage(
+    seerWrap(response || 'I have heard Your intent, but I do not yet know the cleanest road to carry it.', ctx, worldState),
+    'Seer'
+  );
+}
+
+function pickVariant(seed, values) {
+  if (!Array.isArray(values) || !values.length) return '';
+  const idx = Math.abs(Number(seed) || 0) % values.length;
+  return values[idx];
+}
+
+function normalizeSeedFromContext(ctx, input = '') {
+  const base = (ctx.eventWeight || 0) * 31
+    + Math.round((ctx.tensionLevel || 0) * 100) * 17
+    + Math.round((ctx.instability || 0) * 100) * 13
+    + (ctx.age || 0) * 7
+    + (input || '').length;
+  return base;
+}
+
+async function composeSeerIntentResponse({ intent, input, primary, secondary, ctx, state }) {
+  const seed = normalizeSeedFromContext(ctx, input);
+  const targetThread = findThread(input) || primary || secondary;
+
+  if (intent === 'send') {
+    return await sendSeer(input);
   }
 
-  addSeerMessage(response || 'I have heard the intent, but I do not yet know how to carry it.', 'Seer');
+  if (intent === 'inspect') {
+    return inspectRegion(input);
+  }
+
+  if (intent === 'continue') {
+    if (!targetThread) {
+      return pickVariant(seed, [
+        'I hold my sight open and narrow until one pressure resolves into something I can name cleanly.',
+        'I continue watching without widening the frame. I would rather miss noise than mistake it for truth.',
+        'I remain in observation. No single thread has earned a stronger claim on Your attention yet.'
+      ]);
+    }
+    return [
+      `I keep my sight on ${targetThread.name}.`,
+      pickVariant(seed + 2, [
+        'Its current movement is clearer than the surrounding noise.',
+        'Its pressure is still active in present decisions.',
+        'It remains the most stable anchor in a noisy field.'
+      ]),
+      targetThread.summary ? shortenSentence(`What I can confirm now: ${targetThread.summary}`, 140) : ''
+    ].filter(Boolean).join(' ');
+  }
+
+  if (intent === 'clarify') {
+    if (!targetThread) {
+      return pickVariant(seed + 5, [
+        'Name one event, one faction, or one place. I can clarify one edge at a time.',
+        'Give me a narrower point. I can sharpen sight, but not across the whole horizon at once.',
+        'I need one specific thread to clarify. Broad questions blur the signal.'
+      ]);
+    }
+    return [
+      `I clarify ${targetThread.name}.`,
+      targetThread.summary
+        ? shortenSentence(`The strongest readable signal is: ${targetThread.summary}`, 150)
+        : 'I can name its presence, but the cause is still incomplete.',
+      pickVariant(seed + 9, [
+        'I do not extend this beyond what is currently visible.',
+        'I keep this reading local to what is present now.',
+        'I will not claim certainty beyond what is in front of us.'
+      ])
+    ].join(' ');
+  }
+
+  if (intent === 'expand') {
+    if (!targetThread) {
+      return pickVariant(seed + 11, [
+        'Give me a named thread and I will widen one layer beneath it.',
+        'I can expand only from a concrete point. Name what You want me to deepen.',
+        'I need one clear anchor before I widen the frame.'
+      ]);
+    }
+    const influenceLine = pickVariant(seed + 14, [
+      'The secondary pressure appears in who responds slowly versus who responds first.',
+      'The deeper layer is not louder; it shows in timing, posture, and restraint.',
+      'The deeper layer usually appears in alignment shifts before public declarations.'
+    ]);
+    return [
+      `I widen beneath ${targetThread.name}.`,
+      targetThread.summary ? shortenSentence(`Surface reading: ${targetThread.summary}`, 135) : '',
+      influenceLine
+    ].filter(Boolean).join(' ');
+  }
+
+  return 'I have heard Your intent, and I remain in observation.';
 }
 
 function inspectRegion(query) {
-  if (!query) return 'Name the region and I will keep to it. I will not pull the rest of the world into the answer.';
+  const ctx = getSeerContext(worldState);
+  if (!query) return 'Name the region, and I will keep my sight there. I will not drag the whole world into an answer that should stay narrow.';
   const needle = query.toLowerCase();
   const recent = (worldState.recent_events || []).find(item =>
     `${item.region || ''} ${item.text || ''}`.toLowerCase().includes(needle)
@@ -4406,9 +5228,17 @@ function inspectRegion(query) {
     `${item.name || ''} ${item.summary || ''}`.toLowerCase().includes(needle)
   );
   if (!recent && !active) {
-    return `I do not have a firm report from ${query}. That does not mean nothing is happening there. It means I would be guessing, and I will not dress a guess as sight.`;
+    return seerWrap(
+      `I do not yet hold a firm report from ${query}. That does not mean the place is quiet. It means I would be guessing, and I will not dress a guess as sight before You.`,
+      ctx,
+      worldState
+    );
   }
-  return `I will keep to ${recent?.region || query}. What I can report is limited: ${recent?.text || active?.summary} I would treat this as local truth first, not world truth.`;
+  return seerWrap(
+    `I keep to ${recent?.region || query}. What I can speak is limited: ${recent?.text || active?.summary} Treat this as local truth first, not world truth.`,
+    ctx,
+    worldState
+  );
 }
 
 async function sendSeer(input) {
@@ -4422,11 +5252,16 @@ async function sendSeer(input) {
     });
     if (!response.ok) throw new Error('Failed to queue movement');
     const data = await response.json();
+    const currentSeer = getSeerState(worldState || {});
+    const destination = inferScope(input, worldState || {}) || input;
+    const travelLead = currentSeer.status === 'travelling'
+      ? `I am already on the road from ${currentSeer.location} toward ${currentSeer.destination}.`
+      : `I depart from ${currentSeer.location}.`;
     showToast(`Seer intent queued (${data.pending_count || 0})`);
-    return `I have taken the road you set before me: ${input}. I will carry the meaning as I understand it, but I cannot promise I will arrive before the matter changes.`;
+    return `${travelLead} I now turn toward ${destination} under Your will. I will carry Your intent as faithfully as I can, but I cannot promise I will arrive before the matter reshapes itself.`;
   } catch (error) {
     console.error(error);
-    return 'I tried to take the road, but the command did not settle into the pending lore. I remain where I am for now.';
+    return 'I tried to take the road, but Your command did not settle. I remain where I am, listening for the signal to resolve.';
   }
 }
 
@@ -4554,8 +5389,539 @@ function showToast(message) {
 }
 
 loadHome();
+
+/* ─────────────────────────────────────────────────────────────
+   EPIC OVERLAY — decorative DOM injection.
+   Adds ambient shafts, dust motes, corner brackets and crests.
+   Pure visual layer; no markup or behavior is modified.
+   ───────────────────────────────────────────────────────────── */
+(function epicOverlay() {
+  try {
+    var reduceMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+    var svgEl = function (name) { return document.createElementNS(SVG_NS, name); };
+
+    /* ── corner-bracket SVG (a single inward L with a small flourish) ── */
+    function makeCornerSVG() {
+      var s = svgEl('svg');
+      s.setAttribute('viewBox', '0 0 32 32');
+      s.setAttribute('fill', 'none');
+      var p = svgEl('path');
+      p.setAttribute('d',
+        'M2 12 L2 2 L12 2 ' +
+        'M2 6 L6 6 ' +
+        'M6 2 L6 6 ' +
+        'M2 14 Q4 9 9 7 ' +
+        'M14 2 Q9 4 7 9');
+      p.setAttribute('stroke', 'currentColor');
+      p.setAttribute('stroke-width', '1.1');
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('stroke-linejoin', 'round');
+      s.appendChild(p);
+      var dot = svgEl('circle');
+      dot.setAttribute('cx', '4'); dot.setAttribute('cy', '4');
+      dot.setAttribute('r', '0.9');
+      dot.setAttribute('fill', 'currentColor');
+      s.appendChild(dot);
+      return s;
+    }
+
+    function attachCorners(host) {
+      if (!host || host.querySelector(':scope > .epic-corners')) return;
+      var box = document.createElement('div');
+      box.className = 'epic-corners';
+      ['tl', 'tr', 'bl', 'br'].forEach(function (pos) {
+        var c = document.createElement('div');
+        c.className = 'epic-corner ' + pos;
+        c.appendChild(makeCornerSVG());
+        box.appendChild(c);
+      });
+      host.appendChild(box);
+    }
+
+    /* ── small heraldic crest (top center of side rails) ── */
+    function makeCrestSVG() {
+      var s = svgEl('svg');
+      s.setAttribute('viewBox', '0 0 64 14');
+      s.setAttribute('fill', 'none');
+      var path = svgEl('path');
+      path.setAttribute('d',
+        'M2 7 L20 7 ' +
+        'M44 7 L62 7 ' +
+        'M22 7 Q26 1 32 7 Q38 13 42 7 ' +
+        'M32 1 L32 13');
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('stroke-linecap', 'round');
+      s.appendChild(path);
+      var dot = svgEl('circle');
+      dot.setAttribute('cx', '32'); dot.setAttribute('cy', '7');
+      dot.setAttribute('r', '1.6');
+      dot.setAttribute('fill', 'currentColor');
+      s.appendChild(dot);
+      return s;
+    }
+
+    function attachRailCrest(host) {
+      if (!host || host.querySelector(':scope > .epic-rail-crest')) return;
+      var crest = document.createElement('div');
+      crest.className = 'epic-rail-crest';
+      crest.setAttribute('aria-hidden', 'true');
+      crest.appendChild(makeCrestSVG());
+      host.appendChild(crest);
+    }
+
+    /* ── cathedral light shafts inside the map stage ── */
+    function attachShafts() {
+      var stage = document.querySelector('.home-map-stage');
+      if (!stage || stage.querySelector(':scope > .epic-shafts')) return;
+      var box = document.createElement('div');
+      box.className = 'epic-shafts';
+      box.setAttribute('aria-hidden', 'true');
+
+      var s = svgEl('svg');
+      s.setAttribute('viewBox', '0 0 1000 700');
+      s.setAttribute('preserveAspectRatio', 'none');
+
+      var defs = svgEl('defs');
+      // Build 4 vertical gradient defs at slightly different positions
+      var configs = [
+        { id: 'eshaft1', x1: 200, x2: 320, w: 120 },
+        { id: 'eshaft2', x1: 460, x2: 600, w: 140 },
+        { id: 'eshaft3', x1: 720, x2: 820, w: 100 },
+        { id: 'eshaft4', x1: 60,  x2: 180, w: 120 }
+      ];
+      configs.forEach(function (cfg) {
+        var lg = svgEl('linearGradient');
+        lg.setAttribute('id', cfg.id);
+        lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0');
+        lg.setAttribute('x2', '0'); lg.setAttribute('y2', '1');
+        var stops = [
+          { o: 0,    c: 'rgba(255,220,160,0.42)' },
+          { o: 0.45, c: 'rgba(255,200,120,0.18)' },
+          { o: 1,    c: 'rgba(255,180,90,0.0)'  }
+        ];
+        stops.forEach(function (st) {
+          var s2 = svgEl('stop');
+          s2.setAttribute('offset', st.o);
+          s2.setAttribute('stop-color', st.c);
+          lg.appendChild(s2);
+        });
+        defs.appendChild(lg);
+      });
+      s.appendChild(defs);
+
+      configs.forEach(function (cfg) {
+        var poly = svgEl('polygon');
+        var x1 = cfg.x1, x2 = cfg.x2;
+        var bottomSpread = cfg.w * 1.6;
+        var bx1 = x1 - bottomSpread * 0.25;
+        var bx2 = x2 + bottomSpread * 0.25;
+        poly.setAttribute('points',
+          x1 + ',0 ' + x2 + ',0 ' + bx2 + ',700 ' + bx1 + ',700');
+        poly.setAttribute('fill', 'url(#' + cfg.id + ')');
+        poly.setAttribute('class', 'epic-shaft');
+        s.appendChild(poly);
+      });
+
+      box.appendChild(s);
+      // Insert before existing .home-ui-layer so shafts sit between map and UI
+      var uiLayer = stage.querySelector('.home-ui-layer');
+      if (uiLayer) stage.insertBefore(box, uiLayer);
+      else stage.appendChild(box);
+    }
+
+    /* ── dust motes canvas (full-screen, screen-blend) ── */
+    function attachDust() {
+      if (reduceMotion) return;
+      var screen = document.querySelector('.home-screen');
+      if (!screen || screen.querySelector(':scope > .epic-dust')) return;
+      var canvas = document.createElement('canvas');
+      canvas.className = 'epic-dust';
+      canvas.setAttribute('aria-hidden', 'true');
+      screen.appendChild(canvas);
+
+      var ctx = canvas.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var motes = [];
+      var raf = 0;
+
+      function resize() {
+        var rect = screen.getBoundingClientRect();
+        canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        canvas.style.width  = rect.width  + 'px';
+        canvas.style.height = rect.height + 'px';
+        var density = Math.max(40, Math.min(110, Math.floor(rect.width * rect.height / 22000)));
+        motes = [];
+        for (var i = 0; i < density; i++) {
+          motes.push(spawnMote(rect.width, rect.height));
+        }
+      }
+
+      function spawnMote(w, h) {
+        return {
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: 0.4 + Math.random() * 1.6,
+          vx: (-0.08 + Math.random() * 0.16),
+          vy: (-0.04 - Math.random() * 0.10),
+          life: 0,
+          ttl: 600 + Math.random() * 900,
+          a: 0.05 + Math.random() * 0.35,
+          hue: 36 + Math.random() * 14
+        };
+      }
+
+      function tick() {
+        var w = canvas.width / dpr;
+        var h = canvas.height / dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        for (var i = 0; i < motes.length; i++) {
+          var m = motes[i];
+          m.x += m.vx + Math.sin((m.life + i) * 0.012) * 0.05;
+          m.y += m.vy;
+          m.life++;
+          if (m.life > m.ttl || m.y < -10 || m.x < -10 || m.x > w + 10) {
+            motes[i] = spawnMote(w, h);
+            motes[i].y = h + 4;
+            continue;
+          }
+          var fade = Math.min(1, Math.min(m.life, m.ttl - m.life) / 80);
+          var alpha = m.a * fade;
+          var grad = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.r * 4);
+          grad.addColorStop(0, 'hsla(' + m.hue + ', 70%, 78%, ' + alpha + ')');
+          grad.addColorStop(1, 'hsla(' + m.hue + ', 70%, 60%, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, m.r * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        raf = requestAnimationFrame(tick);
+      }
+
+      var ro = new ResizeObserver(resize);
+      ro.observe(screen);
+      resize();
+      raf = requestAnimationFrame(tick);
+
+      // Pause while tab is hidden
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        } else if (!raf) {
+          raf = requestAnimationFrame(tick);
+        }
+      });
+    }
+
+    function init() {
+      attachShafts();
+      attachDust();
+      attachCorners(document.querySelector('.home-codex-rail'));
+      attachCorners(document.querySelector('.home-intel-rail'));
+      attachCorners(document.querySelector('.center-event-modal'));
+      attachCorners(document.querySelector('.command-bar-frame'));
+      attachRailCrest(document.querySelector('.home-codex-rail'));
+      attachRailCrest(document.querySelector('.home-intel-rail'));
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+  } catch (e) {
+    // Decorative layer must never break the app.
+    if (window.console && console.warn) console.warn('epicOverlay skipped:', e);
+  }
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   EPIC OVERLAY — TIER II
+   Cursor torchlight, drifting fog, hanging banners, constellation
+   stars, rising embers, distant lightning, deep-corner runes.
+   All decorative. No data, no markup behavior touched.
+   ───────────────────────────────────────────────────────────── */
+(function epicOverlayTwo() {
+  try {
+    var reduceMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+    var svgEl = function (n) { return document.createElementNS(SVG_NS, n); };
+
+    /* ── Cursor torchlight ─────────────────────────────────── */
+    function attachTorch() {
+      // Cursor-follow torchlight disabled by request.
+      return;
+      if (reduceMotion) return;
+      var screen = document.querySelector('.home-screen');
+      if (!screen || screen.querySelector(':scope > .epic-torch')) return;
+      var torch = document.createElement('div');
+      torch.className = 'epic-torch';
+      torch.setAttribute('aria-hidden', 'true');
+      screen.appendChild(torch);
+
+      var rect = null;
+      var pending = false;
+      function refreshRect() { rect = screen.getBoundingClientRect(); }
+      refreshRect();
+      window.addEventListener('resize', refreshRect, { passive: true });
+      window.addEventListener('scroll', refreshRect, { passive: true });
+
+      function onMove(e) {
+        if (!rect) refreshRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+          torch.classList.remove('is-live');
+          return;
+        }
+        if (!pending) {
+          pending = true;
+          requestAnimationFrame(function () {
+            torch.style.setProperty('--tx', x + 'px');
+            torch.style.setProperty('--ty', y + 'px');
+            torch.classList.add('is-live');
+            pending = false;
+          });
+        }
+      }
+      window.addEventListener('pointermove', onMove, { passive: true });
+      window.addEventListener('pointerleave', function () {
+        torch.classList.remove('is-live');
+      });
+    }
+
+    /* ── Volumetric fog (CSS-only, just inject the div) ────── */
+    function attachFog() {
+      var stage = document.querySelector('.home-map-stage');
+      if (!stage || stage.querySelector(':scope > .epic-fog')) return;
+      var f = document.createElement('div');
+      f.className = 'epic-fog';
+      f.setAttribute('aria-hidden', 'true');
+      var ui = stage.querySelector('.home-ui-layer');
+      if (ui) stage.insertBefore(f, ui);
+      else stage.appendChild(f);
+    }
+
+    /* ── Constellation stars over the upper map ─────────────── */
+    function attachStars() {
+      var stage = document.querySelector('.home-map-stage');
+      if (!stage || stage.querySelector(':scope > .epic-stars')) return;
+      var box = document.createElement('div');
+      box.className = 'epic-stars';
+      box.setAttribute('aria-hidden', 'true');
+
+      var s = svgEl('svg');
+      s.setAttribute('viewBox', '0 0 1000 500');
+      s.setAttribute('preserveAspectRatio', 'none');
+
+      // Place ~28 stars in upper area with varied sizes and twinkle delays
+      var seed = 0;
+      function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+      seed = 1337;
+      for (var i = 0; i < 28; i++) {
+        var cx = rnd() * 1000;
+        var cy = 30 + rnd() * 360;
+        var r  = 0.6 + rnd() * 1.8;
+        var c = svgEl('circle');
+        c.setAttribute('cx', cx.toFixed(1));
+        c.setAttribute('cy', cy.toFixed(1));
+        c.setAttribute('r',  r.toFixed(2));
+        c.setAttribute('fill', 'rgba(255, 235, 200, 0.9)');
+        c.setAttribute('class', 'epic-star');
+        c.style.animationDelay  = (rnd() * 4).toFixed(2) + 's';
+        c.style.animationDuration = (3 + rnd() * 4).toFixed(2) + 's';
+        c.style.transformBox = 'fill-box';
+        c.style.transformOrigin = 'center';
+        s.appendChild(c);
+      }
+
+      // A handful of larger glowing stars
+      for (var j = 0; j < 5; j++) {
+        var gx = rnd() * 1000;
+        var gy = 30 + rnd() * 200;
+        var glow = svgEl('circle');
+        glow.setAttribute('cx', gx.toFixed(1));
+        glow.setAttribute('cy', gy.toFixed(1));
+        glow.setAttribute('r', '3.2');
+        glow.setAttribute('fill', 'rgba(255, 240, 200, 0.55)');
+        glow.setAttribute('filter', 'blur(2px)');
+        glow.setAttribute('class', 'epic-star');
+        glow.style.animationDelay  = (rnd() * 4).toFixed(2) + 's';
+        glow.style.animationDuration = (5 + rnd() * 3).toFixed(2) + 's';
+        glow.style.transformBox = 'fill-box';
+        glow.style.transformOrigin = 'center';
+        s.appendChild(glow);
+      }
+
+      box.appendChild(s);
+      var ui = stage.querySelector('.home-ui-layer');
+      if (ui) stage.insertBefore(box, ui);
+      else stage.appendChild(box);
+    }
+
+    /* ── Rising ember sparks above the command bar ──────────── */
+    function attachSparks() {
+      if (reduceMotion) return;
+      var screen = document.querySelector('.home-screen');
+      if (!screen || screen.querySelector(':scope > .epic-spark-field')) return;
+      var field = document.createElement('div');
+      field.className = 'epic-spark-field';
+      field.setAttribute('aria-hidden', 'true');
+      screen.appendChild(field);
+
+      var alive = 0;
+      var MAX = 6;
+
+      function spawn() {
+        if (alive >= MAX || document.hidden) return;
+        var s = document.createElement('div');
+        s.className = 'epic-spark';
+        var bar = document.querySelector('.command-bar');
+        var screenRect = screen.getBoundingClientRect();
+        var barRect = bar ? bar.getBoundingClientRect() : null;
+        // Spawn near the influence sigil (left side of command bar) most often,
+        // sometimes spread along the whole bar.
+        var fromLeft;
+        if (Math.random() < 0.55) {
+          fromLeft = 50 + Math.random() * 220;
+        } else {
+          fromLeft = 60 + Math.random() * (screenRect.width - 120);
+        }
+        var bottomOffset = barRect
+          ? (screenRect.bottom - barRect.top) - 6
+          : 80;
+        s.style.left = fromLeft + 'px';
+        s.style.bottom = bottomOffset + 'px';
+        s.style.setProperty('--sx', ((Math.random() * 80) - 40).toFixed(1) + 'px');
+        s.style.animationDuration = (4.5 + Math.random() * 3.5).toFixed(2) + 's';
+        field.appendChild(s);
+        alive++;
+        s.addEventListener('animationend', function () {
+          if (s.parentNode) s.parentNode.removeChild(s);
+          alive--;
+        }, { once: true });
+      }
+
+      function loop() {
+        spawn();
+        var next = 900 + Math.random() * 2400;
+        setTimeout(loop, next);
+      }
+      setTimeout(loop, 1200);
+    }
+
+    /* ── Distant lightning flicker (rare, cinematic) ────────── */
+    function attachFlash() {
+      if (reduceMotion) return;
+      var screen = document.querySelector('.home-screen');
+      if (!screen || screen.querySelector(':scope > .epic-flash')) return;
+      var f = document.createElement('div');
+      f.className = 'epic-flash';
+      f.setAttribute('aria-hidden', 'true');
+      screen.appendChild(f);
+
+      function fire() {
+        if (document.hidden) { schedule(); return; }
+        f.classList.remove('is-flashing');
+        // Force reflow so the class re-add triggers animation
+        void f.offsetWidth;
+        f.classList.add('is-flashing');
+        schedule();
+      }
+      function schedule() {
+        var next = 38000 + Math.random() * 70000; // 38s – 108s
+        setTimeout(fire, next);
+      }
+      schedule();
+    }
+
+    /* ── Faint runes in the deep corners of the home screen ── */
+    function makeRuneSVG(which) {
+      var s = svgEl('svg');
+      s.setAttribute('viewBox', '0 0 56 56');
+      s.setAttribute('fill', 'none');
+      var g = svgEl('g');
+      g.setAttribute('stroke', 'currentColor');
+      g.setAttribute('stroke-width', '1');
+      g.setAttribute('stroke-linecap', 'round');
+      g.setAttribute('stroke-linejoin', 'round');
+      g.setAttribute('fill', 'none');
+
+      // Outer circle
+      var c = svgEl('circle');
+      c.setAttribute('cx', '28'); c.setAttribute('cy', '28'); c.setAttribute('r', '20');
+      c.setAttribute('opacity', '0.6');
+      g.appendChild(c);
+
+      // Inner circle
+      var c2 = svgEl('circle');
+      c2.setAttribute('cx', '28'); c2.setAttribute('cy', '28'); c2.setAttribute('r', '8');
+      c2.setAttribute('opacity', '0.7');
+      g.appendChild(c2);
+
+      // Rune strokes (pick a different glyph per corner)
+      var glyphs = {
+        tl: 'M28 12 L28 44 M16 28 L40 28 M22 18 L34 38',
+        tr: 'M18 18 L38 38 M38 18 L18 38 M28 14 L28 42',
+        bl: 'M18 22 L28 38 L38 22 M28 14 L28 42',
+        br: 'M18 18 H38 V28 H22 V38 H38'
+      };
+      var p = svgEl('path');
+      p.setAttribute('d', glyphs[which] || glyphs.tl);
+      g.appendChild(p);
+
+      // Three orbital dots
+      [12, 28, 44].forEach(function (cy, i) {
+        var dot = svgEl('circle');
+        dot.setAttribute('cx', i === 1 ? 48 : (i === 0 ? 28 : 8));
+        dot.setAttribute('cy', cy);
+        dot.setAttribute('r', '0.9');
+        dot.setAttribute('fill', 'currentColor');
+        dot.setAttribute('stroke', 'none');
+        g.appendChild(dot);
+      });
+
+      s.appendChild(g);
+      return s;
+    }
+    function attachRunes() {
+      var screen = document.querySelector('.home-screen');
+      if (!screen || screen.querySelector(':scope > .epic-rune')) return;
+      ['tl', 'tr', 'bl', 'br'].forEach(function (pos) {
+        var r = document.createElement('div');
+        r.className = 'epic-rune ' + pos;
+        r.setAttribute('aria-hidden', 'true');
+        r.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+        r.style.animationDuration = (7 + Math.random() * 3).toFixed(2) + 's';
+        r.appendChild(makeRuneSVG(pos));
+        screen.appendChild(r);
+      });
+    }
+
+    function init() {
+      attachTorch();
+      attachFog();
+      attachStars();
+      attachSparks();
+      attachFlash();
+      attachRunes();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      // Defer slightly so we layer on top of the first overlay's elements
+      setTimeout(init, 60);
+    }
+  } catch (e) {
+    if (window.console && console.warn) console.warn('epicOverlayTwo skipped:', e);
+  }
+})();
 </script>
 {% endblock %}
-git add .
-git commit -m "latest working version from local"
-git push origin main

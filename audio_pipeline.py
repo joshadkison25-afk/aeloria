@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pdfplumber
 import requests
-from anthropic import Anthropic
+
+from aeloria_llm import complete_chat_anthropic_format
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +57,6 @@ def _clean_for_tts(text: str) -> str:
 
 
 def _generate_script(world_state: dict, lore: str, style_guide: str) -> str:
-    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-
     events = world_state.get("recent_events", [])
     event_text = "\n".join(f"- [{e['region']}] {e['text']}" for e in events)
     tensions = "\n".join(f"- {t['factions']}: {t['description']}" for t in world_state.get("active_tensions", []))
@@ -98,12 +97,12 @@ Structure:
 - powerful, memorable ending
 """
 
-    response = client.messages.create(
-        model=os.getenv("API_MODEL", "claude-sonnet-4-6"),
+    return complete_chat_anthropic_format(
+        system=None,
+        messages=[{"role": "user", "content": prompt}],
         max_tokens=1500,
-        messages=[{"role": "user", "content": prompt}]
+        openai_continuity="Continuity: match the style constraints above; same gritty spoken-story voice.",
     )
-    return response.content[0].text
 
 
 def _generate_voice(script_text: str, output_path: Path):

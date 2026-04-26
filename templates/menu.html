@@ -5,82 +5,213 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aeloria</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Crimson+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
+    /* ─────────────────────────────────────────────────────────────
+       AELORIA — Cinematic Main Menu
+       Full-bleed key art, breathing world, illuminated text menu.
+       ───────────────────────────────────────────────────────────── */
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      min-height: 100vh;
-      background: #04050a;
-      color: #efe2c8;
-      font-family: 'Crimson Text', serif;
+    :root {
+      --gold:        #e7c285;
+      --gold-bright: #ffd99a;
+      --gold-deep:   #b8893f;
+      --bone:        #f4ead0;
+      --ink:         #03050a;
+      --ink-deep:    #010205;
+      --shadow:      rgba(0, 0, 0, 0.85);
+    }
+
+    html, body {
+      height: 100%;
       overflow: hidden;
     }
 
-    .bg {
+    body {
+      min-height: 100vh;
+      background: var(--ink-deep);
+      color: var(--bone);
+      font-family: 'Cormorant Garamond', 'Crimson Text', serif;
+      position: relative;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      animation: pageIgnite 2.6s cubic-bezier(.16,.84,.32,1) both;
+    }
+
+    @keyframes pageIgnite {
+      from { opacity: 0; filter: brightness(0.35) saturate(0.55); }
+      to   { opacity: 1; filter: brightness(1) saturate(1); }
+    }
+
+    /* ── BACKGROUND STACK ───────────────────────────────────── */
+
+    .stage {
       position: fixed;
       inset: 0;
       z-index: 0;
+      overflow: hidden;
+    }
+
+    .stage-deep {
+      position: absolute;
+      inset: 0;
       background:
-        radial-gradient(ellipse at 20% 8%, rgba(130, 89, 38, 0.35), transparent 42%),
-        radial-gradient(ellipse at 80% 88%, rgba(22, 52, 88, 0.28), transparent 40%),
-        radial-gradient(ellipse at 50% 40%, rgba(126, 68, 24, 0.1), transparent 60%),
-        linear-gradient(180deg, #03040a 0%, #05060d 45%, #04050a 100%);
+        radial-gradient(ellipse at 50% 30%, rgba(40, 28, 14, 0.55), transparent 60%),
+        radial-gradient(ellipse at 50% 100%, rgba(80, 45, 18, 0.30), transparent 65%),
+        linear-gradient(180deg, #02030a 0%, #04050d 45%, #02030a 100%);
     }
 
-    .bg-map {
-      position: fixed;
-      inset: -2%;
-      z-index: 0;
-      background-image: url('/aeloria-menu-cinematic-bg.png?v=2');
+    .stage-art {
+      position: absolute;
+      inset: -4%;
+      background-image: url('/aeloria-menu-cinematic-bg.png?v=20260426-cinematic-1');
       background-size: cover;
-      background-position: center;
-      opacity: 0.4;
-      filter: saturate(0.96) contrast(1.16) brightness(0.5);
-      animation: bgDrift 42s ease-in-out infinite alternate;
+      background-position: 38% 52%;
+      filter: saturate(1.05) contrast(1.18) brightness(0.62);
+      transform-origin: 42% 50%;
+      animation: stageKenBurns 90s ease-in-out infinite alternate;
+      transition: transform 1.6s cubic-bezier(.16,.84,.32,1);
+      will-change: transform, filter;
     }
-    @keyframes bgDrift {
-      from { transform: scale(1.02) translate3d(0, 0, 0); }
-      to   { transform: scale(1.08) translate3d(-1.8%, -1%, 0); }
+    @keyframes stageKenBurns {
+      0%   { transform: scale(1.10) translate3d(0, 0, 0); }
+      100% { transform: scale(1.20) translate3d(-2.4%, -1.6%, 0); }
     }
 
-    .bg-shafts {
-      position: fixed;
+    /* God-rays — diagonal moving light shafts above the citadel */
+    .stage-rays {
+      position: absolute;
       inset: -20% -10%;
-      z-index: 1;
       pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.55;
       background:
         repeating-linear-gradient(
+          108deg,
+          rgba(255, 220, 150, 0.10) 0px,
+          rgba(255, 220, 150, 0.0) 110px,
+          rgba(255, 220, 150, 0.0) 220px
+        ),
+        repeating-linear-gradient(
           112deg,
-          rgba(255, 220, 150, 0.05) 0px,
-          rgba(255, 220, 150, 0.0) 70px,
-          rgba(255, 220, 150, 0.0) 140px
+          rgba(255, 200, 120, 0.06) 0px,
+          rgba(255, 200, 120, 0.0) 70px,
+          rgba(255, 200, 120, 0.0) 140px
         );
-      filter: blur(2px);
-      mix-blend-mode: screen;
-      animation: shafts 28s linear infinite;
-      opacity: 0.55;
+      filter: blur(2.4px);
+      animation: rayDrift 32s linear infinite;
     }
-    @keyframes shafts {
+    @keyframes rayDrift {
       from { transform: translateX(0); }
-      to { transform: translateX(90px); }
+      to   { transform: translateX(220px); }
     }
 
-    .bg-vignette {
-      position: fixed;
+    /* Volumetric fog layer — drifts low across the realm */
+    .stage-fog {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: -8%;
+      height: 55%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.50;
+      background:
+        radial-gradient(ellipse 60% 90% at 22% 100%, rgba(220, 180, 130, 0.18), transparent 70%),
+        radial-gradient(ellipse 70% 90% at 78% 100%, rgba(180, 140, 90, 0.14), transparent 70%),
+        radial-gradient(ellipse 100% 80% at 50% 100%, rgba(110, 80, 50, 0.20), transparent 75%);
+      filter: blur(20px);
+      animation: stageFogDrift 32s ease-in-out infinite alternate;
+    }
+    @keyframes stageFogDrift {
+      from { transform: translate3d(-3%, 1%, 0) scale(1.04); }
+      to   { transform: translate3d(3%, -1%, 0)  scale(1.10); }
+    }
+
+    /* Vignette — keeps focus center, deepens the corners */
+    .stage-vignette {
+      position: absolute;
       inset: 0;
-      z-index: 2;
       pointer-events: none;
       background:
-        radial-gradient(circle at 50% 46%, transparent 17%, rgba(3, 4, 8, 0.66) 66%, rgba(2, 3, 6, 0.95) 100%),
-        linear-gradient(180deg, rgba(2, 2, 4, 0.72) 0%, rgba(3, 3, 6, 0.2) 28%, rgba(2, 2, 4, 0.75) 100%);
+        radial-gradient(circle at 50% 50%,
+          transparent 18%,
+          rgba(2, 3, 6, 0.55) 65%,
+          rgba(0, 0, 0, 0.96) 100%),
+        linear-gradient(180deg, rgba(2, 2, 4, 0.48) 0%, transparent 28%, rgba(2, 2, 4, 0.78) 100%);
     }
 
-    .embers {
-      position: fixed;
+    /* Aged-vellum film grain over everything */
+    .stage-grain {
+      position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 1;
+      opacity: 0.07;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>");
+      background-size: 220px 220px;
+    }
+
+    /* Cursor torchlight — warm halo follows the mouse */
+    .stage-torch {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle 360px at var(--tx, 50%) var(--ty, 60%),
+          rgba(255, 200, 130, 0.10) 0%,
+          rgba(255, 170, 80, 0.06)  32%,
+          rgba(120, 60, 20, 0.03)   60%,
+          transparent               76%),
+        radial-gradient(circle 120px at var(--tx, 50%) var(--ty, 60%),
+          rgba(255, 220, 150, 0.20) 0%,
+          rgba(230, 150, 60, 0.10)  44%,
+          transparent               80%);
+      mix-blend-mode: screen;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+    .stage-torch.is-live { opacity: 1; }
+    /* Cursor-follow torchlight disabled by request */
+    .stage-torch { display: none !important; }
+
+    /* Distant lightning flicker (rare, cinematic) */
+    .stage-flash {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      background: radial-gradient(ellipse 100% 60% at 50% 30%,
+        rgba(220, 230, 200, 0.18), transparent 70%);
+      opacity: 0;
+    }
+    .stage-flash.is-flashing { animation: stageFlash 1.6s ease-out forwards; }
+    @keyframes stageFlash {
+      0%   { opacity: 0; }
+      6%   { opacity: 0.85; }
+      14%  { opacity: 0.05; }
+      22%  { opacity: 0.55; }
+      32%  { opacity: 0.0; }
+      100% { opacity: 0; }
+    }
+
+    /* Dust motes canvas — fills the stage */
+    .stage-dust {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.55;
+    }
+
+    /* Embers (legacy + amplified) */
+    .embers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
       overflow: hidden;
     }
     .ember {
@@ -88,612 +219,837 @@
       width: 2px;
       height: 2px;
       border-radius: 50%;
-      background: rgba(245, 195, 118, 0.78);
-      box-shadow: 0 0 14px rgba(245, 195, 118, 0.45);
-      animation: emberFloat var(--d, 16s) linear infinite var(--delay, 0s);
+      background: rgba(255, 210, 140, 0.85);
+      box-shadow: 0 0 14px rgba(255, 195, 110, 0.55);
+      animation: emberFloat var(--d, 18s) linear infinite var(--delay, 0s);
       opacity: 0;
     }
     @keyframes emberFloat {
-      0%   { transform: translate3d(0, 15px, 0) scale(0.7); opacity: 0; }
-      12%  { opacity: 0.45; }
-      70%  { opacity: 0.65; }
-      100% { transform: translate3d(var(--x, 30px), -120px, 0) scale(1.3); opacity: 0; }
+      0%   { transform: translate3d(0, 25px, 0) scale(0.6); opacity: 0; }
+      10%  { opacity: 0.55; }
+      72%  { opacity: 0.65; }
+      100% { transform: translate3d(var(--x, 30px), -135vh, 0) scale(1.4); opacity: 0; }
     }
 
-    .screen-wrap {
+    /* ── FOREGROUND STAGE ─────────────────────────────────── */
+
+    .menu-stage {
       position: relative;
       z-index: 10;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 26px;
-    }
-
-    .screen {
-      width: min(100%, 1060px);
-      min-height: min(760px, 92vh);
-      border: 1px solid rgba(228, 196, 134, 0.22);
-      background:
-        linear-gradient(180deg, rgba(6, 8, 15, 0.84) 0%, rgba(7, 10, 18, 0.76) 100%),
-        radial-gradient(circle at 18% 0%, rgba(155, 107, 45, 0.13), transparent 36%);
-      backdrop-filter: blur(9px);
-      box-shadow:
-        0 30px 120px rgba(0, 0, 0, 0.55),
-        inset 0 0 0 1px rgba(255, 222, 170, 0.05),
-        inset 0 -140px 180px rgba(8, 10, 18, 0.6);
-      display: grid;
-      grid-template-columns: 1.15fr 0.95fr;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .screen::before,
-    .screen::after {
-      content: '';
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border: 1px solid rgba(228, 196, 134, 0.24);
-      pointer-events: none;
-      z-index: 2;
-    }
-    .screen::before { top: 16px; left: 16px; border-right: none; border-bottom: none; }
-    .screen::after { right: 16px; bottom: 16px; border-left: none; border-top: none; }
-
-    .hero {
-      position: relative;
-      padding: clamp(28px, 4vw, 48px);
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      border-right: 1px solid rgba(228, 196, 134, 0.11);
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 18% 28%, rgba(196, 146, 84, 0.18), transparent 35%),
-        radial-gradient(circle at 78% 72%, rgba(62, 88, 124, 0.18), transparent 34%);
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100vh;
+      padding: 28px clamp(28px, 6vw, 88px);
+      gap: 0;
+      text-align: center;
       pointer-events: none;
-      z-index: 0;
+    }
+    .menu-stage > * { pointer-events: auto; }
+
+    /* Top crest — a small heraldic mark above the title */
+    .crest {
+      width: 86px;
+      height: 86px;
+      color: rgba(231, 194, 133, 0.78);
+      filter: drop-shadow(0 0 16px rgba(231, 194, 133, 0.32));
+      animation: crestBreathe 6s ease-in-out infinite alternate, crestEnter 2.4s cubic-bezier(.16,.84,.32,1) both;
+      animation-delay: 0s, 0.4s;
+      margin-bottom: 18px;
+    }
+    .crest svg { width: 100%; height: 100%; display: block; }
+    @keyframes crestBreathe {
+      from { filter: drop-shadow(0 0 12px rgba(231, 194, 133, 0.22)); }
+      to   { filter: drop-shadow(0 0 24px rgba(255, 215, 150, 0.55)); }
+    }
+    @keyframes crestEnter {
+      from { opacity: 0; transform: translateY(-12px) scale(0.92); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .title-block {
-      position: relative;
-      z-index: 1;
-      max-width: 40ch;
+    /* TITLE — the main brand */
+    .brand {
+      text-align: center;
+      width: 100%;
+      max-width: 1200px;
+      animation: brandEnter 2.6s cubic-bezier(.16,.84,.32,1) both;
+      animation-delay: 0.6s;
+    }
+    @keyframes brandEnter {
+      from { opacity: 0; transform: scale(0.94) translateY(8px); filter: blur(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0);     filter: blur(0); }
     }
 
-    .title-kicker {
-      font-size: 0.66rem;
-      font-weight: 700;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: rgba(223, 184, 122, 0.68);
-      margin-bottom: 12px;
-    }
-
-    .title-word {
-      display: block;
+    .brand-kicker {
       font-family: 'Cinzel', serif;
-      font-size: clamp(52px, 9vw, 96px);
+      font-size: clamp(10px, 0.9vw, 13px);
       font-weight: 500;
-      letter-spacing: 0.16em;
-      line-height: 0.9;
+      letter-spacing: 0.62em;
       text-transform: uppercase;
-      color: #f4e5c8;
-      text-shadow:
-        0 0 34px rgba(220, 179, 112, 0.2),
-        0 0 72px rgba(220, 179, 112, 0.14);
-      animation: titlePulse 4.8s ease-in-out infinite;
-    }
-    @keyframes titlePulse {
-      0%, 100% { text-shadow: 0 0 34px rgba(220, 179, 112, 0.2), 0 0 72px rgba(220, 179, 112, 0.14); }
-      50%      { text-shadow: 0 0 54px rgba(220, 179, 112, 0.34), 0 0 102px rgba(220, 179, 112, 0.2); }
+      color: rgba(231, 194, 133, 0.80);
+      margin-bottom: 22px;
+      text-shadow: 0 0 14px rgba(231, 194, 133, 0.30);
+      text-indent: 0.62em; /* compensate trailing letter-spacing */
     }
 
-    .title-rule {
-      margin-top: 14px;
+    .brand-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: clamp(72px, 13vw, 184px);
+      letter-spacing: 0.34em;
+      line-height: 0.92;
+      color: var(--bone);
+      text-transform: uppercase;
+      margin: 0;
+      /* Render as an inline-block so we can translate it freely; an outer
+         wrapper handles centering, and JS shifts it horizontally to land
+         the O at the viewport center. */
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform;
+      background: linear-gradient(180deg,
+        #fff7df 0%,
+        #f4ead0 28%,
+        #e7c285 60%,
+        #b8893f 86%,
+        #7a5520 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter:
+        drop-shadow(0 0 38px rgba(231, 194, 133, 0.30))
+        drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45));
+      animation: brandPulse 6.5s ease-in-out infinite;
+      position: relative;
+    }
+    /* Letter wrapper used purely for measurement — inherits all type. */
+    .brand-title-o {
+      display: inline-block;
+      letter-spacing: inherit;
+    }
+    /* When JS finishes measuring, the final translateX applies smoothly. */
+    .brand-title.is-aligned {
+      transition: transform 0.5s cubic-bezier(.16,.84,.32,1);
+    }
+    @keyframes brandPulse {
+      0%, 100% { filter: drop-shadow(0 0 28px rgba(231, 194, 133, 0.22)) drop-shadow(0 4px 0 rgba(0,0,0,0.45)); }
+      50%      { filter: drop-shadow(0 0 56px rgba(255, 215, 150, 0.50)) drop-shadow(0 4px 0 rgba(0,0,0,0.45)); }
+    }
+
+    .brand-rule {
+      margin-top: 22px;
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      color: rgba(223, 184, 122, 0.6);
-      letter-spacing: 0.2em;
+      gap: 18px;
+      color: rgba(231, 194, 133, 0.78);
       font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
+      font-size: clamp(10px, 0.85vw, 12px);
+      letter-spacing: 0.42em;
       text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(231, 194, 133, 0.22);
     }
-    .title-rule::before,
-    .title-rule::after {
+    .brand-rule::before,
+    .brand-rule::after {
       content: '';
       display: block;
-      width: 58px;
+      width: 96px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(223, 184, 122, 0.52));
+      background: linear-gradient(90deg, transparent, rgba(231, 194, 133, 0.65));
     }
-    .title-rule::after { background: linear-gradient(270deg, transparent, rgba(223, 184, 122, 0.52)); }
+    .brand-rule::after { background: linear-gradient(270deg, transparent, rgba(231, 194, 133, 0.65)); }
 
-    .hero-lore {
-      position: relative;
-      z-index: 1;
-      max-width: 44ch;
-      border: 1px solid rgba(223, 184, 122, 0.17);
-      background: rgba(9, 13, 22, 0.72);
-      padding: 15px 16px;
-      line-height: 1.6;
-      color: rgba(245, 233, 209, 0.8);
-      font-size: 1.02rem;
-    }
-    .hero-lore strong {
-      color: #e7bf82;
-      font-family: 'Cinzel', serif;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.78rem;
-      display: block;
-      margin-bottom: 6px;
+    .brand-rule-diamond {
+      width: 6px;
+      height: 6px;
+      transform: rotate(45deg);
+      background: rgba(231, 194, 133, 0.85);
+      box-shadow: 0 0 8px rgba(231, 194, 133, 0.55);
+      flex-shrink: 0;
     }
 
-    .menu-panel {
-      position: relative;
-      padding: clamp(24px, 3.5vw, 40px);
+    /* MENU — illuminated text list, no hard panels */
+    .menu-block {
+      width: min(360px, 88vw);
+      margin-top: 32px;
       display: flex;
       flex-direction: column;
-      z-index: 1;
+      align-items: stretch;
+      gap: 2px;
+      animation: menuEnter 2.8s cubic-bezier(.16,.84,.32,1) both;
+      animation-delay: 1.0s;
     }
-
-    .menu-head {
-      margin-bottom: 14px;
-    }
-    .menu-head h2 {
-      font-family: 'Cinzel', serif;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: #e9c98f;
-      font-size: 1.02rem;
-      margin-bottom: 6px;
-    }
-    .menu-head p {
-      color: rgba(241, 227, 199, 0.62);
-      font-size: 0.94rem;
-      line-height: 1.45;
+    @keyframes menuEnter {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .menu {
-      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      margin-top: 8px;
+      gap: 1px;
+      list-style: none;
     }
 
     .menu-btn {
       width: 100%;
-      padding: 13px 16px;
-      border: 1px solid rgba(223, 184, 122, 0.22);
-      background: rgba(10, 13, 22, 0.72);
-      color: rgba(241, 227, 199, 0.92);
+      padding: 9px 28px;
+      border: 0;
+      background: transparent;
+      color: rgba(244, 234, 208, 0.86);
       font-family: 'Cinzel', serif;
-      font-size: 0.79rem;
+      font-size: clamp(11px, 0.72vw, 13px);
       font-weight: 500;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.30em;
       text-transform: uppercase;
-      text-align: left;
+      text-align: center;
       cursor: pointer;
       position: relative;
-      overflow: hidden;
-      transition: border-color 180ms ease, color 180ms ease, background 180ms ease, transform 180ms ease;
-      backdrop-filter: blur(8px);
+      transition: color 220ms ease, transform 220ms ease, letter-spacing 280ms ease, text-shadow 220ms ease;
       text-decoration: none;
       display: block;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
     }
 
+    /* Left bracket marker — fades in on hover */
     .menu-btn::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(90deg, rgba(223, 184, 122, 0.08), rgba(223, 184, 122, 0) 68%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+      left: 4px;
+      top: 50%;
+      transform: translate(-8px, -50%) scaleY(0.6);
+      width: 9px;
+      height: 14px;
+      border-left: 1.5px solid rgba(231, 194, 133, 0.85);
+      border-top: 1.5px solid rgba(231, 194, 133, 0.85);
+      border-bottom: 1.5px solid rgba(231, 194, 133, 0.85);
       opacity: 0;
-      transition: opacity 160ms ease;
+      transition: opacity 220ms ease, transform 260ms cubic-bezier(.16,.84,.32,1);
+      box-shadow: 0 0 8px rgba(231, 194, 133, 0.22);
+    }
+
+    /* Centered gold under-sweep */
+    .menu-btn::after {
+      content: '';
+      position: absolute;
+      left: 22%;
+      right: 22%;
+      bottom: 4px;
+      height: 1px;
+      background: linear-gradient(90deg,
+        rgba(231, 194, 133, 0) 0%,
+        rgba(231, 194, 133, 0.40) 30%,
+        rgba(255, 215, 150, 0.70) 50%,
+        rgba(231, 194, 133, 0.40) 70%,
+        rgba(231, 194, 133, 0) 100%);
+      opacity: 0;
+      transform: scaleX(0.4);
+      transform-origin: center;
+      transition: opacity 220ms ease, transform 320ms cubic-bezier(.16,.84,.32,1);
+    }
+
+    .menu-btn:hover,
+    .menu-btn:focus-visible {
+      color: #fff7df;
+      letter-spacing: 0.34em;
+      text-shadow: 0 0 18px rgba(255, 215, 150, 0.55), 0 1px 0 rgba(0, 0, 0, 0.6);
+      outline: none;
+    }
+    .menu-btn:hover::before,
+    .menu-btn:focus-visible::before {
+      opacity: 1;
+      transform: translate(0, -50%) scaleY(1);
+    }
+    .menu-btn:hover::after,
+    .menu-btn:focus-visible::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    /* Right caret — absolute so it doesn't shift the centered label */
+    .menu-btn-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(231, 194, 133, 0.55);
+      font-family: 'Cinzel', serif;
+      font-size: 0.95em;
+      transition: transform 220ms ease, color 220ms ease, opacity 220ms ease;
+      opacity: 0;
       pointer-events: none;
     }
-    .menu-btn:hover::before { opacity: 1; }
-
-    .menu-btn:hover {
-      border-color: rgba(223, 184, 122, 0.6);
-      color: #f8ebcf;
-      background: rgba(14, 17, 28, 0.86);
-      transform: translateX(3px);
-    }
-
-    .menu-btn.primary {
-      border-color: rgba(223, 184, 122, 0.5);
-      background:
-        linear-gradient(90deg, rgba(94, 62, 24, 0.45), rgba(14, 16, 25, 0.8)),
-        rgba(16, 18, 28, 0.86);
-    }
-
-    .menu-btn-inner {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+    .menu-btn:hover .menu-btn-arrow,
+    .menu-btn:focus-visible .menu-btn-arrow {
+      opacity: 1;
+      transform: translate(3px, -50%);
+      color: rgba(255, 215, 150, 0.95);
     }
 
     .menu-btn-sub {
-      font-family: 'Crimson Text', serif;
-      font-size: 0.86rem;
-      letter-spacing: 0;
-      text-transform: none;
-      font-weight: 400;
-      color: rgba(223, 184, 122, 0.62);
       display: block;
-      margin-top: 3px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.78em;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: rgba(231, 194, 133, 0.55);
+      margin-top: 2px;
+      font-weight: 400;
     }
 
-    .menu-btn-arrow {
-      color: rgba(223, 184, 122, 0.58);
-      font-size: 1.08rem;
-      flex-shrink: 0;
-      transition: transform 180ms ease, color 180ms ease;
+    .menu-btn.primary {
+      color: #fff7df;
     }
-    .menu-btn:hover .menu-btn-arrow {
-      transform: translateX(4px);
-      color: rgba(223, 184, 122, 0.95);
+    .menu-btn.primary::before {
+      opacity: 0.7;
+      transform: translate(-2px, -50%) scaleY(0.85);
+      border-left-color: rgba(255, 215, 150, 0.85);
+      border-top-color: rgba(255, 215, 150, 0.85);
+      border-bottom-color: rgba(255, 215, 150, 0.85);
+    }
+    .menu-btn.primary::after {
+      opacity: 0.55;
+      transform: scaleX(0.65);
     }
 
-    .timelines-panel,
-    .save-panel {
-      display: none;
-      width: 100%;
-      margin-top: 8px;
-      border: 1px solid rgba(223, 184, 122, 0.19);
-      background: rgba(8, 11, 18, 0.9);
-      backdrop-filter: blur(10px);
+    /* Centered drop-down tablets (timelines + save) */
+    .menu-tablet {
+      max-height: 0;
       overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255, 227, 168, 0.04);
+      opacity: 0;
+      width: min(420px, 92vw);
+      margin: 0 auto;
+      padding: 0 14px;
+      transition: max-height 360ms cubic-bezier(.16,.84,.32,1),
+                  opacity 260ms ease,
+                  margin 320ms cubic-bezier(.16,.84,.32,1),
+                  padding 320ms cubic-bezier(.16,.84,.32,1);
+      border-top: 1px solid rgba(231, 194, 133, 0);
+      text-align: center;
     }
-    .timelines-panel.open,
-    .save-panel.open { display: block; }
+    .menu-tablet.open {
+      max-height: 320px;
+      opacity: 1;
+      margin: 6px auto 12px;
+      padding: 10px 14px 4px;
+      border-top: 1px solid rgba(231, 194, 133, 0.18);
+    }
 
-    .timelines-header,
-    .save-label {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(223, 184, 122, 0.12);
+    .tablet-label {
       font-family: 'Cinzel', serif;
-      font-size: 0.63rem;
-      letter-spacing: 0.2em;
+      font-size: 11px;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: rgba(223, 184, 122, 0.72);
+      color: rgba(231, 194, 133, 0.70);
+      margin-bottom: 10px;
+      text-shadow: 0 0 8px rgba(231, 194, 133, 0.18);
     }
 
     .timelines-list {
-      max-height: 220px;
+      max-height: 240px;
       overflow-y: auto;
       scrollbar-width: thin;
-      scrollbar-color: rgba(223,184,122,0.26) transparent;
+      scrollbar-color: rgba(231,194,133,0.35) transparent;
+      padding-right: 6px;
+    }
+    .timelines-list::-webkit-scrollbar { width: 6px; }
+    .timelines-list::-webkit-scrollbar-track { background: transparent; }
+    .timelines-list::-webkit-scrollbar-thumb {
+      background: rgba(231, 194, 133, 0.35);
+      border-radius: 3px;
     }
 
     .timeline-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 11px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      justify-content: center;
+      gap: 14px;
+      padding: 10px 4px;
+      border-bottom: 1px solid rgba(231, 194, 133, 0.10);
       cursor: pointer;
-      transition: background 140ms ease;
+      transition: background 160ms ease;
     }
     .timeline-row:last-child { border-bottom: 0; }
-    .timeline-row:hover { background: rgba(223,184,122,0.08); }
+    .timeline-row:hover {
+      background: linear-gradient(90deg, transparent, rgba(231,194,133,0.10), transparent);
+    }
 
     .timeline-name {
       font-family: 'Cinzel', serif;
-      font-size: 0.83rem;
-      color: #e8d0a5;
-      letter-spacing: 0.08em;
+      font-size: 13px;
+      letter-spacing: 0.10em;
+      color: rgba(244, 234, 208, 0.92);
     }
 
     .timeline-load {
-      font-size: 0.61rem;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(223, 184, 122, 0.72);
-      padding: 4px 9px;
-      border: 1px solid rgba(223, 184, 122, 0.3);
+      color: rgba(231, 194, 133, 0.85);
+      padding: 5px 12px;
+      border: 1px solid rgba(231, 194, 133, 0.40);
       background: transparent;
       cursor: pointer;
       font-family: 'Cinzel', serif;
-      transition: border-color 150ms ease, color 150ms ease;
+      transition: border-color 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease;
     }
     .timeline-load:hover {
-      border-color: rgba(223, 184, 122, 0.72);
-      color: #f0d7ab;
+      border-color: rgba(255, 215, 150, 0.85);
+      color: #fff7df;
+      background: rgba(231, 194, 133, 0.10);
+      box-shadow: 0 0 12px rgba(231, 194, 133, 0.30);
     }
 
     .timelines-empty {
-      padding: 18px 14px;
+      padding: 14px 0;
       font-style: italic;
-      color: rgba(223, 184, 122, 0.48);
-      font-size: 0.95rem;
+      color: rgba(231, 194, 133, 0.55);
+      font-size: 14px;
       text-align: center;
     }
 
-    .save-panel { padding: 12px; }
     .save-row {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 4px;
     }
 
     .save-input {
-      flex: 1;
-      height: 38px;
-      padding: 0 11px;
-      border: 1px solid rgba(223, 184, 122, 0.26);
-      background: rgba(4, 6, 12, 0.8);
-      color: #f3e3c4;
+      flex: 0 1 240px;
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid rgba(231, 194, 133, 0.35);
+      background: rgba(4, 6, 12, 0.65);
+      color: var(--bone);
       font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
+      font-size: 13px;
+      letter-spacing: 0.10em;
+      text-align: center;
       outline: none;
-      transition: border-color 150ms ease;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
     }
-    .save-input:focus { border-color: rgba(223, 184, 122, 0.62); }
-    .save-input::placeholder { color: rgba(223, 184, 122, 0.34); }
+    .save-input:focus {
+      border-color: rgba(255, 215, 150, 0.85);
+      box-shadow: 0 0 0 1px rgba(231, 194, 133, 0.30), 0 0 14px rgba(231, 194, 133, 0.22);
+    }
+    .save-input::placeholder { color: rgba(231, 194, 133, 0.35); }
 
     .save-confirm {
-      height: 38px;
-      padding: 0 14px;
-      border: 1px solid rgba(223, 184, 122, 0.35);
-      background: rgba(116, 73, 21, 0.42);
-      color: #eccf9f;
+      height: 36px;
+      padding: 0 18px;
+      border: 1px solid rgba(231, 194, 133, 0.55);
+      background: linear-gradient(180deg, rgba(120, 80, 30, 0.55), rgba(60, 40, 14, 0.78));
+      color: #fff7df;
       font-family: 'Cinzel', serif;
-      font-size: 0.65rem;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.11em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 140ms ease, border-color 140ms ease;
+      transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      text-shadow: 0 0 10px rgba(231, 194, 133, 0.25);
     }
     .save-confirm:hover {
-      background: rgba(142, 89, 30, 0.62);
-      border-color: rgba(223, 184, 122, 0.68);
+      background: linear-gradient(180deg, rgba(160, 105, 38, 0.68), rgba(85, 55, 18, 0.88));
+      border-color: rgba(255, 215, 150, 0.85);
+      box-shadow: 0 0 18px rgba(231, 194, 133, 0.40);
     }
 
+    /* Status line — under the menu */
     .status {
-      margin-top: 14px;
-      min-height: 20px;
+      min-height: 22px;
+      margin-top: 18px;
       text-align: center;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      color: rgba(223, 184, 122, 0.7);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      color: rgba(231, 194, 133, 0.72);
       text-transform: uppercase;
+      font-family: 'Cinzel', serif;
+      animation: statusEnter 2.6s ease both;
+      animation-delay: 1.4s;
+      width: min(720px, 90vw);
+    }
+    @keyframes statusEnter {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
-    .footer-hints {
-      margin-top: auto;
-      border-top: 1px solid rgba(223, 184, 122, 0.14);
-      padding-top: 12px;
-      color: rgba(223, 184, 122, 0.56);
-      font-size: 0.75rem;
-      line-height: 1.5;
-      letter-spacing: 0.04em;
-    }
 
+    /* ── LOADING OVERLAY ─────────────────────────────────── */
     .loading-overlay {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: rgba(4, 5, 10, 0.92);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(8, 6, 4, 0.88), rgba(0, 0, 0, 0.96)),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.25'/></svg>");
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: 18px;
+      gap: 26px;
+      backdrop-filter: blur(6px);
     }
-    .loading-overlay.show { display: flex; }
+    .loading-overlay.show { display: flex; animation: loadingEnter 0.5s ease both; }
+    @keyframes loadingEnter {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .loading-sigil {
+      width: 92px;
+      height: 92px;
+      color: rgba(231, 194, 133, 0.85);
+      filter: drop-shadow(0 0 28px rgba(231, 194, 133, 0.40));
+      animation: sigilSpin 16s linear infinite, sigilBreath 2.4s ease-in-out infinite alternate;
+    }
+    .loading-sigil svg { width: 100%; height: 100%; display: block; }
+    @keyframes sigilSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes sigilBreath {
+      from { filter: drop-shadow(0 0 18px rgba(231, 194, 133, 0.30)); }
+      to   { filter: drop-shadow(0 0 40px rgba(255, 215, 150, 0.65)); }
+    }
 
     .loading-title {
       font-family: 'Cinzel', serif;
-      font-size: 1rem;
-      letter-spacing: 0.18em;
+      font-size: 14px;
+      letter-spacing: 0.36em;
       text-transform: uppercase;
-      color: rgba(223, 184, 122, 0.9);
-      animation: pulse 1.4s ease-in-out infinite;
+      color: rgba(244, 234, 208, 0.95);
+      animation: loadingPulse 2.4s ease-in-out infinite;
+      text-align: center;
+      text-indent: 0.36em;
+      text-shadow: 0 0 18px rgba(231, 194, 133, 0.30);
     }
-    @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-    .loading-dots {
-      display: flex;
-      gap: 8px;
-    }
-    .loading-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: rgba(223, 184, 122, 0.7);
-      animation: dotPulse 1.2s ease-in-out infinite;
-    }
-    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes dotPulse { 0%,100% { transform: scale(0.6); opacity: 0.4; } 50% { transform: scale(1); opacity: 1; } }
-
-    .version {
-      position: fixed;
-      right: 24px;
-      bottom: 18px;
-      z-index: 20;
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(223, 184, 122, 0.36);
+    @keyframes loadingPulse {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 1; }
     }
 
+    .loading-subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(231, 194, 133, 0.55);
+      max-width: 40ch;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── REDUCED MOTION ─────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      body, .crest, .brand, .brand-title, .menu-block, .status,
+      .stage-art, .stage-rays, .stage-fog, .loading-sigil, .loading-title {
+        animation: none !important;
+      }
+      .stage-dust, .stage-torch, .stage-flash, .embers { display: none !important; }
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
     @media (max-width: 900px) {
-      body { overflow-y: auto; }
-      .screen-wrap { align-items: start; }
-      .screen {
-        grid-template-columns: 1fr;
-        min-height: auto;
+      html, body { overflow-y: auto; }
+      .menu-stage {
+        height: auto;
+        min-height: 100vh;
+        padding: 22px 18px 28px;
       }
-      .hero {
-        border-right: 0;
-        border-bottom: 1px solid rgba(228, 196, 134, 0.1);
-      }
-      .title-word { font-size: clamp(44px, 15vw, 74px); }
+      .crest { width: 64px; height: 64px; }
+      .brand-title { font-size: clamp(54px, 16vw, 96px); letter-spacing: 0.20em; text-indent: 0.20em; }
+      .brand-rule::before, .brand-rule::after { width: 48px; }
+      .menu-block { width: 100%; }
     }
   </style>
 </head>
 <body>
 
-<div class="bg"></div>
-<div class="bg-map"></div>
-<div class="bg-shafts"></div>
-<div class="embers" id="embers"></div>
-<div class="bg-vignette"></div>
-
-<div class="screen-wrap">
-  <section class="screen">
-    <aside class="hero">
-      <div class="title-block">
-        <p class="title-kicker">A Living World Simulation</p>
-        <span class="title-word">Aeloria</span>
-        <div class="title-rule">Cinematic Chronicle</div>
-      </div>
-      <div class="hero-lore">
-        <strong>World Brief</strong>
-        Kingdoms shift, clans rise, and dynasties fracture as every decision leaves a scar on the realm. Enter where your current timeline waits, or forge a new age and watch history split in real time.
-      </div>
-    </aside>
-
-    <section class="menu-panel">
-      <header class="menu-head">
-        <h2>Command Table</h2>
-        <p>Choose how you want to enter the realm.</p>
-      </header>
-
-      <nav class="menu" aria-label="Main menu">
-        <button class="menu-btn primary" id="btn-continue" type="button">
-          <span class="menu-btn-inner">
-            <span>
-              <span>Continue</span>
-              <span class="menu-btn-sub">Resume the current timeline</span>
-            </span>
-            <span class="menu-btn-arrow">›</span>
-          </span>
-        </button>
-
-        <button class="menu-btn" id="btn-load" type="button">
-          <span class="menu-btn-inner">
-            <span>
-              <span>Load Timeline</span>
-              <span class="menu-btn-sub">Choose a saved world</span>
-            </span>
-            <span class="menu-btn-arrow">›</span>
-          </span>
-        </button>
-
-        <div class="timelines-panel" id="timelines-panel">
-          <div class="timelines-header">Saved Timelines</div>
-          <div class="timelines-list" id="timelines-list">
-            <div class="timelines-empty">Loading…</div>
-          </div>
-        </div>
-
-        <button class="menu-btn" id="btn-save" type="button">
-          <span class="menu-btn-inner">
-            <span>
-              <span>Save Current World</span>
-              <span class="menu-btn-sub">Store this timeline under a name</span>
-            </span>
-            <span class="menu-btn-arrow">›</span>
-          </span>
-        </button>
-
-        <div class="save-panel" id="save-panel">
-          <div class="save-label">Timeline Name</div>
-          <div class="save-row">
-            <input class="save-input" id="save-input" type="text" placeholder="e.g. before-the-war" maxlength="48" spellcheck="false">
-            <button class="save-confirm" id="save-confirm" type="button">Save</button>
-          </div>
-        </div>
-
-        <button class="menu-btn" id="btn-new" type="button">
-          <span class="menu-btn-inner">
-            <span>
-              <span>New World</span>
-              <span class="menu-btn-sub">Begin from the starter template</span>
-            </span>
-            <span class="menu-btn-arrow">›</span>
-          </span>
-        </button>
-
-        <a class="menu-btn" href="/create">
-          <span class="menu-btn-inner">
-            <span>
-              <span>Custom World</span>
-              <span class="menu-btn-sub">Pick factions and shape your own world</span>
-            </span>
-            <span class="menu-btn-arrow">›</span>
-          </span>
-        </a>
-      </nav>
-
-      <div class="status" id="status"></div>
-      <div class="footer-hints">
-        Tip: save milestone timelines before major wars, then branch alternate outcomes.
-      </div>
-    </section>
-  </section>
+<!-- ── BACKGROUND STAGE ─────────────────────────────────────── -->
+<div class="stage" aria-hidden="true">
+  <div class="stage-deep"></div>
+  <div class="stage-art"></div>
+  <div class="stage-rays"></div>
+  <div class="stage-fog"></div>
+  <canvas class="stage-dust" id="stage-dust"></canvas>
+  <div class="embers" id="embers"></div>
+  <div class="stage-vignette"></div>
+  <div class="stage-grain"></div>
+  <div class="stage-torch" id="stage-torch"></div>
+  <div class="stage-flash" id="stage-flash"></div>
 </div>
 
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-title" id="loading-label">Entering the world</div>
-  <div class="loading-dots">
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
+<!-- ── FOREGROUND STAGE ─────────────────────────────────────── -->
+<main class="menu-stage">
+
+  <!-- TOP CREST -->
+  <div class="crest" aria-hidden="true">
+    <svg viewBox="0 0 100 100" fill="none">
+      <!-- Outer ring -->
+      <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="0.8" opacity="0.55"/>
+      <!-- Inner ring -->
+      <circle cx="50" cy="50" r="34" stroke="currentColor" stroke-width="0.6" opacity="0.40"/>
+      <!-- Cardinal ticks -->
+      <g stroke="currentColor" stroke-width="1" stroke-linecap="round">
+        <line x1="50" y1="2"  x2="50" y2="14"/>
+        <line x1="50" y1="86" x2="50" y2="98"/>
+        <line x1="2"  y1="50" x2="14" y2="50"/>
+        <line x1="86" y1="50" x2="98" y2="50"/>
+      </g>
+      <!-- Crown / sun rays radiating from center -->
+      <g stroke="currentColor" stroke-width="0.9" stroke-linecap="round" opacity="0.85">
+        <line x1="50" y1="50" x2="50" y2="20"/>
+        <line x1="50" y1="50" x2="68" y2="32"/>
+        <line x1="50" y1="50" x2="80" y2="50"/>
+        <line x1="50" y1="50" x2="68" y2="68"/>
+        <line x1="50" y1="50" x2="50" y2="80"/>
+        <line x1="50" y1="50" x2="32" y2="68"/>
+        <line x1="50" y1="50" x2="20" y2="50"/>
+        <line x1="50" y1="50" x2="32" y2="32"/>
+      </g>
+      <!-- Center crown shape -->
+      <path d="M40 50 L40 42 L46 46 L50 38 L54 46 L60 42 L60 50 Z"
+            stroke="currentColor" stroke-width="1" fill="none" stroke-linejoin="round"/>
+      <!-- Center dot -->
+      <circle cx="50" cy="50" r="2" fill="currentColor"/>
+    </svg>
   </div>
-</div>
 
-<div class="version">Aeloria · Living World Engine</div>
+  <!-- BRAND TITLE -->
+  <header class="brand">
+    <p class="brand-kicker">A Living World Simulation</p>
+    <h1 class="brand-title">Ael<span class="brand-title-o">o</span>ria</h1>
+    <div class="brand-rule">
+      <span class="brand-rule-diamond"></span>
+      Cinematic Chronicle
+      <span class="brand-rule-diamond"></span>
+    </div>
+  </header>
+
+  <!-- MENU BLOCK -->
+  <section class="menu-block" aria-label="Main menu">
+    <nav class="menu" role="menu">
+
+      <button class="menu-btn primary" id="btn-continue" type="button" role="menuitem">
+        Continue
+        <span class="menu-btn-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button class="menu-btn" id="btn-load" type="button" role="menuitem">
+        Load Timeline
+        <span class="menu-btn-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <div class="menu-tablet" id="timelines-panel" aria-hidden="true">
+        <div class="tablet-label">Saved Timelines</div>
+        <div class="timelines-list" id="timelines-list">
+          <div class="timelines-empty">Loading…</div>
+        </div>
+      </div>
+
+      <button class="menu-btn" id="btn-save" type="button" role="menuitem">
+        Save World
+        <span class="menu-btn-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <div class="menu-tablet" id="save-panel" aria-hidden="true">
+        <div class="tablet-label">Timeline Name</div>
+        <div class="save-row">
+          <input class="save-input" id="save-input" type="text" placeholder="e.g. before-the-war" maxlength="48" spellcheck="false">
+          <button class="save-confirm" id="save-confirm" type="button">Save</button>
+        </div>
+      </div>
+
+      <button class="menu-btn" id="btn-new" type="button" role="menuitem">
+        New World
+        <span class="menu-btn-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <a class="menu-btn" href="/create" role="menuitem">
+        Custom World
+        <span class="menu-btn-arrow" aria-hidden="true">›</span>
+      </a>
+
+    </nav>
+  </section>
+
+  <!-- STATUS LINE -->
+  <div class="status" id="status"></div>
+
+</main>
+
+<!-- ── LOADING OVERLAY ──────────────────────────────────────── -->
+<div class="loading-overlay" id="loading-overlay" aria-hidden="true">
+  <div class="loading-sigil">
+    <svg viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="50" cy="50" r="34" stroke="currentColor" stroke-width="0.6" opacity="0.4" stroke-dasharray="4 6"/>
+      <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+        <line x1="50" y1="6"  x2="50" y2="22"/>
+        <line x1="50" y1="78" x2="50" y2="94"/>
+        <line x1="6"  y1="50" x2="22" y2="50"/>
+        <line x1="78" y1="50" x2="94" y2="50"/>
+        <line x1="20" y1="20" x2="32" y2="32"/>
+        <line x1="68" y1="68" x2="80" y2="80"/>
+        <line x1="20" y1="80" x2="32" y2="68"/>
+        <line x1="68" y1="32" x2="80" y2="20"/>
+      </g>
+      <path d="M40 50 L40 42 L46 46 L50 38 L54 46 L60 42 L60 50 Z"
+            stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="3" fill="currentColor"/>
+    </svg>
+  </div>
+  <div class="loading-title" id="loading-label">Entering the world</div>
+  <div class="loading-subtitle">The realm draws breath. The Seer waits in Stonebreak.</div>
+</div>
 
 <script>
 (function () {
+  /* ── SPAWN EMBERS ─────────────────────────────────────── */
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const embersEl = document.getElementById('embers');
-  for (let i = 0; i < 60; i++) {
-    const e = document.createElement('div');
-    e.className = 'ember';
-    e.style.left = Math.random() * 100 + '%';
-    e.style.top = 70 + Math.random() * 35 + '%';
-    e.style.setProperty('--d', (11 + Math.random() * 14).toFixed(1) + 's');
-    e.style.setProperty('--delay', -(Math.random() * 16).toFixed(1) + 's');
-    e.style.setProperty('--x', ((Math.random() - 0.5) * 80).toFixed(1) + 'px');
-    embersEl.appendChild(e);
+  if (embersEl && !reduceMotion) {
+    for (let i = 0; i < 90; i++) {
+      const e = document.createElement('div');
+      e.className = 'ember';
+      e.style.left = Math.random() * 100 + '%';
+      e.style.top = 70 + Math.random() * 35 + '%';
+      e.style.setProperty('--d', (12 + Math.random() * 16).toFixed(1) + 's');
+      e.style.setProperty('--delay', -(Math.random() * 18).toFixed(1) + 's');
+      e.style.setProperty('--x', ((Math.random() - 0.5) * 100).toFixed(1) + 'px');
+      embersEl.appendChild(e);
+    }
   }
 
+  /* ── DUST MOTES CANVAS (golden firefly motes) ─────────── */
+  if (!reduceMotion) {
+    const canvas = document.getElementById('stage-dust');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let motes = [];
+      let raf = 0;
+
+      function resize() {
+        canvas.width  = Math.max(1, Math.floor(window.innerWidth  * dpr));
+        canvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
+        canvas.style.width  = window.innerWidth  + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        const density = Math.max(60, Math.min(150,
+          Math.floor(window.innerWidth * window.innerHeight / 18000)));
+        motes = [];
+        for (let i = 0; i < density; i++) motes.push(spawn());
+      }
+
+      function spawn() {
+        return {
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          r: 0.4 + Math.random() * 1.8,
+          vx: -0.10 + Math.random() * 0.20,
+          vy: -0.05 - Math.random() * 0.12,
+          life: 0,
+          ttl: 600 + Math.random() * 1100,
+          a: 0.06 + Math.random() * 0.42,
+          hue: 36 + Math.random() * 14
+        };
+      }
+
+      function tick() {
+        const w = window.innerWidth, h = window.innerHeight;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < motes.length; i++) {
+          const m = motes[i];
+          m.x += m.vx + Math.sin((m.life + i) * 0.012) * 0.06;
+          m.y += m.vy;
+          m.life++;
+          if (m.life > m.ttl || m.y < -10 || m.x < -10 || m.x > w + 10) {
+            motes[i] = spawn();
+            motes[i].y = h + 4;
+            continue;
+          }
+          const fade = Math.min(1, Math.min(m.life, m.ttl - m.life) / 80);
+          const alpha = m.a * fade;
+          const grad = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.r * 4);
+          grad.addColorStop(0, `hsla(${m.hue}, 72%, 80%, ${alpha})`);
+          grad.addColorStop(1, `hsla(${m.hue}, 72%, 60%, 0)`);
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, m.r * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        raf = requestAnimationFrame(tick);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      raf = requestAnimationFrame(tick);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        } else if (!raf) {
+          raf = requestAnimationFrame(tick);
+        }
+      });
+    }
+  }
+
+  /* Cursor-follow torchlight removed */
+
+  /* ── BACKGROUND PARALLAX (subtle shift toward cursor) ──── */
+  if (!reduceMotion) {
+    const art = document.querySelector('.stage-art');
+    let pendingP = false;
+    window.addEventListener('pointermove', (e) => {
+      if (pendingP) return;
+      pendingP = true;
+      requestAnimationFrame(() => {
+        const cx = (e.clientX / window.innerWidth)  - 0.5;
+        const cy = (e.clientY / window.innerHeight) - 0.5;
+        art.style.setProperty('transform',
+          `scale(1.16) translate3d(${(-cx * 1.4).toFixed(2)}%, ${(-cy * 1.0).toFixed(2)}%, 0)`);
+        pendingP = false;
+      });
+    }, { passive: true });
+  }
+
+  /* ── DISTANT LIGHTNING FLICKER (rare) ──────────────────── */
+  if (!reduceMotion) {
+    const flash = document.getElementById('stage-flash');
+    function fire() {
+      if (document.hidden) { schedule(); return; }
+      flash.classList.remove('is-flashing');
+      void flash.offsetWidth;
+      flash.classList.add('is-flashing');
+      schedule();
+    }
+    function schedule() {
+      const next = 32000 + Math.random() * 70000;
+      setTimeout(fire, next);
+    }
+    schedule();
+  }
+
+  /* ── MENU LOGIC (preserved from original) ──────────────── */
   function setStatus(msg) {
-    document.getElementById('status').textContent = msg;
+    document.getElementById('status').textContent = msg || '';
   }
 
   function showLoading(label) {
-    document.getElementById('loading-label').textContent = label || 'Entering the world…';
+    document.getElementById('loading-label').textContent = label || 'Entering the world';
     document.getElementById('loading-overlay').classList.add('show');
   }
 
   function enter() {
-    showLoading('Entering the world…');
-    setTimeout(() => { window.location.href = '/'; }, 600);
+    showLoading('Entering the world');
+    setTimeout(() => { window.location.href = '/'; }, 700);
   }
 
   function togglePanel(id, closeOthers = []) {
@@ -702,8 +1058,8 @@
   }
 
   document.getElementById('btn-continue').addEventListener('click', () => {
-    showLoading('Resuming timeline…');
-    setTimeout(() => { window.location.href = '/'; }, 500);
+    showLoading('Resuming timeline');
+    setTimeout(() => { window.location.href = '/'; }, 600);
   });
 
   document.getElementById('btn-load').addEventListener('click', async () => {
@@ -726,7 +1082,7 @@
       ).join('');
       list.querySelectorAll('.timeline-load').forEach((btn) => {
         btn.addEventListener('click', async () => {
-          showLoading('Loading timeline…');
+          showLoading('Loading timeline');
           try {
             const r = await fetch('/api/worlds/load', {
               method: 'POST',
@@ -776,7 +1132,7 @@
 
   document.getElementById('btn-new').addEventListener('click', async () => {
     if (!confirm('Start a new world? The current world_state will be replaced.')) return;
-    showLoading('Creating new world…');
+    showLoading('Creating new world');
     try {
       const r = await fetch('/api/worlds/new', { method: 'POST' });
       if (!r.ok) throw new Error();
@@ -794,6 +1150,64 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  /* ── CENTER THE "O" IN AELORIA ON THE SCREEN MIDLINE ────────────
+     The parent .brand runs a scale(0.94 → 1) entry animation
+     (delay 0.6s, duration 2.6s — i.e. settles at 3.2s). If we measure
+     while the parent is still scaled, the offset is biased and the
+     title ends up off in the opposite direction. So we measure ONLY
+     once the entry animation has finished, and on resize.            */
+  function centerBrandO() {
+    const title = document.querySelector('.brand-title');
+    const o     = title && title.querySelector('.brand-title-o');
+    if (!title || !o) return;
+    title.style.transform = '';
+    // Force a synchronous reflow so the cleared transform is committed
+    // before we measure the rect.
+    void title.offsetWidth;
+    const rect       = o.getBoundingClientRect();
+    const oCenter    = rect.left + rect.width / 2;
+    const screenMid  = window.innerWidth / 2;
+    const offset     = Math.round(screenMid - oCenter);
+    title.style.transform = 'translateX(' + offset + 'px)';
+    title.classList.add('is-aligned');
+  }
+
+  function initBrandCentering() {
+    const brand = document.querySelector('.brand');
+    if (!brand) return;
+    const reduce = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      // No entry animation — measure right away.
+      centerBrandO();
+      return;
+    }
+    let done = false;
+    function once() {
+      if (done) return;
+      done = true;
+      centerBrandO();
+    }
+    // Fires when the brandEnter scale animation finishes (~3.2s).
+    brand.addEventListener('animationend', function (e) {
+      if (e.animationName === 'brandEnter') once();
+    });
+    // Safety net in case animationend doesn't fire.
+    setTimeout(once, 3500);
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(initBrandCentering).catch(initBrandCentering);
+  } else {
+    setTimeout(initBrandCentering, 200);
+  }
+
+  let resizeRaf = 0;
+  window.addEventListener('resize', function () {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(centerBrandO);
+  }, { passive: true });
 })();
 </script>
 </body>
