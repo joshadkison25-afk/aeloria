@@ -18,6 +18,7 @@
     "build:territory-map": "node scripts/build-house-territories.mjs",
     "build:terrain-map": "node scripts/build-terrain-map.mjs",
     "build:map-geo": "node scripts/build-map-geo.mjs",
+    "build:map-geojson": "node scripts/build-map-geojson.mjs",
     "image:enter": "python scripts/generate_enter_background.py",
     "build": "next build",
     "start": "next start",

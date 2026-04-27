@@ -1,0 +1,1873 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "frostvale-adkison",
+      "properties": {
+        "house_id": "frostvale-adkison",
+        "realm_id": "Frostvale",
+        "faction_id": "The Wintermark"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              506.947147,
+              1000
+            ],
+            [
+              488.81838,
+              921.244709
+            ],
+            [
+              494.097056,
+              911.9688
+            ],
+            [
+              692.725027,
+              889.747275
+            ],
+            [
+              833.900688,
+              1000
+            ],
+            [
+              506.947147,
+              1000
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "frostvale-mcintosh",
+      "properties": {
+        "house_id": "frostvale-mcintosh",
+        "realm_id": "Frostvale",
+        "faction_id": "The Wintermark"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              171.190296,
+              1000
+            ],
+            [
+              488.81838,
+              921.244709
+            ],
+            [
+              506.947147,
+              1000
+            ],
+            [
+              171.190296,
+              1000
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "frostvale-holter",
+      "properties": {
+        "house_id": "frostvale-holter",
+        "realm_id": "Frostvale",
+        "faction_id": "The Wintermark"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              467.173969,
+              846.185156
+            ],
+            [
+              494.097056,
+              911.9688
+            ],
+            [
+              488.81838,
+              921.244709
+            ],
+            [
+              171.190296,
+              1000
+            ],
+            [
+              2.048988,
+              1000
+            ],
+            [
+              441.960544,
+              842.964527
+            ],
+            [
+              467.173969,
+              846.185156
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "frostvale-duval",
+      "properties": {
+        "house_id": "frostvale-duval",
+        "realm_id": "Frostvale",
+        "faction_id": "The Wintermark"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              689.387666,
+              885.962569
+            ],
+            [
+              692.725027,
+              889.747275
+            ],
+            [
+              494.097056,
+              911.9688
+            ],
+            [
+              467.173969,
+              846.185156
+            ],
+            [
+              563.011636,
+              794.342958
+            ],
+            [
+              689.387666,
+              885.962569
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lostfeld-goldfinger",
+      "properties": {
+        "house_id": "lostfeld-goldfinger",
+        "realm_id": "Lostfeld",
+        "faction_id": "Lostfeld"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              440.663465,
+              770.496159
+            ],
+            [
+              538.256927,
+              733.81709
+            ],
+            [
+              563.011636,
+              794.342958
+            ],
+            [
+              467.173969,
+              846.185156
+            ],
+            [
+              441.960544,
+              842.964527
+            ],
+            [
+              440.663465,
+              770.496159
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lostfeld-runewarden",
+      "properties": {
+        "house_id": "lostfeld-runewarden",
+        "realm_id": "Lostfeld",
+        "faction_id": "Lostfeld"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              440.663465,
+              770.496159
+            ],
+            [
+              441.960544,
+              842.964527
+            ],
+            [
+              2.048988,
+              1000
+            ],
+            [
+              0,
+              1000
+            ],
+            [
+              0,
+              938.280442
+            ],
+            [
+              230.571605,
+              718.905754
+            ],
+            [
+              351.125037,
+              707.815192
+            ],
+            [
+              440.663465,
+              770.496159
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lostfeld-ironmaul",
+      "properties": {
+        "house_id": "lostfeld-ironmaul",
+        "realm_id": "Lostfeld",
+        "faction_id": "Lostfeld"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              532.104601,
+              659.313988
+            ],
+            [
+              538.256927,
+              733.81709
+            ],
+            [
+              440.663465,
+              770.496159
+            ],
+            [
+              351.125037,
+              707.815192
+            ],
+            [
+              466.961556,
+              658.943325
+            ],
+            [
+              532.104601,
+              659.313988
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "farrock-ember",
+      "properties": {
+        "house_id": "farrock-ember",
+        "realm_id": "Farrock",
+        "faction_id": "Varkuun"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1000,
+              1000
+            ],
+            [
+              833.900688,
+              1000
+            ],
+            [
+              692.725027,
+              889.747275
+            ],
+            [
+              689.387666,
+              885.962569
+            ],
+            [
+              664.108793,
+              717.282996
+            ],
+            [
+              764.423654,
+              582.188991
+            ],
+            [
+              885.050226,
+              644.405289
+            ],
+            [
+              1000,
+              724.087164
+            ],
+            [
+              1000,
+              1000
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "farrock-ironmarch",
+      "properties": {
+        "house_id": "farrock-ironmarch",
+        "realm_id": "Farrock",
+        "faction_id": "Varkuun"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              551.669549,
+              638.483277
+            ],
+            [
+              664.108793,
+              717.282996
+            ],
+            [
+              689.387666,
+              885.962569
+            ],
+            [
+              563.011636,
+              794.342958
+            ],
+            [
+              538.256927,
+              733.81709
+            ],
+            [
+              532.104601,
+              659.313988
+            ],
+            [
+              545.742869,
+              642.718801
+            ],
+            [
+              551.669549,
+              638.483277
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "farrock-vanward",
+      "properties": {
+        "house_id": "farrock-vanward",
+        "realm_id": "Farrock",
+        "faction_id": "Varkuun"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              589.981255,
+              612.902566
+            ],
+            [
+              752.430721,
+              572.725133
+            ],
+            [
+              764.423654,
+              582.188991
+            ],
+            [
+              664.108793,
+              717.282996
+            ],
+            [
+              551.669549,
+              638.483277
+            ],
+            [
+              555.277835,
+              634.291519
+            ],
+            [
+              589.981255,
+              612.902566
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eldoria-lefleur",
+      "properties": {
+        "house_id": "eldoria-lefleur",
+        "realm_id": "Eldoria",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              446.389016,
+              529.476153
+            ],
+            [
+              545.742869,
+              642.718801
+            ],
+            [
+              532.104601,
+              659.313988
+            ],
+            [
+              466.961556,
+              658.943325
+            ],
+            [
+              420.267356,
+              592.10569
+            ],
+            [
+              446.389016,
+              529.476153
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eldoria-vaelith",
+      "properties": {
+        "house_id": "eldoria-vaelith",
+        "realm_id": "Eldoria",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              305.97181,
+              569.77527
+            ],
+            [
+              420.267356,
+              592.10569
+            ],
+            [
+              466.961556,
+              658.943325
+            ],
+            [
+              351.125037,
+              707.815192
+            ],
+            [
+              230.571605,
+              718.905754
+            ],
+            [
+              255.528208,
+              650.472988
+            ],
+            [
+              302.209978,
+              571.146497
+            ],
+            [
+              305.97181,
+              569.77527
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eldoria-duskcourt",
+      "properties": {
+        "house_id": "eldoria-duskcourt",
+        "realm_id": "Eldoria",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              446.389016,
+              529.476153
+            ],
+            [
+              420.267356,
+              592.10569
+            ],
+            [
+              305.97181,
+              569.77527
+            ],
+            [
+              389.412563,
+              509.889094
+            ],
+            [
+              441.277248,
+              509.02341
+            ],
+            [
+              446.389016,
+              529.476153
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "faerwood-verlorn",
+      "properties": {
+        "house_id": "faerwood-verlorn",
+        "realm_id": "Faerwood",
+        "faction_id": "Shadow Court"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              302.209978,
+              571.146497
+            ],
+            [
+              255.528208,
+              650.472988
+            ],
+            [
+              187.033451,
+              508.919052
+            ],
+            [
+              261.272109,
+              439.419877
+            ],
+            [
+              268.268504,
+              441.423628
+            ],
+            [
+              302.209978,
+              571.146497
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "faerwood-nightborn",
+      "properties": {
+        "house_id": "faerwood-nightborn",
+        "realm_id": "Faerwood",
+        "faction_id": "Shadow Court"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              440.293814
+            ],
+            [
+              187.033451,
+              508.919052
+            ],
+            [
+              255.528208,
+              650.472988
+            ],
+            [
+              230.571605,
+              718.905754
+            ],
+            [
+              0,
+              938.280442
+            ],
+            [
+              0,
+              440.293814
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "faerwood-shadowveil",
+      "properties": {
+        "house_id": "faerwood-shadowveil",
+        "realm_id": "Faerwood",
+        "faction_id": "Shadow Court"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              380.626077
+            ],
+            [
+              149.579053,
+              373.931618
+            ],
+            [
+              261.272109,
+              439.419877
+            ],
+            [
+              187.033451,
+              508.919052
+            ],
+            [
+              0,
+              440.293814
+            ],
+            [
+              0,
+              380.626077
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gilgeth-blackblood",
+      "properties": {
+        "house_id": "gilgeth-blackblood",
+        "realm_id": "Gilgeth",
+        "faction_id": "Gilgeth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              477.344718,
+              333.179165
+            ],
+            [
+              445.01748,
+              505.000439
+            ],
+            [
+              441.277248,
+              509.02341
+            ],
+            [
+              389.412563,
+              509.889094
+            ],
+            [
+              371.387369,
+              449.143072
+            ],
+            [
+              477.344718,
+              333.179165
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gilgeth-ironhide",
+      "properties": {
+        "house_id": "gilgeth-ironhide",
+        "realm_id": "Gilgeth",
+        "faction_id": "Gilgeth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              305.97181,
+              569.77527
+            ],
+            [
+              302.209978,
+              571.146497
+            ],
+            [
+              268.268504,
+              441.423628
+            ],
+            [
+              284.075498,
+              429.998636
+            ],
+            [
+              371.387369,
+              449.143072
+            ],
+            [
+              389.412563,
+              509.889094
+            ],
+            [
+              305.97181,
+              569.77527
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gilgeth-redtusk",
+      "properties": {
+        "house_id": "gilgeth-redtusk",
+        "realm_id": "Gilgeth",
+        "faction_id": "Gilgeth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              477.344718,
+              333.179165
+            ],
+            [
+              371.387369,
+              449.143072
+            ],
+            [
+              284.075498,
+              429.998636
+            ],
+            [
+              299.902211,
+              403.08698
+            ],
+            [
+              490.648623,
+              302.506064
+            ],
+            [
+              477.344718,
+              333.179165
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "twin-bower",
+      "properties": {
+        "house_id": "twin-bower",
+        "realm_id": "Twin Cities",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              575.789367,
+              493.154869
+            ],
+            [
+              527.622519,
+              530.299058
+            ],
+            [
+              509.412014,
+              507.935696
+            ],
+            [
+              549.78902,
+              435.959842
+            ],
+            [
+              575.789367,
+              493.154869
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "twin-binx",
+      "properties": {
+        "house_id": "twin-binx",
+        "realm_id": "Twin Cities",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              527.622519,
+              530.299058
+            ],
+            [
+              555.277835,
+              634.291519
+            ],
+            [
+              551.669549,
+              638.483277
+            ],
+            [
+              545.742869,
+              642.718801
+            ],
+            [
+              446.389016,
+              529.476153
+            ],
+            [
+              441.277248,
+              509.02341
+            ],
+            [
+              445.01748,
+              505.000439
+            ],
+            [
+              509.412014,
+              507.935696
+            ],
+            [
+              527.622519,
+              530.299058
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "twin-dale",
+      "properties": {
+        "house_id": "twin-dale",
+        "realm_id": "Twin Cities",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              549.78902,
+              435.959842
+            ],
+            [
+              509.412014,
+              507.935696
+            ],
+            [
+              445.01748,
+              505.000439
+            ],
+            [
+              477.344718,
+              333.179165
+            ],
+            [
+              490.648623,
+              302.506064
+            ],
+            [
+              518.267591,
+              264.895486
+            ],
+            [
+              548.457289,
+              317.138484
+            ],
+            [
+              549.78902,
+              435.959842
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eresteron-aurand",
+      "properties": {
+        "house_id": "eresteron-aurand",
+        "realm_id": "Eresteron",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              589.558521,
+              504.937339
+            ],
+            [
+              713.349565,
+              463.565723
+            ],
+            [
+              719.812928,
+              467.048381
+            ],
+            [
+              752.430721,
+              572.725133
+            ],
+            [
+              589.981255,
+              612.902566
+            ],
+            [
+              589.558521,
+              504.937339
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eresteron-braafhart",
+      "properties": {
+        "house_id": "eresteron-braafhart",
+        "realm_id": "Eresteron",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              575.789367,
+              493.154869
+            ],
+            [
+              589.558521,
+              504.937339
+            ],
+            [
+              589.981255,
+              612.902566
+            ],
+            [
+              555.277835,
+              634.291519
+            ],
+            [
+              527.622519,
+              530.299058
+            ],
+            [
+              575.789367,
+              493.154869
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "eresteron-goldvale",
+      "properties": {
+        "house_id": "eresteron-goldvale",
+        "realm_id": "Eresteron",
+        "faction_id": "Twin Cities"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              575.789367,
+              493.154869
+            ],
+            [
+              549.78902,
+              435.959842
+            ],
+            [
+              548.457289,
+              317.138484
+            ],
+            [
+              713.349565,
+              463.565723
+            ],
+            [
+              589.558521,
+              504.937339
+            ],
+            [
+              575.789367,
+              493.154869
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "groth-mijid",
+      "properties": {
+        "house_id": "groth-mijid",
+        "realm_id": "Groth",
+        "faction_id": "Groth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              490.648623,
+              302.506064
+            ],
+            [
+              299.902211,
+              403.08698
+            ],
+            [
+              289.736036,
+              334.702608
+            ],
+            [
+              494.80088,
+              163.738359
+            ],
+            [
+              518.395154,
+              255.360514
+            ],
+            [
+              518.267591,
+              264.895486
+            ],
+            [
+              490.648623,
+              302.506064
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "groth-ashfang",
+      "properties": {
+        "house_id": "groth-ashfang",
+        "realm_id": "Groth",
+        "faction_id": "Groth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              284.075498,
+              429.998636
+            ],
+            [
+              268.268504,
+              441.423628
+            ],
+            [
+              261.272109,
+              439.419877
+            ],
+            [
+              149.579053,
+              373.931618
+            ],
+            [
+              223.210391,
+              307.882216
+            ],
+            [
+              289.736036,
+              334.702608
+            ],
+            [
+              299.902211,
+              403.08698
+            ],
+            [
+              284.075498,
+              429.998636
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "groth-syncar",
+      "properties": {
+        "house_id": "groth-syncar",
+        "realm_id": "Groth",
+        "faction_id": "Groth Clans"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              289.736036,
+              334.702608
+            ],
+            [
+              223.210391,
+              307.882216
+            ],
+            [
+              224.025153,
+              305.310952
+            ],
+            [
+              481.589999,
+              59.679409
+            ],
+            [
+              494.80088,
+              163.738359
+            ],
+            [
+              289.736036,
+              334.702608
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vilefin-bloodware",
+      "properties": {
+        "house_id": "vilefin-bloodware",
+        "realm_id": "Vilefin",
+        "faction_id": "Vilefin"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              481.589999,
+              59.679409
+            ],
+            [
+              224.025153,
+              305.310952
+            ],
+            [
+              203.380423,
+              247.96804
+            ],
+            [
+              429.829243,
+              0
+            ],
+            [
+              479.677905,
+              0
+            ],
+            [
+              481.221312,
+              15.723127
+            ],
+            [
+              481.589999,
+              59.679409
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vilefin-cogtooth",
+      "properties": {
+        "house_id": "vilefin-cogtooth",
+        "realm_id": "Vilefin",
+        "faction_id": "Vilefin"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              146.645882
+            ],
+            [
+              203.380423,
+              247.96804
+            ],
+            [
+              224.025153,
+              305.310952
+            ],
+            [
+              223.210391,
+              307.882216
+            ],
+            [
+              149.579053,
+              373.931618
+            ],
+            [
+              0,
+              380.626077
+            ],
+            [
+              0,
+              146.645882
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vilefin-rustfang",
+      "properties": {
+        "house_id": "vilefin-rustfang",
+        "realm_id": "Vilefin",
+        "faction_id": "Vilefin"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              429.829243,
+              0
+            ],
+            [
+              203.380423,
+              247.96804
+            ],
+            [
+              0,
+              146.645882
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dur-gross",
+      "properties": {
+        "house_id": "dur-gross",
+        "realm_id": "Dur Khadur",
+        "faction_id": "Dur Khadur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              766.781672,
+              261.015116
+            ],
+            [
+              760.982232,
+              225.039224
+            ],
+            [
+              870.910885,
+              157.302149
+            ],
+            [
+              848.675548,
+              248.523142
+            ],
+            [
+              814.331536,
+              285.809542
+            ],
+            [
+              790.839185,
+              285.468215
+            ],
+            [
+              766.781672,
+              261.015116
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dur-galfazzar",
+      "properties": {
+        "house_id": "dur-galfazzar",
+        "realm_id": "Dur Khadur",
+        "faction_id": "Dur Khadur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              518.395154,
+              255.360514
+            ],
+            [
+              494.80088,
+              163.738359
+            ],
+            [
+              481.589999,
+              59.679409
+            ],
+            [
+              481.221312,
+              15.723127
+            ],
+            [
+              760.982232,
+              225.039224
+            ],
+            [
+              766.781672,
+              261.015116
+            ],
+            [
+              618.941538,
+              275.952674
+            ],
+            [
+              518.395154,
+              255.360514
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dur-vercenti",
+      "properties": {
+        "house_id": "dur-vercenti",
+        "realm_id": "Dur Khadur",
+        "faction_id": "Dur Khadur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              947.114321,
+              0
+            ],
+            [
+              870.910885,
+              157.302149
+            ],
+            [
+              760.982232,
+              225.039224
+            ],
+            [
+              481.221312,
+              15.723127
+            ],
+            [
+              479.677905,
+              0
+            ],
+            [
+              947.114321,
+              0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "glen-wood",
+      "properties": {
+        "house_id": "glen-wood",
+        "realm_id": "Glenwood",
+        "faction_id": "Glenhaven"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              748.186647,
+              329.538531
+            ],
+            [
+              790.839185,
+              285.468215
+            ],
+            [
+              814.331536,
+              285.809542
+            ],
+            [
+              839.076685,
+              339.354166
+            ],
+            [
+              760.564442,
+              405.157655
+            ],
+            [
+              748.186647,
+              329.538531
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "glen-darkleaf",
+      "properties": {
+        "house_id": "glen-darkleaf",
+        "realm_id": "Glenwood",
+        "faction_id": "Glenhaven"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              713.349565,
+              463.565723
+            ],
+            [
+              548.457289,
+              317.138484
+            ],
+            [
+              518.267591,
+              264.895486
+            ],
+            [
+              518.395154,
+              255.360514
+            ],
+            [
+              618.941538,
+              275.952674
+            ],
+            [
+              748.186647,
+              329.538531
+            ],
+            [
+              760.564442,
+              405.157655
+            ],
+            [
+              755.026647,
+              424.734237
+            ],
+            [
+              719.812928,
+              467.048381
+            ],
+            [
+              713.349565,
+              463.565723
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "glen-mistafae",
+      "properties": {
+        "house_id": "glen-mistafae",
+        "realm_id": "Glenwood",
+        "faction_id": "Glenhaven"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              748.186647,
+              329.538531
+            ],
+            [
+              618.941538,
+              275.952674
+            ],
+            [
+              766.781672,
+              261.015116
+            ],
+            [
+              790.839185,
+              285.468215
+            ],
+            [
+              748.186647,
+              329.538531
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tide-ver-meer",
+      "properties": {
+        "house_id": "tide-ver-meer",
+        "realm_id": "Tidefall",
+        "faction_id": "Tidefall"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1000,
+              724.087164
+            ],
+            [
+              885.050226,
+              644.405289
+            ],
+            [
+              855.321062,
+              419.918567
+            ],
+            [
+              865.814796,
+              410.93508
+            ],
+            [
+              1000,
+              427.159646
+            ],
+            [
+              1000,
+              724.087164
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tide-highland-dusken",
+      "properties": {
+        "house_id": "tide-highland-dusken",
+        "realm_id": "Tidefall",
+        "faction_id": "Tidefall"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              719.812928,
+              467.048381
+            ],
+            [
+              755.026647,
+              424.734237
+            ],
+            [
+              855.321062,
+              419.918567
+            ],
+            [
+              885.050226,
+              644.405289
+            ],
+            [
+              764.423654,
+              582.188991
+            ],
+            [
+              752.430721,
+              572.725133
+            ],
+            [
+              719.812928,
+              467.048381
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tide-fish",
+      "properties": {
+        "house_id": "tide-fish",
+        "realm_id": "Tidefall",
+        "faction_id": "Tidefall"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              760.564442,
+              405.157655
+            ],
+            [
+              839.076685,
+              339.354166
+            ],
+            [
+              857.824703,
+              347.97722
+            ],
+            [
+              865.814796,
+              410.93508
+            ],
+            [
+              855.321062,
+              419.918567
+            ],
+            [
+              755.026647,
+              424.734237
+            ],
+            [
+              760.564442,
+              405.157655
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tide-mcgowan",
+      "properties": {
+        "house_id": "tide-mcgowan",
+        "realm_id": "Tidefall",
+        "faction_id": "Tidefall"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1000,
+              427.159646
+            ],
+            [
+              865.814796,
+              410.93508
+            ],
+            [
+              857.824703,
+              347.97722
+            ],
+            [
+              909.659766,
+              331.853642
+            ],
+            [
+              1000,
+              368.979364
+            ],
+            [
+              1000,
+              427.159646
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dreadwind-blacktide",
+      "properties": {
+        "house_id": "dreadwind-blacktide",
+        "realm_id": "Dreadwind Isles",
+        "faction_id": "Dreadwind Isles"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1000,
+              368.979364
+            ],
+            [
+              909.659766,
+              331.853642
+            ],
+            [
+              899.150594,
+              290.720401
+            ],
+            [
+              1000,
+              199.044656
+            ],
+            [
+              1000,
+              368.979364
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dreadwind-stormward",
+      "properties": {
+        "house_id": "dreadwind-stormward",
+        "realm_id": "Dreadwind Isles",
+        "faction_id": "Dreadwind Isles"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              839.076685,
+              339.354166
+            ],
+            [
+              814.331536,
+              285.809542
+            ],
+            [
+              848.675548,
+              248.523142
+            ],
+            [
+              899.150594,
+              290.720401
+            ],
+            [
+              909.659766,
+              331.853642
+            ],
+            [
+              857.824703,
+              347.97722
+            ],
+            [
+              839.076685,
+              339.354166
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "dreadwind-reef",
+      "properties": {
+        "house_id": "dreadwind-reef",
+        "realm_id": "Dreadwind Isles",
+        "faction_id": "Dreadwind Isles"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1000,
+              0
+            ],
+            [
+              1000,
+              199.044656
+            ],
+            [
+              899.150594,
+              290.720401
+            ],
+            [
+              848.675548,
+              248.523142
+            ],
+            [
+              870.910885,
+              157.302149
+            ],
+            [
+              947.114321,
+              0
+            ],
+            [
+              1000,
+              0
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

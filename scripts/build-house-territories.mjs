@@ -16,81 +16,8 @@ const OUT_DIR = join(ROOT, 'public', 'data');
 const layout = JSON.parse(readFileSync(join(ROOT, 'public', 'data', 'map_layout.json'), 'utf8'));
 const majorRegions = layout.regions;
 
-/** Subregions: major `region_id` -> list of { house_id, faction_id? } (unique house_id) */
-const SUBS = {
-  Frostvale: [
-    { house_id: 'frostvale-adkison', faction_id: 'The Wintermark' },
-    { house_id: 'frostvale-mcintosh', faction_id: 'The Wintermark' },
-    { house_id: 'frostvale-holter', faction_id: 'The Wintermark' },
-    { house_id: 'frostvale-duval', faction_id: 'The Wintermark' },
-  ],
-  Faerwood: [
-    { house_id: 'faerwood-verlorn', faction_id: 'Shadow Court' },
-    { house_id: 'faerwood-nightborn', faction_id: 'Shadow Court' },
-    { house_id: 'faerwood-shadowveil', faction_id: 'Shadow Court' },
-  ],
-  Eldoria: [
-    { house_id: 'eldoria-lefleur', faction_id: 'Twin Cities' },
-    { house_id: 'eldoria-vaelith', faction_id: 'Twin Cities' },
-    { house_id: 'eldoria-duskcourt', faction_id: 'Twin Cities' },
-  ],
-  'Twin Cities': [
-    { house_id: 'twin-bower', faction_id: 'Twin Cities' },
-    { house_id: 'twin-binx', faction_id: 'Twin Cities' },
-    { house_id: 'twin-dale', faction_id: 'Twin Cities' },
-  ],
-  Eresteron: [
-    { house_id: 'eresteron-aurand', faction_id: 'Twin Cities' },
-    { house_id: 'eresteron-braafhart', faction_id: 'Twin Cities' },
-    { house_id: 'eresteron-goldvale', faction_id: 'Twin Cities' },
-  ],
-  Farrock: [
-    { house_id: 'farrock-ember', faction_id: 'Varkuun' },
-    { house_id: 'farrock-ironmarch', faction_id: 'Varkuun' },
-    { house_id: 'farrock-vanward', faction_id: 'Varkuun' },
-  ],
-  Gilgeth: [
-    { house_id: 'gilgeth-blackblood', faction_id: 'Gilgeth Clans' },
-    { house_id: 'gilgeth-ironhide', faction_id: 'Gilgeth Clans' },
-    { house_id: 'gilgeth-redtusk', faction_id: 'Gilgeth Clans' },
-  ],
-  Groth: [
-    { house_id: 'groth-mijid', faction_id: 'Groth Clans' },
-    { house_id: 'groth-ashfang', faction_id: 'Groth Clans' },
-    { house_id: 'groth-syncar', faction_id: 'Groth Clans' },
-  ],
-  Vilefin: [
-    { house_id: 'vilefin-bloodware', faction_id: 'Vilefin' },
-    { house_id: 'vilefin-cogtooth', faction_id: 'Vilefin' },
-    { house_id: 'vilefin-rustfang', faction_id: 'Vilefin' },
-  ],
-  Lostfeld: [
-    { house_id: 'lostfeld-goldfinger', faction_id: 'Lostfeld' },
-    { house_id: 'lostfeld-runewarden', faction_id: 'Lostfeld' },
-    { house_id: 'lostfeld-ironmaul', faction_id: 'Lostfeld' },
-  ],
-  'Dur Khadur': [
-    { house_id: 'dur-gross', faction_id: 'Dur Khadur' },
-    { house_id: 'dur-galfazzar', faction_id: 'Dur Khadur' },
-    { house_id: 'dur-vercenti', faction_id: 'Dur Khadur' },
-  ],
-  Glenwood: [
-    { house_id: 'glen-wood', faction_id: 'Glenhaven' },
-    { house_id: 'glen-darkleaf', faction_id: 'Glenhaven' },
-    { house_id: 'glen-mistafae', faction_id: 'Glenhaven' },
-  ],
-  Tidefall: [
-    { house_id: 'tide-ver-meer', faction_id: 'Tidefall' },
-    { house_id: 'tide-highland-dusken', faction_id: 'Tidefall' },
-    { house_id: 'tide-fish', faction_id: 'Tidefall' },
-    { house_id: 'tide-mcgowan', faction_id: 'Tidefall' },
-  ],
-  'Dreadwind Isles': [
-    { house_id: 'dreadwind-blacktide', faction_id: 'Dreadwind Isles' },
-    { house_id: 'dreadwind-stormward', faction_id: 'Dreadwind Isles' },
-    { house_id: 'dreadwind-reef', faction_id: 'Dreadwind Isles' },
-  ],
-};
+/** Subregions: major `region_id` -> list of { house_id, faction_id? } — shared with build-map-geojson.mjs */
+const SUBS = JSON.parse(readFileSync(join(ROOT, 'public', 'data', 'realm_houses.json'), 'utf8'));
 
 function toClip(poly) {
   if (!poly || poly.length < 3) return null;

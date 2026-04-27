@@ -5,12 +5,29 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { normalizeMapLibreColor } from '@/lib/strategyMapColors';
+import {
+  type RawTerrain,
+  coastlinesToGeoJson,
+  TERRAIN_LAYER_FILL,
+  terrainFillsToGeoJson,
+} from '@/lib/terrainToGeojson';
 
 function readEmbedMode(): boolean {
   if (typeof window === 'undefined') return false;
   const v = new URLSearchParams(window.location.search).get('embed');
   if (v == null) return false;
   return ['1', 'true', 'yes', 'on'].includes(v.trim().toLowerCase());
+}
+
+/** Map only: no legend, HUD, hover popup, or zoom buttons (also implied by `embed=1`). */
+function readBareMapMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const q = new URLSearchParams(window.location.search);
+  for (const key of ['no_ui', 'bare', 'minimal']) {
+    const v = q.get(key);
+    if (v != null && ['1', 'true', 'yes', 'on'].includes(v.trim().toLowerCase())) return true;
+  }
+  return false;
 }
 
 /** Flask home.html removes the atlas veil when it receives this (see `homeAtlasEnterVeil`). */
@@ -26,7 +43,24 @@ function notifyParentMapReady() {
   });
 }
 
+/** Prefix for `/data/*` when Next runs under a subpath (`NEXT_PUBLIC_BASE_PATH`). */
+function dataUrl(file: string): string {
+  const base =
+    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BASE_PATH?.replace(/\/$/, '')) || '';
+  return `${base}/data/${file.replace(/^\//, '')}`;
+}
+
+/** Map `realm_id` → Flask `world_state.regions` key when names differ. */
+const REALM_WORLD_KEY: Record<string, string> = {
+  Glenwood: 'Glenhaven',
+  Farrock: 'Varkuun',
+};
+
 const SOURCE_ID = 'regions';
+const TERRAIN_SOURCE = 'terrain';
+const COAST_SOURCE = 'coastlines';
+const TERRAIN_FILL_LAYER = 'terrain-base';
+const COAST_LINE_LAYER = 'terrain-coast';
 const FILL_LAYER = 'regions-fill';
 const LINE_LAYER = 'regions-line';
 
@@ -151,11 +185,13 @@ export default function StrategyMap() {
 
   const [selectionHud, setSelectionHud] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
-  const [embedMode] = useState(readEmbedMode);
+  const embedMode = typeof window !== 'undefined' && readEmbedMode();
+  const minimalUi = typeof window !== 'undefined' && (readEmbedMode() || readBareMapMode());
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    const minimalChrome = readEmbedMode() || readBareMapMode();
 
     const map = new maplibregl.Map({
       container,
@@ -176,52 +212,96 @@ export default function StrategyMap() {
     });
 
     mapRef.current = map;
-    popupRef.current = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 12,
-      className: 'strategy-map-popup',
-    });
+    if (!minimalChrome) {
+      popupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 12,
+        className: 'strategy-map-popup',
+      });
+    }
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    if (!minimalChrome) {
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    }
 
     const postEmbedReadyOnce = () => {
-      if (!embedMode || embedReadyPostedRef.current) return;
+      if (!readEmbedMode() || embedReadyPostedRef.current) return;
       embedReadyPostedRef.current = true;
       notifyParentMapReady();
     };
 
     map.on('error', (ev) => {
+      const errObj = (ev as { error?: { message?: string } }).error;
       const msg =
+        (typeof errObj?.message === 'string' ? errObj.message : null) ||
         (ev as { error?: Error }).error?.message ||
         (typeof (ev as { message?: string }).message === 'string'
           ? (ev as { message: string }).message
           : null);
-      setMapError(msg || 'Map error.');
+      setMapError(
+        msg
+          ? `Map engine: ${msg}`
+          : 'Map engine error (often WebGL blocked or invalid layer). Check the browser console.',
+      );
       postEmbedReadyOnce();
     });
 
     map.on('load', async () => {
       let geojson: GeoJSONFeatureCollection;
       try {
-        const [geoRes, housesRes] = await Promise.all([
-          fetch('/data/map_geo.json', { cache: 'no-store' }),
-          fetch('/data/houses.json', { cache: 'no-store' }),
+        const [housesRes, terrainRes] = await Promise.all([
+          fetch(dataUrl('houses.json'), { cache: 'no-store' }),
+          fetch(dataUrl('terrain_map.json'), { cache: 'no-store' }),
         ]);
+        let geoRes = await fetch(dataUrl('map.geojson'), { cache: 'no-store' });
+        if (!geoRes.ok) {
+          geoRes = await fetch(dataUrl('map_geo.json'), { cache: 'no-store' });
+        }
         if (!geoRes.ok) {
           setMapError(
-            `Could not load map (HTTP ${geoRes.status}). Run: npm run build:map-geo (or build:territory-map first if using parcels).`,
+            `Could not load map data (HTTP ${geoRes.status} for map.geojson / map_geo.json). ` +
+              `Ensure Next is running from the repo root and commit includes public/data/map.geojson (run: npm run build:map-geojson). ` +
+              `If the app uses a URL prefix, set NEXT_PUBLIC_BASE_PATH in .env.`,
           );
           postEmbedReadyOnce();
           return;
         }
-        if (!housesRes.ok) {
-          setMapError(`Could not load houses.json (HTTP ${housesRes.status}).`);
+        try {
+          const raw = await geoRes.text();
+          geojson = JSON.parse(raw) as GeoJSONFeatureCollection;
+        } catch {
+          setMapError(
+            'Map file downloaded but is not valid JSON. Re-run: npm run build:map-geojson (or build:map-geo).',
+          );
           postEmbedReadyOnce();
           return;
         }
-        geojson = (await geoRes.json()) as GeoJSONFeatureCollection;
-        const houses = (await housesRes.json()) as HousesJson;
+        if (!Array.isArray(geojson.features) || geojson.features.length === 0) {
+          setMapError('Map GeoJSON has no features.');
+          postEmbedReadyOnce();
+          return;
+        }
+
+        for (const f of geojson.features) {
+          if (!f.properties) f.properties = {};
+          const p = f.properties;
+          if (p.house_id == null && f.id != null) p.house_id = String(f.id);
+          if (p.house_id == null) {
+            setMapError('Map GeoJSON has a feature without house_id (needed for parcel picking).');
+            postEmbedReadyOnce();
+            return;
+          }
+        }
+
+        let houses: HousesJson = { factionColors: {} };
+        if (housesRes.ok) {
+          try {
+            houses = (await housesRes.json()) as HousesJson;
+          } catch {
+            /* use empty palette below */
+          }
+        }
         const rawPalette = houses.factionColors || {};
         const palette: Record<string, string> = {};
         for (const [k, v] of Object.entries(rawPalette)) {
@@ -236,14 +316,68 @@ export default function StrategyMap() {
             f.properties.default_fill,
             fac,
           );
-          const rid = String(f.properties.region_id || '');
+          const rid = String(f.properties.region_id || f.properties.realm_id || '');
           const hid = String(f.properties.house_id ?? f.id ?? '');
           if (rid && hid) {
             if (!byRegion[rid]) byRegion[rid] = [];
             byRegion[rid].push(hid);
+            const worldKey = REALM_WORLD_KEY[rid];
+            if (worldKey) {
+              if (!byRegion[worldKey]) byRegion[worldKey] = [];
+              byRegion[worldKey].push(hid);
+            }
           }
         }
         housesByRegionRef.current = byRegion;
+
+        if (terrainRes.ok) {
+          try {
+            const terrainJson = (await terrainRes.json()) as RawTerrain;
+            const terrainFills = terrainFillsToGeoJson(terrainJson);
+            if (terrainFills.features.length > 0) {
+              map.addSource(TERRAIN_SOURCE, { type: 'geojson', data: terrainFills });
+              map.addLayer({
+                id: TERRAIN_FILL_LAYER,
+                type: 'fill',
+                source: TERRAIN_SOURCE,
+                paint: {
+                  'fill-color': [
+                    'match',
+                    ['get', 'kind'],
+                    'plains',
+                    TERRAIN_LAYER_FILL.plains,
+                    'desert',
+                    TERRAIN_LAYER_FILL.desert,
+                    'forests',
+                    TERRAIN_LAYER_FILL.forests,
+                    'mountains',
+                    TERRAIN_LAYER_FILL.mountains,
+                    'coastal',
+                    TERRAIN_LAYER_FILL.coastal,
+                    TERRAIN_LAYER_FILL.plains,
+                  ],
+                  'fill-opacity': 1,
+                },
+              });
+            }
+            const coastGj = coastlinesToGeoJson(terrainJson);
+            if (coastGj.features.length > 0) {
+              map.addSource(COAST_SOURCE, { type: 'geojson', data: coastGj });
+              map.addLayer({
+                id: COAST_LINE_LAYER,
+                type: 'line',
+                source: COAST_SOURCE,
+                paint: {
+                  'line-color': '#1a2835',
+                  'line-width': 1.1,
+                  'line-opacity': 0.5,
+                },
+              });
+            }
+          } catch {
+            /* Terrain is optional; bad JSON or MapLibre reject should not block the political map. */
+          }
+        }
 
         map.addSource(SOURCE_ID, {
           type: 'geojson',
@@ -345,7 +479,7 @@ export default function StrategyMap() {
           }
           map.getCanvas().style.cursor = id ? 'pointer' : '';
 
-          if (id && popupRef.current) {
+          if (!minimalChrome && id && popupRef.current) {
             const sub = region ? `${escapeHtml(region)} · ` : '';
             popupRef.current
               .setLngLat(e.lngLat)
@@ -385,7 +519,7 @@ export default function StrategyMap() {
           } catch {
             /* ignore */
           }
-          setSelectionHud(name || id);
+          if (!minimalChrome) setSelectionHud(name || id);
         });
 
         map.on('click', (e) => {
@@ -400,7 +534,7 @@ export default function StrategyMap() {
             }
           }
           selectedIdRef.current = null;
-          setSelectionHud(null);
+          if (!minimalChrome) setSelectionHud(null);
         });
 
         async function pullWorld() {
@@ -442,14 +576,19 @@ export default function StrategyMap() {
 
   return (
     <div
-      className={`strategy-map-root${embedMode ? ' strategy-map-root--embed' : ''}`}
+      suppressHydrationWarning
+      className={`strategy-map-root${embedMode ? ' strategy-map-root--embed' : ''}${
+        minimalUi ? ' strategy-map-root--minimal' : ''
+      }`}
       role="region"
       aria-label="Aeloria strategy map: pan and zoom to view faction regions"
     >
-      <p className="strategy-map-legend">
-        Vector map: faction regions are GeoJSON polygons (MapLibre). The backdrop is plain void—no satellite tiles.
-        Pan and zoom to explore.
-      </p>
+      {!minimalUi && (
+        <p className="strategy-map-legend">
+          2D vector map: terrain and coast under faction parcels (MapLibre). No satellite tiles—pan and zoom to
+          explore.
+        </p>
+      )}
       <div ref={containerRef} className="strategy-map-canvas" />
       {mapError != null && (
         <div className="strategy-map-error" role="alert">
@@ -462,7 +601,7 @@ export default function StrategyMap() {
           </p>
         </div>
       )}
-      {selectionHud != null && (
+      {!minimalUi && selectionHud != null && (
         <div className="strategy-map-hud" role="status">
           Selected: {selectionHud}
         </div>
