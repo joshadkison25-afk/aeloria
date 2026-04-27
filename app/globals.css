@@ -302,9 +302,15 @@ a {
 }
 
 .fantasy-map-world {
-  will-change: transform;
   transform-origin: 0 0;
   width: 100%;
+  backface-visibility: hidden;
+}
+
+/* Promote layer only while panning — permanent will-change on a large map hurts GPU memory. */
+.fantasy-map-viewport.is-panning .fantasy-map-world,
+.fantasy-map-viewport.fantasy-map-viewport--zooming .fantasy-map-world {
+  will-change: transform;
 }
 
 .fantasy-map-canvas {
@@ -342,6 +348,16 @@ a {
   filter: contrast(1.05) saturate(1.06) brightness(0.97)
     drop-shadow(0 3px 18px rgba(0, 0, 0, 0.5));
   border-radius: 2px;
+}
+
+/* Home iframe embed: filters on a large raster hurt scroll-zoom performance. */
+.fantasy-map-shell--embed .fantasy-map-terrain {
+  filter: none;
+}
+
+/* Embed: vignette is a full-size blended layer over the basemap — skip it for clarity + GPU cost. */
+.fantasy-map-shell--embed .fantasy-map-atlas-mood {
+  display: none;
 }
 
 .fantasy-map-atlas-crown {
@@ -434,6 +450,11 @@ a {
   height: 100%;
   mix-blend-mode: soft-light;
   isolation: isolate;
+}
+
+/* Embed: soft-light washes out thin province strokes on the basemap; normal reads clearly. */
+.fantasy-map-shell--embed .fantasy-map-political {
+  mix-blend-mode: normal;
 }
 
 .fantasy-map-hexes {
@@ -1639,4 +1660,139 @@ a {
   .static-atlas-map-area {
     overflow-x: auto;
   }
+}
+
+/* ── MapLibre strategy map (/map) ─────────────────────────── */
+.strategy-map-root {
+  position: relative;
+  width: 100%;
+  /* Full viewport: MapLibre needs a real pixel height (not 0) or the WebGL canvas stays blank. */
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 480px;
+}
+
+/* Fills the Flask home iframe (`?embed=1`); parent sets iframe height. */
+.strategy-map-root--embed {
+  height: 100%;
+  min-height: 0;
+}
+
+html:has(.strategy-map-root),
+body:has(.strategy-map-root) {
+  height: 100%;
+  margin: 0;
+}
+
+.strategy-map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Tailwind / resets sometimes set `max-width`/`height: auto` on `canvas` and break MapLibre’s WebGL surface. */
+.strategy-map-root .maplibregl-map,
+.strategy-map-root .maplibregl-canvas-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+.strategy-map-root canvas.maplibregl-canvas {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.strategy-map-legend {
+  position: absolute;
+  right: 12px;
+  bottom: 48px;
+  z-index: 2;
+  max-width: min(22rem, calc(100vw - 1.5rem));
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(232, 220, 196, 0.42);
+  pointer-events: none;
+  text-align: right;
+}
+
+.strategy-map-hud {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(8, 10, 16, 0.88);
+  border: 1px solid rgba(201, 169, 110, 0.35);
+  color: #e8dcc4;
+  font-size: 13px;
+  pointer-events: none;
+  max-width: 280px;
+}
+
+.strategy-map-popup .maplibregl-popup-content {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(12, 14, 22, 0.92);
+  border: 1px solid rgba(201, 169, 110, 0.32);
+  color: #e8dcc4;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.strategy-map-popup .maplibregl-popup-tip {
+  border-top-color: rgba(12, 14, 22, 0.92);
+}
+
+.strategy-map-tip strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #f4e4bc;
+}
+
+.strategy-map-error {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: rgba(6, 8, 14, 0.92);
+  border: 1px solid rgba(201, 169, 110, 0.35);
+  color: #e8dcc4;
+  font-size: 14px;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+
+.strategy-map-error__title {
+  margin: 0 0 8px;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 18px;
+  color: #f4e4bc;
+}
+
+.strategy-map-error__msg {
+  margin: 0 0 16px;
+  max-width: 42rem;
+  white-space: pre-wrap;
+  color: #c8b898;
+}
+
+.strategy-map-error__hint {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.strategy-map-error__hint code {
+  font-size: 0.95em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
 }

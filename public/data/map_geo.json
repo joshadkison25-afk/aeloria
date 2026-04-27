@@ -1,0 +1,589 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Wintermark",
+      "properties": {
+        "house_id": "Wintermark",
+        "region_id": "Wintermark",
+        "faction_id": "The Wintermark",
+        "name": "The Wintermark",
+        "default_fill": "hsl(63, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.9219,
+              7.1525
+            ],
+            [
+              6.8359,
+              6.0968
+            ],
+            [
+              9.2969,
+              6.3607
+            ],
+            [
+              8.75,
+              8.7361
+            ],
+            [
+              5.4688,
+              8.6833
+            ],
+            [
+              4.9219,
+              7.1525
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Faerwood",
+      "properties": {
+        "house_id": "Faerwood",
+        "region_id": "Faerwood",
+        "faction_id": "Shadow Court",
+        "name": "Shadow Court",
+        "default_fill": "hsl(181, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.5469,
+              5.5689
+            ],
+            [
+              1.6406,
+              3.7214
+            ],
+            [
+              4.1016,
+              3.1935
+            ],
+            [
+              6.0156,
+              5.0411
+            ],
+            [
+              5.1953,
+              8.0499
+            ],
+            [
+              0.4375,
+              7.7331
+            ],
+            [
+              0.5469,
+              5.5689
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Glenhaven",
+      "properties": {
+        "house_id": "Glenhaven",
+        "region_id": "Glenhaven",
+        "faction_id": "Glenhaven",
+        "name": "Glenhaven",
+        "default_fill": "hsl(88, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.2734,
+              2.6657
+            ],
+            [
+              0.9844,
+              1.0821
+            ],
+            [
+              3.8281,
+              1.8739
+            ],
+            [
+              3.0078,
+              5.305
+            ],
+            [
+              0.2188,
+              5.0411
+            ],
+            [
+              0.2734,
+              2.6657
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Lostfeld",
+      "properties": {
+        "house_id": "Lostfeld",
+        "region_id": "Lostfeld",
+        "faction_id": "Lostfeld",
+        "name": "Lostfeld",
+        "default_fill": "hsl(117, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.5547,
+              3.4575
+            ],
+            [
+              4.9219,
+              2.1378
+            ],
+            [
+              7.1094,
+              2.6657
+            ],
+            [
+              6.5625,
+              5.305
+            ],
+            [
+              3.8281,
+              5.0411
+            ],
+            [
+              3.5547,
+              3.4575
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Stonebreak",
+      "properties": {
+        "house_id": "Stonebreak",
+        "region_id": "Stonebreak",
+        "faction_id": "Stonebreak Monastery",
+        "name": "Stonebreak Monastery",
+        "default_fill": "hsl(272, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.1016,
+              2.9824
+            ],
+            [
+              4.9219,
+              2.2962
+            ],
+            [
+              6.125,
+              2.6657
+            ],
+            [
+              5.7422,
+              3.9326
+            ],
+            [
+              4.375,
+              3.7214
+            ],
+            [
+              4.1016,
+              2.9824
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Eresteron",
+      "properties": {
+        "house_id": "Eresteron",
+        "region_id": "Eresteron",
+        "faction_id": "Twin Cities",
+        "name": "Eresteron",
+        "default_fill": "hsl(327, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.125,
+              2.7713
+            ],
+            [
+              7.1094,
+              1.8211
+            ],
+            [
+              8.9688,
+              2.4018
+            ],
+            [
+              8.4766,
+              4.4604
+            ],
+            [
+              6.5625,
+              4.2493
+            ],
+            [
+              6.125,
+              2.7713
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Eldoria",
+      "properties": {
+        "house_id": "Eldoria",
+        "region_id": "Eldoria",
+        "faction_id": "Twin Cities",
+        "name": "Eldoria",
+        "default_fill": "hsl(327, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.6953,
+              2.4545
+            ],
+            [
+              9.5703,
+              1.7155
+            ],
+            [
+              11.2656,
+              2.1378
+            ],
+            [
+              10.9375,
+              3.827
+            ],
+            [
+              8.4766,
+              4.4604
+            ],
+            [
+              8.6953,
+              2.4545
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Groth",
+      "properties": {
+        "house_id": "Groth",
+        "region_id": "Groth",
+        "faction_id": "Groth Clans",
+        "name": "Groth",
+        "default_fill": "hsl(5, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.5703,
+              6.8886
+            ],
+            [
+              10.9375,
+              5.305
+            ],
+            [
+              13.8906,
+              5.8328
+            ],
+            [
+              13.7813,
+              8.3666
+            ],
+            [
+              9.2969,
+              8.5777
+            ],
+            [
+              9.5703,
+              6.8886
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Gilgeth",
+      "properties": {
+        "house_id": "Gilgeth",
+        "region_id": "Gilgeth",
+        "faction_id": "Gilgeth Clans",
+        "name": "Gilgeth",
+        "default_fill": "hsl(57, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              10.2266,
+              3.9853
+            ],
+            [
+              10.9375,
+              2.6129
+            ],
+            [
+              13.3984,
+              2.4018
+            ],
+            [
+              13.6719,
+              4.7771
+            ],
+            [
+              10.3906,
+              5.305
+            ],
+            [
+              10.2266,
+              3.9853
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Dur Khadur",
+      "properties": {
+        "house_id": "Dur Khadur",
+        "region_id": "Dur Khadur",
+        "faction_id": "Dur Khadur",
+        "name": "Dur Khadur",
+        "default_fill": "hsl(172, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.0234,
+              1.8739
+            ],
+            [
+              9.5703,
+              1.0821
+            ],
+            [
+              12.0313,
+              0.8182
+            ],
+            [
+              12.3047,
+              2.2434
+            ],
+            [
+              9.5703,
+              2.6657
+            ],
+            [
+              9.0234,
+              1.8739
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Tidefall",
+      "properties": {
+        "house_id": "Tidefall",
+        "region_id": "Tidefall",
+        "faction_id": "Tidefall",
+        "name": "Tidefall",
+        "default_fill": "hsl(71, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.9219,
+              1.0821
+            ],
+            [
+              6.5625,
+              0.132
+            ],
+            [
+              9.5703,
+              0.5543
+            ],
+            [
+              7.9297,
+              2.5601
+            ],
+            [
+              4.9219,
+              2.4018
+            ],
+            [
+              4.9219,
+              1.0821
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Varkuun",
+      "properties": {
+        "house_id": "Varkuun",
+        "region_id": "Varkuun",
+        "faction_id": "Varkuun",
+        "name": "Varkuun",
+        "default_fill": "hsl(250, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.5625,
+              1.346
+            ],
+            [
+              7.3828,
+              0.3431
+            ],
+            [
+              9.0234,
+              0.8182
+            ],
+            [
+              8.4766,
+              2.4018
+            ],
+            [
+              6.8359,
+              2.1378
+            ],
+            [
+              6.5625,
+              1.346
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Vilefin",
+      "properties": {
+        "house_id": "Vilefin",
+        "region_id": "Vilefin",
+        "faction_id": "Vilefin",
+        "name": "Vilefin",
+        "default_fill": "hsl(159, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.8438,
+              0.0792
+            ],
+            [
+              13.7813,
+              0.2903
+            ],
+            [
+              13.7813,
+              2.4018
+            ],
+            [
+              9.2969,
+              1.8739
+            ],
+            [
+              9.8438,
+              0.0792
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Dreadwind Isles",
+      "properties": {
+        "house_id": "Dreadwind Isles",
+        "region_id": "Dreadwind Isles",
+        "faction_id": "Dreadwind Isles",
+        "name": "Dreadwind Isles",
+        "default_fill": "hsl(94, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              12.3047,
+              3.4575
+            ],
+            [
+              13.7266,
+              3.7214
+            ],
+            [
+              13.6719,
+              6.8886
+            ],
+            [
+              11.7578,
+              6.6246
+            ],
+            [
+              12.3047,
+              3.4575
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -4,7 +4,6 @@
     "components",
     "lib",
     "data",
-    "static",
     "public",
     "next.config.js",
     "tailwind.config.js",

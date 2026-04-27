@@ -8,12 +8,35 @@
     "stage": "ongoing",
     "trend": "stable",
     "involved": [
-      "Groth Clans",
-      "Groth"
+      "Gilgeth Clans"
     ]
   },
-  "supporting_events": [],
+  "supporting_events": [
+    {
+      "name": "Stabilization: Groth Clans \u2014 Groth",
+      "summary": "Groth Clans committed resources to stabilize Groth.",
+      "severity": 4,
+      "stage": "emerging",
+      "trend": "stable",
+      "involved": [
+        "Groth Clans",
+        "Groth"
+      ]
+    }
+  ],
   "active_events": [
+    {
+      "name": "Stabilization: Gilgeth Clans \u2014 internal",
+      "involved": [
+        "Gilgeth Clans"
+      ],
+      "severity": 4,
+      "stage": "emerging",
+      "duration": 2,
+      "trend": "stable",
+      "summary": "Gilgeth Clans committed resources to stabilize Gilgeth Clans's territory.",
+      "consequences": "The internal consolidation effort in Gilgeth Clans's territory reduces unrest and strengthens Gilgeth Clans's administrative grip. Effects will compound if maintained across several ticks."
+    },
     {
       "name": "Stabilization: Groth Clans \u2014 Groth",
       "involved": [
@@ -22,7 +45,7 @@
       ],
       "severity": 4,
       "stage": "emerging",
-      "duration": 2,
+      "duration": 1,
       "trend": "stable",
       "summary": "Groth Clans committed resources to stabilize Groth.",
       "consequences": "The internal consolidation effort in Groth reduces unrest and strengthens Groth Clans's administrative grip. Effects will compound if maintained across several ticks."
@@ -30,6 +53,15 @@
   ],
   "factions": {},
   "characters": {},
+  "portrait_cache": {
+    "Eldaric Aurand III": "/static/illustrations/characters/eldaric-aurand-iii.png",
+    "Levi Ver Meer": "/static/illustrations/characters/levi-ver-meer.png",
+    "Seran Gross": "/static/illustrations/characters/seran-gross.png",
+    "Babadu Goldfinger-Duke": "/static/illustrations/characters/babadu-goldfinger-duke.png",
+    "Lyathra the Veiled": "/static/illustrations/characters/lyathra-the-veiled.png",
+    "Thalorien Wood": "/static/illustrations/characters/thalorien-wood.png",
+    "Kragor Blackblood": "/static/illustrations/characters/kragor-blackblood.png"
+  },
   "regions": {
     "Faerwood": {
       "name": "Faerwood",
@@ -398,78 +430,6 @@
   ],
   "faction_power_state": [
     {
-      "faction": "Vilefin",
-      "militaryPower": 49,
-      "economicPower": 47,
-      "politicalInfluence": 37,
-      "religiousInfluence": 24,
-      "power_modifiers": {
-        "military_posture": "weak",
-        "battle_edge": -0.02,
-        "attrition_resist": -0.04,
-        "coalition_pull": -0.14,
-        "morale_edge": -0.26,
-        "economic_posture": "strained",
-        "political_posture": "fragile",
-        "treaty_leverage": -0.2,
-        "economic_leverage": -0.04,
-        "threat_credibility": -0.01,
-        "oath_durability": -0.26,
-        "recovery_speed": -0.05,
-        "rebellion_resistance": -0.18,
-        "belief_spread": -0.39,
-        "faith_posture": "secular"
-      }
-    },
-    {
-      "faction": "Shadow Court",
-      "militaryPower": 54,
-      "economicPower": 46,
-      "politicalInfluence": 52,
-      "religiousInfluence": 31,
-      "power_modifiers": {
-        "military_posture": "moderate",
-        "battle_edge": 0.06,
-        "attrition_resist": -0.05,
-        "coalition_pull": 0.02,
-        "morale_edge": -0.19,
-        "economic_posture": "strained",
-        "political_posture": "contested",
-        "treaty_leverage": 0.03,
-        "economic_leverage": -0.05,
-        "threat_credibility": 0.05,
-        "oath_durability": -0.19,
-        "recovery_speed": -0.06,
-        "rebellion_resistance": 0.03,
-        "belief_spread": -0.28,
-        "faith_posture": "secular"
-      }
-    },
-    {
-      "faction": "Gilgeth Clans",
-      "militaryPower": 57,
-      "economicPower": 46,
-      "politicalInfluence": 45,
-      "religiousInfluence": 36,
-      "power_modifiers": {
-        "military_posture": "moderate",
-        "battle_edge": 0.11,
-        "attrition_resist": -0.05,
-        "coalition_pull": -0.05,
-        "morale_edge": -0.14,
-        "economic_posture": "strained",
-        "political_posture": "fragile",
-        "treaty_leverage": -0.07,
-        "economic_leverage": -0.05,
-        "threat_credibility": 0.09,
-        "oath_durability": -0.14,
-        "recovery_speed": -0.06,
-        "rebellion_resistance": -0.07,
-        "belief_spread": -0.21,
-        "faith_posture": "secular"
-      }
-    },
-    {
       "faction": "Dreadwind Isles",
       "militaryPower": 48,
       "economicPower": 47,
@@ -494,74 +454,50 @@
       }
     },
     {
-      "faction": "The Wintermark",
-      "militaryPower": 44,
-      "economicPower": 42,
-      "politicalInfluence": 35,
-      "religiousInfluence": 38,
-      "power_modifiers": {
-        "military_posture": "weak",
-        "battle_edge": -0.1,
-        "attrition_resist": -0.1,
-        "coalition_pull": -0.16,
-        "morale_edge": -0.12,
-        "economic_posture": "strained",
-        "political_posture": "fragile",
-        "treaty_leverage": -0.22,
-        "economic_leverage": -0.1,
-        "threat_credibility": -0.08,
-        "oath_durability": -0.12,
-        "recovery_speed": -0.13,
-        "rebellion_resistance": -0.21,
-        "belief_spread": -0.18,
-        "faith_posture": "secular"
-      }
-    },
-    {
-      "faction": "Varkuun",
-      "militaryPower": 49,
-      "economicPower": 48,
-      "politicalInfluence": 44,
-      "religiousInfluence": 39,
-      "power_modifiers": {
-        "military_posture": "weak",
-        "battle_edge": -0.02,
-        "attrition_resist": -0.03,
-        "coalition_pull": -0.07,
-        "morale_edge": -0.11,
-        "economic_posture": "strained",
-        "political_posture": "fragile",
-        "treaty_leverage": -0.09,
-        "economic_leverage": -0.03,
-        "threat_credibility": -0.01,
-        "oath_durability": -0.11,
-        "recovery_speed": -0.03,
-        "rebellion_resistance": -0.08,
-        "belief_spread": -0.16,
-        "faith_posture": "secular"
-      }
-    },
-    {
-      "faction": "Twin Cities",
+      "faction": "Dur Khadur",
       "militaryPower": 56,
-      "economicPower": 71,
-      "politicalInfluence": 48,
-      "religiousInfluence": 48,
+      "economicPower": 53,
+      "politicalInfluence": 42,
+      "religiousInfluence": 34,
       "power_modifiers": {
         "military_posture": "moderate",
         "battle_edge": 0.1,
-        "attrition_resist": 0.27,
-        "coalition_pull": -0.02,
-        "morale_edge": -0.02,
-        "economic_posture": "stable",
+        "attrition_resist": 0.04,
+        "coalition_pull": -0.09,
+        "morale_edge": -0.16,
+        "economic_posture": "adequate",
         "political_posture": "fragile",
-        "treaty_leverage": -0.03,
-        "economic_leverage": 0.27,
+        "treaty_leverage": -0.12,
+        "economic_leverage": 0.04,
         "threat_credibility": 0.08,
-        "oath_durability": -0.02,
-        "recovery_speed": 0.34,
-        "rebellion_resistance": -0.03,
-        "belief_spread": -0.03,
+        "oath_durability": -0.16,
+        "recovery_speed": 0.05,
+        "rebellion_resistance": -0.11,
+        "belief_spread": -0.24,
+        "faith_posture": "secular"
+      }
+    },
+    {
+      "faction": "Glenhaven",
+      "militaryPower": 41,
+      "economicPower": 51,
+      "politicalInfluence": 44,
+      "religiousInfluence": 49,
+      "power_modifiers": {
+        "military_posture": "weak",
+        "battle_edge": -0.14,
+        "attrition_resist": 0.01,
+        "coalition_pull": -0.07,
+        "morale_edge": -0.01,
+        "economic_posture": "adequate",
+        "political_posture": "fragile",
+        "treaty_leverage": -0.09,
+        "economic_leverage": 0.01,
+        "threat_credibility": -0.12,
+        "oath_durability": -0.01,
+        "recovery_speed": 0.02,
+        "rebellion_resistance": -0.08,
+        "belief_spread": -0.01,
         "faith_posture": "lukewarm"
       }
     },
@@ -590,26 +526,74 @@
       }
     },
     {
-      "faction": "Tidefall",
-      "militaryPower": 51,
-      "economicPower": 62,
-      "politicalInfluence": 41,
-      "religiousInfluence": 40,
+      "faction": "The Wintermark",
+      "militaryPower": 44,
+      "economicPower": 42,
+      "politicalInfluence": 35,
+      "religiousInfluence": 38,
+      "power_modifiers": {
+        "military_posture": "weak",
+        "battle_edge": -0.1,
+        "attrition_resist": -0.1,
+        "coalition_pull": -0.16,
+        "morale_edge": -0.12,
+        "economic_posture": "strained",
+        "political_posture": "fragile",
+        "treaty_leverage": -0.22,
+        "economic_leverage": -0.1,
+        "threat_credibility": -0.08,
+        "oath_durability": -0.12,
+        "recovery_speed": -0.13,
+        "rebellion_resistance": -0.21,
+        "belief_spread": -0.18,
+        "faith_posture": "secular"
+      }
+    },
+    {
+      "faction": "Gilgeth Clans",
+      "militaryPower": 57,
+      "economicPower": 46,
+      "politicalInfluence": 45,
+      "religiousInfluence": 36,
       "power_modifiers": {
         "military_posture": "moderate",
-        "battle_edge": 0.02,
-        "attrition_resist": 0.16,
-        "coalition_pull": -0.1,
-        "morale_edge": -0.1,
-        "economic_posture": "adequate",
+        "battle_edge": 0.11,
+        "attrition_resist": -0.05,
+        "coalition_pull": -0.05,
+        "morale_edge": -0.14,
+        "economic_posture": "strained",
         "political_posture": "fragile",
-        "treaty_leverage": -0.14,
-        "economic_leverage": 0.16,
-        "threat_credibility": 0.01,
-        "oath_durability": -0.1,
-        "recovery_speed": 0.19,
-        "rebellion_resistance": -0.13,
-        "belief_spread": -0.15,
+        "treaty_leverage": -0.07,
+        "economic_leverage": -0.05,
+        "threat_credibility": 0.09,
+        "oath_durability": -0.14,
+        "recovery_speed": -0.06,
+        "rebellion_resistance": -0.07,
+        "belief_spread": -0.21,
+        "faith_posture": "secular"
+      }
+    },
+    {
+      "faction": "Vilefin",
+      "militaryPower": 49,
+      "economicPower": 47,
+      "politicalInfluence": 37,
+      "religiousInfluence": 24,
+      "power_modifiers": {
+        "military_posture": "weak",
+        "battle_edge": -0.02,
+        "attrition_resist": -0.04,
+        "coalition_pull": -0.14,
+        "morale_edge": -0.26,
+        "economic_posture": "strained",
+        "political_posture": "fragile",
+        "treaty_leverage": -0.2,
+        "economic_leverage": -0.04,
+        "threat_credibility": -0.01,
+        "oath_durability": -0.26,
+        "recovery_speed": -0.05,
+        "rebellion_resistance": -0.18,
+        "belief_spread": -0.39,
         "faith_posture": "secular"
       }
     },
@@ -638,50 +622,74 @@
       }
     },
     {
-      "faction": "Glenhaven",
-      "militaryPower": 41,
-      "economicPower": 51,
-      "politicalInfluence": 44,
-      "religiousInfluence": 49,
+      "faction": "Tidefall",
+      "militaryPower": 51,
+      "economicPower": 62,
+      "politicalInfluence": 41,
+      "religiousInfluence": 40,
       "power_modifiers": {
-        "military_posture": "weak",
-        "battle_edge": -0.14,
-        "attrition_resist": 0.01,
-        "coalition_pull": -0.07,
-        "morale_edge": -0.01,
+        "military_posture": "moderate",
+        "battle_edge": 0.02,
+        "attrition_resist": 0.16,
+        "coalition_pull": -0.1,
+        "morale_edge": -0.1,
         "economic_posture": "adequate",
         "political_posture": "fragile",
-        "treaty_leverage": -0.09,
-        "economic_leverage": 0.01,
-        "threat_credibility": -0.12,
-        "oath_durability": -0.01,
-        "recovery_speed": 0.02,
-        "rebellion_resistance": -0.08,
-        "belief_spread": -0.01,
+        "treaty_leverage": -0.14,
+        "economic_leverage": 0.16,
+        "threat_credibility": 0.01,
+        "oath_durability": -0.1,
+        "recovery_speed": 0.19,
+        "rebellion_resistance": -0.13,
+        "belief_spread": -0.15,
+        "faith_posture": "secular"
+      }
+    },
+    {
+      "faction": "Twin Cities",
+      "militaryPower": 56,
+      "economicPower": 71,
+      "politicalInfluence": 48,
+      "religiousInfluence": 48,
+      "power_modifiers": {
+        "military_posture": "moderate",
+        "battle_edge": 0.1,
+        "attrition_resist": 0.27,
+        "coalition_pull": -0.02,
+        "morale_edge": -0.02,
+        "economic_posture": "stable",
+        "political_posture": "fragile",
+        "treaty_leverage": -0.03,
+        "economic_leverage": 0.27,
+        "threat_credibility": 0.08,
+        "oath_durability": -0.02,
+        "recovery_speed": 0.34,
+        "rebellion_resistance": -0.03,
+        "belief_spread": -0.03,
         "faith_posture": "lukewarm"
       }
     },
     {
-      "faction": "Dur Khadur",
-      "militaryPower": 56,
-      "economicPower": 53,
-      "politicalInfluence": 42,
-      "religiousInfluence": 34,
+      "faction": "Varkuun",
+      "militaryPower": 49,
+      "economicPower": 48,
+      "politicalInfluence": 44,
+      "religiousInfluence": 39,
       "power_modifiers": {
-        "military_posture": "moderate",
-        "battle_edge": 0.1,
-        "attrition_resist": 0.04,
-        "coalition_pull": -0.09,
-        "morale_edge": -0.16,
-        "economic_posture": "adequate",
+        "military_posture": "weak",
+        "battle_edge": -0.02,
+        "attrition_resist": -0.03,
+        "coalition_pull": -0.07,
+        "morale_edge": -0.11,
+        "economic_posture": "strained",
         "political_posture": "fragile",
-        "treaty_leverage": -0.12,
-        "economic_leverage": 0.04,
-        "threat_credibility": 0.08,
-        "oath_durability": -0.16,
-        "recovery_speed": 0.05,
-        "rebellion_resistance": -0.11,
-        "belief_spread": -0.24,
+        "treaty_leverage": -0.09,
+        "economic_leverage": -0.03,
+        "threat_credibility": -0.01,
+        "oath_durability": -0.11,
+        "recovery_speed": -0.03,
+        "rebellion_resistance": -0.08,
+        "belief_spread": -0.16,
         "faith_posture": "secular"
       }
     },
@@ -707,6 +715,30 @@
         "rebellion_resistance": -0.13,
         "belief_spread": -0.01,
         "faith_posture": "lukewarm"
+      }
+    },
+    {
+      "faction": "Shadow Court",
+      "militaryPower": 54,
+      "economicPower": 46,
+      "politicalInfluence": 52,
+      "religiousInfluence": 31,
+      "power_modifiers": {
+        "military_posture": "moderate",
+        "battle_edge": 0.06,
+        "attrition_resist": -0.05,
+        "coalition_pull": 0.02,
+        "morale_edge": -0.19,
+        "economic_posture": "strained",
+        "political_posture": "contested",
+        "treaty_leverage": 0.03,
+        "economic_leverage": -0.05,
+        "threat_credibility": 0.05,
+        "oath_durability": -0.19,
+        "recovery_speed": -0.06,
+        "rebellion_resistance": 0.03,
+        "belief_spread": -0.28,
+        "faith_posture": "secular"
       }
     }
   ],
@@ -912,8 +944,8 @@
       "name": "Groth",
       "owner": "Groth Clans",
       "controller": "Groth Clans",
-      "control": 91,
-      "stability": 48,
+      "control": 85,
+      "stability": 40,
       "population": 45000,
       "value": 52,
       "region_type": "wilderness",
@@ -1038,25 +1070,25 @@
       "resources": {
         "grain": {
           "production": 271.88,
-          "consumption": 841.48,
+          "consumption": 841.49,
           "stockpile": 3260,
           "storage_capacity": 8000
         },
         "iron": {
-          "production": 113.61,
-          "consumption": 78.7,
+          "production": 113.62,
+          "consumption": 78.73,
           "stockpile": 2094,
           "storage_capacity": 4000
         },
         "timber": {
           "production": 141.33,
-          "consumption": 19.69,
+          "consumption": 19.7,
           "stockpile": 2765,
           "storage_capacity": 5000
         },
         "gold": {
           "production": 142.5,
-          "consumption": 122.87,
+          "consumption": 122.88,
           "stockpile": 2186,
           "storage_capacity": 3000
         }
@@ -1092,7 +1124,7 @@
         },
         "iron": {
           "production": 130.35,
-          "consumption": 201.13,
+          "consumption": 201.12,
           "stockpile": 2058,
           "storage_capacity": 4000
         },
@@ -1134,13 +1166,13 @@
       "resources": {
         "grain": {
           "production": 240.62,
-          "consumption": 1028.49,
+          "consumption": 1028.48,
           "stockpile": 2824,
           "storage_capacity": 8000
         },
         "iron": {
           "production": 98.87,
-          "consumption": 96.22,
+          "consumption": 96.2,
           "stockpile": 2063,
           "storage_capacity": 4000
         },
@@ -1182,13 +1214,13 @@
       "resources": {
         "grain": {
           "production": 238.12,
-          "consumption": 654.49,
+          "consumption": 654.48,
           "stockpile": 3568,
           "storage_capacity": 8000
         },
         "iron": {
           "production": 88.37,
-          "consumption": 61.22,
+          "consumption": 61.21,
           "stockpile": 2079,
           "storage_capacity": 4000
         },
@@ -1230,13 +1262,13 @@
       "resources": {
         "grain": {
           "production": 251.88,
-          "consumption": 841.48,
+          "consumption": 841.49,
           "stockpile": 3220,
           "storage_capacity": 8000
         },
         "iron": {
           "production": 93.61,
-          "consumption": 78.7,
+          "consumption": 78.72,
           "stockpile": 2057,
           "storage_capacity": 4000
         },
@@ -1248,7 +1280,7 @@
         },
         "gold": {
           "production": 92.5,
-          "consumption": 122.87,
+          "consumption": 122.88,
           "stockpile": 2055,
           "storage_capacity": 3000
         }
@@ -1284,7 +1316,7 @@
         },
         "iron": {
           "production": 104.11,
-          "consumption": 113.71,
+          "consumption": 113.69,
           "stockpile": 2090,
           "storage_capacity": 4000
         },
@@ -1296,7 +1328,7 @@
         },
         "gold": {
           "production": 109.17,
-          "consumption": 166.38,
+          "consumption": 166.37,
           "stockpile": 1888,
           "storage_capacity": 3000
         }
@@ -1326,13 +1358,13 @@
       "resources": {
         "grain": {
           "production": 206.25,
-          "consumption": 560.98,
+          "consumption": 560.99,
           "stockpile": 3690,
           "storage_capacity": 8000
         },
         "iron": {
           "production": 85.74,
-          "consumption": 52.45,
+          "consumption": 52.47,
           "stockpile": 2090,
           "storage_capacity": 4000
         },
@@ -1422,25 +1454,25 @@
       "resources": {
         "grain": {
           "production": 222.75,
-          "consumption": 785.3,
+          "consumption": 785.31,
           "stockpile": 3274,
           "storage_capacity": 8000
         },
         "iron": {
-          "production": 91.99,
-          "consumption": 73.24,
+          "production": 92.0,
+          "consumption": 73.28,
           "stockpile": 2064,
           "storage_capacity": 4000
         },
         "timber": {
           "production": 110.0,
-          "consumption": 17.58,
+          "consumption": 17.59,
           "stockpile": 2709,
           "storage_capacity": 5000
         },
         "gold": {
           "production": 90.0,
-          "consumption": 116.32,
+          "consumption": 116.33,
           "stockpile": 2088,
           "storage_capacity": 3000
         }
@@ -1476,13 +1508,13 @@
         },
         "iron": {
           "production": 165.97,
-          "consumption": 319.85,
+          "consumption": 319.86,
           "stockpile": 1892,
           "storage_capacity": 4000
         },
         "timber": {
           "production": 111.67,
-          "consumption": 77.76,
+          "consumption": 77.77,
           "stockpile": 2599,
           "storage_capacity": 5000
         },
@@ -1518,25 +1550,25 @@
       "resources": {
         "grain": {
           "production": 533.12,
-          "consumption": 4394.4,
+          "consumption": 4394.44,
           "stockpile": 443,
           "storage_capacity": 8000
         },
         "iron": {
-          "production": 213.32,
-          "consumption": 411.0,
+          "production": 213.35,
+          "consumption": 411.1,
           "stockpile": 1804,
           "storage_capacity": 4000
         },
         "timber": {
           "production": 140.17,
-          "consumption": 98.74,
+          "consumption": 98.76,
           "stockpile": 2613,
           "storage_capacity": 5000
         },
         "gold": {
           "production": 265.83,
-          "consumption": 536.1,
+          "consumption": 536.11,
           "stockpile": 533,
           "storage_capacity": 3000
         }
@@ -1614,19 +1646,19 @@
       "resources": {
         "grain": {
           "production": 485.62,
-          "consumption": 4020.41,
+          "consumption": 4020.4,
           "stockpile": 500,
           "storage_capacity": 8000
         },
         "iron": {
-          "production": 182.83,
-          "consumption": 376.03,
+          "production": 182.82,
+          "consumption": 376.0,
           "stockpile": 1814,
           "storage_capacity": 4000
         },
         "timber": {
           "production": 128.0,
-          "consumption": 90.25,
+          "consumption": 90.24,
           "stockpile": 2607,
           "storage_capacity": 5000
         },
@@ -30917,7 +30949,7 @@
           "patient"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/lyathra-the-veiled.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -30970,7 +31002,7 @@
           "defensive"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/thalorien-wood.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -31023,7 +31055,7 @@
           "proud"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/kragor-blackblood.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -31076,7 +31108,7 @@
           "strength-bound"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/drogath-mijid.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -31129,7 +31161,7 @@
           "communal"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/grikk-bloodware.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -31182,7 +31214,7 @@
           "enduring"
         ],
         "notableEvents": [],
-        "portrait_image": ""
+        "portrait_image": "/static/illustrations/characters/kaelen-adkison.png"
       },
       "rulerHistory": [],
       "dynasties": [
@@ -31352,74 +31384,44 @@
   ],
   "faction_armies": [
     {
-      "army_id": "army_744cc3_b0920d0d21",
+      "army_id": "army_744cc3_bf8939f513",
       "faction_id": "Dreadwind Isles",
-      "manpower": 1566,
-      "morale": 64,
-      "discipline": 57,
-      "supply_level": 70,
+      "manpower": 1571,
+      "morale": 59,
+      "discipline": 54,
+      "supply_level": 85,
       "location": "Dreadwind Isles",
       "home_region": "Dreadwind Isles",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 4
+      "_last_attrition": 2
     },
     {
-      "army_id": "army_f20170_7f28bbf023",
+      "army_id": "army_f20170_7e8a2c1174",
       "faction_id": "Dur Khadur",
-      "manpower": 4002,
-      "morale": 64,
-      "discipline": 52,
-      "supply_level": 72,
+      "manpower": 4000,
+      "morale": 53,
+      "discipline": 42,
+      "supply_level": 69,
       "location": "Dur Khadur",
       "home_region": "Dur Khadur",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 11
+      "_last_attrition": 12
     },
     {
-      "army_id": "army_f88d41_c37828cf37",
+      "army_id": "army_f88d41_85c4b32155",
       "faction_id": "Gilgeth Clans",
-      "manpower": 1920,
-      "morale": 56,
-      "discipline": 42,
-      "supply_level": 85,
+      "manpower": 1916,
+      "morale": 65,
+      "discipline": 60,
+      "supply_level": 77,
       "location": "Gilgeth",
       "home_region": "Gilgeth",
-      "commander": null,
-      "hostile_campaign_ticks": 0,
-      "supply_status": "connected",
-      "supply_line_reason": "home_region",
-      "_last_attrition": 2
-    },
-    {
-      "army_id": "army_2a4f27_481b01a401",
-      "faction_id": "Glenhaven",
-      "manpower": 1220,
-      "morale": 55,
-      "discipline": 44,
-      "supply_level": 77,
-      "location": "Glenhaven",
-      "home_region": "Glenhaven",
-      "commander": null,
-      "hostile_campaign_ticks": 0,
-      "supply_status": "connected",
-      "supply_line_reason": "home_region",
-      "_last_attrition": 2
-    },
-    {
-      "army_id": "army_2d5cda_0f4a184933",
-      "faction_id": "Groth Clans",
-      "manpower": 1566,
-      "morale": 56,
-      "discipline": 48,
-      "supply_level": 70,
-      "location": "Groth",
-      "home_region": "Groth",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
@@ -31427,14 +31429,14 @@
       "_last_attrition": 4
     },
     {
-      "army_id": "army_866ce5_f0d6ba230e",
-      "faction_id": "Lostfeld",
-      "manpower": 2268,
-      "morale": 65,
-      "discipline": 49,
-      "supply_level": 83,
-      "location": "Lostfeld",
-      "home_region": "Lostfeld",
+      "army_id": "army_2a4f27_138d21a2f3",
+      "faction_id": "Glenhaven",
+      "manpower": 1218,
+      "morale": 54,
+      "discipline": 43,
+      "supply_level": 70,
+      "location": "Glenhaven",
+      "home_region": "Glenhaven",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
@@ -31442,14 +31444,29 @@
       "_last_attrition": 3
     },
     {
-      "army_id": "army_21256c_13f9cd833e",
-      "faction_id": "Shadow Court",
-      "manpower": 1040,
-      "morale": 58,
-      "discipline": 51,
-      "supply_level": 76,
-      "location": "Faerwood",
-      "home_region": "Faerwood",
+      "army_id": "army_2d5cda_53e2fa2e30",
+      "faction_id": "Groth Clans",
+      "manpower": 1570,
+      "morale": 54,
+      "discipline": 58,
+      "supply_level": 81,
+      "location": "Groth",
+      "home_region": "Groth",
+      "commander": null,
+      "hostile_campaign_ticks": 0,
+      "supply_status": "connected",
+      "supply_line_reason": "home_region",
+      "_last_attrition": 2
+    },
+    {
+      "army_id": "army_866ce5_b2c709acda",
+      "faction_id": "Lostfeld",
+      "manpower": 2264,
+      "morale": 57,
+      "discipline": 53,
+      "supply_level": 74,
+      "location": "Lostfeld",
+      "home_region": "Lostfeld",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
@@ -31457,12 +31474,27 @@
       "_last_attrition": 5
     },
     {
-      "army_id": "army_05bb5a_29c559a0d8",
+      "army_id": "army_21256c_c017fbfb56",
+      "faction_id": "Shadow Court",
+      "manpower": 1044,
+      "morale": 63,
+      "discipline": 60,
+      "supply_level": 85,
+      "location": "Faerwood",
+      "home_region": "Faerwood",
+      "commander": null,
+      "hostile_campaign_ticks": 0,
+      "supply_status": "connected",
+      "supply_line_reason": "home_region",
+      "_last_attrition": 3
+    },
+    {
+      "army_id": "army_05bb5a_074946e580",
       "faction_id": "Stonebreak Monastery",
       "manpower": 192,
-      "morale": 62,
-      "discipline": 54,
-      "supply_level": 74,
+      "morale": 60,
+      "discipline": 43,
+      "supply_level": 81,
       "location": "Stonebreak",
       "home_region": "Stonebreak",
       "commander": null,
@@ -31472,57 +31504,57 @@
       "_last_attrition": 0
     },
     {
-      "army_id": "army_ad35ae_29c1cda5c7",
+      "army_id": "army_ad35ae_fe63641c2b",
       "faction_id": "The Wintermark",
-      "manpower": 1420,
+      "manpower": 1429,
       "morale": 62,
-      "discipline": 56,
-      "supply_level": 66,
+      "discipline": 49,
+      "supply_level": 73,
       "location": "Frostvale",
       "home_region": "Frostvale",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 24
+      "_last_attrition": 19
     },
     {
-      "army_id": "army_e1d403_95a0176d63",
+      "army_id": "army_e1d403_d6c9d8825c",
       "faction_id": "Tidefall",
-      "manpower": 6372,
+      "manpower": 6374,
       "morale": 66,
-      "discipline": 52,
-      "supply_level": 79,
+      "discipline": 51,
+      "supply_level": 81,
       "location": "Tidefall",
       "home_region": "Tidefall",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 13
+      "_last_attrition": 12
     },
     {
-      "army_id": "army_0519a5_22a4471bc9",
+      "army_id": "army_0519a5_8d47f8dd6f",
       "faction_id": "Twin Cities",
-      "manpower": 8176,
-      "morale": 55,
+      "manpower": 8196,
+      "morale": 61,
       "discipline": 56,
-      "supply_level": 70,
+      "supply_level": 82,
       "location": "Twin Cities",
       "home_region": "Twin Cities",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 24
+      "_last_attrition": 14
     },
     {
-      "army_id": "army_70e1b9_52c8a33379",
+      "army_id": "army_70e1b9_8055c73f35",
       "faction_id": "Varkuun",
       "manpower": 628,
-      "morale": 60,
-      "discipline": 56,
-      "supply_level": 72,
+      "morale": 54,
+      "discipline": 44,
+      "supply_level": 80,
       "location": "Varkuun",
       "home_region": "Varkuun",
       "commander": null,
@@ -31532,25 +31564,37 @@
       "_last_attrition": 1
     },
     {
-      "army_id": "army_7b56d3_f71c28491e",
+      "army_id": "army_7b56d3_abc61c0245",
       "faction_id": "Vilefin",
-      "manpower": 7482,
-      "morale": 53,
-      "discipline": 44,
-      "supply_level": 71,
+      "manpower": 7476,
+      "morale": 58,
+      "discipline": 48,
+      "supply_level": 67,
       "location": "Vilefin",
       "home_region": "Vilefin",
       "commander": null,
       "hostile_campaign_ticks": 0,
       "supply_status": "connected",
       "supply_line_reason": "home_region",
-      "_last_attrition": 21
+      "_last_attrition": 24
     }
   ],
   "region_control": [],
   "treaties": [],
   "faction_actions": [],
   "decision_log": [
+    {
+      "faction": "Gilgeth Clans",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Gilgeth Clans held position this tick."
+    },
+    {
+      "faction": "Twin Cities",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Twin Cities held position this tick."
+    },
     {
       "faction": "Groth Clans",
       "action": "stabilize_territory",
@@ -31561,64 +31605,10 @@
       "event_name": "Stabilization: Groth Clans \u2014 Groth"
     },
     {
-      "faction": "Stonebreak Monastery",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Stonebreak Monastery held position this tick."
-    },
-    {
-      "faction": "Tidefall",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Tidefall held position this tick."
-    },
-    {
-      "faction": "Twin Cities",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Twin Cities held position this tick."
-    },
-    {
-      "faction": "Gilgeth Clans",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Gilgeth Clans held position this tick."
-    },
-    {
-      "faction": "Vilefin",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Vilefin held position this tick."
-    },
-    {
-      "faction": "Dur Khadur",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Dur Khadur held position this tick."
-    },
-    {
       "faction": "The Wintermark",
       "action": "do_nothing",
       "meta": {},
       "summary": "The Wintermark held position this tick."
-    },
-    {
-      "faction": "Shadow Court",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Shadow Court held position this tick."
-    },
-    {
-      "faction": "Varkuun",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Varkuun held position this tick."
-    },
-    {
-      "faction": "Dreadwind Isles",
-      "action": "do_nothing",
-      "meta": {},
-      "summary": "Dreadwind Isles held position this tick."
     },
     {
       "faction": "Glenhaven",
@@ -31627,10 +31617,52 @@
       "summary": "Glenhaven held position this tick."
     },
     {
+      "faction": "Varkuun",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Varkuun held position this tick."
+    },
+    {
       "faction": "Lostfeld",
       "action": "do_nothing",
       "meta": {},
       "summary": "Lostfeld held position this tick."
+    },
+    {
+      "faction": "Dur Khadur",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Dur Khadur held position this tick."
+    },
+    {
+      "faction": "Dreadwind Isles",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Dreadwind Isles held position this tick."
+    },
+    {
+      "faction": "Shadow Court",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Shadow Court held position this tick."
+    },
+    {
+      "faction": "Tidefall",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Tidefall held position this tick."
+    },
+    {
+      "faction": "Vilefin",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Vilefin held position this tick."
+    },
+    {
+      "faction": "Stonebreak Monastery",
+      "action": "do_nothing",
+      "meta": {},
+      "summary": "Stonebreak Monastery held position this tick."
     }
   ],
   "intrigue_pending": [],
@@ -31702,8 +31734,8 @@
       "reason": "outward_tie",
       "summary": "Groth Clans holds channels open; no single envoy steals the day.",
       "meta": {
-        "legitimacy": 62.6,
-        "stability": 50.0,
+        "legitimacy": 61.3,
+        "stability": 42.0,
         "resource_stress": 0.0,
         "active_treaties": 0,
         "marriage_tie_strength": 0.0,
@@ -31845,7 +31877,7 @@
     },
     {
       "faction_id": "Groth Clans",
-      "legitimacy": 62.6,
+      "legitimacy": 61.3,
       "risk_level": "stable"
     },
     {
@@ -31956,14 +31988,14 @@
       "world_date": "Day 2",
       "decisions": [
         {
-          "faction": "Groth Clans",
+          "faction": "Gilgeth Clans",
           "action": "stabilize_territory",
-          "target": "Groth",
-          "summary": "Groth Clans invested in stabilizing Groth."
+          "target": "",
+          "summary": "Gilgeth Clans invested in stabilizing their territory."
         }
       ],
       "events_fired": [
-        "Stabilization: Groth Clans \u2014 Groth"
+        "Stabilization: Gilgeth Clans \u2014 internal"
       ],
       "active_wars": [],
       "alliances": [],
@@ -31978,7 +32010,12 @@
             {
               "dominant_faction": "Groth Clans",
               "target_subordinate": "Stonebreak Monastery",
-              "score": 5.16
+              "score": 4.92
+            },
+            {
+              "dominant_faction": "Gilgeth Clans",
+              "target_subordinate": "Stonebreak Monastery",
+              "score": 4.8
             },
             {
               "dominant_faction": "Dur Khadur",
@@ -32037,7 +32074,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.7812
+            "military_need": 0.7646
           },
           "meta": {}
         },
@@ -32071,7 +32108,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.6521
+            "military_need": 0.6687
           },
           "meta": {}
         },
@@ -32222,13 +32259,13 @@
           "reason": "peace",
           "summary": "Dreadwind Isles holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 590.63,
+            "army_strength": 518.15,
             "enemy_factions": [],
             "military_power": 54,
             "terrain_advantage": 0.117,
-            "avg_supply_level": 68.0,
+            "avg_supply_level": 82.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 68
+            "min_supply_level": 82
           }
         },
         {
@@ -32238,13 +32275,13 @@
           "reason": "peace",
           "summary": "Dur Khadur holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 1335.53,
+            "army_strength": 893.07,
             "enemy_factions": [],
             "military_power": 66,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 69.0,
+            "avg_supply_level": 66.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 69
+            "min_supply_level": 66
           }
         },
         {
@@ -32254,13 +32291,13 @@
           "reason": "peace",
           "summary": "Gilgeth Clans holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 452.05,
+            "army_strength": 748.8,
             "enemy_factions": [],
-            "military_power": 64,
+            "military_power": 66,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 82.0,
+            "avg_supply_level": 74.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 82
+            "min_supply_level": 74
           }
         },
         {
@@ -32270,13 +32307,13 @@
           "reason": "peace",
           "summary": "Glenhaven holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 295.72,
+            "army_strength": 283.52,
             "enemy_factions": [],
             "military_power": 47,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 74.0,
+            "avg_supply_level": 67.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 74
+            "min_supply_level": 67
           }
         },
         {
@@ -32286,13 +32323,13 @@
           "reason": "peace",
           "summary": "Groth Clans holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 422.02,
+            "army_strength": 510.59,
             "enemy_factions": [],
-            "military_power": 69,
+            "military_power": 67,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 67.0,
+            "avg_supply_level": 78.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 67
+            "min_supply_level": 78
           }
         },
         {
@@ -32302,13 +32339,13 @@
           "reason": "peace",
           "summary": "Lostfeld holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 723.31,
+            "army_strength": 685.46,
             "enemy_factions": [],
             "military_power": 54,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 80.0,
+            "avg_supply_level": 71.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 80
+            "min_supply_level": 71
           }
         },
         {
@@ -32318,13 +32355,13 @@
           "reason": "peace",
           "summary": "Shadow Court holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 309.11,
+            "army_strength": 395.77,
             "enemy_factions": [],
             "military_power": 53,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 73.0,
+            "avg_supply_level": 82.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 73
+            "min_supply_level": 82
           }
         },
         {
@@ -32334,13 +32371,13 @@
           "reason": "peace",
           "summary": "Stonebreak Monastery holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 63.24,
+            "army_strength": 48.71,
             "enemy_factions": [],
             "military_power": 26,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 71.0,
+            "avg_supply_level": 79.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 71
+            "min_supply_level": 79
           }
         },
         {
@@ -32350,13 +32387,13 @@
           "reason": "peace",
           "summary": "The Wintermark holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 501.36,
+            "army_strength": 439.9,
             "enemy_factions": [],
             "military_power": 53,
             "terrain_advantage": 0.433,
-            "avg_supply_level": 64.0,
+            "avg_supply_level": 70.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 64
+            "min_supply_level": 70
           }
         },
         {
@@ -32366,13 +32403,13 @@
           "reason": "peace",
           "summary": "Tidefall holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 2191.33,
+            "army_strength": 2149.53,
             "enemy_factions": [],
             "military_power": 57,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 76.0,
+            "avg_supply_level": 78.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 76
+            "min_supply_level": 78
           }
         },
         {
@@ -32382,13 +32419,13 @@
           "reason": "peace",
           "summary": "Twin Cities holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 2525.6,
+            "army_strength": 2804.54,
             "enemy_factions": [],
             "military_power": 60,
             "terrain_advantage": 0.192,
-            "avg_supply_level": 69.0,
+            "avg_supply_level": 81.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 69
+            "min_supply_level": 81
           }
         },
         {
@@ -32398,13 +32435,13 @@
           "reason": "peace",
           "summary": "Varkuun holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 211.34,
+            "army_strength": 149.45,
             "enemy_factions": [],
             "military_power": 59,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 70.0,
+            "avg_supply_level": 77.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 70
+            "min_supply_level": 77
           }
         },
         {
@@ -32414,13 +32451,13 @@
           "reason": "peace",
           "summary": "Vilefin holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 1815.73,
+            "army_strength": 2160.0,
             "enemy_factions": [],
             "military_power": 47,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 70.0,
+            "avg_supply_level": 66.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 70
+            "min_supply_level": 66
           }
         }
       ],
@@ -32430,7 +32467,7 @@
       "intrigue_actions": [
         {
           "tick": 2,
-          "op_id": "INT-384ef0c869",
+          "op_id": "INT-4e8752f2c9",
           "action": "information_gathering",
           "status": "started",
           "source_faction": "Groth Clans",
@@ -32445,7 +32482,7 @@
         },
         {
           "tick": 2,
-          "op_id": "INT-08a01f3304",
+          "op_id": "INT-92476152c2",
           "action": "information_gathering",
           "status": "started",
           "source_faction": "Twin Cities",
@@ -32460,7 +32497,7 @@
         },
         {
           "tick": 2,
-          "op_id": "INT-d7fc491c79",
+          "op_id": "INT-fd9fb954eb",
           "action": "information_gathering",
           "status": "started",
           "source_faction": "Glenhaven",
@@ -32848,7 +32885,7 @@
           "agent_intelligence": 71,
           "culture": "default",
           "target_avg_stability": 90.0,
-          "op_id": "INT-384ef0c869"
+          "op_id": "INT-4e8752f2c9"
         },
         {
           "tick": 2,
@@ -32858,7 +32895,7 @@
           "agent_intelligence": 44,
           "culture": "twin_cities",
           "target_avg_stability": 72.0,
-          "op_id": "INT-08a01f3304"
+          "op_id": "INT-92476152c2"
         },
         {
           "tick": 2,
@@ -32868,7 +32905,7 @@
           "agent_intelligence": 67,
           "culture": "default",
           "target_avg_stability": 36.0,
-          "op_id": "INT-d7fc491c79"
+          "op_id": "INT-fd9fb954eb"
         }
       ],
       "death_events": [],
@@ -33008,7 +33045,7 @@
         },
         {
           "faction_id": "Groth Clans",
-          "legitimacy": 62.5,
+          "legitimacy": 61.2,
           "risk_level": "stable"
         },
         {
@@ -33105,7 +33142,7 @@
             "resource_stress": 0.0,
             "active_treaties": 0,
             "marriage_tie_strength": 0.0,
-            "military": 64
+            "military": 66
           }
         },
         {
@@ -33125,17 +33162,17 @@
         },
         {
           "faction": "Groth Clans",
-          "priority_tier": "expansion",
-          "action": "alliance_proposal",
-          "reason": "outward_tie",
-          "summary": "Groth Clans holds channels open; no single envoy steals the day.",
+          "priority_tier": "stability",
+          "action": "reaffirm_treaties",
+          "reason": "internal_order",
+          "summary": "Groth Clans rehearses oaths in hall \u2014 continuity before ambition.",
           "meta": {
-            "legitimacy": 62.5,
-            "stability": 44.0,
+            "legitimacy": 61.2,
+            "stability": 36.0,
             "resource_stress": 0.0,
             "active_treaties": 0,
             "marriage_tie_strength": 0.0,
-            "military": 69
+            "military": 67
           }
         },
         {
@@ -33308,7 +33345,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.8102
+            "military_need": 0.8103
           },
           "meta": {}
         },
@@ -33342,7 +33379,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.8228
+            "military_need": 0.8227
           },
           "meta": {}
         },
@@ -33376,7 +33413,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.7602
+            "military_need": 0.7603
           },
           "meta": {}
         },
@@ -33410,7 +33447,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.6456
+            "military_need": 0.6457
           },
           "meta": {}
         },
@@ -33444,7 +33481,7 @@
               "gold": 0.0
             },
             "trade_dependency": 0.0,
-            "military_need": 0.8162
+            "military_need": 0.8164
           },
           "meta": {}
         },
@@ -33531,13 +33568,13 @@
           "reason": "peace",
           "summary": "Dreadwind Isles holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 571.28,
+            "army_strength": 500.52,
             "enemy_factions": [],
             "military_power": 50,
             "terrain_advantage": 0.117,
-            "avg_supply_level": 70.0,
+            "avg_supply_level": 85.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 70
+            "min_supply_level": 85
           }
         },
         {
@@ -33547,13 +33584,13 @@
           "reason": "peace",
           "summary": "Dur Khadur holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 1311.06,
+            "army_strength": 873.6,
             "enemy_factions": [],
             "military_power": 59,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 72.0,
+            "avg_supply_level": 69.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 72
+            "min_supply_level": 69
           }
         },
         {
@@ -33563,13 +33600,13 @@
           "reason": "peace",
           "summary": "Gilgeth Clans holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 443.52,
+            "army_strength": 735.74,
             "enemy_factions": [],
             "military_power": 59,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 85.0,
+            "avg_supply_level": 77.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 85
+            "min_supply_level": 77
           }
         },
         {
@@ -33579,13 +33616,13 @@
           "reason": "peace",
           "summary": "Glenhaven holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 289.87,
+            "army_strength": 277.58,
             "enemy_factions": [],
             "military_power": 42,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 77.0,
+            "avg_supply_level": 70.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 77
+            "min_supply_level": 70
           }
         },
         {
@@ -33595,13 +33632,13 @@
           "reason": "peace",
           "summary": "Groth Clans holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 413.42,
+            "army_strength": 491.72,
             "enemy_factions": [],
             "military_power": 56,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 70.0,
+            "avg_supply_level": 81.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 70
+            "min_supply_level": 81
           }
         },
         {
@@ -33611,13 +33648,13 @@
           "reason": "peace",
           "summary": "Lostfeld holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 711.24,
+            "army_strength": 671.96,
             "enemy_factions": [],
             "military_power": 47,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 83.0,
+            "avg_supply_level": 74.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 83
+            "min_supply_level": 74
           }
         },
         {
@@ -33627,13 +33664,13 @@
           "reason": "peace",
           "summary": "Shadow Court holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 302.33,
+            "army_strength": 388.37,
             "enemy_factions": [],
             "military_power": 54,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 76.0,
+            "avg_supply_level": 85.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 76
+            "min_supply_level": 85
           }
         },
         {
@@ -33643,13 +33680,13 @@
           "reason": "peace",
           "summary": "Stonebreak Monastery holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 63.24,
+            "army_strength": 48.71,
             "enemy_factions": [],
             "military_power": 25,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 74.0,
+            "avg_supply_level": 81.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 74
+            "min_supply_level": 81
           }
         },
         {
@@ -33659,13 +33696,13 @@
           "reason": "peace",
           "summary": "The Wintermark holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 485.07,
+            "army_strength": 427.13,
             "enemy_factions": [],
             "military_power": 46,
             "terrain_advantage": 0.433,
-            "avg_supply_level": 66.0,
+            "avg_supply_level": 73.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 66
+            "min_supply_level": 73
           }
         },
         {
@@ -33675,13 +33712,13 @@
           "reason": "peace",
           "summary": "Tidefall holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 2153.74,
+            "army_strength": 2112.98,
             "enemy_factions": [],
             "military_power": 53,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 79.0,
+            "avg_supply_level": 81.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 79
+            "min_supply_level": 81
           }
         },
         {
@@ -33691,13 +33728,13 @@
           "reason": "peace",
           "summary": "Twin Cities holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 2472.42,
+            "army_strength": 2753.86,
             "enemy_factions": [],
             "military_power": 57,
             "terrain_advantage": 0.192,
-            "avg_supply_level": 70.0,
+            "avg_supply_level": 82.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 70
+            "min_supply_level": 82
           }
         },
         {
@@ -33707,13 +33744,13 @@
           "reason": "peace",
           "summary": "Varkuun holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 207.49,
+            "army_strength": 146.45,
             "enemy_factions": [],
             "military_power": 52,
             "terrain_advantage": 0.383,
-            "avg_supply_level": 72.0,
+            "avg_supply_level": 80.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 72
+            "min_supply_level": 80
           }
         },
         {
@@ -33723,13 +33760,13 @@
           "reason": "peace",
           "summary": "Vilefin holds, probes, and waits for a clearer edge.",
           "meta": {
-            "army_strength": 1744.8,
+            "army_strength": 2081.32,
             "enemy_factions": [],
             "military_power": 49,
             "terrain_advantage": 0.083,
-            "avg_supply_level": 71.0,
+            "avg_supply_level": 67.0,
             "worst_supply_status": "connected",
-            "min_supply_level": 71
+            "min_supply_level": 67
           }
         }
       ],
@@ -33739,7 +33776,7 @@
       "intrigue_actions": [
         {
           "tick": 3,
-          "op_id": "INT-384ef0c869",
+          "op_id": "INT-4e8752f2c9",
           "action": "information_gathering",
           "outcome": "detected",
           "source_faction": "Groth Clans",
@@ -33755,7 +33792,7 @@
         },
         {
           "tick": 3,
-          "op_id": "INT-08a01f3304",
+          "op_id": "INT-92476152c2",
           "action": "information_gathering",
           "outcome": "failed",
           "source_faction": "Twin Cities",
@@ -33771,7 +33808,7 @@
         },
         {
           "tick": 3,
-          "op_id": "INT-d7fc491c79",
+          "op_id": "INT-fd9fb954eb",
           "action": "information_gathering",
           "outcome": "success",
           "source_faction": "Glenhaven",
@@ -34369,7 +34406,7 @@
         },
         {
           "faction_id": "Groth Clans",
-          "legitimacy": 62.6,
+          "legitimacy": 61.3,
           "risk_level": "stable"
         },
         {
@@ -34491,8 +34528,8 @@
           "reason": "outward_tie",
           "summary": "Groth Clans holds channels open; no single envoy steals the day.",
           "meta": {
-            "legitimacy": 62.6,
-            "stability": 50.0,
+            "legitimacy": 61.3,
+            "stability": 42.0,
             "resource_stress": 0.0,
             "active_treaties": 0,
             "marriage_tie_strength": 0.0,
@@ -34635,13 +34672,6 @@
       "location": "Groth",
       "faction": "Groth Clans",
       "detail": "Groth Clans has dispatched administrators and resources to Groth. Unrest is being actively suppressed. Control is expected to improve.",
-      "tick": 2
-    },
-    {
-      "type": "stabilization_effort",
-      "location": "Groth",
-      "faction": "Groth Clans",
-      "detail": "Groth Clans has dispatched administrators and resources to Groth. Unrest is being actively suppressed. Control is expected to improve.",
       "tick": 3
     }
   ],
@@ -34675,36 +34705,8 @@
   },
   "military_attrition": [
     {
-      "army_id": "army_744cc3_b0920d0d21",
+      "army_id": "army_744cc3_bf8939f513",
       "faction_id": "Dreadwind Isles",
-      "loss": 4,
-      "terrain": "plains",
-      "terrain_modifier": 0.01,
-      "effective_terrain_modifier": 0.01,
-      "campaign_ticks_hostile": 0,
-      "campaign_bonus": 0.0,
-      "supply_factor": 0.3,
-      "tick": 3,
-      "supply_status": "connected",
-      "supply_line_reason": "home_region"
-    },
-    {
-      "army_id": "army_f20170_7f28bbf023",
-      "faction_id": "Dur Khadur",
-      "loss": 11,
-      "terrain": "plains",
-      "terrain_modifier": 0.01,
-      "effective_terrain_modifier": 0.01,
-      "campaign_ticks_hostile": 0,
-      "campaign_bonus": 0.0,
-      "supply_factor": 0.28,
-      "tick": 3,
-      "supply_status": "connected",
-      "supply_line_reason": "home_region"
-    },
-    {
-      "army_id": "army_f88d41_c37828cf37",
-      "faction_id": "Gilgeth Clans",
       "loss": 2,
       "terrain": "plains",
       "terrain_modifier": 0.01,
@@ -34717,9 +34719,23 @@
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_2a4f27_481b01a401",
-      "faction_id": "Glenhaven",
-      "loss": 2,
+      "army_id": "army_f20170_7e8a2c1174",
+      "faction_id": "Dur Khadur",
+      "loss": 12,
+      "terrain": "plains",
+      "terrain_modifier": 0.01,
+      "effective_terrain_modifier": 0.01,
+      "campaign_ticks_hostile": 0,
+      "campaign_bonus": 0.0,
+      "supply_factor": 0.31,
+      "tick": 3,
+      "supply_status": "connected",
+      "supply_line_reason": "home_region"
+    },
+    {
+      "army_id": "army_f88d41_85c4b32155",
+      "faction_id": "Gilgeth Clans",
+      "loss": 4,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
@@ -34731,9 +34747,9 @@
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_2d5cda_0f4a184933",
-      "faction_id": "Groth Clans",
-      "loss": 4,
+      "army_id": "army_2a4f27_138d21a2f3",
+      "faction_id": "Glenhaven",
+      "loss": 3,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
@@ -34745,37 +34761,23 @@
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_866ce5_f0d6ba230e",
-      "faction_id": "Lostfeld",
-      "loss": 3,
+      "army_id": "army_2d5cda_53e2fa2e30",
+      "faction_id": "Groth Clans",
+      "loss": 2,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.17,
+      "supply_factor": 0.19,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_21256c_13f9cd833e",
-      "faction_id": "Shadow Court",
+      "army_id": "army_866ce5_b2c709acda",
+      "faction_id": "Lostfeld",
       "loss": 5,
-      "terrain": "forest",
-      "terrain_modifier": 0.02,
-      "effective_terrain_modifier": 0.02,
-      "campaign_ticks_hostile": 0,
-      "campaign_bonus": 0.0,
-      "supply_factor": 0.24,
-      "tick": 3,
-      "supply_status": "connected",
-      "supply_line_reason": "home_region"
-    },
-    {
-      "army_id": "army_05bb5a_29c559a0d8",
-      "faction_id": "Stonebreak Monastery",
-      "loss": 0,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
@@ -34787,49 +34789,77 @@
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_ad35ae_29c1cda5c7",
+      "army_id": "army_21256c_c017fbfb56",
+      "faction_id": "Shadow Court",
+      "loss": 3,
+      "terrain": "forest",
+      "terrain_modifier": 0.02,
+      "effective_terrain_modifier": 0.02,
+      "campaign_ticks_hostile": 0,
+      "campaign_bonus": 0.0,
+      "supply_factor": 0.15,
+      "tick": 3,
+      "supply_status": "connected",
+      "supply_line_reason": "home_region"
+    },
+    {
+      "army_id": "army_05bb5a_074946e580",
+      "faction_id": "Stonebreak Monastery",
+      "loss": 0,
+      "terrain": "plains",
+      "terrain_modifier": 0.01,
+      "effective_terrain_modifier": 0.01,
+      "campaign_ticks_hostile": 0,
+      "campaign_bonus": 0.0,
+      "supply_factor": 0.19,
+      "tick": 3,
+      "supply_status": "connected",
+      "supply_line_reason": "home_region"
+    },
+    {
+      "army_id": "army_ad35ae_fe63641c2b",
       "faction_id": "The Wintermark",
-      "loss": 24,
+      "loss": 19,
       "terrain": "frozen",
       "terrain_modifier": 0.05,
       "effective_terrain_modifier": 0.05,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.34,
+      "supply_factor": 0.27,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_e1d403_95a0176d63",
+      "army_id": "army_e1d403_d6c9d8825c",
       "faction_id": "Tidefall",
-      "loss": 13,
+      "loss": 12,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.21,
+      "supply_factor": 0.19,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_0519a5_22a4471bc9",
+      "army_id": "army_0519a5_8d47f8dd6f",
       "faction_id": "Twin Cities",
-      "loss": 24,
+      "loss": 14,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.3,
+      "supply_factor": 0.18,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_70e1b9_52c8a33379",
+      "army_id": "army_70e1b9_8055c73f35",
       "faction_id": "Varkuun",
       "loss": 1,
       "terrain": "plains",
@@ -34837,21 +34867,21 @@
       "effective_terrain_modifier": 0.01,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.28,
+      "supply_factor": 0.2,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
     },
     {
-      "army_id": "army_7b56d3_f71c28491e",
+      "army_id": "army_7b56d3_abc61c0245",
       "faction_id": "Vilefin",
-      "loss": 21,
+      "loss": 24,
       "terrain": "plains",
       "terrain_modifier": 0.01,
       "effective_terrain_modifier": 0.01,
       "campaign_ticks_hostile": 0,
       "campaign_bonus": 0.0,
-      "supply_factor": 0.29,
+      "supply_factor": 0.33,
       "tick": 3,
       "supply_status": "connected",
       "supply_line_reason": "home_region"
@@ -34859,91 +34889,91 @@
   ],
   "military_supply": [
     {
-      "army_id": "army_744cc3_b0920d0d21",
+      "army_id": "army_744cc3_bf8939f513",
       "faction_id": "Dreadwind Isles",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_f20170_7f28bbf023",
+      "army_id": "army_f20170_7e8a2c1174",
       "faction_id": "Dur Khadur",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_f88d41_c37828cf37",
+      "army_id": "army_f88d41_85c4b32155",
       "faction_id": "Gilgeth Clans",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_2a4f27_481b01a401",
+      "army_id": "army_2a4f27_138d21a2f3",
       "faction_id": "Glenhaven",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_2d5cda_0f4a184933",
+      "army_id": "army_2d5cda_53e2fa2e30",
       "faction_id": "Groth Clans",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_866ce5_f0d6ba230e",
+      "army_id": "army_866ce5_b2c709acda",
       "faction_id": "Lostfeld",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_21256c_13f9cd833e",
+      "army_id": "army_21256c_c017fbfb56",
       "faction_id": "Shadow Court",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_05bb5a_29c559a0d8",
+      "army_id": "army_05bb5a_074946e580",
       "faction_id": "Stonebreak Monastery",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_ad35ae_29c1cda5c7",
+      "army_id": "army_ad35ae_fe63641c2b",
       "faction_id": "The Wintermark",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_e1d403_95a0176d63",
+      "army_id": "army_e1d403_d6c9d8825c",
       "faction_id": "Tidefall",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_0519a5_22a4471bc9",
+      "army_id": "army_0519a5_8d47f8dd6f",
       "faction_id": "Twin Cities",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_70e1b9_52c8a33379",
+      "army_id": "army_70e1b9_8055c73f35",
       "faction_id": "Varkuun",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
       "tick": 3
     },
     {
-      "army_id": "army_7b56d3_f71c28491e",
+      "army_id": "army_7b56d3_abc61c0245",
       "faction_id": "Vilefin",
       "supply_status": "connected",
       "supply_line_reason": "home_region",
@@ -34964,7 +34994,7 @@
           "gold": 0.0
         },
         "trade_dependency": 0.0,
-        "military_need": 0.8102
+        "military_need": 0.8103
       },
       "meta": {}
     },
@@ -34998,7 +35028,7 @@
           "gold": 0.0
         },
         "trade_dependency": 0.0,
-        "military_need": 0.8228
+        "military_need": 0.8227
       },
       "meta": {}
     },
@@ -35032,7 +35062,7 @@
           "gold": 0.0
         },
         "trade_dependency": 0.0,
-        "military_need": 0.7602
+        "military_need": 0.7603
       },
       "meta": {}
     },
@@ -35066,7 +35096,7 @@
           "gold": 0.0
         },
         "trade_dependency": 0.0,
-        "military_need": 0.6456
+        "military_need": 0.6457
       },
       "meta": {}
     },
@@ -35100,7 +35130,7 @@
           "gold": 0.0
         },
         "trade_dependency": 0.0,
-        "military_need": 0.8162
+        "military_need": 0.8164
       },
       "meta": {}
     },
@@ -35187,13 +35217,13 @@
       "reason": "peace",
       "summary": "Dreadwind Isles holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 571.28,
+        "army_strength": 500.52,
         "enemy_factions": [],
         "military_power": 50,
         "terrain_advantage": 0.117,
-        "avg_supply_level": 70.0,
+        "avg_supply_level": 85.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 70
+        "min_supply_level": 85
       }
     },
     {
@@ -35203,13 +35233,13 @@
       "reason": "peace",
       "summary": "Dur Khadur holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 1311.06,
+        "army_strength": 873.6,
         "enemy_factions": [],
         "military_power": 59,
         "terrain_advantage": 0.383,
-        "avg_supply_level": 72.0,
+        "avg_supply_level": 69.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 72
+        "min_supply_level": 69
       }
     },
     {
@@ -35219,13 +35249,13 @@
       "reason": "peace",
       "summary": "Gilgeth Clans holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 443.52,
+        "army_strength": 735.74,
         "enemy_factions": [],
         "military_power": 59,
         "terrain_advantage": 0.383,
-        "avg_supply_level": 85.0,
+        "avg_supply_level": 77.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 85
+        "min_supply_level": 77
       }
     },
     {
@@ -35235,13 +35265,13 @@
       "reason": "peace",
       "summary": "Glenhaven holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 289.87,
+        "army_strength": 277.58,
         "enemy_factions": [],
         "military_power": 42,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 77.0,
+        "avg_supply_level": 70.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 77
+        "min_supply_level": 70
       }
     },
     {
@@ -35251,13 +35281,13 @@
       "reason": "peace",
       "summary": "Groth Clans holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 413.42,
+        "army_strength": 491.72,
         "enemy_factions": [],
         "military_power": 56,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 70.0,
+        "avg_supply_level": 81.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 70
+        "min_supply_level": 81
       }
     },
     {
@@ -35267,13 +35297,13 @@
       "reason": "peace",
       "summary": "Lostfeld holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 711.24,
+        "army_strength": 671.96,
         "enemy_factions": [],
         "military_power": 47,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 83.0,
+        "avg_supply_level": 74.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 83
+        "min_supply_level": 74
       }
     },
     {
@@ -35283,13 +35313,13 @@
       "reason": "peace",
       "summary": "Shadow Court holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 302.33,
+        "army_strength": 388.37,
         "enemy_factions": [],
         "military_power": 54,
         "terrain_advantage": 0.383,
-        "avg_supply_level": 76.0,
+        "avg_supply_level": 85.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 76
+        "min_supply_level": 85
       }
     },
     {
@@ -35299,13 +35329,13 @@
       "reason": "peace",
       "summary": "Stonebreak Monastery holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 63.24,
+        "army_strength": 48.71,
         "enemy_factions": [],
         "military_power": 25,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 74.0,
+        "avg_supply_level": 81.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 74
+        "min_supply_level": 81
       }
     },
     {
@@ -35315,13 +35345,13 @@
       "reason": "peace",
       "summary": "The Wintermark holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 485.07,
+        "army_strength": 427.13,
         "enemy_factions": [],
         "military_power": 46,
         "terrain_advantage": 0.433,
-        "avg_supply_level": 66.0,
+        "avg_supply_level": 73.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 66
+        "min_supply_level": 73
       }
     },
     {
@@ -35331,13 +35361,13 @@
       "reason": "peace",
       "summary": "Tidefall holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 2153.74,
+        "army_strength": 2112.98,
         "enemy_factions": [],
         "military_power": 53,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 79.0,
+        "avg_supply_level": 81.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 79
+        "min_supply_level": 81
       }
     },
     {
@@ -35347,13 +35377,13 @@
       "reason": "peace",
       "summary": "Twin Cities holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 2472.42,
+        "army_strength": 2753.86,
         "enemy_factions": [],
         "military_power": 57,
         "terrain_advantage": 0.192,
-        "avg_supply_level": 70.0,
+        "avg_supply_level": 82.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 70
+        "min_supply_level": 82
       }
     },
     {
@@ -35363,13 +35393,13 @@
       "reason": "peace",
       "summary": "Varkuun holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 207.49,
+        "army_strength": 146.45,
         "enemy_factions": [],
         "military_power": 52,
         "terrain_advantage": 0.383,
-        "avg_supply_level": 72.0,
+        "avg_supply_level": 80.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 72
+        "min_supply_level": 80
       }
     },
     {
@@ -35379,13 +35409,13 @@
       "reason": "peace",
       "summary": "Vilefin holds, probes, and waits for a clearer edge.",
       "meta": {
-        "army_strength": 1744.8,
+        "army_strength": 2081.32,
         "enemy_factions": [],
         "military_power": 49,
         "terrain_advantage": 0.083,
-        "avg_supply_level": 71.0,
+        "avg_supply_level": 67.0,
         "worst_supply_status": "connected",
-        "min_supply_level": 71
+        "min_supply_level": 67
       }
     }
   ],
@@ -35400,7 +35430,7 @@
   "intrigue_actions": [
     {
       "tick": 3,
-      "op_id": "INT-384ef0c869",
+      "op_id": "INT-4e8752f2c9",
       "action": "information_gathering",
       "outcome": "detected",
       "source_faction": "Groth Clans",
@@ -35416,7 +35446,7 @@
     },
     {
       "tick": 3,
-      "op_id": "INT-08a01f3304",
+      "op_id": "INT-92476152c2",
       "action": "information_gathering",
       "outcome": "failed",
       "source_faction": "Twin Cities",
@@ -35432,7 +35462,7 @@
     },
     {
       "tick": 3,
-      "op_id": "INT-d7fc491c79",
+      "op_id": "INT-fd9fb954eb",
       "action": "information_gathering",
       "outcome": "success",
       "source_faction": "Glenhaven",
@@ -36030,14 +36060,30 @@
     "Lostfeld": 67.89600000000002,
     "Shadow Court": 67.2098,
     "Glenhaven": 69.5216,
-    "Gilgeth Clans": 64.01420000000002,
-    "Groth Clans": 62.5856,
+    "Gilgeth Clans": 63.983599999999996,
+    "Groth Clans": 61.336200000000005,
     "Vilefin": 58.636481599999996,
     "The Wintermark": 65.42660000000001,
     "Varkuun": 68.17720000000001,
     "Dreadwind Isles": 59.878600000000006,
     "Stonebreak Monastery": 68.371
   },
+  "collapsed_factions": [],
+  "civil_wars": [],
+  "emerging_factions": [],
+  "vacant_thrones": [],
+  "reunification_claims": [],
+  "new_kingdom_claims": [],
+  "faction_lifecycle_report": {
+    "tick": 3,
+    "collapsed": [],
+    "civil_wars": [],
+    "emerging_factions": [],
+    "vassalage": [],
+    "reunifications": [],
+    "new_kingdoms": []
+  },
+  "_faction_lifecycle_tick": 3,
   "tick_lifecycle": {
     "births": [],
     "deaths": [],
@@ -36052,7 +36098,7 @@
       "species": "Humans",
       "culture": "Twin Cities",
       "population": 139933,
-      "growthRate": 0.00021782796286182415,
+      "growthRate": 0.00021782770956026252,
       "capacity": 170000,
       "health": 86,
       "pressure": 26,
@@ -36065,7 +36111,7 @@
       "species": "Humans",
       "culture": "Twin Cities",
       "population": 94955,
-      "growthRate": 0.00018782796286182416,
+      "growthRate": 0.00018782770956026252,
       "capacity": 115000,
       "health": 82,
       "pressure": 22,
@@ -36156,7 +36202,7 @@
       "species": "Goblins",
       "culture": "Vilefin",
       "population": 214915,
-      "growthRate": 0.0005233491360333896,
+      "growthRate": 0.0005233492189831857,
       "capacity": 230000,
       "health": 63,
       "pressure": 72,
@@ -36267,7 +36313,6 @@
   "ruler_states": [],
   "war_outcomes": [],
   "war_targets": [],
-  "emerging_factions": [],
   "faction_dominance": {
     "dominantFaction": {
       "faction": "Twin Cities",
@@ -36554,10 +36599,10 @@
       "gold": 20911.0
     },
     "aggregate_demand": {
-      "grain": 19940.34,
-      "iron": 1903.34,
-      "timber": 459.1,
-      "gold": 2646.34
+      "grain": 19940.39,
+      "iron": 1903.47,
+      "timber": 459.14,
+      "gold": 2646.37
     }
   },
   "economic_trade_routes": [],

@@ -216,6 +216,19 @@
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* Invisible primer: loads the same Next map as home; parent receives postMessage when ready */
+    .map-primer-iframe {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      pointer-events: none;
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+    }
   </style>
 </head>
 <body>
@@ -245,8 +258,34 @@
   </div>
 </main>
 
+{% if home_interactive_map %}
+<iframe
+  id="map-primer-iframe"
+  class="map-primer-iframe"
+  src="{{ home_map_iframe_url }}"
+  title=""
+  aria-hidden="true"
+  tabindex="-1"
+  loading="eager"
+  referrerpolicy="strict-origin-when-cross-origin"
+></iframe>
+{% endif %}
+
 <script>
 (function () {
+  const INTERACTIVE_MAP = {{ home_interactive_map | tojson }};
+  const ATLAS_PRIMER_URL = {{ (home_atlas_url ~ '?v=enter-primer') | tojson }};
+
+  /* Listen immediately so a fast map cannot post before we await /api/state */
+  let mapPrimed = false;
+  if (INTERACTIVE_MAP) {
+    window.addEventListener('message', function aeloriaEnterPrimerReady(ev) {
+      const d = ev.data;
+      if (!d || typeof d !== 'object' || d.type !== 'aeloria-home-map-ready') return;
+      mapPrimed = true;
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const mode = (params.get('mode') || 'play').toLowerCase();
   const next = params.get('next') || '/';
@@ -288,7 +327,6 @@
   }
 
   async function run() {
-    const t0 = performance.now();
     setProgress(8, 'Awakening the simulation&hellip;');
 
     const ok = await fetchStateAttempts();
@@ -298,19 +336,53 @@
       return;
     }
 
-    setProgress(45, 'Binding chronicles&hellip;');
+    setProgress(38, 'Binding chronicles&hellip;');
     try { await fetch('/api/god/panel', { cache: 'no-store' }); } catch (e) { /* best effort */ }
 
-    setProgress(78, 'Opening the map&hellip;');
-    await delay(400);
+    let done = false;
+    let mapPoll = null;
+    function finish() {
+      if (done) return;
+      done = true;
+      if (mapPoll != null) {
+        window.clearInterval(mapPoll);
+        mapPoll = null;
+      }
+      setProgress(100, 'Step across the threshold.');
+      window.setTimeout(function () {
+        try {
+          sessionStorage.setItem('aeloriaAtlasVeil', '1');
+        } catch (e) {
+          /* ignore */
+        }
+        window.location.href = next;
+      }, 200);
+    }
 
-    const minMs = 1600;
-    const elapsed = performance.now() - t0;
-    if (elapsed < minMs) await delay(minMs - elapsed);
+    setProgress(52, INTERACTIVE_MAP ? 'Drawing the realm&hellip;' : 'Unfurling the atlas&hellip;');
 
-    setProgress(100, 'Step across the threshold.');
-    await delay(280);
-    window.location.href = next;
+    if (!INTERACTIVE_MAP) {
+      const img = new Image();
+      img.onload = function () { finish(); };
+      img.onerror = function () { finish(); };
+      img.src = ATLAS_PRIMER_URL;
+      window.setTimeout(finish, 90000);
+      return;
+    }
+
+    const primer = document.getElementById('map-primer-iframe');
+    if (!primer) {
+      finish();
+      return;
+    }
+    if (mapPrimed) {
+      finish();
+      return;
+    }
+    mapPoll = window.setInterval(function () {
+      if (mapPrimed) finish();
+    }, 40);
+    window.setTimeout(finish, 90000);
   }
 
   run();

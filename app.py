@@ -67,9 +67,9 @@ app = Flask(__name__)
 
 
 def _map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
-    """Next `/map` URL with cache-buster (Map.tsx mtime). Optional query keys merged in."""
+    """Next `/map` URL with cache-buster (StrategyMap.tsx mtime). Optional query keys merged in."""
     try:
-        map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
+        map_ts = int((BASE_DIR / "components" / "StrategyMap.tsx").stat().st_mtime)
     except OSError:
         map_ts = 0
     parsed = urlsplit(MAP_PUBLIC_URL)
@@ -803,7 +803,7 @@ def atlas_embed():
 
 
 def _map_embed_context() -> dict:
-    """Next map URL with cache-buster for the iframe (Map.tsx mtime)."""
+    """Next map URL with cache-buster for the iframe (StrategyMap.tsx mtime)."""
     return {
         "active_page": "map",
         "map_public_url": MAP_PUBLIC_URL,
@@ -879,9 +879,26 @@ def health():
 
 # ── World state ──────────────────────────────────────────────────────────────
 
+_MAP_STATE_KEYS = frozenset(
+    {
+        "tick",
+        "world_date",
+        "regions",
+        "region_control",
+        "faction_identities",
+        "faction_power_state",
+        "leadership_state",
+    }
+)
+
+
 @app.route("/api/state")
 def get_state():
-    return jsonify(_state_with_display_defaults(_read_json(WORLD_STATE_FILE, {})))
+    state = _state_with_display_defaults(_read_json(WORLD_STATE_FILE, {}))
+    if request.args.get("for_map") in ("1", "true", "yes"):
+        slim = {k: state[k] for k in _MAP_STATE_KEYS if k in state}
+        return jsonify(slim)
+    return jsonify(state)
 
 
 def _state_with_display_defaults(state):

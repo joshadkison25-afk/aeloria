@@ -488,7 +488,17 @@ function locationForHex(x: number, y: number): MapLocation | null {
  * Basemap in `public/`. Default: your paint reference (`aeloria-basemap-paint.png`). Override with
  * `NEXT_PUBLIC_MAP_ATLAS_URL` (e.g. `/aeloria-basemap-isometric.png` or OpenAI output).
  */
-const MAP_ATLAS_SRC = process.env.NEXT_PUBLIC_MAP_ATLAS_URL || '/aeloria-basemap-paint.png';
+const MAP_ATLAS_SRC =
+  process.env.NEXT_PUBLIC_MAP_ATLAS_URL ||
+  (process.env.NEXT_PUBLIC_USE_LORE_HOUSE_MAP === '1'
+    ? '/aeloria-lore-houses-basemap.svg'
+    : '/aeloria-basemap-paint.png');
+
+function readMapEmbedMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const v = new URLSearchParams(window.location.search).get('embed');
+  return v === '1' || v === 'true';
+}
 
 type MapView = { x: number; y: number; k: number };
 
@@ -547,15 +557,21 @@ function clampZoomK(rawK: number, dims: { W: number; H: number; Cw: number; Ch: 
   return Math.min(MAX_K, Math.max(kMinFit, rawK));
 }
 
+function paintWorldTransform(el: HTMLDivElement | null, v: MapView) {
+  if (!el) return;
+  el.style.transform = `translate3d(${v.x}px, ${v.y}px, 0) scale(${v.k})`;
+}
+
 function useMapViewport() {
   const ref = useRef<HTMLDivElement | null>(null);
+  const worldRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<MapView>({ x: 0, y: 0, k: 1 });
   const [view, setView] = useState<MapView>({ x: 0, y: 0, k: 1 });
   const [isMiddleDrag, setIsMiddleDrag] = useState(false);
   const panning = useRef(false);
   const panStart = useRef({ scrX: 0, scrY: 0, x: 0, y: 0 });
-  viewRef.current = view;
+  const wheelIdleTimerRef = useRef<number | null>(null);
 
   const setViewClamped = useCallback((next: MapView) => {
     setView(() => {
@@ -583,6 +599,11 @@ function useMapViewport() {
       return next;
     });
   }, []);
+
+  useLayoutEffect(() => {
+    viewRef.current = view;
+    paintWorldTransform(worldRef.current, view);
+  }, [view]);
 
   useLayoutEffect(() => {
     const vp = ref.current;
@@ -620,11 +641,27 @@ function useMapViewport() {
       if (Math.abs(k1 - prevK) < 1e-6) return;
       const cx = (mx - px) / prevK;
       const cy = (my - py) / prevK;
-      setViewClamped({ x: mx - cx * k1, y: my - cy * k1, k: k1 });
+      let next: MapView = { x: mx - cx * k1, y: my - cy * k1, k: k1 };
+      if (dims) next = clampView(next, dims.W, dims.H, dims.Cw, dims.Ch);
+      viewRef.current = next;
+      paintWorldTransform(worldRef.current, next);
+      el.classList.add('fantasy-map-viewport--zooming');
+      if (wheelIdleTimerRef.current != null) {
+        window.clearTimeout(wheelIdleTimerRef.current);
+      }
+      wheelIdleTimerRef.current = window.setTimeout(() => {
+        wheelIdleTimerRef.current = null;
+        el.classList.remove('fantasy-map-viewport--zooming');
+        setView({ ...viewRef.current });
+      }, 120);
     };
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [setViewClamped]);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.classList.remove('fantasy-map-viewport--zooming');
+      if (wheelIdleTimerRef.current != null) window.clearTimeout(wheelIdleTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -668,30 +705,35 @@ function useMapViewport() {
     [],
   );
 
-  const onPointerMove = useCallback(
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!panning.current) return;
+    e.preventDefault();
+    const s = panStart.current;
+    const { k } = viewRef.current;
+    const x = s.x + (e.clientX - s.scrX);
+    const y = s.y + (e.clientY - s.scrY);
+    const dims = getViewportContentDims(ref.current, contentRef.current);
+    let next: MapView = { x, y, k };
+    if (dims) next = clampView(next, dims.W, dims.H, dims.Cw, dims.Ch);
+    viewRef.current = next;
+    paintWorldTransform(worldRef.current, next);
+  }, []);
+
+  const endPan = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!panning.current) return;
-      e.preventDefault();
-      const s = panStart.current;
-      const { k } = viewRef.current;
-      const x = s.x + (e.clientX - s.scrX);
-      const y = s.y + (e.clientY - s.scrY);
-      setViewClamped({ x, y, k });
+      if (e.type !== 'pointercancel' && e.button !== 1) return;
+      panning.current = false;
+      setIsMiddleDrag(false);
+      setViewClamped(viewRef.current);
+      try {
+        (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
     },
     [setViewClamped],
   );
-
-  const endPan = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!panning.current) return;
-    if (e.type !== 'pointercancel' && e.button !== 1) return;
-    panning.current = false;
-    setIsMiddleDrag(false);
-    try {
-      (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const nudgeZoom = useCallback(
     (direction: 1 | -1) => {
@@ -717,6 +759,7 @@ function useMapViewport() {
 
   return {
     ref,
+    worldRef,
     contentRef,
     reapplyBounds,
     view,
@@ -741,22 +784,19 @@ function regionControllerLabel(world: WorldResponse | null, r: RegionDefinition)
 export default function FantasyMap() {
   const hexTiles = useMemo(() => buildHexGrid(), []);
   const dataBounds = useMemo(() => getDataBounds(mapRegions), [mapRegions]);
-  const [embedMode] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const v = new URLSearchParams(window.location.search).get('embed');
-    return v === '1' || v === 'true';
-  });
+  const [embedMode] = useState(() => readMapEmbedMode());
   /** On by default in hex mode; province (CK3) mode uses shapes and keeps the grid visual-only. */
-  const [showStrategicHex, setShowStrategicHex] = useState(true);
+  const [showStrategicHex, setShowStrategicHex] = useState(() => !readMapEmbedMode());
   /** Province polygons vs hex-cell painting. */
   const [cartographyMode, setCartographyMode] = useState<CartographyMode>('provinces');
   const [provinceFactions, setProvinceFactions] = useState<Record<string, string | null>>({});
   const [provinceLocations, setProvinceLocations] = useState<Record<string, string>>({});
   /** When false, lore region shapes are for hit-test / hover only — no sim faction wash. */
-  const [showPoliticalTints, setShowPoliticalTints] = useState(false);
+  const [showPoliticalTints, setShowPoliticalTints] = useState(() => readMapEmbedMode());
   const [hoveredRegion, setHoveredRegion] = useState<RegionDefinition | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionDefinition | null>(null);
   const [world, setWorld] = useState<WorldResponse | null>(null);
+  const [worldFetchSettled, setWorldFetchSettled] = useState(false);
   const [loreLocations, setLoreLocations] = useState<LoreLocation[]>([]);
   const [configMode, setConfigMode] = useState<ConfigMode>('core');
   const [layoutsByConfig, setLayoutsByConfig] = useState<Record<string, Record<string, string | null>>>({});
@@ -775,6 +815,9 @@ export default function FantasyMap() {
   const [brushRadius, setBrushRadius] = useState<0 | 1 | 2>(1);
   const [landByHex, setLandByHex] = useState<Record<string, boolean> | null>(null);
   const [landMaskStatus, setLandMaskStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('loading');
+  /** Embed: visible basemap <img> has loaded/decoded (separate from land-mask sampling). */
+  const [embedAtlasSurfaceReady, setEmbedAtlasSurfaceReady] = useState(false);
+  const atlasImgRef = useRef<HTMLImageElement | null>(null);
   /** After localStorage draft restore runs (or skips); avoids debounce overwriting draft before hydrate. */
   const [mapDraftHydrated, setMapDraftHydrated] = useState(false);
   const [mapSaveBanner, setMapSaveBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -905,6 +948,10 @@ export default function FantasyMap() {
       setMapDraftHydrated(true);
       return;
     }
+    if (embedMode) {
+      setMapDraftHydrated(true);
+      return;
+    }
     try {
       const raw = localStorage.getItem(MAP_EDITOR_DRAFT_STORAGE_KEY);
       if (!raw) return;
@@ -943,7 +990,7 @@ export default function FantasyMap() {
     } finally {
       setMapDraftHydrated(true);
     }
-  }, [hexTiles]);
+  }, [hexTiles, embedMode]);
 
   useEffect(() => {
     setLayoutsByConfig((prev) => {
@@ -1054,7 +1101,7 @@ export default function FantasyMap() {
   }, [cartographyMode, derivedLocationFromProvinces, locationByHex]);
 
   useEffect(() => {
-    if (!mapDraftHydrated) return;
+    if (embedMode || !mapDraftHydrated) return;
     const t = window.setTimeout(() => {
       writeMapEditorDraft(
         layoutForDraft,
@@ -1067,6 +1114,7 @@ export default function FantasyMap() {
     }, MAP_EDITOR_DRAFT_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
   }, [
+    embedMode,
     mapDraftHydrated,
     layoutForDraft,
     locationForDraft,
@@ -1078,7 +1126,7 @@ export default function FantasyMap() {
   ]);
 
   useEffect(() => {
-    if (!mapDraftHydrated) return;
+    if (embedMode || !mapDraftHydrated) return;
     const flush = () => {
       writeMapEditorDraft(
         layoutForDraft,
@@ -1092,6 +1140,7 @@ export default function FantasyMap() {
     window.addEventListener('beforeunload', flush);
     return () => window.removeEventListener('beforeunload', flush);
   }, [
+    embedMode,
     mapDraftHydrated,
     layoutForDraft,
     locationForDraft,
@@ -1136,6 +1185,7 @@ export default function FantasyMap() {
   }
 
   function handleProvincePaint(region: RegionDefinition) {
+    if (embedMode) return;
     const geometryLocationId = (() => {
       if (region.coordinates.length === 0) return null;
       const cx = region.coordinates.reduce((s, p) => s + p[0], 0) / region.coordinates.length;
@@ -1326,11 +1376,13 @@ export default function FantasyMap() {
 
   async function loadWorld() {
     try {
-      const response = await fetch('/api/world', { cache: 'no-store' });
+      const response = await fetch('/api/world?for_map=1', { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to load world.');
       setWorld((await response.json()) as WorldResponse);
     } catch (error) {
       console.error('Could not load /api/world:', error);
+    } finally {
+      setWorldFetchSettled(true);
     }
   }
 
@@ -1535,11 +1587,17 @@ export default function FantasyMap() {
 
   useEffect(() => {
     void loadWorld();
+    if (embedMode) return;
     void loadLoreData();
     void listSavedMaps();
-  }, []);
+  }, [embedMode]);
 
   useEffect(() => {
+    if (embedMode) {
+      setLandByHex(null);
+      setLandMaskStatus('ready');
+      return;
+    }
     let cancelled = false;
     setLandMaskStatus('loading');
     void (async () => {
@@ -1565,13 +1623,18 @@ export default function FantasyMap() {
     return () => {
       cancelled = true;
     };
-  }, [hexTiles]);
+  }, [hexTiles, embedMode]);
+
+  const markEmbedAtlasSurfaceReady = useCallback(() => {
+    if (!embedMode) return;
+    setEmbedAtlasSurfaceReady(true);
+  }, [embedMode]);
 
   const {
     ref: mapViewportRef,
+    worldRef: mapWorldRef,
     contentRef: mapContentRef,
     reapplyBounds: reapplyMapBounds,
-    view: mapView,
     isMiddleDrag,
     onPointerDown: onMapPointerDown,
     onPointerMove: onMapPointerMove,
@@ -1580,6 +1643,81 @@ export default function FantasyMap() {
     nudgeZoom,
     reset: resetMapView,
   } = mapViewport;
+
+  const runAfterAtlasImgPaint = useCallback(() => {
+    let frames = 4;
+    const step = () => {
+      frames -= 1;
+      if (frames > 0) {
+        requestAnimationFrame(step);
+      } else {
+        markEmbedAtlasSurfaceReady();
+      }
+    };
+    requestAnimationFrame(step);
+  }, [markEmbedAtlasSurfaceReady]);
+
+  useLayoutEffect(() => {
+    if (!embedMode) return;
+    const el = atlasImgRef.current;
+    if (el?.complete && el.naturalWidth > 0) {
+      reapplyMapBounds();
+      runAfterAtlasImgPaint();
+    }
+  }, [embedMode, reapplyMapBounds, runAfterAtlasImgPaint]);
+
+  const embedReadyPostedRef = useRef(false);
+  useEffect(() => {
+    if (!embedMode) return;
+    if (landMaskStatus === 'loading') return;
+    if (!worldFetchSettled) return;
+    if (!embedAtlasSurfaceReady) return;
+    if (embedReadyPostedRef.current) return;
+    let cancelled = false;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (cancelled || embedReadyPostedRef.current) return;
+          embedReadyPostedRef.current = true;
+          try {
+            if (typeof window !== 'undefined' && window.parent !== window) {
+              window.parent.postMessage({ type: 'aeloria-home-map-ready' }, '*');
+            }
+          } catch {
+            // ignore
+          }
+        });
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
+  }, [embedMode, embedAtlasSurfaceReady, landMaskStatus, worldFetchSettled]);
+
+  useEffect(() => {
+    if (!embedMode) return;
+    if (typeof window === 'undefined' || window.parent === window) return;
+    try {
+      if (!selectedRegion) {
+        window.parent.postMessage({ type: 'aeloria-map-region-select', region: null }, '*');
+        return;
+      }
+      window.parent.postMessage(
+        {
+          type: 'aeloria-map-region-select',
+          region: {
+            id: selectedRegion.id,
+            name: selectedRegion.name,
+            controller: regionControllerLabel(world, selectedRegion),
+          },
+        },
+        '*',
+      );
+    } catch {
+      // ignore
+    }
+  }, [embedMode, selectedRegion, world]);
 
   const polSvgRef = useRef<SVGSVGElement | null>(null);
   const politicalHoverRafRef = useRef<number | null>(null);
@@ -1621,7 +1759,7 @@ export default function FantasyMap() {
         return row.controller || row.canonical_faction || null;
       })();
       if (id) return colorForFaction(String(id));
-      return 'rgba(55, 55, 62, 0.38)';
+      return 'rgba(120, 128, 155, 0.5)';
     },
     [world],
   );
@@ -2022,21 +2160,26 @@ export default function FantasyMap() {
             aria-label="Realm map, scroll to zoom, middle-drag to pan"
             style={{ outline: 'none' }}
           >
-            <div
-              className="fantasy-map-world"
-              style={{ transform: `translate(${mapView.x}px, ${mapView.y}px) scale(${mapView.k})` }}
-            >
+            <div ref={mapWorldRef} className="fantasy-map-world">
               <div className="fantasy-map-canvas" ref={mapContentRef}>
                 <div className="fantasy-map-atlas-mood" aria-hidden>
                   <div className="fantasy-map-atlas-mood__vignette" />
                 </div>
                 <img
+                  ref={atlasImgRef}
                   src={MAP_ATLAS_SRC}
                   alt="Aeloria territory map, top down"
                   className="fantasy-map-terrain"
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
-                  onLoad={reapplyMapBounds}
+                  onLoad={() => {
+                    reapplyMapBounds();
+                    if (embedMode) runAfterAtlasImgPaint();
+                  }}
+                  onError={() => {
+                    reapplyMapBounds();
+                    if (embedMode) markEmbedAtlasSurfaceReady();
+                  }}
                 />
                 <svg
                   ref={polSvgRef}
@@ -2047,6 +2190,7 @@ export default function FantasyMap() {
                     if (cartographyMode === 'provinces' && e.button === 0) paintButtonHeldRef.current = true;
                   }}
                   onPointerMove={(e) => {
+                    if (embedMode) return;
                     if (cartographyMode !== 'provinces' && showStrategicHex) return;
                     updatePoliticalHover(e.clientX, e.clientY, e.currentTarget);
                   }}
@@ -2064,7 +2208,10 @@ export default function FantasyMap() {
                       findRegionAtViewPoint(x, y, mapRegions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT),
                     );
                   }}
-                  style={{ pointerEvents: cartographyMode === 'provinces' || !showStrategicHex ? 'auto' : 'none' }}
+                  style={{
+                    pointerEvents: cartographyMode === 'provinces' || !showStrategicHex ? 'auto' : 'none',
+                    zIndex: cartographyMode === 'provinces' ? 2 : 1,
+                  }}
                 >
                   {mapRegions.map((r) => {
                     const d = regionPathD(r, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
@@ -2096,7 +2243,9 @@ export default function FantasyMap() {
                           ? 0.58
                           : isH
                             ? 0.52
-                            : 0.4
+                            : embedMode
+                              ? 0.5
+                              : 0.4
                         : 0;
                     const stroke = (() => {
                       if (cartographyMode === 'provinces') {
@@ -2104,7 +2253,9 @@ export default function FantasyMap() {
                           ? 'rgba(255,250,220,0.9)'
                           : isH
                             ? 'rgba(200,220,255,0.78)'
-                            : 'rgba(0,0,0,0.4)';
+                            : embedMode
+                              ? 'rgba(18,22,34,0.78)'
+                              : 'rgba(0,0,0,0.4)';
                       }
                       return showPoliticalTints
                         ? isS
@@ -2119,7 +2270,8 @@ export default function FantasyMap() {
                             : 'transparent';
                     })();
                     const strokeW = (() => {
-                      if (cartographyMode === 'provinces') return isH || isS ? 0.42 : 0.3;
+                      if (cartographyMode === 'provinces')
+                        return isH || isS ? 0.42 : embedMode ? 0.48 : 0.3;
                       return showPoliticalTints && !isH && !isS ? 0.28 : isH || isS || showPoliticalTints ? 0.4 : 0;
                     })();
                     return (
@@ -2132,7 +2284,7 @@ export default function FantasyMap() {
                         strokeWidth={strokeW}
                         vectorEffect="non-scaling-stroke"
                         style={{
-                          transition: 'fill-opacity 0.12s, stroke 0.12s',
+                          transition: embedMode ? undefined : 'fill-opacity 0.12s, stroke 0.12s',
                           cursor: cartographyMode === 'provinces' ? 'pointer' : undefined,
                         }}
                         onPointerEnter={() => {
@@ -2148,79 +2300,84 @@ export default function FantasyMap() {
                     );
                   })}
                 </svg>
-                <svg
-                  viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
-                  preserveAspectRatio="none"
-                  className="fantasy-map-hexes"
-                  onPointerDown={(e) => {
-                    if (e.button === 0 && cartographyMode === 'hex') paintButtonHeldRef.current = true;
-                  }}
-                  style={{ pointerEvents: showStrategicHex && cartographyMode === 'hex' ? 'auto' : 'none' }}
-                >
-                  {hexTiles.map((hex) => {
-                    const isSea = landByHex != null && landByHex[hex.id] === false;
-                    const isHovered = hoveredHexId === hex.id;
-                    const factionId = factionByHex?.[hex.id] ?? null;
-                    const hasManualLocation = Object.prototype.hasOwnProperty.call(effectiveLocationByHex, hex.id);
-                    const manualLocation = hasManualLocation ? effectiveLocationByHex[hex.id] : null;
-                    const geometryLocationId = locationForHex(hex.x, hex.y)?.id || null;
-                    const resolvedLocationId =
-                      manualLocation === ''
-                        ? null
-                        : manualLocation || (isLocationPaintMode ? geometryLocationId : null);
-                    const factionFill = factionId ? colorForFaction(factionId) : null;
-                    const locationFill = resolvedLocationId
-                      ? locationColors[resolvedLocationId] || colorForFaction(`location-${resolvedLocationId}`)
-                      : null;
-                    // Land vs sea is cosmetic (stroke); faction/location paint must show on the whole grid including ocean.
-                    const baseFill = factionFill || locationFill || 'transparent';
-                    const baseOp = factionFill ? 1 : locationFill ? 0.5 : 0;
-                    const rawFillOpacity = baseOp;
-                    const isEmpty = rawFillOpacity < 0.001;
-                    // SVG hit-testing: fill-opacity 0 / transparent often misses pointer events; only
-                    // the hairline stroke hits. A nearly invisible face makes click + drag paint reliable.
-                    const fill = isEmpty ? 'rgba(5, 6, 11, 0.08)' : baseFill;
-                    const fillOpacity = isEmpty
-                      ? 1
-                      : isHovered
-                        ? Math.min(rawFillOpacity + 0.12, 1)
-                        : rawFillOpacity;
-                    const stroke = (() => {
-                      if (isHovered) {
-                        return isSea ? 'rgba(160, 210, 255, 0.7)' : 'rgba(188, 240, 255, 0.9)';
-                      }
-                      if (isEmpty) {
-                        // Land + water: same grid weight so ocean isn’t a dead zone
-                        return isSea
-                          ? 'rgba(200, 220, 255, 0.34)'
-                          : 'rgba(210, 218, 240, 0.36)';
-                      }
-                      if (isSea) return 'rgba(150, 195, 240, 0.45)';
-                      return 'rgba(200, 215, 255, 0.38)';
-                    })();
-                    return (
-                      <polygon
-                        key={hex.id}
-                        points={pointsByHexId.get(hex.id) ?? ''}
-                        fill={fill}
-                        fillOpacity={fillOpacity}
-                        stroke={stroke}
-                        strokeWidth={0.038}
-                        vectorEffect="non-scaling-stroke"
-                        style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-                        onPointerEnter={() => {
-                          setHoveredHexId(hex.id);
-                          if (paintButtonHeldRef.current) handleHexPaintClick(hex);
-                        }}
-                        onPointerLeave={() => setHoveredHexId(null)}
-                        onClick={() => {
-                          setSelectedHexId(hex.id);
-                          handleHexPaintClick(hex);
-                        }}
-                      />
-                    );
-                  })}
-                </svg>
+                {showStrategicHex ? (
+                  <svg
+                    viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+                    preserveAspectRatio="none"
+                    className="fantasy-map-hexes"
+                    onPointerDown={(e) => {
+                      if (e.button === 0 && cartographyMode === 'hex') paintButtonHeldRef.current = true;
+                    }}
+                    style={{
+                      pointerEvents: showStrategicHex && cartographyMode === 'hex' ? 'auto' : 'none',
+                      zIndex: cartographyMode === 'provinces' ? 1 : 2,
+                    }}
+                  >
+                    {hexTiles.map((hex) => {
+                      const isSea = landByHex != null && landByHex[hex.id] === false;
+                      const isHovered = hoveredHexId === hex.id;
+                      const factionId = factionByHex?.[hex.id] ?? null;
+                      const hasManualLocation = Object.prototype.hasOwnProperty.call(effectiveLocationByHex, hex.id);
+                      const manualLocation = hasManualLocation ? effectiveLocationByHex[hex.id] : null;
+                      const geometryLocationId = locationForHex(hex.x, hex.y)?.id || null;
+                      const resolvedLocationId =
+                        manualLocation === ''
+                          ? null
+                          : manualLocation || (isLocationPaintMode ? geometryLocationId : null);
+                      const factionFill = factionId ? colorForFaction(factionId) : null;
+                      const locationFill = resolvedLocationId
+                        ? locationColors[resolvedLocationId] || colorForFaction(`location-${resolvedLocationId}`)
+                        : null;
+                      // Land vs sea is cosmetic (stroke); faction/location paint must show on the whole grid including ocean.
+                      const baseFill = factionFill || locationFill || 'transparent';
+                      const baseOp = factionFill ? 1 : locationFill ? 0.5 : 0;
+                      const rawFillOpacity = baseOp;
+                      const isEmpty = rawFillOpacity < 0.001;
+                      // SVG hit-testing: fill-opacity 0 / transparent often misses pointer events; only
+                      // the hairline stroke hits. A nearly invisible face makes click + drag paint reliable.
+                      const fill = isEmpty ? 'rgba(5, 6, 11, 0.08)' : baseFill;
+                      const fillOpacity = isEmpty
+                        ? 1
+                        : isHovered
+                          ? Math.min(rawFillOpacity + 0.12, 1)
+                          : rawFillOpacity;
+                      const stroke = (() => {
+                        if (isHovered) {
+                          return isSea ? 'rgba(160, 210, 255, 0.7)' : 'rgba(188, 240, 255, 0.9)';
+                        }
+                        if (isEmpty) {
+                          // Land + water: same grid weight so ocean isn’t a dead zone
+                          return isSea
+                            ? 'rgba(200, 220, 255, 0.34)'
+                            : 'rgba(210, 218, 240, 0.36)';
+                        }
+                        if (isSea) return 'rgba(150, 195, 240, 0.45)';
+                        return 'rgba(200, 215, 255, 0.38)';
+                      })();
+                      return (
+                        <polygon
+                          key={hex.id}
+                          points={pointsByHexId.get(hex.id) ?? ''}
+                          fill={fill}
+                          fillOpacity={fillOpacity}
+                          stroke={stroke}
+                          strokeWidth={0.038}
+                          vectorEffect="non-scaling-stroke"
+                          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                          onPointerEnter={() => {
+                            setHoveredHexId(hex.id);
+                            if (paintButtonHeldRef.current) handleHexPaintClick(hex);
+                          }}
+                          onPointerLeave={() => setHoveredHexId(null)}
+                          onClick={() => {
+                            setSelectedHexId(hex.id);
+                            handleHexPaintClick(hex);
+                          }}
+                        />
+                      );
+                    })}
+                  </svg>
+                ) : null}
               </div>
             </div>
 

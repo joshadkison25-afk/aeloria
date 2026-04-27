@@ -1,0 +1,404 @@
+{
+  "version": 1,
+  "name": "Aeloria terrain layers (derived from map_layout + lore)",
+  "coordinate_space": {
+    "x_min": 0,
+    "x_max": 1000,
+    "y_min": 0,
+    "y_max": 1000,
+    "axes": "x increases east; y increases north (south = 0, north = 1000)"
+  },
+  "influence_legend": {
+    "movement": "1.0 = easy march (open plains, roads); <0.55 = very slow (ice, deep forest, desert sand)",
+    "war": "1.0 = strong positional advantage (defensive mountains) or open pitched battle; interpret per scenario",
+    "economy": "1.0 = baseline; >1.0 = trade / agriculture / mining bonus"
+  },
+  "region_influence": {
+    "Frostvale": {
+      "layout_terrain": "frozen_mountains",
+      "terrain_class": "mountains",
+      "movement": 0.4,
+      "war": 0.75,
+      "economy": 0.38,
+      "note": "Glacial passes; defense in depth; little surplus"
+    },
+    "Lostfeld": {
+      "layout_terrain": "mountain_mining",
+      "terrain_class": "mountains",
+      "movement": 0.45,
+      "war": 0.68,
+      "economy": 0.82,
+      "note": "Mining wealth; defensible vales"
+    },
+    "Farrock": {
+      "layout_terrain": "militarized_plains",
+      "terrain_class": "plains",
+      "movement": 0.9,
+      "war": 0.88,
+      "economy": 0.62,
+      "note": "Legions; clear lines of attack"
+    },
+    "Eldoria": {
+      "layout_terrain": "noble_heartland",
+      "terrain_class": "plains",
+      "movement": 0.88,
+      "war": 0.55,
+      "economy": 0.9,
+      "note": "Noble roads; wealth and statecraft"
+    },
+    "Faerwood": {
+      "layout_terrain": "dense_forest",
+      "terrain_class": "forests",
+      "movement": 0.5,
+      "war": 0.72,
+      "economy": 0.42,
+      "note": "Cover, ambush, no mass logistics"
+    },
+    "Gilgeth": {
+      "layout_terrain": "mountain_strongholds",
+      "terrain_class": "mountains",
+      "movement": 0.46,
+      "war": 0.78,
+      "economy": 0.48,
+      "note": "Fortified orc highlands"
+    },
+    "Twin Cities": {
+      "layout_terrain": "central_plains",
+      "terrain_class": "plains",
+      "movement": 0.95,
+      "war": 0.5,
+      "economy": 0.95,
+      "note": "Hub; vulnerable if besieged"
+    },
+    "Eresteron": {
+      "layout_terrain": "fertile_plains",
+      "terrain_class": "plains",
+      "movement": 0.92,
+      "war": 0.52,
+      "economy": 1.05,
+      "note": "Breadbasket; open battlefields"
+    },
+    "Groth": {
+      "layout_terrain": "badlands",
+      "terrain_class": "plains",
+      "movement": 0.72,
+      "war": 0.82,
+      "economy": 0.35,
+      "note": "Badlands; raid economy, harsh supply"
+    },
+    "Vilefin": {
+      "layout_terrain": "rock_plains",
+      "terrain_class": "desert",
+      "movement": 0.62,
+      "war": 0.58,
+      "economy": 0.4,
+      "note": "Rock plains; scrap and traps"
+    },
+    "Dur Khadur": {
+      "layout_terrain": "desert_trade",
+      "terrain_class": "desert",
+      "movement": 0.58,
+      "war": 0.48,
+      "economy": 0.95,
+      "note": "Caravans; oasis trade"
+    },
+    "Glenwood": {
+      "layout_terrain": "deep_forest",
+      "terrain_class": "forests",
+      "movement": 0.52,
+      "war": 0.7,
+      "economy": 0.48,
+      "note": "Dense wood; elven home ground"
+    },
+    "Tidefall": {
+      "layout_terrain": "coastal_ports",
+      "terrain_class": "coastal",
+      "movement": 0.82,
+      "war": 0.45,
+      "economy": 1.12,
+      "note": "Ports; naval mobility (off-map sea)"
+    },
+    "Dreadwind Isles": {
+      "layout_terrain": "offshore_archipelago",
+      "terrain_class": "coastal",
+      "movement": 0.75,
+      "war": 0.6,
+      "economy": 0.55,
+      "note": "Isles; raiding, smuggling"
+    }
+  },
+  "mountains": [
+    [
+      [
+        0,
+        941.545455
+      ],
+      [
+        252.54386,
+        707.368421
+      ],
+      [
+        526.891892,
+        666.216216
+      ],
+      [
+        585.652174,
+        820.461957
+      ],
+      [
+        811.357143,
+        1000
+      ],
+      [
+        0,
+        1000
+      ]
+    ],
+    [
+      [
+        269.100408,
+        434.864934
+      ],
+      [
+        515.568182,
+        263.409091
+      ],
+      [
+        430.605096,
+        501.305732
+      ],
+      [
+        305.147059,
+        549.558824
+      ]
+    ]
+  ],
+  "forests": [
+    [
+      [
+        0,
+        361.037736
+      ],
+      [
+        152.428177,
+        369.665746
+      ],
+      [
+        269.100408,
+        434.864934
+      ],
+      [
+        305.147059,
+        549.558824
+      ],
+      [
+        252.54386,
+        707.368421
+      ],
+      [
+        0,
+        941.545455
+      ]
+    ],
+    [
+      [
+        517.746881,
+        226.356549
+      ],
+      [
+        822.231707,
+        284.353659
+      ],
+      [
+        837.04892,
+        335.390724
+      ],
+      [
+        729.850746,
+        459.514925
+      ],
+      [
+        555,
+        309.642857
+      ],
+      [
+        518.46831,
+        259.542254
+      ]
+    ]
+  ],
+  "plains": [
+    [
+      [
+        152.428177,
+        369.665746
+      ],
+      [
+        484.986314,
+        89.616788
+      ],
+      [
+        517.746881,
+        226.356549
+      ],
+      [
+        518.46831,
+        259.542254
+      ],
+      [
+        555,
+        309.642857
+      ],
+      [
+        729.850746,
+        459.514925
+      ],
+      [
+        760.985915,
+        560.704225
+      ],
+      [
+        1000,
+        731.428571
+      ],
+      [
+        1000,
+        1000
+      ],
+      [
+        811.357143,
+        1000
+      ],
+      [
+        585.652174,
+        820.461957
+      ],
+      [
+        526.891892,
+        666.216216
+      ],
+      [
+        252.54386,
+        707.368421
+      ],
+      [
+        305.147059,
+        549.558824
+      ],
+      [
+        430.605096,
+        501.305732
+      ],
+      [
+        515.568182,
+        263.409091
+      ],
+      [
+        269.100408,
+        434.864934
+      ]
+    ]
+  ],
+  "desert": [
+    [
+      [
+        0,
+        0
+      ],
+      [
+        948.611111,
+        0
+      ],
+      [
+        822.231707,
+        284.353659
+      ],
+      [
+        517.746881,
+        226.356549
+      ],
+      [
+        484.986314,
+        89.616788
+      ],
+      [
+        152.428177,
+        369.665746
+      ],
+      [
+        0,
+        361.037736
+      ]
+    ]
+  ],
+  "coastal_zones": [
+    [
+      [
+        729.850746,
+        459.514925
+      ],
+      [
+        837.04892,
+        335.390724
+      ],
+      [
+        822.231707,
+        284.353659
+      ],
+      [
+        948.611111,
+        0
+      ],
+      [
+        1000,
+        0
+      ],
+      [
+        1000,
+        731.428571
+      ],
+      [
+        760.985915,
+        560.704225
+      ]
+    ]
+  ],
+  "coastlines": [
+    [
+      [
+        1000,
+        200
+      ],
+      [
+        1000,
+        520
+      ],
+      [
+        880,
+        580
+      ],
+      [
+        780,
+        1000
+      ],
+      [
+        620,
+        1000
+      ]
+    ],
+    [
+      [
+        920,
+        100
+      ],
+      [
+        1000,
+        120
+      ],
+      [
+        1000,
+        240
+      ]
+    ]
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "factionColors": {
+    "The Wintermark": "hsl(63, 52%, 42%)",
+    "Shadow Court": "hsl(181, 52%, 42%)",
+    "Glenhaven": "hsl(88, 52%, 42%)",
+    "Lostfeld": "hsl(117, 52%, 42%)",
+    "Stonebreak Monastery": "hsl(272, 52%, 42%)",
+    "Twin Cities": "hsl(327, 52%, 42%)",
+    "Groth Clans": "hsl(5, 52%, 42%)",
+    "Gilgeth Clans": "hsl(57, 52%, 42%)",
+    "Dur Khadur": "hsl(172, 52%, 42%)",
+    "Tidefall": "hsl(71, 52%, 42%)",
+    "Varkuun": "hsl(250, 52%, 42%)",
+    "Vilefin": "hsl(159, 52%, 42%)",
+    "Dreadwind Isles": "hsl(94, 52%, 42%)"
+  },
+  "houses": [
+    {
+      "id": "verlorn",
+      "name": "House Verlorn",
+      "faction_id": "Shadow Court",
+      "region_id": "Faerwood"
+    },
+    {
+      "id": "nightborn",
+      "name": "House Nightborn",
+      "faction_id": "Shadow Court",
+      "region_id": "Faerwood"
+    },
+    {
+      "id": "shadowveil",
+      "name": "House Shadowveil",
+      "faction_id": "Shadow Court",
+      "region_id": "Faerwood"
+    },
+    {
+      "id": "aurand",
+      "name": "House Aurand",
+      "faction_id": "Twin Cities",
+      "region_id": "Eresteron"
+    },
+    {
+      "id": "braafhart",
+      "name": "House Braafhart",
+      "faction_id": "Twin Cities",
+      "region_id": "Eresteron"
+    },
+    {
+      "id": "lefleur",
+      "name": "House LeFleur",
+      "faction_id": "Twin Cities",
+      "region_id": "Eldoria"
+    },
+    {
+      "id": "wood",
+      "name": "House Wood",
+      "faction_id": "Glenhaven",
+      "region_id": "Glenhaven"
+    },
+    {
+      "id": "darkleaf",
+      "name": "House Darkleaf",
+      "faction_id": "Glenhaven",
+      "region_id": "Glenhaven"
+    },
+    {
+      "id": "mistafae",
+      "name": "House Mistafae",
+      "faction_id": "Glenhaven",
+      "region_id": "Glenhaven"
+    },
+    {
+      "id": "ver-meer",
+      "name": "House Ver Meer",
+      "faction_id": "Tidefall",
+      "region_id": "Tidefall"
+    },
+    {
+      "id": "van-cleave",
+      "name": "House Van Cleave",
+      "faction_id": "Varkuun",
+      "region_id": "Varkuun"
+    },
+    {
+      "id": "gross",
+      "name": "House Gross",
+      "faction_id": "Dur Khadur",
+      "region_id": "Dur Khadur"
+    },
+    {
+      "id": "adkison",
+      "name": "House Adkison",
+      "faction_id": "The Wintermark",
+      "region_id": "Wintermark"
+    },
+    {
+      "id": "blacktide",
+      "name": "House Blacktide",
+      "faction_id": "Dreadwind Isles",
+      "region_id": "Dreadwind Isles"
+    },
+    {
+      "id": "goldfinger",
+      "name": "Clan Goldfinger-Duke",
+      "faction_id": "Lostfeld",
+      "region_id": "Lostfeld"
+    },
+    {
+      "id": "mijid",
+      "name": "Clan Mijid",
+      "faction_id": "Groth Clans",
+      "region_id": "Groth"
+    },
+    {
+      "id": "blackblood",
+      "name": "Clan Blackblood",
+      "faction_id": "Gilgeth Clans",
+      "region_id": "Gilgeth"
+    },
+    {
+      "id": "bloodware",
+      "name": "Clan Bloodware",
+      "faction_id": "Vilefin",
+      "region_id": "Vilefin"
+    }
+  ]
+}

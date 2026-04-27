@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "name": "Aeloria continental layout",
+  "coordinate_space": {
+    "x_min": 0,
+    "x_max": 1000,
+    "y_min": 0,
+    "y_max": 1000,
+    "axes": "x increases east; y increases north (south = 0, north = 1000)"
+  },
+  "design_principles": [
+    "Frostvale is the northern glacial wall; passes and mining mountains (Lostfeld) leak pressure into the central basins.",
+    "Twin Cities and Eresteron form the contested heart: fertile river plains between badlands, mountains, and east-coast trade.",
+    "Eldoria sits northwest of the heartland, framed by forest (Faerwood) and the Gilgeth cordillera.",
+    "Gilgeth and Lostfeld are mountain screens: they separate Groth and Vilefin from the league cities while gating access to Faerwood.",
+    "Faerwood (west) and Glenwood (southeast) are discontinuous old-growth: separated by arid, urban, and coastal buffers.",
+    "Tidefall rules the warm eastern gulf; Dreadwind Isles are the same naval sphere. Dur Khadur is the arid trade hinge between Vilefin, Groth, Glenwood, and the sea."
+  ],
+  "regions": [
+    {
+      "region_id": "Frostvale",
+      "center_x": 485,
+      "center_y": 920,
+      "terrain_type": "frozen_mountains",
+      "neighbors": ["Lostfeld", "Farrock", "Eldoria"]
+    },
+    {
+      "region_id": "Lostfeld",
+      "center_x": 450,
+      "center_y": 780,
+      "terrain_type": "mountain_mining",
+      "neighbors": ["Frostvale", "Gilgeth", "Eldoria", "Eresteron", "Farrock"]
+    },
+    {
+      "region_id": "Farrock",
+      "center_x": 660,
+      "center_y": 700,
+      "terrain_type": "militarized_plains",
+      "neighbors": ["Frostvale", "Lostfeld", "Eresteron", "Groth", "Gilgeth", "Twin Cities"]
+    },
+    {
+      "region_id": "Eldoria",
+      "center_x": 420,
+      "center_y": 580,
+      "terrain_type": "noble_heartland",
+      "neighbors": ["Frostvale", "Lostfeld", "Faerwood", "Gilgeth", "Twin Cities", "Eresteron"]
+    },
+    {
+      "region_id": "Faerwood",
+      "center_x": 195,
+      "center_y": 505,
+      "terrain_type": "dense_forest",
+      "neighbors": ["Eldoria", "Gilgeth"]
+    },
+    {
+      "region_id": "Gilgeth",
+      "center_x": 370,
+      "center_y": 450,
+      "terrain_type": "mountain_strongholds",
+      "neighbors": ["Faerwood", "Eldoria", "Lostfeld", "Groth", "Twin Cities", "Eresteron", "Farrock"]
+    },
+    {
+      "region_id": "Twin Cities",
+      "center_x": 510,
+      "center_y": 500,
+      "terrain_type": "central_plains",
+      "neighbors": ["Eldoria", "Eresteron", "Gilgeth", "Farrock", "Groth"]
+    },
+    {
+      "region_id": "Eresteron",
+      "center_x": 600,
+      "center_y": 500,
+      "terrain_type": "fertile_plains",
+      "neighbors": ["Eldoria", "Twin Cities", "Lostfeld", "Farrock", "Tidefall", "Glenwood", "Gilgeth"]
+    },
+    {
+      "region_id": "Groth",
+      "center_x": 290,
+      "center_y": 335,
+      "terrain_type": "badlands",
+      "neighbors": ["Gilgeth", "Twin Cities", "Farrock", "Vilefin", "Dur Khadur"]
+    },
+    {
+      "region_id": "Vilefin",
+      "center_x": 210,
+      "center_y": 240,
+      "terrain_type": "rock_plains",
+      "neighbors": ["Groth", "Dur Khadur"]
+    },
+    {
+      "region_id": "Dur Khadur",
+      "center_x": 770,
+      "center_y": 220,
+      "terrain_type": "desert_trade",
+      "neighbors": ["Vilefin", "Groth", "Glenwood", "Tidefall"]
+    },
+    {
+      "region_id": "Glenwood",
+      "center_x": 750,
+      "center_y": 325,
+      "terrain_type": "deep_forest",
+      "neighbors": ["Eresteron", "Tidefall", "Dur Khadur"]
+    },
+    {
+      "region_id": "Tidefall",
+      "center_x": 860,
+      "center_y": 420,
+      "terrain_type": "coastal_ports",
+      "neighbors": ["Eresteron", "Glenwood", "Dur Khadur", "Dreadwind Isles"]
+    },
+    {
+      "region_id": "Dreadwind Isles",
+      "center_x": 905,
+      "center_y": 280,
+      "terrain_type": "offshore_archipelago",
+      "neighbors": ["Tidefall"]
+    }
+  ]
+}

@@ -13,6 +13,11 @@
     "vibe": "npm run dev",
     "dev:vibe": "npm run dev",
     "map:from-azgaar": "node scripts/azgaar-map-to-aeloria-regions.mjs",
+    "generate:lore-houses-map": "node scripts/generate-lore-house-map.mjs",
+    "build:strategy-map-data": "node scripts/build-strategy-map-data.mjs",
+    "build:territory-map": "node scripts/build-house-territories.mjs",
+    "build:terrain-map": "node scripts/build-terrain-map.mjs",
+    "build:map-geo": "node scripts/build-map-geo.mjs",
     "image:enter": "python scripts/generate_enter_background.py",
     "build": "next build",
     "start": "next start",
@@ -21,12 +26,15 @@
   "dependencies": {
     "@types/leaflet": "^1.9.21",
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.24.0",
     "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18",
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
+    "d3-delaunay": "^6.0.4",
+    "polygon-clipping": "^0.15.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -15,7 +15,8 @@
 
   .home-command-stage {
     position: relative;
-    z-index: 1;
+    /* Above .home-screen::before/::after (2–3) and .epic-dust (4); below .epic-spark-field (7). */
+    z-index: 5;
     width: 100%;
     height: clamp(620px, calc(100vh - var(--nav-h)), 1080px);
     margin: 0;
@@ -40,7 +41,8 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
+    /* Above .home-map-stage::before/::after (5) so the live atlas isn’t crushed by vignette; below UI (12) and epic dust (11). */
+    z-index: 6;
     overflow: hidden;
     pointer-events: none;
     background: rgba(5, 7, 10, 0.96);
@@ -51,6 +53,8 @@
     inset: 0;
     z-index: 12;
     min-height: 100%;
+    /* Let pan/zoom/clicks reach the iframe; children re-enable hits where needed (e.g. modal). */
+    pointer-events: none;
   }
 
   .home-ui-overlay {
@@ -1070,9 +1074,78 @@
     border: 0;
     display: block;
     background: #05060b;
-    filter: saturate(0.96) contrast(1.04) brightness(0.92);
+    /* Above .home-atlas-tone-layer (1); re-enable hits (parent uses pointer-events: none for pass-through UI). */
+    z-index: 2;
+    pointer-events: auto;
   }
 
+  /* Same cinematic language as /enter — covers only the atlas until the live iframe/map is painted */
+  .home-atlas-enter-veil {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    pointer-events: auto;
+    overflow: hidden;
+  }
+  .home-atlas-enter-veil.is-on {
+    display: flex;
+  }
+  .home-atlas-enter-veil__art {
+    position: absolute;
+    inset: -4%;
+    background-image: url('/aeloria-enter-cinematic-bg.png?v=20260427-enter-1');
+    background-size: cover;
+    background-position: 55% 48%;
+    filter: saturate(1.05) contrast(1.16) brightness(0.5);
+    z-index: 0;
+  }
+  .home-atlas-enter-veil__dim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 12%, rgba(2, 3, 6, 0.55) 62%, rgba(0, 0, 0, 0.92) 100%),
+      linear-gradient(180deg, rgba(2, 2, 4, 0.45) 0%, transparent 30%, rgba(2, 2, 4, 0.7) 100%);
+    pointer-events: none;
+  }
+  .home-atlas-enter-veil__hud {
+    position: relative;
+    z-index: 2;
+    max-width: 420px;
+  }
+  .home-atlas-enter-veil__eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(8px, 0.75vw, 11px);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: rgba(231, 194, 133, 0.55);
+    margin-bottom: 12px;
+  }
+  .home-atlas-enter-veil__title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 3.2vw, 40px);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, #fff7df 0%, #f4ead0 28%, #e7c285 60%, #7a5520 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.45));
+  }
+  .home-atlas-enter-veil__sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(15px, 1.8vw, 18px);
+    font-style: italic;
+    color: rgba(244, 234, 208, 0.72);
+  }
 
   .home-atlas-footer {
     position: absolute;
@@ -1835,7 +1908,8 @@
   .epic-dust {
     position: absolute;
     inset: 0;
-    z-index: 11;
+    /* Below .home-command-stage (5) so the interactive atlas isn’t washed out. */
+    z-index: 4;
     pointer-events: none;
     mix-blend-mode: screen;
     opacity: 0.55;
@@ -2204,17 +2278,6 @@
     to   { opacity: 0.55; }
   }
 
-  /* ── Map atlas: slow living breath ── */
-  .home-atlas-map {
-    animation: epicAtlasBreath 14s ease-in-out infinite alternate;
-    transform-origin: 50% 50%;
-    will-change: transform;
-  }
-  @keyframes epicAtlasBreath {
-    from { transform: scale(1.00); }
-    to   { transform: scale(1.035); }
-  }
-
   /* ── Reduced-motion respect (extended) ────────────────────── */
   @media (prefers-reduced-motion: reduce) {
     .home-screen,
@@ -2225,7 +2288,6 @@
     .command-bar-influence .command-influence-sigil,
     .epic-star,
     .epic-rune,
-    .home-atlas-map,
     .home-map-stage > .epic-fog,
     .center-event-title::before {
       animation: none !important;
@@ -2308,6 +2370,33 @@
     <section class="home-map-stage" aria-label="World map canvas">
       <div class="home-map-background" aria-hidden="true">
         <div class="home-atlas-frame">
+          <script>
+          (function atlasVeilEarlyListen() {
+            try {
+              if (sessionStorage.getItem('aeloriaAtlasVeil') !== '1') return;
+            } catch (e) {
+              return;
+            }
+            window.addEventListener(
+              'message',
+              function atlasVeilEarlyMsg(ev) {
+                var d = ev.data;
+                if (!d || typeof d !== 'object' || d.type !== 'aeloria-home-map-ready') return;
+                window.__aeloriaAtlasVeilPrimed = true;
+              },
+              false,
+            );
+          })();
+          </script>
+          <div id="home-atlas-enter-veil" class="home-atlas-enter-veil" hidden aria-hidden="true">
+            <div class="home-atlas-enter-veil__art" aria-hidden="true"></div>
+            <div class="home-atlas-enter-veil__dim" aria-hidden="true"></div>
+            <div class="home-atlas-enter-veil__hud">
+              <p class="home-atlas-enter-veil__eyebrow">Aeloria</p>
+              <h2 class="home-atlas-enter-veil__title">Entering the Realm</h2>
+              <p class="home-atlas-enter-veil__sub">The atlas unfurls&hellip;</p>
+            </div>
+          </div>
           {% if home_interactive_map %}
           <iframe
             class="home-atlas-embed"
@@ -5082,6 +5171,19 @@ function bindActions() {
   document.getElementById('modal-omen-submit')?.addEventListener('click', sendHomeOmen);
   document.getElementById('modal-dream-submit')?.addEventListener('click', sendHomeDream);
   document.getElementById('modal-seer-submit')?.addEventListener('click', sendModalSeer);
+
+  window.addEventListener('message', function onEmbedMapRegion(ev) {
+    var d = ev.data;
+    if (!d || typeof d !== 'object' || d.type !== 'aeloria-map-region-select') return;
+    var r = d.region;
+    if (!r || typeof r !== 'object' || !r.name) return;
+    var loc = document.getElementById('focus-location');
+    if (loc) loc.textContent = r.name;
+    var thought = document.getElementById('focus-summary');
+    if (thought && r.controller && r.controller !== '—') {
+      thought.textContent = 'Controller: ' + r.controller + '.';
+    }
+  });
 }
 
 function toggleActionPanel(kind) {
@@ -5436,6 +5538,7 @@ loadHome();
   try {
     var reduceMotion = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
 
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var svgEl = function (name) { return document.createElementNS(SVG_NS, name); };
@@ -5572,7 +5675,6 @@ loadHome();
 
     /* ── dust motes canvas (full-screen, screen-blend) ── */
     function attachDust() {
-      if (reduceMotion) return;
       var screen = document.querySelector('.home-screen');
       if (!screen || screen.querySelector(':scope > .epic-dust')) return;
       var canvas = document.createElement('canvas');
@@ -5581,7 +5683,7 @@ loadHome();
       screen.appendChild(canvas);
 
       var ctx = canvas.getContext('2d');
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       var motes = [];
       var raf = 0;
 
@@ -5591,7 +5693,7 @@ loadHome();
         canvas.height = Math.max(1, Math.floor(rect.height * dpr));
         canvas.style.width  = rect.width  + 'px';
         canvas.style.height = rect.height + 'px';
-        var density = Math.max(40, Math.min(110, Math.floor(rect.width * rect.height / 22000)));
+        var density = Math.max(28, Math.min(72, Math.floor(rect.width * rect.height / 38000)));
         motes = [];
         for (var i = 0; i < density; i++) {
           motes.push(spawnMote(rect.width, rect.height));
@@ -5687,6 +5789,7 @@ loadHome();
   try {
     var reduceMotion = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var svgEl = function (n) { return document.createElementNS(SVG_NS, n); };
 
@@ -5757,11 +5860,11 @@ loadHome();
       s.setAttribute('viewBox', '0 0 1000 500');
       s.setAttribute('preserveAspectRatio', 'none');
 
-      // Place ~28 stars in upper area with varied sizes and twinkle delays
+      // Upper-area stars (count kept moderate for paint cost on large viewports)
       var seed = 0;
       function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
       seed = 1337;
-      for (var i = 0; i < 28; i++) {
+      for (var i = 0; i < 17; i++) {
         var cx = rnd() * 1000;
         var cy = 30 + rnd() * 360;
         var r  = 0.6 + rnd() * 1.8;
@@ -5778,8 +5881,7 @@ loadHome();
         s.appendChild(c);
       }
 
-      // A handful of larger glowing stars
-      for (var j = 0; j < 5; j++) {
+      for (var j = 0; j < 3; j++) {
         var gx = rnd() * 1000;
         var gy = 30 + rnd() * 200;
         var glow = svgEl('circle');
@@ -5813,7 +5915,7 @@ loadHome();
       screen.appendChild(field);
 
       var alive = 0;
-      var MAX = 6;
+      var MAX = 4;
 
       function spawn() {
         if (alive >= MAX || document.hidden) return;
@@ -5958,6 +6060,78 @@ loadHome();
     }
   } catch (e) {
     if (window.console && console.warn) console.warn('epicOverlayTwo skipped:', e);
+  }
+})();
+</script>
+<script>
+(function homeAtlasEnterVeil() {
+  var KEY = 'aeloriaAtlasVeil';
+  function canRun() {
+    try {
+      return sessionStorage.getItem(KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+  function release(veil) {
+    try {
+      sessionStorage.removeItem(KEY);
+    } catch (e) {
+      /* ignore */
+    }
+    window.removeEventListener('message', onMsg);
+    if (!veil) return;
+    veil.classList.remove('is-on');
+    veil.setAttribute('hidden', '');
+    veil.setAttribute('aria-hidden', 'true');
+  }
+  var veilEl = null;
+  function onMsg(ev) {
+    var d = ev.data;
+    if (!d || typeof d !== 'object' || d.type !== 'aeloria-home-map-ready') return;
+    release(veilEl);
+  }
+  function init() {
+    if (!canRun()) return;
+    veilEl = document.getElementById('home-atlas-enter-veil');
+    if (window.__aeloriaAtlasVeilPrimed) {
+      release(veilEl);
+      return;
+    }
+    if (!veilEl) return;
+    veilEl.removeAttribute('hidden');
+    veilEl.classList.add('is-on');
+    veilEl.setAttribute('aria-hidden', 'false');
+    window.addEventListener('message', onMsg);
+    var staticMap = document.querySelector('.home-atlas-map');
+    if (staticMap) {
+      if (staticMap.complete && staticMap.naturalWidth > 0) {
+        release(veilEl);
+        return;
+      }
+      staticMap.addEventListener(
+        'load',
+        function () {
+          release(veilEl);
+        },
+        { once: true },
+      );
+      staticMap.addEventListener(
+        'error',
+        function () {
+          release(veilEl);
+        },
+        { once: true },
+      );
+    }
+    window.setTimeout(function () {
+      release(veilEl);
+    }, 120000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
   }
 })();
 </script>

@@ -16,6 +16,13 @@ const MAX_SPECIES_PER_LOCATION = 5;
 const ALLOWED_EXTENSIONS = new Set(['.md', '.txt', '.json']);
 const MASTER_LORE_FILE = 'master_lore.md';
 
+/** Set `AELORIA_DEBUG_LORE_API=1` to log per-location parsing (noisy during dev refresh). */
+function loreDebug(...args: unknown[]) {
+  if (process.env.AELORIA_DEBUG_LORE_API === '1') {
+    console.log(...args);
+  }
+}
+
 function toId(value: string): string {
   return value
     .toLowerCase()
@@ -93,7 +100,7 @@ function extractLocationsFromMasterText(text: string): LocationRow[] {
     const species = extractSpeciesFromText(currentBlock.join('\n'));
     const locationId = toId(currentLocationName);
     locations.push({ id: locationId, species });
-    console.log(
+    loreDebug(
       `[api/lore] location=${locationId} extractedSpecies=${species.length} names=${species.map((s) => s.name).join('|') || '(none)'}`,
     );
   };
@@ -147,9 +154,9 @@ export async function GET() {
   const projectRoot = process.cwd();
   const configuredLorePath = process.env.LORE_DOCS_PATH?.trim() || 'C:\\Users\\Josh\\Desktop\\lore_docs';
   const loreDocsPath = configuredLorePath || path.resolve(projectRoot, 'lore_docs');
-  console.log(`[api/lore] projectRoot=${projectRoot}`);
-  console.log(`[api/lore] configuredLorePath=${configuredLorePath || '(not set)'}`);
-  console.log(`[api/lore] resolvedLoreDocsPath=${loreDocsPath}`);
+  loreDebug(`[api/lore] projectRoot=${projectRoot}`);
+  loreDebug(`[api/lore] configuredLorePath=${configuredLorePath || '(not set)'}`);
+  loreDebug(`[api/lore] resolvedLoreDocsPath=${loreDocsPath}`);
 
   try {
     const stat = await fs.stat(loreDocsPath);
@@ -163,7 +170,7 @@ export async function GET() {
       );
     }
   } catch {
-    console.log('[api/lore] filesFound=0 (lore_docs missing)');
+    loreDebug('[api/lore] filesFound=0 (lore_docs missing)');
     return NextResponse.json(
       {
         error: 'Lore folder not found.',
@@ -176,14 +183,14 @@ export async function GET() {
   try {
     const entries = await fs.readdir(loreDocsPath, { withFileTypes: true });
     const files = entries.filter((entry) => entry.isFile());
-    console.log(`[api/lore] filesFound=${files.length}`);
+    loreDebug(`[api/lore] filesFound=${files.length}`);
     const locations: LocationRow[] = [];
     const masterPath = path.join(loreDocsPath, MASTER_LORE_FILE);
     let masterContent = '';
     try {
       masterContent = await fs.readFile(masterPath, 'utf-8');
     } catch {
-      console.log(`[api/lore] skippedFile=${MASTER_LORE_FILE} reason=missing_or_unreadable`);
+      loreDebug(`[api/lore] skippedFile=${MASTER_LORE_FILE} reason=missing_or_unreadable`);
       return NextResponse.json({ locations: [] });
     }
 
@@ -193,11 +200,13 @@ export async function GET() {
     } else {
       const extension = path.extname(MASTER_LORE_FILE).toLowerCase();
       if (!ALLOWED_EXTENSIONS.has(extension)) {
-        console.log(`[api/lore] skippedFile=${MASTER_LORE_FILE} reason=unsupported_extension`);
+        loreDebug(`[api/lore] skippedFile=${MASTER_LORE_FILE} reason=unsupported_extension`);
       } else {
         const locationId = toId(MASTER_LORE_FILE.replace(/\.[^/.]+$/, ''));
         const species = extension === '.json' ? extractSpeciesFromJson(masterContent) : extractSpeciesFromText(masterContent);
-        console.log(`[api/lore] location=${locationId} extractedSpecies=${species.length} names=${species.map((s) => s.name).join('|') || '(none)'}`);
+        loreDebug(
+          `[api/lore] location=${locationId} extractedSpecies=${species.length} names=${species.map((s) => s.name).join('|') || '(none)'}`,
+        );
         locations.push({ id: locationId, species });
       }
     }

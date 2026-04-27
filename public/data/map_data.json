@@ -1,0 +1,561 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Wintermark",
+        "name": "The Wintermark",
+        "faction_id": "The Wintermark",
+        "default_fill": "hsl(63, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.4688,
+              8.6833
+            ],
+            [
+              8.75,
+              8.7361
+            ],
+            [
+              9.2969,
+              6.3607
+            ],
+            [
+              6.8359,
+              6.0968
+            ],
+            [
+              4.9219,
+              7.1525
+            ],
+            [
+              5.4688,
+              8.6833
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Faerwood",
+        "name": "Shadow Court",
+        "faction_id": "Shadow Court",
+        "default_fill": "hsl(181, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.4375,
+              7.7331
+            ],
+            [
+              5.1953,
+              8.0499
+            ],
+            [
+              6.0156,
+              5.0411
+            ],
+            [
+              4.1016,
+              3.1935
+            ],
+            [
+              1.6406,
+              3.7214
+            ],
+            [
+              0.5469,
+              5.5689
+            ],
+            [
+              0.4375,
+              7.7331
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Glenhaven",
+        "name": "Glenhaven",
+        "faction_id": "Glenhaven",
+        "default_fill": "hsl(88, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.2188,
+              5.0411
+            ],
+            [
+              3.0078,
+              5.305
+            ],
+            [
+              3.8281,
+              1.8739
+            ],
+            [
+              0.9844,
+              1.0821
+            ],
+            [
+              0.2734,
+              2.6657
+            ],
+            [
+              0.2188,
+              5.0411
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Lostfeld",
+        "name": "Lostfeld",
+        "faction_id": "Lostfeld",
+        "default_fill": "hsl(117, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8281,
+              5.0411
+            ],
+            [
+              6.5625,
+              5.305
+            ],
+            [
+              7.1094,
+              2.6657
+            ],
+            [
+              4.9219,
+              2.1378
+            ],
+            [
+              3.5547,
+              3.4575
+            ],
+            [
+              3.8281,
+              5.0411
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Stonebreak",
+        "name": "Stonebreak Monastery",
+        "faction_id": "Stonebreak Monastery",
+        "default_fill": "hsl(272, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.375,
+              3.7214
+            ],
+            [
+              5.7422,
+              3.9326
+            ],
+            [
+              6.125,
+              2.6657
+            ],
+            [
+              4.9219,
+              2.2962
+            ],
+            [
+              4.1016,
+              2.9824
+            ],
+            [
+              4.375,
+              3.7214
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Eresteron",
+        "name": "Eresteron",
+        "faction_id": "Twin Cities",
+        "default_fill": "hsl(327, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.5625,
+              4.2493
+            ],
+            [
+              8.4766,
+              4.4604
+            ],
+            [
+              8.9688,
+              2.4018
+            ],
+            [
+              7.1094,
+              1.8211
+            ],
+            [
+              6.125,
+              2.7713
+            ],
+            [
+              6.5625,
+              4.2493
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Eldoria",
+        "name": "Eldoria",
+        "faction_id": "Twin Cities",
+        "default_fill": "hsl(327, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.4766,
+              4.4604
+            ],
+            [
+              10.9375,
+              3.827
+            ],
+            [
+              11.2656,
+              2.1378
+            ],
+            [
+              9.5703,
+              1.7155
+            ],
+            [
+              8.6953,
+              2.4545
+            ],
+            [
+              8.4766,
+              4.4604
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Groth",
+        "name": "Groth",
+        "faction_id": "Groth Clans",
+        "default_fill": "hsl(5, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.2969,
+              8.5777
+            ],
+            [
+              13.7813,
+              8.3666
+            ],
+            [
+              13.8906,
+              5.8328
+            ],
+            [
+              10.9375,
+              5.305
+            ],
+            [
+              9.5703,
+              6.8886
+            ],
+            [
+              9.2969,
+              8.5777
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Gilgeth",
+        "name": "Gilgeth",
+        "faction_id": "Gilgeth Clans",
+        "default_fill": "hsl(57, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              10.3906,
+              5.305
+            ],
+            [
+              13.6719,
+              4.7771
+            ],
+            [
+              13.3984,
+              2.4018
+            ],
+            [
+              10.9375,
+              2.6129
+            ],
+            [
+              10.2266,
+              3.9853
+            ],
+            [
+              10.3906,
+              5.305
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Dur Khadur",
+        "name": "Dur Khadur",
+        "faction_id": "Dur Khadur",
+        "default_fill": "hsl(172, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.5703,
+              2.6657
+            ],
+            [
+              12.3047,
+              2.2434
+            ],
+            [
+              12.0313,
+              0.8182
+            ],
+            [
+              9.5703,
+              1.0821
+            ],
+            [
+              9.0234,
+              1.8739
+            ],
+            [
+              9.5703,
+              2.6657
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Tidefall",
+        "name": "Tidefall",
+        "faction_id": "Tidefall",
+        "default_fill": "hsl(71, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.9219,
+              2.4018
+            ],
+            [
+              7.9297,
+              2.5601
+            ],
+            [
+              9.5703,
+              0.5543
+            ],
+            [
+              6.5625,
+              0.132
+            ],
+            [
+              4.9219,
+              1.0821
+            ],
+            [
+              4.9219,
+              2.4018
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Varkuun",
+        "name": "Varkuun",
+        "faction_id": "Varkuun",
+        "default_fill": "hsl(250, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.8359,
+              2.1378
+            ],
+            [
+              8.4766,
+              2.4018
+            ],
+            [
+              9.0234,
+              0.8182
+            ],
+            [
+              7.3828,
+              0.3431
+            ],
+            [
+              6.5625,
+              1.346
+            ],
+            [
+              6.8359,
+              2.1378
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Vilefin",
+        "name": "Vilefin",
+        "faction_id": "Vilefin",
+        "default_fill": "hsl(159, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9.2969,
+              1.8739
+            ],
+            [
+              13.7813,
+              2.4018
+            ],
+            [
+              13.7813,
+              0.2903
+            ],
+            [
+              9.8438,
+              0.0792
+            ],
+            [
+              9.2969,
+              1.8739
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "Dreadwind Isles",
+        "name": "Dreadwind Isles",
+        "faction_id": "Dreadwind Isles",
+        "default_fill": "hsl(94, 52%, 42%)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              11.7578,
+              6.6246
+            ],
+            [
+              13.6719,
+              6.8886
+            ],
+            [
+              13.7266,
+              3.7214
+            ],
+            [
+              12.3047,
+              3.4575
+            ],
+            [
+              11.7578,
+              6.6246
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

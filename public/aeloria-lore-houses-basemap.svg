@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 682" width="1024" height="682" role="img" aria-label="Aeloria house provinces (unlabeled)">
+  <rect width="1024" height="682" fill="#0a0c12"/>
+  <path id="frostvale__adkison" fill="hsl(241, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 516.00 120.80 L 500.00 220.00 L 360.00 140.00 Z"/>
+  <path id="frostvale__mcintosh" fill="hsl(93, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 400.00 24.00 L 640.00 20.00 L 680.00 200.00 L 500.00 220.00 L 360.00 140.00 Z"/>
+  <path id="frostvale__holter" fill="hsl(4, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 400.00 24.00 L 640.00 20.00 L 680.00 200.00 L 500.00 220.00 L 360.00 140.00 Z"/>
+  <path id="frostvale__duval" fill="hsl(184, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 400.00 24.00 L 640.00 20.00 L 680.00 200.00 L 500.00 220.00 L 360.00 140.00 Z"/>
+  <path id="faerwood__verlorn" fill="hsl(357, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 218.67 261.33 L 40.00 260.00 L 32.00 96.00 Z"/>
+  <path id="faerwood__nightborn" fill="hsl(332, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 218.67 261.33 L 380.00 72.00 L 440.00 300.00 Z"/>
+  <path id="faerwood__shadowveil" fill="hsl(225, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 218.67 261.33 L 300.00 440.00 L 120.00 400.00 Z"/>
+  <path id="glenhaven__wood" fill="hsl(347, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 121.60 440.00 L 220.00 280.00 L 280.00 540.00 Z"/>
+  <path id="glenhaven__darkleaf" fill="hsl(156, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 121.60 440.00 L 72.00 600.00 L 20.00 480.00 Z"/>
+  <path id="glenhaven__mistafae" fill="hsl(274, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 16.00 300.00 L 220.00 280.00 L 280.00 540.00 L 72.00 600.00 L 20.00 480.00 Z"/>
+  <path id="lostfeld__goldfinger-duke" fill="hsl(124, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 380.00 400.00 L 480.00 280.00 L 520.00 480.00 Z"/>
+  <path id="lostfeld__runewarden" fill="hsl(350, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 380.00 400.00 L 360.00 520.00 L 260.00 420.00 Z"/>
+  <path id="lostfeld__ironmaul" fill="hsl(170, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 280.00 300.00 L 480.00 280.00 L 520.00 480.00 L 360.00 520.00 L 260.00 420.00 Z"/>
+  <path id="stonebreak__monastery" fill="hsl(252, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 320.00 400.00 L 420.00 384.00 L 448.00 480.00 L 360.00 508.00 L 300.00 456.00 Z"/>
+  <path id="eresteron__aurand" fill="hsl(42, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 544.80 444.00 L 620.00 344.00 L 656.00 500.00 Z"/>
+  <path id="eresteron__braafhart" fill="hsl(76, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 544.80 444.00 L 520.00 544.00 L 448.00 472.00 Z"/>
+  <path id="eresteron__bower" fill="hsl(2, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 480.00 360.00 L 620.00 344.00 L 656.00 500.00 L 520.00 544.00 L 448.00 472.00 Z"/>
+  <path id="eldoria__lefleur" fill="hsl(309, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 716.00 460.80 L 800.00 392.00 L 824.00 520.00 Z"/>
+  <path id="eldoria__binx" fill="hsl(129, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 716.00 460.80 L 700.00 552.00 L 636.00 496.00 Z"/>
+  <path id="eldoria__dale" fill="hsl(102, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 620.00 344.00 L 800.00 392.00 L 824.00 520.00 L 700.00 552.00 L 636.00 496.00 Z"/>
+  <path id="groth__mijid" fill="hsl(231, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 840.80 152.00 L 1008.00 48.00 L 1016.00 240.00 Z"/>
+  <path id="groth__ashfang" fill="hsl(266, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 840.80 152.00 L 800.00 280.00 L 700.00 160.00 Z"/>
+  <path id="groth__syncar" fill="hsl(340, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 680.00 32.00 L 1008.00 48.00 L 1016.00 240.00 L 800.00 280.00 L 700.00 160.00 Z"/>
+  <path id="gilgeth__blackblood" fill="hsl(153, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 857.60 392.80 L 760.00 280.00 L 1000.00 320.00 Z"/>
+  <path id="gilgeth__ironhide" fill="hsl(238, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 857.60 392.80 L 980.00 500.00 L 800.00 484.00 Z"/>
+  <path id="gilgeth__redtusk" fill="hsl(50, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 760.00 280.00 L 1000.00 320.00 L 980.00 500.00 L 800.00 484.00 L 748.00 380.00 Z"/>
+  <path id="dur_khadur__gross" fill="hsl(129, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 768.00 550.40 L 880.00 620.00 L 700.00 600.00 Z"/>
+  <path id="dur_khadur__delonious" fill="hsl(3, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 700.00 480.00 L 900.00 512.00 L 880.00 620.00 L 700.00 600.00 L 660.00 540.00 Z"/>
+  <path id="dur_khadur__galfazzar" fill="hsl(227, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 700.00 480.00 L 900.00 512.00 L 880.00 620.00 L 700.00 600.00 L 660.00 540.00 Z"/>
+  <path id="dur_khadur__vercenti" fill="hsl(207, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 700.00 480.00 L 900.00 512.00 L 880.00 620.00 L 700.00 600.00 L 660.00 540.00 Z"/>
+  <path id="tidefall__ver-meer" fill="hsl(288, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 496.00 580.00 L 480.00 672.00 L 360.00 600.00 Z"/>
+  <path id="tidefall__highland-dusken" fill="hsl(111, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 360.00 500.00 L 580.00 488.00 L 700.00 640.00 L 480.00 672.00 L 360.00 600.00 Z"/>
+  <path id="tidefall__fish" fill="hsl(313, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 360.00 500.00 L 580.00 488.00 L 700.00 640.00 L 480.00 672.00 L 360.00 600.00 Z"/>
+  <path id="tidefall__mcgowan" fill="hsl(133, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 360.00 500.00 L 580.00 488.00 L 700.00 640.00 L 480.00 672.00 L 360.00 600.00 Z"/>
+  <path id="farrock__van-cleave" fill="hsl(102, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 500.00 520.00 L 620.00 500.00 L 660.00 620.00 L 540.00 656.00 L 480.00 580.00 Z"/>
+  <path id="vilefin__bloodware" fill="hsl(192, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 854.00 594.00 L 1008.00 660.00 L 720.00 676.00 Z"/>
+  <path id="vilefin__cogtooth" fill="hsl(356, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 680.00 540.00 L 1008.00 500.00 L 1008.00 660.00 L 720.00 676.00 Z"/>
+  <path id="vilefin__rustfang" fill="hsl(9, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 680.00 540.00 L 1008.00 500.00 L 1008.00 660.00 L 720.00 676.00 Z"/>
+  <path id="dreadwind_isles__blacktide" fill="hsl(286, 32%, 38%)" stroke="rgba(12,14,22,0.35)" stroke-width="0.6" d="M 860.00 180.00 L 1000.00 160.00 L 1004.00 400.00 L 900.00 420.00 Z"/>
+</svg>
