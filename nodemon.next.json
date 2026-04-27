@@ -1,0 +1,17 @@
+{
+  "watch": [
+    "app",
+    "components",
+    "lib",
+    "data",
+    "static",
+    "public",
+    "next.config.js",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "ext": "ts,tsx,js,jsx,mjs,cjs,json,css,scss,md,mdx",
+  "ignore": [".next/**", "node_modules/**"],
+  "exec": "next dev",
+  "delay": 1200
+}

@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
 
-function getMapsDir(): string {
-  const configuredPath = process.env.LORE_DOCS_PATH?.trim();
-  const lorePath = configuredPath || path.resolve(process.cwd(), 'lore');
-  return path.join(lorePath, 'maps');
-}
+import { readMapLayoutJson } from '@/lib/mapLayoutStorage';
 
 function safeFileName(fileName: string): string {
   return fileName.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 export async function GET(_request: NextRequest, context: { params: { fileName: string } }) {
-  const mapsDir = getMapsDir();
   const rawName = context.params.fileName;
   const fileName = safeFileName(rawName.endsWith('.json') ? rawName : `${rawName}.json`);
 
@@ -22,11 +15,11 @@ export async function GET(_request: NextRequest, context: { params: { fileName: 
   }
 
   try {
-    const filePath = path.join(mapsDir, fileName);
-    const content = await fs.readFile(filePath, 'utf-8');
+    const { layout, filePath } = await readMapLayoutJson(fileName);
     return NextResponse.json({
       fileName,
-      layout: JSON.parse(content),
+      path: filePath,
+      layout,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown map load error.';

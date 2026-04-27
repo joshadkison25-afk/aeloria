@@ -1,0 +1,19 @@
+{
+  "watch": ["."],
+  "ext": "py",
+  "ignore": [
+    "node_modules/**",
+    ".next/**",
+    "venv/**",
+    "logs/**",
+    "**/__pycache__/**",
+    "tests/**",
+    "public/**",
+    "history/**",
+    "conversations/**",
+    "*.json",
+    "*.md"
+  ],
+  "exec": "cross-env FLASK_DEBUG=1 python app.py",
+  "delay": 500
+}

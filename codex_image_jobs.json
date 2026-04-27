@@ -397,5 +397,38 @@
     "status": "queued",
     "created_tick": 32,
     "created_at": "2026-04-25T23:31:34.614424"
+  },
+  {
+    "key": "place:Aeloria",
+    "kind": "place",
+    "name": "Aeloria",
+    "prompt": "Location illustration for Aeloria: The day advanced under local simulation while the prophecy engine was unavailable.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-aeloria.png",
+    "static_path": "/static/illustrations/codex/place-aeloria.png",
+    "status": "queued",
+    "created_tick": 7,
+    "created_at": "2026-04-26T11:00:36.016791"
+  },
+  {
+    "key": "lore:The Clock Moves Without Prophecy",
+    "kind": "lore",
+    "name": "The Clock Moves Without Prophecy",
+    "prompt": "Major lore event illustration for The Clock Moves Without Prophecy: A quiet day passes without fresh divine insight. Existing tensions and political momentum continue shaping Aeloria.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-the-clock-moves-without-prophecy.png",
+    "static_path": "/static/illustrations/codex/lore-the-clock-moves-without-prophecy.png",
+    "status": "queued",
+    "created_tick": 7,
+    "created_at": "2026-04-26T11:00:36.017107"
+  },
+  {
+    "key": "lore:Stabilization: Dreadwind Isles \u2014 Open Sea",
+    "kind": "lore",
+    "name": "Stabilization: Dreadwind Isles \u2014 Open Sea",
+    "prompt": "Major lore event illustration for Stabilization: Dreadwind Isles \u2014 Open Sea: Dreadwind Isles committed resources to stabilize Open Sea.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-stabilization-dreadwind-isles-open-sea.png",
+    "static_path": "/static/illustrations/codex/lore-stabilization-dreadwind-isles-open-sea.png",
+    "status": "queued",
+    "created_tick": 7,
+    "created_at": "2026-04-26T11:00:36.017164"
   }
 ]

@@ -4,11 +4,20 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { regions } from '@/data/regions';
 import type { RegionDefinition } from '@/data/regions';
-import { getDataBounds, regionPathD, findRegionAtViewPoint, worldStateKeyForRegion } from '@/lib/mapGeography';
+import {
+  getDataBounds,
+  regionPathD,
+  findRegionAtViewPoint,
+  worldStateKeyForRegion,
+  pointInPolygon,
+  toViewBox,
+  type MapBounds,
+} from '@/lib/mapGeography';
 import { buildHexLandMask } from '@/lib/mapLandMask';
 
 type HexTile = { id: string; x: number; y: number; row: number; col: number };
 type ConfigMode = 'core' | 'optional' | 'custom';
+type CartographyMode = 'provinces' | 'hex';
 type LoreSpeciesOption = { id: string; name: string };
 type LoreLocation = { id: string; species: LoreSpeciesOption[] };
 type LoreResponse = { locations?: LoreLocation[] };
@@ -38,8 +47,14 @@ type SavedMapLayout = {
     version: number;
     savedAt: string;
     mapGrid?: { viewBox: [number, number]; hexSize: number };
+    cartographyMode?: CartographyMode;
   };
   ownership: Record<string, string | null>;
+  /** Hex id → location id (or '' for explicit unclaimed). Omitted keys in older files = not stored. */
+  locationByHex?: Record<string, string>;
+  /** CK3-style province paint (region id → faction id). */
+  regionFaction?: Record<string, string | null>;
+  regionLocation?: Record<string, string>;
 };
 type MapLocation = { id: string; name: string; centerX: number; centerY: number; radius: number };
 type LocationOption = { id: string; name: string };
@@ -48,7 +63,7 @@ type LocationAssignment = string | null;
 const VIEWBOX_WIDTH = 100;
 const VIEWBOX_HEIGHT = 100;
 /** Flat/pointy-hex “width”. Smaller = denser territory cells (CK3-style). */
-const HEX_SIZE = 1.2;
+const HEX_SIZE = 0.55;
 const HEX_WIDTH = HEX_SIZE;
 const HEX_HEIGHT = HEX_SIZE;
 const HEX_HORIZONTAL_STEP = HEX_WIDTH * 0.75;
@@ -68,7 +83,7 @@ const MAP_LOCATIONS: MapLocation[] = [
 
 const locationColors: Record<string, string> = {
   'twin-cities': '#facc15',
-  faerwood: '#166534',
+  faerwood: '#5b21b6',
   frostvale: '#93c5fd',
   farrock: '#92400e',
   lostfeld: '#6b7280',
@@ -76,6 +91,39 @@ const locationColors: Record<string, string> = {
   vilefin: '#4ade80',
   'orc-dominion': '#7c2d12',
 };
+
+const MAP_EDITOR_DRAFT_STORAGE_KEY = 'aeloria-map-editor-draft-v1';
+const MAP_EDITOR_DRAFT_VERSION = 3;
+const MAP_EDITOR_DRAFT_DEBOUNCE_MS = 1000;
+
+type MapEditorDraftV1 = {
+  v: number;
+  savedAt: string;
+  configMode: ConfigMode;
+  ownership: Record<string, string | null>;
+  locationByHex: Record<string, string>;
+  /** When present and different from HEX_SIZE, draft is ignored (grid geometry changed). */
+  hexSize?: number;
+  cartographyMode?: CartographyMode;
+  provinceFaction?: Record<string, string | null>;
+  provinceLocation?: Record<string, string>;
+};
+
+function normalizeDraftOwnership(
+  incoming: Record<string, string | null>,
+  hexTiles: HexTile[],
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const h of hexTiles) {
+    out[h.id] = incoming[h.id] ?? null;
+  }
+  return out;
+}
+
+function parseDraftConfigMode(value: unknown): ConfigMode {
+  if (value === 'optional' || value === 'custom' || value === 'core') return value;
+  return 'core';
+}
 
 function normalizeKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -106,6 +154,7 @@ function hexPoints(x: number, y: number, width: number, height: number): string 
 function buildHexGrid(): HexTile[] {
   const tiles: HexTile[] = [];
   let index = 0;
+  // Pass 1: same row-major order as before so existing saved layouts (hex-0, hex-1, …) still line up.
   for (let row = 0; ; row += 1) {
     const y = row * HEX_VERTICAL_STEP;
     // Extra vertical extent so the bottom of the art (incl. ocean) gets full coverage without shifting old hex indices
@@ -118,7 +167,126 @@ function buildHexGrid(): HexTile[] {
       index += 1;
     }
   }
+  // Pass 2: odd staggered rows start at col 0 with x = rowOffset, leaving a gap on the left in [0, rowOffset).
+  // Add col = -1 for those rows so the hex mesh reaches x = 0 and the art is fully tiled (new ids; old saves still load).
+  for (let row = 0; ; row += 1) {
+    const y = row * HEX_VERTICAL_STEP;
+    if (y > VIEWBOX_HEIGHT + 2 * HEX_HEIGHT) break;
+    if (row % 2 === 0) continue;
+    const col = -1;
+    const rowOffset = HEX_WIDTH * 0.5;
+    const x = col * HEX_HORIZONTAL_STEP + rowOffset;
+    if (x + HEX_WIDTH <= 0 || x >= VIEWBOX_WIDTH) continue;
+    tiles.push({ id: `hex-${index}`, x, y, row, col });
+    index += 1;
+  }
   return tiles;
+}
+
+function hexCentersInRegion(
+  r: RegionDefinition,
+  hexTiles: HexTile[],
+  hexCenterById: Map<string, { cx: number; cy: number }>,
+  bounds: MapBounds,
+): HexTile[] {
+  const out: HexTile[] = [];
+  for (const h of hexTiles) {
+    const p = hexCenterById.get(h.id);
+    if (!p) continue;
+    if (pointInPolygon(p.cx, p.cy, r.coordinates, bounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT)) out.push(h);
+  }
+  return out;
+}
+
+function majorityKey(counts: Map<string, number>): string | null {
+  let best: string | null = null;
+  let bestN = 0;
+  for (const [k, n] of counts) {
+    if (n > bestN) {
+      bestN = n;
+      best = k;
+    }
+  }
+  return best;
+}
+
+/** Derive per-region faction from hex ownership (hex centers inside each province polygon). */
+function hexOwnershipToProvinceFactions(
+  ownership: Record<string, string | null>,
+  hexTiles: HexTile[],
+  hexCenterById: Map<string, { cx: number; cy: number }>,
+  bounds: MapBounds,
+  regionList: RegionDefinition[],
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const r of regionList) {
+    const inside = hexCentersInRegion(r, hexTiles, hexCenterById, bounds);
+    const tallies = new Map<string, number>();
+    for (const h of inside) {
+      const v = ownership[h.id];
+      if (v == null || v === '') continue;
+      tallies.set(v, (tallies.get(v) || 0) + 1);
+    }
+    out[r.id] = majorityKey(tallies);
+  }
+  return out;
+}
+
+function hexLocationsToProvinceLocations(
+  locationByHex: Record<string, LocationAssignment>,
+  hexTiles: HexTile[],
+  hexCenterById: Map<string, { cx: number; cy: number }>,
+  bounds: MapBounds,
+  regionList: RegionDefinition[],
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const r of regionList) {
+    const inside = hexCentersInRegion(r, hexTiles, hexCenterById, bounds);
+    const tallies = new Map<string, number>();
+    for (const h of inside) {
+      const hasManual = Object.prototype.hasOwnProperty.call(locationByHex, h.id);
+      const manual = hasManual ? locationByHex[h.id] : null;
+      const resolved =
+        manual === '' ? null : manual || locationForHex(h.x, h.y)?.id || null;
+      if (!resolved) continue;
+      tallies.set(resolved, (tallies.get(resolved) || 0) + 1);
+    }
+    const top = majorityKey(tallies);
+    if (top) out[r.id] = top;
+  }
+  return out;
+}
+
+function provinceFactionsToHexOwnership(
+  provinceFaction: Record<string, string | null>,
+  hexTiles: HexTile[],
+  bounds: MapBounds,
+  regionList: RegionDefinition[],
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const h of hexTiles) {
+    const cx = h.x + HEX_WIDTH * 0.5;
+    const cy = h.y + HEX_HEIGHT * 0.5;
+    const reg = findRegionAtViewPoint(cx, cy, regionList, bounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
+    out[h.id] = reg ? provinceFaction[reg.id] ?? null : null;
+  }
+  return out;
+}
+
+function provinceLocationsToHexLocations(
+  provinceLocation: Record<string, string>,
+  hexTiles: HexTile[],
+  bounds: MapBounds,
+  regionList: RegionDefinition[],
+): Record<string, LocationAssignment> {
+  const out: Record<string, LocationAssignment> = {};
+  for (const h of hexTiles) {
+    const cx = h.x + HEX_WIDTH * 0.5;
+    const cy = h.y + HEX_HEIGHT * 0.5;
+    const reg = findRegionAtViewPoint(cx, cy, regionList, bounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
+    if (reg && provinceLocation[reg.id]) out[h.id] = provinceLocation[reg.id];
+  }
+  return out;
 }
 
 function deriveHexOwnership(world: WorldResponse | null): Record<string, string | null> {
@@ -561,8 +729,12 @@ function regionControllerLabel(world: WorldResponse | null, r: RegionDefinition)
 export default function FantasyMap() {
   const hexTiles = useMemo(() => buildHexGrid(), []);
   const dataBounds = useMemo(() => getDataBounds(regions), []);
-  /** On by default so the hex layer covers land + water for painting. */
+  /** On by default in hex mode; province (CK3) mode uses shapes and keeps the grid visual-only. */
   const [showStrategicHex, setShowStrategicHex] = useState(true);
+  /** Province polygons vs hex-cell painting. */
+  const [cartographyMode, setCartographyMode] = useState<CartographyMode>('provinces');
+  const [provinceFactions, setProvinceFactions] = useState<Record<string, string | null>>({});
+  const [provinceLocations, setProvinceLocations] = useState<Record<string, string>>({});
   /** When false, lore region shapes are for hit-test / hover only — no sim faction wash. */
   const [showPoliticalTints, setShowPoliticalTints] = useState(false);
   const [hoveredRegion, setHoveredRegion] = useState<RegionDefinition | null>(null);
@@ -579,12 +751,16 @@ export default function FantasyMap() {
   const [locationByHex, setLocationByHex] = useState<Record<string, LocationAssignment>>({});
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [selectedFactionId, setSelectedFactionId] = useState('');
-  const [isMouseDown, setIsMouseDown] = useState(false);
+  /** Synchronous (ref) so drag-paint sees button state before React re-renders. */
+  const paintButtonHeldRef = useRef(false);
   const [hoveredHexId, setHoveredHexId] = useState<string | null>(null);
   const [selectedHexId, setSelectedHexId] = useState<string | null>(null);
   const [brushRadius, setBrushRadius] = useState<0 | 1 | 2>(1);
   const [landByHex, setLandByHex] = useState<Record<string, boolean> | null>(null);
   const [landMaskStatus, setLandMaskStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('loading');
+  /** After localStorage draft restore runs (or skips); avoids debounce overwriting draft before hydrate. */
+  const [mapDraftHydrated, setMapDraftHydrated] = useState(false);
+  const [mapSaveBanner, setMapSaveBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
 
   const hoveredHex = hoveredHexId ? hexTiles.find((hex) => hex.id === hoveredHexId) || null : null;
   const selectedHex = selectedHexId ? hexTiles.find((hex) => hex.id === selectedHexId) || null : null;
@@ -635,6 +811,14 @@ export default function FantasyMap() {
   );
 
   const activeLocationId = useMemo(() => {
+    if (cartographyMode === 'provinces') {
+      const r = selectedRegion || hoveredRegion;
+      if (!r) return null;
+      if (Object.prototype.hasOwnProperty.call(provinceLocations, r.id)) {
+        return provinceLocations[r.id];
+      }
+      return null;
+    }
     const source = selectedHex || hoveredHex;
     if (!source) return null;
     if (Object.prototype.hasOwnProperty.call(locationByHex, source.id)) {
@@ -642,7 +826,15 @@ export default function FantasyMap() {
       return assigned === '' ? null : assigned;
     }
     return locationForHex(source.x, source.y)?.id || null;
-  }, [selectedHex, hoveredHex, locationByHex]);
+  }, [
+    cartographyMode,
+    selectedRegion,
+    hoveredRegion,
+    provinceLocations,
+    selectedHex,
+    hoveredHex,
+    locationByHex,
+  ]);
 
   const activeLocationName = useMemo(() => {
     if (!activeLocationId) return null;
@@ -684,6 +876,51 @@ export default function FantasyMap() {
     }
   }, [isLocationPaintMode, isEditMode]);
 
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') {
+      setMapDraftHydrated(true);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(MAP_EDITOR_DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as MapEditorDraftV1;
+      if ((draft.v !== 2 && draft.v !== MAP_EDITOR_DRAFT_VERSION) || draft.ownership == null || typeof draft.ownership !== 'object') {
+        return;
+      }
+      if (draft.hexSize != null && Math.abs(draft.hexSize - HEX_SIZE) > 1e-6) {
+        return;
+      }
+      const mode = parseDraftConfigMode(draft.configMode);
+      setConfigMode(mode);
+      const key = `lore::${mode}`;
+      setLayoutsByConfig((prev) => ({
+        ...prev,
+        [key]: normalizeDraftOwnership(draft.ownership, hexTiles),
+      }));
+      if (draft.locationByHex && typeof draft.locationByHex === 'object') {
+        setLocationByHex({ ...draft.locationByHex });
+      }
+      if (draft.v >= 3 && (draft.cartographyMode === 'provinces' || draft.cartographyMode === 'hex')) {
+        setCartographyMode(draft.cartographyMode);
+      } else {
+        setCartographyMode('hex');
+        setProvinceFactions({});
+        setProvinceLocations({});
+      }
+      if (draft.v >= 3 && draft.provinceFaction && typeof draft.provinceFaction === 'object') {
+        setProvinceFactions({ ...draft.provinceFaction });
+      }
+      if (draft.v >= 3 && draft.provinceLocation && typeof draft.provinceLocation === 'object') {
+        setProvinceLocations({ ...draft.provinceLocation });
+      }
+    } catch {
+      // ignore corrupt draft
+    } finally {
+      setMapDraftHydrated(true);
+    }
+  }, [hexTiles]);
+
   useEffect(() => {
     setLayoutsByConfig((prev) => {
       if (prev[configKey]) return prev;
@@ -700,19 +937,151 @@ export default function FantasyMap() {
     for (const hex of hexTiles) seeded[hex.id] = null;
     return seeded;
   }, [configKey, hexTiles, layoutsByConfig]);
-  const factionByHex = effectiveOwnership;
 
-  const mapViewport = useMapViewport();
-  const pointsByHexId = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const h of hexTiles) m.set(h.id, hexPoints(h.x, h.y, HEX_WIDTH, HEX_HEIGHT));
-    return m;
-  }, [hexTiles]);
   const hexCenterById = useMemo(() => {
     const m = new Map<string, { cx: number; cy: number }>();
     for (const h of hexTiles) {
       m.set(h.id, { cx: h.x + HEX_WIDTH * 0.5, cy: h.y + HEX_HEIGHT * 0.5 });
     }
+    return m;
+  }, [hexTiles]);
+
+  const derivedFactionFromProvinces = useMemo(
+    () => provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, regions),
+    [provinceFactions, hexTiles, dataBounds],
+  );
+  const derivedLocationFromProvinces = useMemo(
+    () => provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, regions),
+    [provinceLocations, hexTiles, dataBounds],
+  );
+
+  const factionByHex = cartographyMode === 'provinces' ? derivedFactionFromProvinces : effectiveOwnership;
+  const effectiveLocationByHex: Record<string, LocationAssignment> =
+    cartographyMode === 'provinces' ? derivedLocationFromProvinces : locationByHex;
+
+  function handleCartographyModeChange(next: CartographyMode) {
+    if (next === cartographyMode) return;
+    if (next === 'provinces') {
+      const own = layoutsByConfig[configKey] ?? effectiveOwnership;
+      setProvinceFactions(hexOwnershipToProvinceFactions(own, hexTiles, hexCenterById, dataBounds, regions));
+      setProvinceLocations(hexLocationsToProvinceLocations(locationByHex, hexTiles, hexCenterById, dataBounds, regions));
+    } else {
+      setLayoutsByConfig((p) => ({
+        ...p,
+        [configKey]: provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, regions),
+      }));
+      setLocationByHex((prev) => ({
+        ...prev,
+        ...provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, regions),
+      }));
+    }
+    setCartographyMode(next);
+  }
+
+  const writeMapEditorDraft = useCallback(
+    (
+      layout: Record<string, string | null>,
+      loc: Record<string, LocationAssignment>,
+      mode: ConfigMode,
+      carto: CartographyMode,
+      provF: Record<string, string | null>,
+      provL: Record<string, string>,
+    ) => {
+      if (typeof window === 'undefined') return;
+      const locationSaved: Record<string, string> = {};
+      for (const h of hexTiles) {
+        if (Object.prototype.hasOwnProperty.call(loc, h.id)) {
+          const v = loc[h.id];
+          locationSaved[h.id] = v === '' || v == null ? '' : String(v);
+        }
+      }
+      try {
+        const payload: MapEditorDraftV1 = {
+          v: MAP_EDITOR_DRAFT_VERSION,
+          savedAt: new Date().toISOString(),
+          configMode: mode,
+          ownership: layout,
+          locationByHex: locationSaved,
+          hexSize: HEX_SIZE,
+          cartographyMode: carto,
+          provinceFaction: provF,
+          provinceLocation: provL,
+        };
+        localStorage.setItem(MAP_EDITOR_DRAFT_STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        console.warn('Map editor draft save failed:', e);
+      }
+    },
+    [hexTiles],
+  );
+
+  const layoutForDraft = useMemo(() => {
+    if (cartographyMode === 'provinces') {
+      return derivedFactionFromProvinces;
+    }
+    return effectiveOwnership;
+  }, [cartographyMode, derivedFactionFromProvinces, effectiveOwnership]);
+
+  const locationForDraft = useMemo(() => {
+    if (cartographyMode === 'provinces') {
+      return derivedLocationFromProvinces;
+    }
+    return locationByHex;
+  }, [cartographyMode, derivedLocationFromProvinces, locationByHex]);
+
+  useEffect(() => {
+    if (!mapDraftHydrated) return;
+    const t = window.setTimeout(() => {
+      writeMapEditorDraft(
+        layoutForDraft,
+        locationForDraft,
+        configMode,
+        cartographyMode,
+        provinceFactions,
+        provinceLocations,
+      );
+    }, MAP_EDITOR_DRAFT_DEBOUNCE_MS);
+    return () => window.clearTimeout(t);
+  }, [
+    mapDraftHydrated,
+    layoutForDraft,
+    locationForDraft,
+    configMode,
+    cartographyMode,
+    provinceFactions,
+    provinceLocations,
+    writeMapEditorDraft,
+  ]);
+
+  useEffect(() => {
+    if (!mapDraftHydrated) return;
+    const flush = () => {
+      writeMapEditorDraft(
+        layoutForDraft,
+        locationForDraft,
+        configMode,
+        cartographyMode,
+        provinceFactions,
+        provinceLocations,
+      );
+    };
+    window.addEventListener('beforeunload', flush);
+    return () => window.removeEventListener('beforeunload', flush);
+  }, [
+    mapDraftHydrated,
+    layoutForDraft,
+    locationForDraft,
+    configMode,
+    cartographyMode,
+    provinceFactions,
+    provinceLocations,
+    writeMapEditorDraft,
+  ]);
+
+  const mapViewport = useMapViewport();
+  const pointsByHexId = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const h of hexTiles) m.set(h.id, hexPoints(h.x, h.y, HEX_WIDTH, HEX_HEIGHT));
     return m;
   }, [hexTiles]);
   function updateActiveLayout(mutator: (current: Record<string, string | null>) => Record<string, string | null>) {
@@ -742,7 +1111,53 @@ export default function FantasyMap() {
     return out;
   }
 
+  function handleProvincePaint(region: RegionDefinition) {
+    const geometryLocationId = (() => {
+      if (region.coordinates.length === 0) return null;
+      const cx = region.coordinates.reduce((s, p) => s + p[0], 0) / region.coordinates.length;
+      const cy = region.coordinates.reduce((s, p) => s + p[1], 0) / region.coordinates.length;
+      const { vx, vy } = toViewBox(cx, cy, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
+      return locationForHex(vx, vy)?.id || null;
+    })();
+    const resolvedLocationId =
+      (Object.prototype.hasOwnProperty.call(provinceLocations, region.id) ? provinceLocations[region.id] : null) ||
+      selectedLocationId ||
+      geometryLocationId ||
+      locationOptions[0]?.id ||
+      null;
+
+    if (isLocationPaintMode) {
+      if (isEraseMode) {
+        setProvinceLocations((prev) => {
+          const next = { ...prev };
+          delete next[region.id];
+          return next;
+        });
+        return;
+      }
+      const locationId = resolvedLocationId || 'unassigned';
+      setProvinceLocations((prev) => ({ ...prev, [region.id]: locationId }));
+      return;
+    }
+
+    if (!isEditMode) return;
+    if (isEraseMode) {
+      setProvinceFactions((prev) => {
+        const next = { ...prev };
+        next[region.id] = null;
+        return next;
+      });
+      return;
+    }
+    const speciesForLocation = resolvedLocationId ? speciesByLocation.get(normalizeKey(resolvedLocationId)) || [] : [];
+    const factionId =
+      selectedFactionId || speciesForLocation[0]?.id || allPaintFactionOptions[0]?.id || 'unclaimed';
+    if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
+    setProvinceFactions((prev) => ({ ...prev, [region.id]: factionId }));
+  }
+
   function handleHexPaintClick(hex: HexTile) {
+    if (cartographyMode === 'provinces') return;
     const targets = brushTargets(hex);
     const isLocationModeActive = isLocationPaintMode;
     const isFactionModeActive = !isLocationModeActive && isEditMode;
@@ -794,12 +1209,23 @@ export default function FantasyMap() {
   }
 
   useEffect(() => {
-    const stopDrag = () => setIsMouseDown(false);
-    window.addEventListener('mouseup', stopDrag);
-    return () => window.removeEventListener('mouseup', stopDrag);
+    const endPaint = (e: PointerEvent) => {
+      if (e.button === 0) paintButtonHeldRef.current = false;
+    };
+    window.addEventListener('pointerup', endPaint, true);
+    window.addEventListener('pointercancel', endPaint, true);
+    return () => {
+      window.removeEventListener('pointerup', endPaint, true);
+      window.removeEventListener('pointercancel', endPaint, true);
+    };
   }, []);
 
   function clearLayout() {
+    if (cartographyMode === 'provinces') {
+      setProvinceFactions({});
+      setProvinceLocations({});
+      return;
+    }
     updateActiveLayout((current) => {
       const next = { ...current };
       for (const id of Object.keys(next)) next[id] = null;
@@ -808,10 +1234,57 @@ export default function FantasyMap() {
   }
 
   function clearAllPaint() {
+    if (cartographyMode === 'provinces') {
+      setProvinceFactions({});
+      setProvinceLocations({});
+      return;
+    }
     const clearedLocations: Record<string, LocationAssignment> = {};
     for (const hex of hexTiles) clearedLocations[hex.id] = '';
     setLocationByHex(clearedLocations);
     clearLayout();
+  }
+
+  function fillEntireMap() {
+    if (cartographyMode === 'provinces') {
+      if (isLocationPaintMode) {
+        if (isEraseMode) return;
+        const lid = selectedLocationId || locationOptions[0]?.id || 'unassigned';
+        const next: Record<string, string> = {};
+        for (const r of regions) next[r.id] = lid;
+        setProvinceLocations(next);
+        return;
+      }
+      if (!isEditMode || isEraseMode) return;
+      const factionId =
+        selectedFactionId ||
+        allPaintFactionOptions[0]?.id ||
+        'unclaimed';
+      if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
+      const next: Record<string, string | null> = {};
+      for (const r of regions) next[r.id] = factionId;
+      setProvinceFactions(next);
+      return;
+    }
+    if (isLocationPaintMode) {
+      if (isEraseMode) return;
+      const lid = selectedLocationId || locationOptions[0]?.id || 'unassigned';
+      const next: Record<string, LocationAssignment> = {};
+      for (const h of hexTiles) next[h.id] = lid;
+      setLocationByHex(next);
+      return;
+    }
+    if (!isEditMode || isEraseMode) return;
+    const factionId =
+      selectedFactionId ||
+      allPaintFactionOptions[0]?.id ||
+      'unclaimed';
+    if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
+    setFactionByHex((prev) => {
+      const next = { ...prev };
+      for (const h of hexTiles) next[h.id] = factionId;
+      return next;
+    });
   }
 
   function resetLayoutToBackend() {
@@ -820,6 +1293,11 @@ export default function FantasyMap() {
       for (const hex of hexTiles) next[hex.id] = backendOwnership?.[hex.id] ?? null;
       return next;
     });
+    if (cartographyMode === 'provinces') {
+      const next: Record<string, string | null> = {};
+      for (const hex of hexTiles) next[hex.id] = backendOwnership?.[hex.id] ?? null;
+      setProvinceFactions(hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, regions));
+    }
   }
 
   async function loadWorld() {
@@ -857,29 +1335,115 @@ export default function FantasyMap() {
     }
   }
 
-  async function saveCurrentLayout() {
-    const baseName = configMode === 'custom' ? 'map_custom' : `map_${configMode}`;
-    const payload: SavedMapLayout = {
+  function buildLayoutSavePayload(): SavedMapLayout {
+    const ownershipSaved =
+      cartographyMode === 'provinces' ? derivedFactionFromProvinces : effectiveOwnership;
+    const locSource =
+      cartographyMode === 'provinces' ? derivedLocationFromProvinces : locationByHex;
+    const locationSaved: Record<string, string> = {};
+    for (const h of hexTiles) {
+      if (Object.prototype.hasOwnProperty.call(locSource, h.id)) {
+        const v = locSource[h.id];
+        locationSaved[h.id] = v === '' || v == null ? '' : String(v);
+      }
+    }
+    const regionFaction: Record<string, string | null> = {};
+    const regionLocation: Record<string, string> = {};
+    if (cartographyMode === 'provinces') {
+      for (const r of regions) {
+        regionFaction[r.id] = provinceFactions[r.id] ?? null;
+        if (provinceLocations[r.id]) regionLocation[r.id] = provinceLocations[r.id];
+      }
+    } else {
+      const pf = hexOwnershipToProvinceFactions(
+        effectiveOwnership,
+        hexTiles,
+        hexCenterById,
+        dataBounds,
+        regions,
+      );
+      const pl = hexLocationsToProvinceLocations(
+        locationByHex,
+        hexTiles,
+        hexCenterById,
+        dataBounds,
+        regions,
+      );
+      for (const r of regions) {
+        regionFaction[r.id] = pf[r.id] ?? null;
+        if (pl[r.id]) regionLocation[r.id] = pl[r.id];
+      }
+    }
+    return {
       metadata: {
         speciesSet: activeLocationId || 'all',
         configMode,
-        version: 2,
+        version: 5,
         savedAt: new Date().toISOString(),
         mapGrid: { viewBox: [VIEWBOX_WIDTH, VIEWBOX_HEIGHT] as [number, number], hexSize: HEX_SIZE },
+        cartographyMode,
       },
-      ownership: effectiveOwnership,
+      ownership: ownershipSaved,
+      locationByHex: locationSaved,
+      regionFaction,
+      regionLocation,
     };
+  }
+
+  function downloadLayoutJsonFile() {
+    const payload = buildLayoutSavePayload();
+    const baseName = configMode === 'custom' ? 'map_custom' : `map_${configMode}`;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${baseName}-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveCurrentLayout() {
+    setMapSaveBanner(null);
+    const baseName = configMode === 'custom' ? 'map_custom' : `map_${configMode}`;
+    const payload = buildLayoutSavePayload();
     try {
       const response = await fetch('/api/lore/maps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName: `${baseName}.json`, layout: payload }),
       });
-      if (!response.ok) throw new Error('Failed to save map layout.');
-      const saved = (await response.json()) as { fileName?: string };
-      if (saved.fileName) setSelectedMapFile(saved.fileName);
+      const result = (await response.json()) as {
+        ok?: boolean;
+        fileName?: string;
+        path?: string;
+        mapsDir?: string;
+        error?: string;
+        details?: string;
+      };
+      if (!response.ok) {
+        const msg = [result.error, result.details].filter(Boolean).join(' — ') || `HTTP ${response.status}`;
+        setMapSaveBanner({ kind: 'err', text: msg });
+        downloadLayoutJsonFile();
+        return;
+      }
+      if (result.fileName) setSelectedMapFile(result.fileName);
       await listSavedMaps();
+      writeMapEditorDraft(
+        layoutForDraft,
+        locationForDraft,
+        configMode,
+        cartographyMode,
+        provinceFactions,
+        provinceLocations,
+      );
+      const pathLine = result.path ? ` ${result.path}` : '';
+      setMapSaveBanner({ kind: 'ok', text: `Saved.${pathLine}` });
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Network or unknown error';
+      setMapSaveBanner({ kind: 'err', text: msg });
+      downloadLayoutJsonFile();
       console.error('Could not save map layout:', error);
     }
   }
@@ -893,7 +1457,53 @@ export default function FantasyMap() {
       if (!payload.layout?.ownership) return;
       const next: Record<string, string | null> = {};
       for (const hex of hexTiles) next[hex.id] = payload.layout.ownership[hex.id] ?? null;
+      const loc: Record<string, LocationAssignment> = {};
+      if (payload.layout.locationByHex && typeof payload.layout.locationByHex === 'object') {
+        for (const [id, v] of Object.entries(payload.layout.locationByHex)) {
+          loc[id] = v === '' ? '' : String(v);
+        }
+      }
       setLayoutsByConfig((prev) => ({ ...prev, [configKey]: next }));
+      setLocationByHex(loc);
+      const meta = payload.layout.metadata;
+      const loadedCarto: CartographyMode =
+        meta.cartographyMode === 'provinces' || meta.cartographyMode === 'hex'
+          ? meta.cartographyMode
+          : payload.layout.regionFaction && Object.keys(payload.layout.regionFaction).length > 0
+            ? 'provinces'
+            : 'hex';
+      let provF: Record<string, string | null>;
+      if (payload.layout.regionFaction && typeof payload.layout.regionFaction === 'object') {
+        provF = {};
+        for (const r of regions) provF[r.id] = payload.layout.regionFaction[r.id] ?? null;
+      } else {
+        provF = hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, regions);
+      }
+      let provL: Record<string, string>;
+      if (payload.layout.regionLocation && typeof payload.layout.regionLocation === 'object') {
+        provL = { ...payload.layout.regionLocation };
+      } else {
+        provL = hexLocationsToProvinceLocations(loc, hexTiles, hexCenterById, dataBounds, regions);
+      }
+      setCartographyMode(loadedCarto);
+      setProvinceFactions(provF);
+      setProvinceLocations(provL);
+      const draftOwn =
+        loadedCarto === 'provinces'
+          ? provinceFactionsToHexOwnership(provF, hexTiles, dataBounds, regions)
+          : next;
+      const draftLoc =
+        loadedCarto === 'provinces'
+          ? provinceLocationsToHexLocations(provL, hexTiles, dataBounds, regions)
+          : loc;
+      writeMapEditorDraft(draftOwn, draftLoc, configMode, loadedCarto, provF, provL);
+      const savedHex = payload.layout.metadata.mapGrid?.hexSize;
+      if (savedHex != null && Math.abs(savedHex - HEX_SIZE) > 1e-6) {
+        setMapSaveBanner({
+          kind: 'err',
+          text: `This layout was saved with hex size ${savedHex}; the editor now uses ${HEX_SIZE}. Hex IDs no longer match the same spots — repaint or keep a backup.`,
+        });
+      }
     } catch (error) {
       console.error('Could not load selected map layout:', error);
     }
@@ -980,11 +1590,28 @@ export default function FantasyMap() {
             Realm map
           </h2>
           <p className="fantasy-map-sidebar__description" style={{ fontSize: '0.88rem' }}>
-            Map loads with a <strong>blank</strong> canvas: paint on the hex layer, or turn on tints. Scroll to
-            zoom, middle-drag to pan, WASD to move.
+            Map loads with a <strong>blank</strong> canvas. <strong>Province</strong> mode (CK3-style) paints whole
+            regions; <strong>hex</strong> mode uses the strategic grid. Scroll to zoom, middle-drag to pan, WASD to move.
           </p>
 
           <div className="fantasy-map-sidebar__card" style={{ marginTop: 8 }}>
+            <label style={{ display: 'grid', gap: 6, color: 'rgba(246,235,209,0.9)', fontSize: '0.86rem' }}>
+              Cartography
+              <select
+                value={cartographyMode}
+                onChange={(e) => handleCartographyModeChange(e.target.value as CartographyMode)}
+                style={{
+                  border: '1px solid rgba(250,233,197,0.2)',
+                  borderRadius: 6,
+                  padding: '8px 10px',
+                  background: 'rgba(20,17,26,0.9)',
+                  color: '#f6ebd1',
+                }}
+              >
+                <option value="provinces">Province shapes (CK3-style)</option>
+                <option value="hex">Hex grid</option>
+              </select>
+            </label>
             <label
               className="fantasy-map-sidebar__item"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
@@ -1040,7 +1667,9 @@ export default function FantasyMap() {
               Species: <strong>{selectedFactionId || 'None'}</strong> · Config: <strong>{configMode}</strong> · Location: <strong>{activeLocationName || 'None'}</strong>
             </p>
             <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.9rem' }}>
-              Mode: <strong>{isLocationPaintMode ? 'Location' : 'Faction'}</strong> · Tool: <strong>{isEraseMode ? 'Erase' : 'Paint'}</strong>
+              Cartography: <strong>{cartographyMode === 'provinces' ? 'Provinces' : 'Hex'}</strong> · Mode:{' '}
+              <strong>{isLocationPaintMode ? 'Location' : 'Faction'}</strong> · Tool:{' '}
+              <strong>{isEraseMode ? 'Erase' : 'Paint'}</strong>
             </p>
             <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.82rem' }}>
               Coastline:{' '}
@@ -1184,8 +1813,31 @@ export default function FantasyMap() {
           <div className="fantasy-map-sidebar__card">
             <h3 className="fantasy-map-sidebar__label">Save / load</h3>
             <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.8rem', marginBottom: 8 }}>
-              Manual paint: hold left mouse and drag. Brush controls how many neighboring hexes paint at once.
+              Manual paint: hold left mouse and drag.
+              {cartographyMode === 'hex'
+                ? ' Brush sizes apply to neighboring hexes.'
+                : ' In province mode, drag across borders to paint multiple regions.'}{' '}
+              This browser auto-saves a draft about every second (and when you close the tab); Save layout writes the
+              file on disk (hex ownership is always derived for compatibility).
             </p>
+            {mapSaveBanner && (
+              <p
+                className="fantasy-map-sidebar__empty"
+                style={{
+                  fontSize: '0.78rem',
+                  marginBottom: 8,
+                  color: mapSaveBanner.kind === 'ok' ? '#a7f3d0' : '#fecaca',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {mapSaveBanner.kind === 'err' ? 'Save failed: ' : ''}
+                {mapSaveBanner.text}
+                {mapSaveBanner.kind === 'err'
+                  ? ' A backup .json was downloaded — copy it into lore/maps or lore_docs/maps if needed.'
+                  : ''}
+              </p>
+            )}
             <label style={{ display: 'grid', gap: 4, color: 'rgba(246,235,209,0.9)', fontSize: '0.8rem', marginBottom: 8 }}>
               Brush
               <select
@@ -1227,6 +1879,16 @@ export default function FantasyMap() {
                 <span>Erase</span>
                 <span>{isEraseMode ? 'on' : 'off'}</span>
               </button>
+              <button
+                type="button"
+                onClick={fillEntireMap}
+                className="fantasy-map-sidebar__item"
+                disabled={isEraseMode}
+                title={isEraseMode ? 'Turn off erase first' : 'Paint every hex with the current faction or location'}
+              >
+                <span>Fill entire map</span>
+                <span>⬛</span>
+              </button>
               <button type="button" onClick={() => void loadWorld()} className="fantasy-map-sidebar__item">
                 <span>Load from world</span>
                 <span>↻</span>
@@ -1246,6 +1908,18 @@ export default function FantasyMap() {
               <button type="button" onClick={() => void saveCurrentLayout()} className="fantasy-map-sidebar__item">
                 <span>Save layout</span>
                 <span>✓</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMapSaveBanner(null);
+                  downloadLayoutJsonFile();
+                  setMapSaveBanner({ kind: 'ok', text: 'Download started (check your Downloads folder).' });
+                }}
+                className="fantasy-map-sidebar__item"
+              >
+                <span>Download JSON backup</span>
+                <span>↓</span>
               </button>
               <label style={{ display: 'grid', gap: 4, color: 'rgba(246,235,209,0.9)', fontSize: '0.8rem' }}>
                 Saved maps
@@ -1322,14 +1996,18 @@ export default function FantasyMap() {
                   viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
                   preserveAspectRatio="none"
                   className="fantasy-map-political"
+                  onPointerDown={(e) => {
+                    if (cartographyMode === 'provinces' && e.button === 0) paintButtonHeldRef.current = true;
+                  }}
                   onPointerMove={(e) => {
-                    if (showStrategicHex) return;
+                    if (cartographyMode !== 'provinces' && showStrategicHex) return;
                     updatePoliticalHover(e.clientX, e.clientY, e.currentTarget);
                   }}
                   onPointerLeave={() => {
-                    if (!showStrategicHex) setHoveredRegion(null);
+                    setHoveredRegion(null);
                   }}
                   onClick={(e) => {
+                    if (cartographyMode === 'provinces') return;
                     if (showStrategicHex) return;
                     const el = e.currentTarget;
                     const rect = el.getBoundingClientRect();
@@ -1339,32 +2017,64 @@ export default function FantasyMap() {
                       findRegionAtViewPoint(x, y, regions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT),
                     );
                   }}
-                  style={{ pointerEvents: showStrategicHex ? 'none' : 'auto' }}
+                  style={{ pointerEvents: cartographyMode === 'provinces' || !showStrategicHex ? 'auto' : 'none' }}
                 >
                   {regions.map((r) => {
                     const d = regionPathD(r, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
                     const isH = hoveredRegion?.id === r.id;
                     const isS = selectedRegion?.id === r.id;
                     const simFill = politicalFill(r);
-                    const fill = showPoliticalTints ? simFill : 'transparent';
-                    const fillOpacity = showPoliticalTints
+                    const manualFaction = provinceFactions[r.id];
+                    const manualLoc = provinceLocations[r.id];
+                    let paintFill: string | null = null;
+                    let paintBaseOp = 0;
+                    if (cartographyMode === 'provinces') {
+                      if (isLocationPaintMode && manualLoc) {
+                        paintFill = locationColors[manualLoc] || colorForFaction(`location-${manualLoc}`);
+                        paintBaseOp = 0.46;
+                      } else if (!isLocationPaintMode && manualFaction) {
+                        paintFill = colorForFaction(manualFaction);
+                        paintBaseOp = 0.48;
+                      }
+                    }
+                    const fill = paintFill ?? (showPoliticalTints ? simFill : 'transparent');
+                    const fillOpacity = paintFill
                       ? isS
-                        ? 0.55
+                        ? 0.58
                         : isH
-                          ? 0.5
-                          : 0.34
-                      : 0;
-                    const stroke = showPoliticalTints
-                      ? isS
-                        ? 'rgba(255,250,220,0.85)'
-                        : isH
-                          ? 'rgba(200,220,255,0.75)'
-                          : 'rgba(0,0,0,0.35)'
-                      : isS
-                        ? 'rgba(255,250,220,0.9)'
-                        : isH
-                          ? 'rgba(200,220,255,0.55)'
-                          : 'transparent';
+                          ? 0.52
+                          : paintBaseOp
+                      : showPoliticalTints
+                        ? isS
+                          ? 0.55
+                          : isH
+                            ? 0.5
+                            : 0.34
+                        : 0;
+                    const stroke = (() => {
+                      if (cartographyMode === 'provinces') {
+                        return isS
+                          ? 'rgba(255,250,220,0.9)'
+                          : isH
+                            ? 'rgba(200,220,255,0.78)'
+                            : 'rgba(0,0,0,0.4)';
+                      }
+                      return showPoliticalTints
+                        ? isS
+                          ? 'rgba(255,250,220,0.85)'
+                          : isH
+                            ? 'rgba(200,220,255,0.75)'
+                            : 'rgba(0,0,0,0.35)'
+                        : isS
+                          ? 'rgba(255,250,220,0.9)'
+                          : isH
+                            ? 'rgba(200,220,255,0.55)'
+                            : 'transparent';
+                    })();
+                    const strokeW = (() => {
+                      if (cartographyMode === 'provinces') return isH || isS ? 0.42 : 0.3;
+                      return showPoliticalTints && !isH && !isS ? 0.28 : isH || isS || showPoliticalTints ? 0.4 : 0;
+                    })();
                     return (
                       <path
                         key={r.id}
@@ -1372,9 +2082,21 @@ export default function FantasyMap() {
                         fill={fill}
                         fillOpacity={fillOpacity}
                         stroke={stroke}
-                        strokeWidth={showPoliticalTints && !isH && !isS ? 0.28 : isH || isS || showPoliticalTints ? 0.4 : 0}
+                        strokeWidth={strokeW}
                         vectorEffect="non-scaling-stroke"
-                        style={{ transition: 'fill-opacity 0.12s, stroke 0.12s' }}
+                        style={{
+                          transition: 'fill-opacity 0.12s, stroke 0.12s',
+                          cursor: cartographyMode === 'provinces' ? 'pointer' : undefined,
+                        }}
+                        onPointerEnter={() => {
+                          if (cartographyMode !== 'provinces') return;
+                          if (paintButtonHeldRef.current) handleProvincePaint(r);
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRegion(r);
+                          if (cartographyMode === 'provinces') handleProvincePaint(r);
+                        }}
                       />
                     );
                   })}
@@ -1383,17 +2105,17 @@ export default function FantasyMap() {
                   viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
                   preserveAspectRatio="none"
                   className="fantasy-map-hexes"
-                  onMouseDown={() => setIsMouseDown(true)}
-                  onMouseUp={() => setIsMouseDown(false)}
-                  onMouseLeave={() => setIsMouseDown(false)}
-                  style={{ pointerEvents: showStrategicHex ? 'auto' : 'none' }}
+                  onPointerDown={(e) => {
+                    if (e.button === 0 && cartographyMode === 'hex') paintButtonHeldRef.current = true;
+                  }}
+                  style={{ pointerEvents: showStrategicHex && cartographyMode === 'hex' ? 'auto' : 'none' }}
                 >
                   {hexTiles.map((hex) => {
                     const isSea = landByHex != null && landByHex[hex.id] === false;
                     const isHovered = hoveredHexId === hex.id;
                     const factionId = factionByHex?.[hex.id] ?? null;
-                    const hasManualLocation = Object.prototype.hasOwnProperty.call(locationByHex, hex.id);
-                    const manualLocation = hasManualLocation ? locationByHex[hex.id] : null;
+                    const hasManualLocation = Object.prototype.hasOwnProperty.call(effectiveLocationByHex, hex.id);
+                    const manualLocation = hasManualLocation ? effectiveLocationByHex[hex.id] : null;
                     const geometryLocationId = locationForHex(hex.x, hex.y)?.id || null;
                     const resolvedLocationId =
                       manualLocation === ''
@@ -1403,23 +2125,19 @@ export default function FantasyMap() {
                     const locationFill = resolvedLocationId
                       ? locationColors[resolvedLocationId] || colorForFaction(`location-${resolvedLocationId}`)
                       : null;
-                    const hasPaint = Boolean(factionFill || (resolvedLocationId && hasManualLocation));
-                    const fill = isSea
-                      ? 'transparent'
-                      : factionFill
-                        ? factionFill
-                        : locationFill
-                          ? locationFill
-                          : 'transparent';
-                    const baseOp = isSea
-                      ? 0
-                      : factionFill
-                        ? 1
-                        : locationFill
-                          ? 0.5
-                          : 0;
-                    const fillOpacity = hasPaint || (locationFill && !isSea) ? baseOp : 0;
-                    const isEmpty = fillOpacity === 0;
+                    // Land vs sea is cosmetic (stroke); faction/location paint must show on the whole grid including ocean.
+                    const baseFill = factionFill || locationFill || 'transparent';
+                    const baseOp = factionFill ? 1 : locationFill ? 0.5 : 0;
+                    const rawFillOpacity = baseOp;
+                    const isEmpty = rawFillOpacity < 0.001;
+                    // SVG hit-testing: fill-opacity 0 / transparent often misses pointer events; only
+                    // the hairline stroke hits. A nearly invisible face makes click + drag paint reliable.
+                    const fill = isEmpty ? 'rgba(5, 6, 11, 0.08)' : baseFill;
+                    const fillOpacity = isEmpty
+                      ? 1
+                      : isHovered
+                        ? Math.min(rawFillOpacity + 0.12, 1)
+                        : rawFillOpacity;
                     const stroke = (() => {
                       if (isHovered) {
                         return isSea ? 'rgba(160, 210, 255, 0.7)' : 'rgba(188, 240, 255, 0.9)';
@@ -1438,16 +2156,16 @@ export default function FantasyMap() {
                         key={hex.id}
                         points={pointsByHexId.get(hex.id) ?? ''}
                         fill={fill}
-                        fillOpacity={isHovered ? Math.min(fillOpacity + 0.12, 1) : fillOpacity}
+                        fillOpacity={fillOpacity}
                         stroke={stroke}
-                        strokeWidth={0.07}
+                        strokeWidth={0.038}
                         vectorEffect="non-scaling-stroke"
                         style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-                        onMouseEnter={() => {
+                        onPointerEnter={() => {
                           setHoveredHexId(hex.id);
-                          if (isMouseDown) handleHexPaintClick(hex);
+                          if (paintButtonHeldRef.current) handleHexPaintClick(hex);
                         }}
-                        onMouseLeave={() => setHoveredHexId(null)}
+                        onPointerLeave={() => setHoveredHexId(null)}
                         onClick={() => {
                           setSelectedHexId(hex.id);
                           handleHexPaintClick(hex);
@@ -1467,7 +2185,26 @@ export default function FantasyMap() {
               <span className="fantasy-map-compass__n">N</span>
             </div>
 
-            {hoveredHexId && (
+            {cartographyMode === 'provinces' && hoveredRegion && (
+              <div
+                className="fantasy-map-hex-hud"
+                style={{
+                  left: 12,
+                  bottom: 12,
+                }}
+              >
+                <span className="fantasy-map-hex-hud__id">{hoveredRegion.id}</span>
+                <span>
+                  {hoveredRegion.name} · loc{' '}
+                  {provinceLocations[hoveredRegion.id] || '—'} · faction{' '}
+                  {(() => {
+                    const fid = provinceFactions[hoveredRegion.id] ?? null;
+                    return (fid ? factionNameById.get(fid) : null) || fid || '—';
+                  })()}
+                </span>
+              </div>
+            )}
+            {cartographyMode === 'hex' && hoveredHexId && (
               <div
                 className="fantasy-map-hex-hud"
                 style={{
@@ -1479,10 +2216,10 @@ export default function FantasyMap() {
                 {hoveredHex && (
                   <span>
                     {hoveredHex.x.toFixed(1)}, {hoveredHex.y.toFixed(1)} ·{' '}
-                    {Object.prototype.hasOwnProperty.call(locationByHex, hoveredHex.id)
-                      ? locationByHex[hoveredHex.id] === ''
+                    {Object.prototype.hasOwnProperty.call(effectiveLocationByHex, hoveredHex.id)
+                      ? effectiveLocationByHex[hoveredHex.id] === ''
                         ? 'Unclaimed'
-                        : locationByHex[hoveredHex.id]
+                        : String(effectiveLocationByHex[hoveredHex.id])
                       : locationForHex(hoveredHex.x, hoveredHex.y)?.id || 'Unclaimed'}{' '}
                     · {(() => {
                       const fid = factionByHex?.[hoveredHex.id] ?? null;

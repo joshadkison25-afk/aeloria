@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}Aeloria - Families{% endblock %}
+
+{% block head %}
+<style>
+  .fam-wrap { padding: 28px 22px 36px; }
+  .fam-head h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+  .fam-sub { color: var(--text-sec); margin-top: 4px; margin-bottom: 14px; }
+  .fam-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .fam-select {
+    height: 38px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    padding: 0 10px;
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+  }
+  .fam-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .fam-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 14px;
+  }
+  .fam-card h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .fam-list { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow: auto; }
+  .fam-row {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .fam-row .meta { color: var(--text-sec); font-size: 12px; margin-top: 3px; }
+  .fam-tree {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 10px;
+  }
+  .fam-tier { margin-bottom: 8px; }
+  .fam-tier-label {
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .fam-pill {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 4px 8px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+  }
+  @media (max-width: 1000px) {
+    .fam-controls { grid-template-columns: 1fr; }
+    .fam-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="cine-hero cine-hero-compact" data-bg="/static/illustrations/ui/heroes/families.png">
+  <div class="cine-hero-bg"></div>
+  <div class="cine-hero-veil"></div>
+  <div class="cine-hero-rays" aria-hidden="true"></div>
+  <div class="cine-hero-fog"  aria-hidden="true"></div>
+  <div class="cine-hero-grain" aria-hidden="true"></div>
+  <div class="cine-hero-vignette" aria-hidden="true"></div>
+  <div class="cine-hero-inner">
+    <p class="cine-kicker">Bloodlines &amp; Houses</p>
+    <h1 class="cine-title">Family Trees</h1>
+    <div class="cine-rule">
+      <span class="cine-rule-diamond"></span>
+      Dynasties of the realm
+      <span class="cine-rule-diamond"></span>
+    </div>
+    <p class="cine-flourish">Track houses, ruling dynasties, heirs, and relationship pressure while the simulation runs.</p>
+  </div>
+</header>
+
+<div class="fam-wrap">
+
+  <div class="fam-controls">
+    <select id="faction-select" class="fam-select"></select>
+    <select id="house-select" class="fam-select"></select>
+    <select id="person-select" class="fam-select"></select>
+  </div>
+
+  <div class="fam-grid">
+    <section class="fam-card">
+      <h3>Dynasty Tree View</h3>
+      <div id="tree-view" class="fam-tree"></div>
+    </section>
+
+    <section class="fam-card">
+      <h3>House Members</h3>
+      <div id="house-members" class="fam-list"></div>
+    </section>
+
+    <section class="fam-card">
+      <h3>Selected Character Links</h3>
+      <div id="char-links" class="fam-list"></div>
+    </section>
+
+    <section class="fam-card">
+      <h3>Faction Family Risk</h3>
+      <div id="risk-list" class="fam-list"></div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let state = {};
+let houseChars = [];
+
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
+}
+
+function membersForHouse(house) {
+  return houseChars
+    .filter((c) => `${c.house || ''}` === house)
+    .sort((a, b) => (Number(b.influenceScore || 0) - Number(a.influenceScore || 0)));
+}
+
+function buildTreeForHouse(house) {
+  const members = membersForHouse(house);
+  const byTier = {
+    leader: members.filter((m) => (m.coreRole || '').toLowerCase() === 'leader'),
+    heir: members.filter((m) => (m.coreRole || '').toLowerCase() === 'heir'),
+    line: members.filter((m) => !['leader', 'heir'].includes((m.coreRole || '').toLowerCase()))
+  };
+  const renderTier = (label, rows) => `
+    <div class="fam-tier">
+      <div class="fam-tier-label">${esc(label)}</div>
+      <div>${rows.length ? rows.map((r) => `<span class="fam-pill">${esc(r.name)} (${esc(r.coreRole || r.role || 'Member')})</span>`).join('') : '<span class="fam-pill">None</span>'}</div>
+    </div>
+  `;
+  return [
+    renderTier('Ruler / House Head', byTier.leader),
+    renderTier('Heir Layer', byTier.heir),
+    renderTier('Extended Line', byTier.line)
+  ].join('');
+}
+
+function renderRiskList() {
+  const box = document.getElementById('risk-list');
+  const byFaction = (state.family_politics && Array.isArray(state.family_politics.by_faction))
+    ? state.family_politics.by_faction
+    : [];
+  box.innerHTML = byFaction.length
+    ? byFaction.map((row) => `
+      <div class="fam-row">
+        <strong>${esc(row.faction || 'Unknown')}</strong> — risk ${esc(row.risk_level ?? '-')}
+        <div class="meta">House: ${esc(row.ruling_house || 'Unknown')} | Size: ${esc(row.family_size ?? '-')} | Heirs: ${esc(row.heir_count ?? '-')}</div>
+      </div>
+    `).join('')
+    : '<div class="fam-row">No family politics data yet.</div>';
+}
+
+function renderMembers(house) {
+  const members = membersForHouse(house);
+  const box = document.getElementById('house-members');
+  box.innerHTML = members.length
+    ? members.map((m) => `
+      <div class="fam-row">
+        <strong>${esc(m.name)}</strong> — ${esc(m.coreRole || m.role || 'Member')}
+        <div class="meta">Faction: ${esc(m.faction)} | Age: ${esc(m.age)} | Influence: ${esc(m.influenceScore ?? '-')} | Status: ${esc(m.status || 'alive')}</div>
+      </div>
+    `).join('')
+    : '<div class="fam-row">No members in this house.</div>';
+}
+
+function renderCharacterLinks(name) {
+  const box = document.getElementById('char-links');
+  const c = houseChars.find((x) => x.name === name);
+  if (!c) {
+    box.innerHTML = '<div class="fam-row">Select a character to inspect links.</div>';
+    return;
+  }
+  const rel = c.relationships && typeof c.relationships === 'object' ? Object.entries(c.relationships) : [];
+  box.innerHTML = rel.length
+    ? rel.slice(0, 24).map(([target, val]) => `
+      <div class="fam-row">
+        <strong>${esc(target)}</strong>
+        <div class="meta">Trust: ${esc(val.trust ?? '-')} | Respect: ${esc(val.respect ?? '-')} | Fear: ${esc(val.fear ?? '-')}</div>
+      </div>
+    `).join('')
+    : '<div class="fam-row">No relationship links recorded for this character.</div>';
+}
+
+function populateControls() {
+  const factionSel = document.getElementById('faction-select');
+  const houseSel = document.getElementById('house-select');
+  const personSel = document.getElementById('person-select');
+
+  const factions = [...new Set(houseChars.map((c) => c.faction).filter(Boolean))].sort();
+  factionSel.innerHTML = `<option value="">All Factions</option>` + factions.map((f) => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+
+  const rebuildHouses = () => {
+    const f = factionSel.value;
+    const houses = [...new Set(houseChars.filter((c) => !f || c.faction === f).map((c) => c.house).filter(Boolean))].sort();
+    houseSel.innerHTML = houses.map((h) => `<option value="${esc(h)}">${esc(h)}</option>`).join('');
+    rebuildPeople();
+    refreshViews();
+  };
+  const rebuildPeople = () => {
+    const house = houseSel.value;
+    const people = houseChars.filter((c) => !house || c.house === house).map((c) => c.name).sort();
+    personSel.innerHTML = people.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  };
+  const refreshViews = () => {
+    const house = houseSel.value;
+    document.getElementById('tree-view').innerHTML = house ? buildTreeForHouse(house) : '<div class="fam-row">Select a house.</div>';
+    renderMembers(house);
+    renderCharacterLinks(personSel.value);
+  };
+
+  factionSel.addEventListener('change', rebuildHouses);
+  houseSel.addEventListener('change', () => { rebuildPeople(); refreshViews(); });
+  personSel.addEventListener('change', refreshViews);
+
+  rebuildHouses();
+}
+
+async function loadFamilies() {
+  const r = await fetch('/api/state');
+  state = await r.json();
+  houseChars = Array.isArray(state.house_characters) ? state.house_characters : [];
+  renderRiskList();
+  populateControls();
+}
+
+loadFamilies();
+setInterval(loadFamilies, 30000);
+</script>
+{% endblock %}

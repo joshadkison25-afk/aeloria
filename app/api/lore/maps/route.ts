@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+import { getMapSaveDirCandidates, writeLayoutToFirstWritableDir } from '@/lib/mapLayoutStorage';
+
 type SavedMapLayout = {
   metadata: {
     speciesSet: string;
@@ -12,40 +14,42 @@ type SavedMapLayout = {
   ownership: Record<string, string | null>;
 };
 
-function getMapsDir(): string {
-  const configuredPath = process.env.LORE_DOCS_PATH?.trim();
-  const lorePath = configuredPath || path.resolve(process.cwd(), 'lore');
-  return path.join(lorePath, 'maps');
-}
-
 function safeFileName(fileName: string): string {
   return fileName.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 export async function GET() {
-  const mapsDir = getMapsDir();
-  try {
-    await fs.mkdir(mapsDir, { recursive: true });
-    const entries = await fs.readdir(mapsDir, { withFileTypes: true });
-    const files = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.json')).map((entry) => entry.name);
-    return NextResponse.json({
-      mapsPath: mapsDir,
-      files: files.sort(),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown maps listing error.';
+  const names = new Set<string>();
+  const errors: string[] = [];
+  let firstOkDir = '';
+  for (const mapsDir of getMapSaveDirCandidates()) {
+    try {
+      await fs.mkdir(mapsDir, { recursive: true });
+      if (!firstOkDir) firstOkDir = mapsDir;
+      const entries = await fs.readdir(mapsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.endsWith('.json')) names.add(entry.name);
+      }
+    } catch (err) {
+      errors.push(`${mapsDir}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  if (names.size === 0 && errors.length >= getMapSaveDirCandidates().length) {
     return NextResponse.json(
       {
         error: 'Failed to list saved maps.',
-        details: message,
+        details: errors.join(' | '),
       },
       { status: 500 },
     );
   }
+  return NextResponse.json({
+    mapsPath: firstOkDir || path.join(process.cwd(), 'lore', 'maps'),
+    files: Array.from(names).sort(),
+  });
 }
 
 export async function POST(request: NextRequest) {
-  const mapsDir = getMapsDir();
   try {
     const body = (await request.json()) as {
       fileName?: string;
@@ -61,10 +65,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'layout with metadata and ownership is required.' }, { status: 400 });
     }
 
-    await fs.mkdir(mapsDir, { recursive: true });
-    const filePath = path.join(mapsDir, fileName);
-    await fs.writeFile(filePath, JSON.stringify(body.layout, null, 2), 'utf-8');
-    return NextResponse.json({ ok: true, fileName, path: filePath });
+    const { filePath, mapsDir } = await writeLayoutToFirstWritableDir(fileName, body.layout);
+    return NextResponse.json({ ok: true, fileName, path: filePath, mapsDir });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown map save error.';
     return NextResponse.json(

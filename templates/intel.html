@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Aeloria - Intel{% endblock %}
+
+{% block head %}
+<style>
+  .intel-wrap { padding: 28px 22px 34px; }
+  .intel-head { margin-bottom: 18px; }
+  .intel-head h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+  .intel-sub { color: var(--text-sec); margin-top: 4px; }
+  .intel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .intel-metric {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 12px;
+  }
+  .intel-metric .k {
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+  }
+  .intel-metric .v { color: var(--text); font-size: 20px; margin-top: 4px; }
+
+  .intel-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .intel-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 14px;
+  }
+  .intel-card h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .intel-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow: auto; }
+  .intel-row {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .intel-row strong { color: var(--gold-bright); }
+  .intel-small { color: var(--text-sec); font-size: 13px; }
+
+  .intel-key-table {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .intel-key-table th, .intel-key-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 13px;
+  }
+  .intel-key-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--surface2);
+  }
+  @media (max-width: 1050px) {
+    .intel-grid { grid-template-columns: 1fr 1fr; }
+    .intel-sections { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="cine-hero cine-hero-compact" data-bg="/static/illustrations/ui/heroes/intel.png">
+  <div class="cine-hero-bg"></div>
+  <div class="cine-hero-veil"></div>
+  <div class="cine-hero-rays" aria-hidden="true"></div>
+  <div class="cine-hero-fog"  aria-hidden="true"></div>
+  <div class="cine-hero-grain" aria-hidden="true"></div>
+  <div class="cine-hero-vignette" aria-hidden="true"></div>
+  <div class="cine-hero-inner">
+    <p class="cine-kicker">The Watch</p>
+    <h1 class="cine-title">World Intel</h1>
+    <div class="cine-rule">
+      <span class="cine-rule-diamond"></span>
+      Live visibility
+      <span class="cine-rule-diamond"></span>
+    </div>
+    <p class="cine-flourish">Live visibility into simulation systems, pressure, and emerging outcomes.</p>
+  </div>
+</header>
+
+<div class="intel-wrap">
+
+  <div class="intel-grid">
+    <div class="intel-metric"><div class="k">Tick</div><div class="v" id="m-tick">-</div></div>
+    <div class="intel-metric"><div class="k">Active Events</div><div class="v" id="m-events">-</div></div>
+    <div class="intel-metric"><div class="k">Active Tensions</div><div class="v" id="m-tensions">-</div></div>
+    <div class="intel-metric"><div class="k">War Outcomes</div><div class="v" id="m-war">-</div></div>
+  </div>
+
+  <div class="intel-sections">
+    <section class="intel-card">
+      <h3>Primary Event</h3>
+      <div class="intel-row"><strong id="primary-name">-</strong></div>
+      <div class="intel-row intel-small" id="primary-summary">-</div>
+      <div class="intel-row intel-small" id="primary-meta">-</div>
+    </section>
+
+    <section class="intel-card">
+      <h3>Recent Events</h3>
+      <div class="intel-list" id="recent-list"></div>
+    </section>
+
+    <section class="intel-card">
+      <h3>Faction Pressure</h3>
+      <div class="intel-list" id="pressure-list"></div>
+    </section>
+
+    <section class="intel-card">
+      <h3>Sim Systems Snapshot</h3>
+      <div class="intel-list" id="systems-list"></div>
+    </section>
+  </div>
+
+  <table class="intel-key-table">
+    <thead>
+      <tr><th>State Key</th><th>Type</th><th>Size/Value</th></tr>
+    </thead>
+    <tbody id="key-tbody"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
+}
+function typeName(v) {
+  if (Array.isArray(v)) return 'array';
+  if (v === null) return 'null';
+  return typeof v;
+}
+function sizeValue(v) {
+  if (Array.isArray(v)) return `${v.length} items`;
+  if (v && typeof v === 'object') return `${Object.keys(v).length} keys`;
+  if (typeof v === 'string') return v.slice(0, 40);
+  return String(v);
+}
+async function loadIntel() {
+  const r = await fetch('/api/state');
+  const s = await r.json();
+  document.getElementById('m-tick').textContent = s.tick ?? '-';
+  document.getElementById('m-events').textContent = Array.isArray(s.active_events) ? s.active_events.length : 0;
+  document.getElementById('m-tensions').textContent = Array.isArray(s.active_tensions) ? s.active_tensions.length : 0;
+  document.getElementById('m-war').textContent = Array.isArray(s.war_outcomes) ? s.war_outcomes.length : 0;
+
+  const p = (s.primary_event && typeof s.primary_event === 'object') ? s.primary_event : {};
+  document.getElementById('primary-name').textContent = p.name || 'No primary event';
+  document.getElementById('primary-summary').textContent = p.summary || 'No summary available.';
+  document.getElementById('primary-meta').textContent = `Severity: ${p.severity ?? '-'} | Stage: ${p.stage ?? '-'} | Trend: ${p.trend ?? '-'}`;
+
+  const recent = Array.isArray(s.recent_events) ? s.recent_events.slice(0, 12) : [];
+  document.getElementById('recent-list').innerHTML = recent.length
+    ? recent.map((e) => `<div class="intel-row"><strong>${esc(e.region || 'Aeloria')}</strong> — ${esc(e.text || e.summary || 'No detail')}</div>`).join('')
+    : '<div class="intel-row intel-small">No recent events recorded.</div>';
+
+  const pressure = Array.isArray(s.faction_event_pressure) ? s.faction_event_pressure.slice(0, 16) : [];
+  document.getElementById('pressure-list').innerHTML = pressure.length
+    ? pressure.map((row) => `<div class="intel-row"><strong>${esc(row.faction || 'Unknown')}</strong> — pressure ${esc(row.pressure ?? row.event_pressure ?? '-')}</div>`).join('')
+    : '<div class="intel-row intel-small">No faction pressure rows currently present.</div>';
+
+  const systems = [
+    ['Military Decisions', Array.isArray(s.military_faction_decisions) ? s.military_faction_decisions.length : 0],
+    ['Economic Decisions', Array.isArray(s.economic_pressure_decisions) ? s.economic_pressure_decisions.length : 0],
+    ['Diplomatic Decisions', Array.isArray(s.diplomatic_faction_decisions) ? s.diplomatic_faction_decisions.length : 0],
+    ['Intrigue Decisions', Array.isArray(s.intrigue_decisions) ? s.intrigue_decisions.length : 0],
+    ['Treaties', Array.isArray(s.treaties) ? s.treaties.length : 0],
+    ['Tributary Pacts', Array.isArray(s.tributary_pacts) ? s.tributary_pacts.length : 0],
+    ['Belief Currents', Array.isArray(s.belief_currents) ? s.belief_currents.length : 0],
+    ['Religious Factions', Array.isArray(s.religious_factions) ? s.religious_factions.length : 0],
+    ['House Characters', Array.isArray(s.house_characters) ? s.house_characters.length : 0],
+    ['Leadership Entries', Array.isArray(s.leadership_state) ? s.leadership_state.length : 0]
+  ];
+  document.getElementById('systems-list').innerHTML = systems
+    .map(([name, count]) => `<div class="intel-row"><strong>${esc(name)}</strong> — ${esc(count)}</div>`)
+    .join('');
+
+  const entries = Object.entries(s).sort(([a],[b]) => a.localeCompare(b));
+  document.getElementById('key-tbody').innerHTML = entries
+    .map(([key, value]) => `<tr><td>${esc(key)}</td><td>${esc(typeName(value))}</td><td>${esc(sizeValue(value))}</td></tr>`)
+    .join('');
+}
+loadIntel();
+setInterval(loadIntel, 30000);
+</script>
+{% endblock %}

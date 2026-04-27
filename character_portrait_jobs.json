@@ -148,5 +148,141 @@
     "status": "queued",
     "created_tick": 32,
     "created_at": "2026-04-25T04:54:04.504645"
+  },
+  {
+    "name": "Eldaric Aurand III",
+    "faction": "Twin Cities",
+    "prompt": "Dark fantasy ruler portrait of High King Eldaric Aurand III, Twin Cities, House Aurand, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\eldaric-aurand-iii.png",
+    "static_path": "/static/illustrations/characters/eldaric-aurand-iii.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:06.660279",
+    "last_attempt_at": "2026-04-26T09:36:26.453364",
+    "error": ""
+  },
+  {
+    "name": "Levi Ver Meer",
+    "faction": "Tidefall",
+    "prompt": "Dark fantasy ruler portrait of Grand Admiral Levi Ver Meer, Tidefall, House Ver Meer, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\levi-ver-meer.png",
+    "static_path": "/static/illustrations/characters/levi-ver-meer.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.454891",
+    "last_attempt_at": "2026-04-26T09:41:57.806250",
+    "error": ""
+  },
+  {
+    "name": "Babadu Goldfinger-Duke",
+    "faction": "Lostfeld",
+    "prompt": "Dark fantasy ruler portrait of High Thane Babadu Goldfinger-Duke, Lostfeld, Clan Goldfinger-Duke, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\babadu-goldfinger-duke.png",
+    "static_path": "/static/illustrations/characters/babadu-goldfinger-duke.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.471711",
+    "last_attempt_at": "2026-04-26T10:08:04.246910",
+    "error": ""
+  },
+  {
+    "name": "Lyathra the Veiled",
+    "faction": "Shadow Court",
+    "prompt": "Dark fantasy ruler portrait of Queen Lyathra the Veiled, Shadow Court, House Verlorn, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\lyathra-the-veiled.png",
+    "static_path": "/static/illustrations/characters/lyathra-the-veiled.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.472155",
+    "last_attempt_at": "2026-04-26T10:15:49.907138",
+    "error": ""
+  },
+  {
+    "name": "Thalorien Wood",
+    "faction": "Glenhaven",
+    "prompt": "Dark fantasy ruler portrait of High Sovereign Thalorien Wood, Glenhaven, House Wood, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\thalorien-wood.png",
+    "static_path": "/static/illustrations/characters/thalorien-wood.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.472369",
+    "last_attempt_at": "2026-04-26T10:38:56.137000",
+    "error": ""
+  },
+  {
+    "name": "Kragor Blackblood",
+    "faction": "Gilgeth Clans",
+    "prompt": "Dark fantasy ruler portrait of High Warlord Kragor Blackblood, Gilgeth Clans, Clan Blackblood, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\kragor-blackblood.png",
+    "static_path": "/static/illustrations/characters/kragor-blackblood.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.472552",
+    "last_attempt_at": "2026-04-26T10:58:23.794536",
+    "error": ""
+  },
+  {
+    "name": "Drogath Mijid",
+    "faction": "Groth Clans",
+    "prompt": "Dark fantasy ruler portrait of Warchief Drogath Mijid, Groth Clans, Clan Mijid, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\drogath-mijid.png",
+    "static_path": "/static/illustrations/characters/drogath-mijid.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.472736",
+    "last_attempt_at": "2026-04-26T14:54:37.823574",
+    "error": ""
+  },
+  {
+    "name": "Grikk Bloodware",
+    "faction": "Vilefin",
+    "prompt": "Dark fantasy ruler portrait of Speaker Grikk Bloodware, Vilefin, Clan Bloodware, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\grikk-bloodware.png",
+    "static_path": "/static/illustrations/characters/grikk-bloodware.png",
+    "status": "completed",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.472939",
+    "last_attempt_at": "2026-04-26T16:27:16.044165",
+    "error": ""
+  },
+  {
+    "name": "Kaelen Adkison",
+    "faction": "The Wintermark",
+    "prompt": "Dark fantasy ruler portrait of High Lord Kaelen Adkison, The Wintermark, House Adkison, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\kaelen-adkison.png",
+    "static_path": "/static/illustrations/characters/kaelen-adkison.png",
+    "status": "queued",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.473121"
+  },
+  {
+    "name": "Ashali Van Cleave",
+    "faction": "Varkuun",
+    "prompt": "Dark fantasy ruler portrait of High Marshal Ashali Van Cleave, Varkuun, House Van Cleave, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\ashali-van-cleave.png",
+    "static_path": "/static/illustrations/characters/ashali-van-cleave.png",
+    "status": "queued",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.473305"
+  },
+  {
+    "name": "Ronan Blacktide",
+    "faction": "Dreadwind Isles",
+    "prompt": "Dark fantasy ruler portrait of Captain Ronan Blacktide, Dreadwind Isles, House Blacktide, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\ronan-blacktide.png",
+    "static_path": "/static/illustrations/characters/ronan-blacktide.png",
+    "status": "queued",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.473518"
+  },
+  {
+    "name": "Varak",
+    "faction": "Stonebreak Monastery",
+    "prompt": "Dark fantasy ruler portrait of Grand Druid Varak, Stonebreak Monastery, Druid Circle, lore accurate Aeloria aesthetic, no text, no watermark.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\varak.png",
+    "static_path": "/static/illustrations/characters/varak.png",
+    "status": "queued",
+    "created_tick": 1,
+    "created_at": "2026-04-26T09:36:26.474023"
   }
 ]

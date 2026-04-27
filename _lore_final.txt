@@ -1,0 +1,354 @@
+﻿Factions:
+Faerwood - The Shadow Court of Faerwood - Dense ancient forest (perpetual twilight canopy) - Queen Lyathra the Veiled
+Faerwood is not ruled—it is observed, manipulated, and quietly reshaped. The forest itself is ancient beyond record, its canopy so thick that sunlight rarely reaches the ground. Beneath it, the Dread Elves have built a civilization of hidden paths, veiled structures, and silent watchers. Nothing in Faerwood is accidental—every movement, alliance, and death is part of a larger unseen design. Outsiders believe Faerwood is isolationist. They are wrong. Faerwood does not isolate—it infiltrates.
+
+Primary Species: Dread Elves - Highly intelligent, emotionally restrained, and politically ruthless. They value control over strength and will avoid open war unless victory is certain long before the first blade is drawn. 
+The Three Houses (Constant Cold War)
+House Verlorn (Rulers)
+The oldest lineage. Their authority is based on legacy, not strength—and it’s slipping.
+House Nightborn (Executioners)
+Masters of assassination and fear. They believe Faerwood should act more aggressively.
+House Shadowveil (Manipulators)
+Information brokers. They control spies across Aeloria and likely know more about other factions than those factions know about themselves.
+Other Species: 
+Hollowlost - Once human or elf—now stripped of identity through ritual. They serve as unquestioning agents of enforcement and execution for the Shadow Throne.
+Veilkin - Pale, soft-spoken interpreters of dreams, omens, and patterns. They advise the houses but are feared even by them. 
+
+CULTURE:
+Core Values: Control, secrecy, patience, inevitability
+Social Structure: House-based hierarchy with hidden influence networks
+Warfare Style: Assassination, sabotage, psychological warfare
+Religion Tendencies: Not worship—interpretation of signs and patterns
+
+NOTES FOR SIMULATION:
+Aggression: 6 (indirect)
+Stability: 5 (declining)
+Expansion Desire: 7 (covert, not territorial)
+Diplomacy Style: Deceitful / manipulative
+
+WAR TRIGGERS:
+Loss of control over another faction
+Exposure of their influence networks
+Internal house power shift
+
+
+
+
+
+TWIN CITIES — The High Kingdom of the Twin Cities - High King Eldaric lll (House Aurand)
+Central authority of the human realms. A unified kingdom formed from two former rival states after the Orc Wars six generations ago. Still powerful, but increasingly strained by internal division and prolonged peace.
+
+ERESTERON — Duchy of Eresteron (House Braafhart) — Fertile plains / agricultural heartland — Lord Nuhoom Braafhart
+Eresteron is the backbone of the High Kingdom’s survival.
+Vast farmlands, disciplined rural communities, and a culture rooted in duty have made Eresteron the primary food supplier to the Twin Cities and surrounding regions. Its people are loyal—but not blind.
+They remember when they were independent. And they remember that they feed the kingdom.
+Eresteron supported the unification during the Orc Wars and has remained one of House Aurand’s most reliable allies—but growing taxation, political neglect, and the excess of the western merchants have begun to erode that loyalty.
+They do not seek rebellion.
+But they are beginning to question why they serve.
+
+Primary Species: Humans
+Eresteron’s population is almost entirely human, with a strong emphasis on lineage, family honor, and land ownership. Generations remain tied to the same soil, creating deep-rooted identity and stability.
+
+House Braafhart (Ruling House)
+A noble line built on honor, duty, and agricultural stewardship. They are loyal to the Crown—but increasingly frustrated by its weakness and dependence.
+
+CULTURE:
+Core Values: Duty, honor, stability, tradition Social Structure: Feudal hierarchy tied to land ownership Warfare Style: Defensive levies, shield formations, disciplined infantry Religion Tendencies: Structured, moralistic belief centered on duty and order
+
+NOTES FOR SIMULATION:
+Aggression: 3 (low, defensive) Stability: 7 (high, but eroding slowly) Expansion Desire: 4 (limited, local influence) Diplomacy Style: Honorable / loyal / cautious
+
+WAR TRIGGERS:
+Excessive taxation or exploitation by the Twin Cities Failure of the Crown to protect Eresteron lands Direct attack from Orc factions (forces mobilization) Political disrespect or loss of standing within the High Kingdom
+ALLIES:
+Twin Cities (House Aurand) Eldoria
+
+
+
+
+🌹 ELDORIA — Duchy of Eldoria (House LeFleur) — Rolling hills / cultural and noble center — Lady Briania LeFleur
+Eldoria is not the strongest duchy—but it is the most refined.
+Known for its nobility, artistry, and political maneuvering, Eldoria acts as the cultural heart of the human world. Its influence spreads not through force, but through prestige, alliances, and quiet manipulation.
+Unlike Eresteron, Eldoria does not question the Crown openly.
+It works around it.
+Primary Species: Humans
+Eldorian humans are more aristocratic and politically aware, with strong emphasis on status, presentation, and influence.
+
+Noble Houses (Internal Power Web)
+House LeFleur (Ruling House) Elegant, calculated, and politically dominant. Maintains control through alliances and social power rather than force.
+House Bower Land-rich traditionalists with deep roots in older nobility. Often resist LeFleur influence.
+House Binx Merchant-aligned nobles who bridge trade and aristocracy. Pragmatic and opportunistic.
+House Dale Militaristic lineage. Less influential politically but respected for battlefield capability.
+
+CULTURE:
+Core Values: Prestige, influence, legacy, appearance Social Structure: Complex noble hierarchy with constant political maneuvering Warfare Style: Strategic, officer-led forces with emphasis on command structure Religion Tendencies: Ceremonial and tied to noble legitimacy
+
+NOTES FOR SIMULATION:
+Aggression: 4 (calculated, indirect) Stability: 5 (stable on surface, politically volatile underneath) Expansion Desire: 6 (influence-driven, not territorial) Diplomacy Style: Strategic / manipulative / alliance-based
+
+WAR TRIGGERS:
+Power struggle between noble houses Opportunity to gain influence over the Twin Cities Weakness in House Aurand’s rule External alliances shifting balance of power
+ALLIES:
+Twin Cities (conditionally) Eresteron
+
+GLENWOOD — The Greenwood Enclave - Ancient forest / natural stronghold — High Sovereign Thalorien (House Wood)
+Glenwood is a realm untouched by the ambitions of men. Deep within vast, living forests, the Wood Elves of Glenwood exist in harmony with nature—not as its rulers, but as its protectors. Their cities are grown, not built, hidden within massive trees and woven into the land itself. They remember a time before the rise of human kingdoms. And they do not consider those kingdoms permanent. Glenwood rarely interferes in the affairs of Aeloria—but when it does, it is always with purpose.
+
+Primary Species: Wood Elves
+Graceful, long-lived, and deeply connected to the natural world. They value balance over power and act only when they believe that balance is threatened.
+
+The Three Houses:
+House Wood (Wardens)
+The traditional leaders of Glenwood. They maintain balance and enforce isolation.
+House Darkleaf (Radicals)
+Believe outsiders are a threat to the forest and should be removed permanently. Also make up the Glenguard - personal bodyguards and right hand men to the High Sovereign - and the Glenguard is led by Eryndor Darkleaf and his descendants as a birthright.
+
+House Mistafae (Seers)
+Mystics who interpret nature, dreams, and ancient magic. Often guide major decisions.
+
+CULTURE:
+Core Values: Balance, preservation, patience, memory
+Social Structure: House-based but spiritually guided
+Warfare Style: Guerrilla tactics, ambushes, terrain mastery
+Religion Tendencies: Deep spiritual connection to nature
+
+NOTES FOR SIMULATION:
+Aggression: 3 (low, reactive)
+Stability: 8 (very high)
+Expansion Desire: 2 (none)
+Diplomacy Style: Isolationist / cautious
+WAR TRIGGERS:
+Deforestation or expansion into their lands
+Magical imbalance
+Direct attack or intrusion
+
+
+GROTH — The War Clans of Groth - Harsh badlands / war-torn territory — Warchief Drogath Mijid
+Groth is not a kingdom. It is a proving ground. Across scorched rock plains and brutal terrain, the Orc clans of Groth live by one law—strength. Leadership is earned through victory, and weakness is removed without hesitation. They were the force that once nearly broke the human kingdoms. They remember that.
+
+Primary Species: Orcs
+Powerful, resilient, and driven by honor through combat. They value strength, loyalty, and dominance.
+
+The Three Clans:
+Clan Mijid (Warlords)
+Disciplined and strategic. Current dominant clan.
+Clan Ashfang (Raiders)
+Savage and aggressive. Thrive in chaos and war.
+Clan Syncar (Tacticians)
+More calculated and intelligent. Focus on long-term victory.
+CULTURE:
+Core Values: Strength, honor, dominance, survival
+Social Structure: Clan hierarchy based on combat strength
+Warfare Style: Direct assault, overwhelming force
+Religion Tendencies: Ancestor reverence and war rituals
+
+NOTES FOR SIMULATION:
+Aggression: 9 (extremely high)
+Stability: 5 (unstable, strength-based)
+Expansion Desire: 9 (constant expansion)
+Diplomacy Style: Hostile / dominance-based
+
+WAR TRIGGERS:
+Opportunity for conquest
+Weakness in enemy factions
+Internal power struggles
+
+
+GILGETH — The Iron Dominion of Gilgeth - Mountain strongholds / fortified territory — High Warlord Kragor Blackblood
+Gilgeth is what Groth could become—if it chose order over chaos. Built within mountain ranges and fortified cities, the Orcs of Gilgeth are structured, disciplined, and strategic. They do not rush into war. They prepare for it.
+
+Primary Species: Orcs
+More disciplined and structured than their Groth counterparts, valuing order and strength combined.
+
+The Three Clans:
+Clan Blackblood (Rulers)
+Dominant and controlling. Maintain strict hierarchy.
+Clan Ironhide (Defenders)
+Masters of fortification and endurance.
+Clan Redtusk (Aggressors)
+Push for expansion and war.
+
+CULTURE:
+Core Values: Strength, discipline, order, conquest
+Social Structure: Strict hierarchical clan system
+Warfare Style: Defensive positioning, calculated offensives
+Religion Tendencies: Warrior philosophy, strength as destiny
+
+NOTES FOR SIMULATION:
+Aggression: 7 (controlled)
+Stability: 7 (strong internal order)
+Expansion Desire: 8 (strategic expansion)
+Diplomacy Style: Calculated / opportunistic
+
+WAR TRIGGERS:
+Strategic opportunity
+Weakness in Groth or human factions
+Territorial advantage
+
+
+
+TIDEFALL — The Admiral Electorate of Tidefall - Coastal cities / naval trade empire — Grand Admiral Levi Ver Meer
+Tidefall controls the sea—and the wealth that flows through it. A collection of powerful naval houses governs Tidefall through an elected admiral system. Trade, fleets, and influence define their power. They do not conquer land. They control everything that connects it.
+
+Primary Species: Humans
+
+Houses:
+House Ver Meer (Ruling)
+Naval command and political leadership.
+House Highland-Dusken
+Coastal defense and military fleets.
+House Fish
+Trade guild dominance.
+House McGowan
+Privateers and shadow operations.
+
+CULTURE:
+Core Values: Trade, power, influence, control
+Social Structure: House-based naval aristocracy
+Warfare Style: Naval dominance, economic warfare
+Religion Tendencies: Sea-based traditions and beliefs
+
+NOTES FOR SIMULATION:
+Aggression: 6
+Stability: 6
+Expansion Desire: 7 (economic)
+Diplomacy Style: Opportunistic / transactional
+
+WAR TRIGGERS:
+Trade disruption
+Naval threats
+Economic interference
+
+
+FARROCK — The Varkuun - Militarized plains / expansionist state — High Marshal Ashali Van Cleave
+Farrock is built for war. A disciplined, militarized society that values strength, unity, and expansion, Farrock believes humanity must not grow weak in times of peace. Farrock exists as an independent fortress that profits off of war on whatever side they can using their mercenaries, the Varkuun.
+
+Primary Species: Humans
+House Van Cleave (Ruling Military Line)
+CULTURE:
+Core Values: Strength, discipline, expansion
+Social Structure: Military hierarchy
+Warfare Style: Organized legions, aggressive campaigns
+Religion Tendencies: Honor and conquest
+NOTES FOR SIMULATION:
+Aggression: 8
+Stability: 7
+Expansion Desire: 9
+Diplomacy Style: Direct / forceful
+WAR TRIGGERS:
+Opportunity to expand
+Weakness in Twin Cities
+Conflict with Orc factions
+
+
+
+VILEFIN — The Scrap Clans of Vilefin - Rock plains / harsh wasteland — Speaker Grikk Bloodware
+Vilefin survives where others cannot. A brutal, resource-starved region where Goblin clans fight, invent, and adapt constantly. Their strength lies in unpredictability.
+
+Primary Species: Goblins
+
+Clans:
+Clan Bloodware
+Clan Cogtooth
+Clan Rustfang
+
+CULTURE:
+Core Values: Survival, cunning, adaptation
+Social Structure: Clan-based chaos
+Warfare Style: Traps, ambushes, unpredictable tactics
+Religion Tendencies: Minimal, survival-focused
+
+NOTES FOR SIMULATION:
+Aggression: 7
+Stability: 3
+Expansion Desire: 8
+Diplomacy Style: Unpredictable
+
+WAR TRIGGERS:
+Resource scarcity
+Opportunity
+Internal chaos
+
+
+FROSTVALE — The Wintermark of Frostvale (House Adkison) - Frozen highlands / glacial mountain passes — High Lord Kaelen Adkison
+Frostvale does not survive. It endures. Carved into frozen mountains and battered by endless storms, Frostvale is a land where weakness is not punished—it is simply erased. Generations have lived and died in the same brutal conditions, forging a people who do not bend, do not break, and do not forget. They were not always isolated. Long before the rise of the Twin Cities, Frostvale’s warriors marched south as conquerors, not defenders. Their banners once stood at the edge of every major conflict in Aeloria. Now the Wintermark stands alone. Not because they fell— but because the world grew softer. Frostvale did not follow.
+
+Primary Species: Humans
+
+Frostvale humans are hardened beyond their southern kin. Larger, slower to trust, and built for survival, they are shaped by cold, war, and memory. Every adult is expected to fight. Every child is raised to endure.
+
+Houses:
+House Adkison (Ruling House)
+The oldest surviving bloodline in Frostvale and one of the oldest in Aeloria. Not chosen by wealth or politics—but by endurance. They lead because they have outlasted every challenge thrown at them. Their rule is not questioned—it is tested constantly.
+House McIntosh
+Keepers of tradition and ancient war rites. They preserve Frostvale’s history and train its warriors in the old ways.
+House Holter
+Wardens of the mountain passes. They control movement in and out of Frostvale and act as the first line of defense against any invasion.
+House Duval
+Hunters and scouts. Masters of the wilds beyond the settlements, tracking threats long before they reach Frostvale.
+
+CULTURE:
+Core Values: Endurance, strength, memory, honor through survival
+Social Structure: Noble houses bound by survival, leadership earned through resilience
+Warfare Style: Defensive dominance, mountain warfare, attrition tactics
+Religion Tendencies: Ancestral reverence and the belief that the dead watch the living.
+
+NOTES FOR SIMULATION:
+Aggression: 6 (defensive but relentless when provoked)
+Stability: 8 (extremely resilient)
+Expansion Desire: 4 (minimal, survival-focused)
+Diplomacy Style: Reserved / honor-bound / slow to trust
+
+WAR TRIGGERS:
+Violation of Frostvale territory
+Threats to mountain passes
+Major Orc incursions
+Betrayal by allied factions
+Loss of ancestral lands
+
+EVENT POTENTIAL (EXAMPLES FOR YOUR SIM - RARELY OCCUR)
+“The Winter March” → Frostvale mobilizes after generations of silence
+“The Old Claim” → House Adkison asserts ancient rights beyond their borders
+
+
+LOSTFELD — The Dwarven Holds of Lostfeld - Mountain strongholds / mining empire — High Thane Babadu Goldfinger-Duke
+Lostfeld is built on wealth beneath the earth.
+
+Primary Species: Dwarves
+
+Clans:
+Goldfinger-Duke Clan
+Runewarden Clan
+Ironmaul Clan
+
+CULTURE:
+Core Values: Wealth, craft, tradition
+Social Structure: Clan hierarchy
+Warfare Style: Defensive, heavy infantry
+Religion Tendencies: Ancestral and runic
+
+NOTES FOR SIMULATION:
+Aggression: 4
+Stability: 8
+Expansion Desire: 6
+Diplomacy Style: Transactional
+
+DUR KHADUR — Trade Monarchy of Dur Khadur (House Gross) - Desert trade empire — Trade Prince Seran Gross
+A kingdom built on trade and wealth across harsh lands.
+
+Houses:
+House Gross
+House Delonious
+House Galfazzar
+House Vercenti
+Lesser Factions:
+STONEBREAK — The Druid Monastery - Wildlands sanctuary - Grand Druid Varak
+Guardians of balance and nature.
+
+GNOMES — Gloomspire Assassin Syndicate
+A hidden network of assassins for hire that work as the secret hand of Stonebreak.
+
+DREADWIND ISLES — The Blacktide Fleet (House Blacktide) - Pirate isles — Ronan Blacktide
+A lawless naval power opposing Tidefall. Blacktide’s father was the former ruler and High Lord of Tidefall and holder of the Saltborn Crown, before he was ousted by the Admiral Electorate. There is still a bounty on Blacktide, dead or alive.
+
+

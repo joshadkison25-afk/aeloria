@@ -35,6 +35,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # Server-side API routes (world, history, tick) call Flask; use service DNS on the Docker network.
+      PYTHON_BACKEND_URL: http://flask:5000
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
     restart: unless-stopped
     healthcheck:
