@@ -12,6 +12,6 @@
   ],
   "ext": "ts,tsx,js,jsx,mjs,cjs,json,css,scss,md,mdx",
   "ignore": [".next/**", "node_modules/**"],
-  "exec": "next dev",
+  "exec": "next dev -p 3000",
   "delay": 1200
 }

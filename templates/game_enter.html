@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aeloria — Entering the Realm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:        #e7c285;
+      --gold-dim:    rgba(231, 194, 133, 0.55);
+      --bone:        #f4ead0;
+      --ink-deep:    #010205;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      min-height: 100vh;
+      background: var(--ink-deep);
+      color: var(--bone);
+      font-family: 'Cormorant Garamond', 'Crimson Text', serif;
+      -webkit-font-smoothing: antialiased;
+      animation: pageIgnite 2s cubic-bezier(.16,.84,.32,1) both;
+    }
+
+    @keyframes pageIgnite {
+      from { opacity: 0; filter: brightness(0.35) saturate(0.55); }
+      to   { opacity: 1; filter: brightness(1) saturate(1); }
+    }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .stage-deep {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 28%, rgba(40, 28, 14, 0.55), transparent 58%),
+        radial-gradient(ellipse at 50% 100%, rgba(80, 45, 18, 0.28), transparent 65%),
+        linear-gradient(180deg, #02030a 0%, #04050d 45%, #02030a 100%);
+    }
+
+    .stage-art {
+      position: absolute;
+      inset: -4%;
+      background-image: url('/aeloria-enter-cinematic-bg.png?v=20260427-enter-1');
+      background-size: cover;
+      background-position: 55% 48%;
+      filter: saturate(1.05) contrast(1.16) brightness(0.60);
+      transform-origin: 55% 50%;
+      animation: stageKenBurns 72s ease-in-out infinite alternate;
+      will-change: transform, filter;
+    }
+    @keyframes stageKenBurns {
+      0%   { transform: scale(1.12) translate3d(1.2%, 0, 0); }
+      100% { transform: scale(1.22) translate3d(-1.8%, -1.2%, 0); }
+    }
+
+    .stage-rays {
+      position: absolute;
+      inset: -20% -10%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.48;
+      background:
+        repeating-linear-gradient(104deg, rgba(255, 220, 150, 0.09) 0px, rgba(255, 220, 150, 0) 100px, rgba(255, 220, 150, 0) 200px),
+        repeating-linear-gradient(110deg, rgba(255, 200, 120, 0.05) 0px, rgba(255, 200, 120, 0) 72px, rgba(255, 200, 120, 0) 144px);
+      filter: blur(2.4px);
+      animation: rayDrift 28s linear infinite;
+    }
+    @keyframes rayDrift {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-180px); }
+    }
+
+    .stage-fog {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: -8%;
+      height: 52%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.48;
+      background:
+        radial-gradient(ellipse 60% 90% at 28% 100%, rgba(220, 180, 130, 0.16), transparent 70%),
+        radial-gradient(ellipse 70% 90% at 72% 100%, rgba(180, 140, 90, 0.12), transparent 70%),
+        radial-gradient(ellipse 100% 80% at 50% 100%, rgba(110, 80, 50, 0.18), transparent 75%);
+      filter: blur(20px);
+      animation: stageFogDrift 30s ease-in-out infinite alternate;
+    }
+    @keyframes stageFogDrift {
+      from { transform: translate3d(2%, 1%, 0) scale(1.04); }
+      to   { transform: translate3d(-2%, -1%, 0) scale(1.08); }
+    }
+
+    .stage-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 16%, rgba(2, 3, 6, 0.52) 62%, rgba(0, 0, 0, 0.96) 100%),
+        linear-gradient(180deg, rgba(2, 2, 4, 0.5) 0%, transparent 26%, rgba(2, 2, 4, 0.76) 100%);
+    }
+
+    .stage-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.065;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>");
+      background-size: 220px 220px;
+    }
+
+    .hud {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px clamp(24px, 5vw, 72px);
+      text-align: center;
+    }
+
+    .eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(9px, 0.85vw, 12px);
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 18px;
+      animation: fadeUp 0.85s ease 0.2s both;
+    }
+
+    .title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(36px, 5.2vw, 72px);
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-indent: 0.18em;
+      line-height: 1.05;
+      margin-bottom: 14px;
+      background: linear-gradient(180deg, #fff7df 0%, #f4ead0 28%, #e7c285 60%, #b8893f 86%, #7a5520 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 28px rgba(231, 194, 133, 0.28)) drop-shadow(0 3px 0 rgba(0,0,0,0.45));
+      animation: fadeUp 0.9s ease 0.35s both;
+    }
+
+    .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(17px, 2.1vw, 22px);
+      font-style: italic;
+      color: rgba(244, 234, 208, 0.72);
+      max-width: 520px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.9s ease 0.5s both;
+    }
+
+    .progress-wrap {
+      width: min(420px, 88vw);
+      animation: fadeUp 0.9s ease 0.65s both;
+    }
+    .progress-track {
+      height: 2px;
+      background: rgba(231, 194, 133, 0.12);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(231, 194, 133, 0.35), rgba(231, 194, 133, 0.9));
+      transition: width 0.55s ease;
+    }
+    .progress-label {
+      margin-top: 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    .error-box {
+      display: none;
+      margin-top: 28px;
+      max-width: 420px;
+      padding: 16px 20px;
+      border: 1px solid rgba(201, 80, 70, 0.35);
+      background: rgba(12, 6, 8, 0.65);
+      font-size: 16px;
+      color: rgba(244, 220, 210, 0.9);
+      animation: fadeUp 0.6s ease both;
+    }
+    .error-box a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(231, 194, 133, 0.35);
+    }
+    .error-box a:hover { border-bottom-color: var(--gold); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <div class="stage-deep"></div>
+  <div class="stage-art"></div>
+  <div class="stage-rays"></div>
+  <div class="stage-fog"></div>
+  <div class="stage-vignette"></div>
+  <div class="stage-grain"></div>
+</div>
+
+<main class="hud">
+  <p class="eyebrow" id="eyebrow">Aeloria</p>
+  <h1 class="title" id="title">Entering the Realm</h1>
+  <p class="subtitle" id="subtitle">The cartographers finish their work&hellip;</p>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <p class="progress-label" id="progress-label">Preparing&hellip;</p>
+  </div>
+
+  <div class="error-box" id="error-box" role="alert">
+    <p id="error-text"></p>
+    <p style="margin-top:10px"><a href="/menu">Return to menu</a></p>
+  </div>
+</main>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const mode = (params.get('mode') || 'play').toLowerCase();
+  const next = params.get('next') || '/';
+
+  const COPY = {
+    continue: 'Resuming your chronicle&hellip;',
+    new: 'A new age begins&hellip;',
+    load: 'Restoring the timeline&hellip;',
+    play: 'The realm assembles itself&hellip;'
+  };
+
+  document.getElementById('subtitle').innerHTML = COPY[mode] || COPY.play;
+
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  const errBox = document.getElementById('error-box');
+  const errText = document.getElementById('error-text');
+
+  function setProgress(pct, text) {
+    fill.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    label.textContent = text;
+  }
+
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function fetchStateAttempts() {
+    const maxAttempts = 16;
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const r = await fetch('/api/state', { cache: 'no-store' });
+        if (r.ok) {
+          await r.json();
+          return true;
+        }
+      } catch (e) { /* retry */ }
+      await delay(220);
+    }
+    return false;
+  }
+
+  async function run() {
+    const t0 = performance.now();
+    setProgress(8, 'Awakening the simulation&hellip;');
+
+    const ok = await fetchStateAttempts();
+    if (!ok) {
+      errText.textContent = 'The world state could not be reached. Check that the server is running.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    setProgress(45, 'Binding chronicles&hellip;');
+    try { await fetch('/api/god/panel', { cache: 'no-store' }); } catch (e) { /* best effort */ }
+
+    setProgress(78, 'Opening the map&hellip;');
+    await delay(400);
+
+    const minMs = 1600;
+    const elapsed = performance.now() - t0;
+    if (elapsed < minMs) await delay(minMs - elapsed);
+
+    setProgress(100, 'Step across the threshold.');
+    await delay(280);
+    window.location.href = next;
+  }
+
+  run();
+})();
+</script>
+</body>
+</html>

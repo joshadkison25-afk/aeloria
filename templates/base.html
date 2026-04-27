@@ -506,8 +506,8 @@ async function loadNavMeta() {
     const s = await r.json();
     const dateEl = document.getElementById('nav-date');
     const tickEl = document.getElementById('nav-tick');
-    if (s.world_date) dateEl.textContent = s.world_date.split(',')[0].toUpperCase();
-    if (s.tick !== undefined) tickEl.textContent = `Tick ${s.tick}`;
+    if (dateEl && s.world_date) dateEl.textContent = s.world_date.split(',')[0].toUpperCase();
+    if (tickEl && s.tick !== undefined) tickEl.textContent = `Tick ${s.tick}`;
   } catch(e) {}
 }
 loadNavMeta();

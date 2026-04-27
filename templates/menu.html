@@ -1042,14 +1042,8 @@
     document.getElementById('status').textContent = msg || '';
   }
 
-  function showLoading(label) {
-    document.getElementById('loading-label').textContent = label || 'Entering the world';
-    document.getElementById('loading-overlay').classList.add('show');
-  }
-
-  function enter() {
-    showLoading('Entering the world');
-    setTimeout(() => { window.location.href = '/'; }, 700);
+  function enter(mode) {
+    window.location.href = '/enter?mode=' + encodeURIComponent(mode || 'play');
   }
 
   function togglePanel(id, closeOthers = []) {
@@ -1058,8 +1052,7 @@
   }
 
   document.getElementById('btn-continue').addEventListener('click', () => {
-    showLoading('Resuming timeline');
-    setTimeout(() => { window.location.href = '/'; }, 600);
+    window.location.href = '/enter?mode=continue';
   });
 
   document.getElementById('btn-load').addEventListener('click', async () => {
@@ -1082,7 +1075,6 @@
       ).join('');
       list.querySelectorAll('.timeline-load').forEach((btn) => {
         btn.addEventListener('click', async () => {
-          showLoading('Loading timeline');
           try {
             const r = await fetch('/api/worlds/load', {
               method: 'POST',
@@ -1090,9 +1082,8 @@
               body: JSON.stringify({ filename: btn.dataset.file })
             });
             if (!r.ok) throw new Error('Load failed');
-            enter();
+            enter('load');
           } catch (e) {
-            document.getElementById('loading-overlay').classList.remove('show');
             setStatus('Failed to load timeline.');
           }
         });
@@ -1132,13 +1123,11 @@
 
   document.getElementById('btn-new').addEventListener('click', async () => {
     if (!confirm('Start a new world? The current world_state will be replaced.')) return;
-    showLoading('Creating new world');
     try {
       const r = await fetch('/api/worlds/new', { method: 'POST' });
       if (!r.ok) throw new Error();
-      enter();
+      enter('new');
     } catch (e) {
-      document.getElementById('loading-overlay').classList.remove('show');
       setStatus('Failed to create new world.');
     }
   });

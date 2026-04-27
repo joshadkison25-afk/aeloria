@@ -1,6 +1,6 @@
 import type { RegionCoordinate, RegionDefinition } from '@/data/regions';
 
-import { regions } from '@/data/regions';
+import { mapRegions } from '@/data/mapRegions';
 
 import { worldStateKeyForRegion } from '@/lib/regionWorldKeys';
 
@@ -15,7 +15,7 @@ export type MapBounds = {
 
 const PADDING = 0.01;
 
-export function getDataBounds(data: RegionDefinition[] = regions): MapBounds {
+export function getDataBounds(data: RegionDefinition[] = mapRegions): MapBounds {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = 0;
@@ -86,7 +86,7 @@ export function pointInPolygon(
 export function findRegionAtViewPoint(
   vx: number,
   vy: number,
-  data: RegionDefinition[] = regions,
+  data: RegionDefinition[] = mapRegions,
   bounds: MapBounds = getDataBounds(data),
   viewW: number,
   viewH: number,

@@ -1,5 +1,5 @@
 @echo off
-REM Flask only. For map + app together: npm run dev:all  or  double-click dev-all.bat
-REM Local dev: enable Werkzeug auto-reload on Python file changes
+REM Flask only (no Next — home map iframe will be blank unless Next is already on 3000).
+REM Full stack: npm run dev   or   double-click dev-all.bat
 set FLASK_DEBUG=1
 python app.py

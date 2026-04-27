@@ -7,18 +7,29 @@
    pip install -r requirements.txt
    ```
 
-2. Copy the example env and fill in your keys (the example has `FLASK_DEBUG=1` so **Flask restarts when you change `.py` files**; set `FLASK_DEBUG=0` for a single long-lived process or production):
+2. Install Node dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Copy the example env and fill in your keys (the example has `FLASK_DEBUG=1` so **Flask restarts when you change `.py` files**; set `FLASK_DEBUG=0` for a single long-lived process or production). Keep `MAP_PUBLIC_URL=http://127.0.0.1:3000/map` for local dev so the home-page map iframe can reach Next.js.
    ```bash
    copy .env.example .env
    ```
 
-3. Start the Flask app:
+4. Start **Flask and Next together** (recommended):
+   ```bash
+   npm run dev
+   ```
+   On Windows you can double-click `dev-all.bat` instead (it runs `npm install` if needed, then `npm run dev`).
+
+   Flask-only (no interactive map unless Next is already running on port 3000):
    ```bash
    python app.py
    ```
-   On Windows you can also use `dev-flask.bat` from the repo root (it sets `FLASK_DEBUG=1`).
+   Or `dev-flask.bat` (sets `FLASK_DEBUG=1`).
 
-4. Open:
+5. Open:
    ```text
    http://localhost:5000
    ```

@@ -35,13 +35,60 @@ CHARACTER_PORTRAIT_JOBS_FILE = BASE_DIR / "character_portrait_jobs.json"
 CODEX_IMAGE_JOBS_FILE = BASE_DIR / "codex_image_jobs.json"
 IMAGE_GENERATION_STATE_FILE = BASE_DIR / "image_generation_state.json"
 MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/map")
+# Same image as Next `/map` by default (files under ./public). Override with NEXT_PUBLIC_MAP_ATLAS_URL or HOME_ATLAS_URL.
+HOME_ATLAS_URL = (
+    os.getenv("HOME_ATLAS_URL")
+    or os.getenv("NEXT_PUBLIC_MAP_ATLAS_URL")
+    or "/aeloria-basemap-paint.png"
+)
+HOME_INTERACTIVE_MAP = os.getenv("HOME_INTERACTIVE_MAP", "1").strip().lower() not in ("0", "false", "no")
+
+
+def _warn_map_public_url_for_embed() -> None:
+    if not HOME_INTERACTIVE_MAP:
+        return
+    parsed = urlsplit(MAP_PUBLIC_URL)
+    if parsed.scheme in ("http", "https") and parsed.netloc:
+        return
+    # Path-only URLs are fine behind one reverse-proxy host (prod). Two-port local dev needs an absolute URL.
+    devish = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
+    if not devish or not (parsed.path or "").startswith("/"):
+        return
+    logger.warning(
+        "HOME_INTERACTIVE_MAP is on and MAP_PUBLIC_URL=%r is path-only while FLASK_DEBUG is enabled. "
+        "If the home atlas iframe is wrong or nested, set MAP_PUBLIC_URL=http://127.0.0.1:3000/map for local Next on port 3000.",
+        MAP_PUBLIC_URL,
+    )
+
+
+_warn_map_public_url_for_embed()
 
 app = Flask(__name__)
 
 
+def _map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
+    """Next `/map` URL with cache-buster (Map.tsx mtime). Optional query keys merged in."""
+    try:
+        map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
+    except OSError:
+        map_ts = 0
+    parsed = urlsplit(MAP_PUBLIC_URL)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query["cb"] = str(map_ts)
+    if extra_query:
+        query.update(extra_query)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+
+
 @app.context_processor
 def _inject_map_public_url():
-    return {"map_public_url": MAP_PUBLIC_URL}
+    return {
+        "map_public_url": MAP_PUBLIC_URL,
+        "home_atlas_url": HOME_ATLAS_URL,
+        "map_iframe_url": _map_iframe_url(),
+        "home_map_iframe_url": _map_iframe_url({"embed": "1"}),
+        "home_interactive_map": HOME_INTERACTIVE_MAP,
+    }
 
 BATTLE_PATTERNS = [
     r"\bbattle\b",
@@ -418,13 +465,10 @@ def loading_page():
     return render_template("loading.html")
 
 
-@app.route("/<path:filename>")
-def public_assets(filename):
-    public_dir = BASE_DIR / "public"
-    target = public_dir / filename
-    if not target.exists() or target.is_dir():
-        return jsonify({"error": "Not found"}), 404
-    return send_from_directory(public_dir, filename)
+@app.route("/enter")
+def game_enter_page():
+    """Full-screen cinematic bridge after menu → home (map/state warm-up)."""
+    return render_template("game_enter.html")
 
 
 @app.route("/api/faction-presets", methods=["GET"])
@@ -760,18 +804,10 @@ def atlas_embed():
 
 def _map_embed_context() -> dict:
     """Next map URL with cache-buster for the iframe (Map.tsx mtime)."""
-    try:
-        map_ts = int((BASE_DIR / "components" / "Map.tsx").stat().st_mtime)
-    except OSError:
-        map_ts = 0
-    parsed = urlsplit(MAP_PUBLIC_URL)
-    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
-    query["cb"] = str(map_ts)
-    map_iframe_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
     return {
         "active_page": "map",
         "map_public_url": MAP_PUBLIC_URL,
-        "map_iframe_url": map_iframe_url,
+        "map_iframe_url": _map_iframe_url(),
     }
 
 
@@ -1249,6 +1285,16 @@ def latest_audio():
         return jsonify({"url": None})
     latest = files[-1]
     return jsonify({"url": f"/static/audio/{latest.name}", "tick": int(latest.stem.split("_")[1])})
+
+
+# Public files (Next basemap PNGs, etc.) — registered last so this catch-all cannot shadow /api/* or pages.
+@app.route("/<path:filename>")
+def public_assets(filename):
+    public_dir = BASE_DIR / "public"
+    target = public_dir / filename
+    if not target.exists() or target.is_dir():
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(public_dir, filename)
 
 
 def _env_truthy(name: str, default: str = "0") -> bool:

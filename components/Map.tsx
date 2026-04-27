@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { regions } from '@/data/regions';
 import type { RegionDefinition } from '@/data/regions';
+import { mapRegions } from '@/data/mapRegions';
 import {
   getDataBounds,
   regionPathD,
@@ -132,7 +132,8 @@ function normalizeKey(value: string): string {
 function colorForFaction(factionId: string): string {
   let hash = 0;
   for (let i = 0; i < factionId.length; i += 1) hash = factionId.charCodeAt(i) + ((hash << 5) - hash);
-  return `hsl(${Math.abs(hash) % 360}, 72%, 56%)`;
+  // Slightly desaturated so soft-light / parchment blend reads as realm tint, not neon overlay.
+  return `hsl(${Math.abs(hash) % 360}, 58%, 50%)`;
 }
 
 function hexPoints(x: number, y: number, width: number, height: number): string {
@@ -569,7 +570,18 @@ function useMapViewport() {
   const reapplyBounds = useCallback(() => {
     const dims = getViewportContentDims(ref.current, contentRef.current);
     if (!dims) return;
-    setView((v) => clampView(v, dims.W, dims.H, dims.Cw, dims.Ch));
+    setView((v) => {
+      const next = clampView(v, dims.W, dims.H, dims.Cw, dims.Ch);
+      // Avoid ResizeObserver ↔ layout feedback loops (subpixel churn freezing the tab).
+      if (
+        Math.abs(next.x - v.x) < 0.5 &&
+        Math.abs(next.y - v.y) < 0.5 &&
+        Math.abs(next.k - v.k) < 1e-5
+      ) {
+        return v;
+      }
+      return next;
+    });
   }, []);
 
   useLayoutEffect(() => {
@@ -728,7 +740,12 @@ function regionControllerLabel(world: WorldResponse | null, r: RegionDefinition)
 
 export default function FantasyMap() {
   const hexTiles = useMemo(() => buildHexGrid(), []);
-  const dataBounds = useMemo(() => getDataBounds(regions), []);
+  const dataBounds = useMemo(() => getDataBounds(mapRegions), [mapRegions]);
+  const [embedMode] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const v = new URLSearchParams(window.location.search).get('embed');
+    return v === '1' || v === 'true';
+  });
   /** On by default in hex mode; province (CK3) mode uses shapes and keeps the grid visual-only. */
   const [showStrategicHex, setShowStrategicHex] = useState(true);
   /** Province polygons vs hex-cell painting. */
@@ -761,6 +778,13 @@ export default function FantasyMap() {
   /** After localStorage draft restore runs (or skips); avoids debounce overwriting draft before hydrate. */
   const [mapDraftHydrated, setMapDraftHydrated] = useState(false);
   const [mapSaveBanner, setMapSaveBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!embedMode) return;
+    setShowPoliticalTints(true);
+    setIsEditMode(false);
+    setShowStrategicHex(false);
+  }, [embedMode]);
 
   const hoveredHex = hoveredHexId ? hexTiles.find((hex) => hex.id === hoveredHexId) || null : null;
   const selectedHex = selectedHexId ? hexTiles.find((hex) => hex.id === selectedHexId) || null : null;
@@ -947,12 +971,12 @@ export default function FantasyMap() {
   }, [hexTiles]);
 
   const derivedFactionFromProvinces = useMemo(
-    () => provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, regions),
-    [provinceFactions, hexTiles, dataBounds],
+    () => provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, mapRegions),
+    [provinceFactions, hexTiles, dataBounds, mapRegions],
   );
   const derivedLocationFromProvinces = useMemo(
-    () => provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, regions),
-    [provinceLocations, hexTiles, dataBounds],
+    () => provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, mapRegions),
+    [provinceLocations, hexTiles, dataBounds, mapRegions],
   );
 
   const factionByHex = cartographyMode === 'provinces' ? derivedFactionFromProvinces : effectiveOwnership;
@@ -963,16 +987,16 @@ export default function FantasyMap() {
     if (next === cartographyMode) return;
     if (next === 'provinces') {
       const own = layoutsByConfig[configKey] ?? effectiveOwnership;
-      setProvinceFactions(hexOwnershipToProvinceFactions(own, hexTiles, hexCenterById, dataBounds, regions));
-      setProvinceLocations(hexLocationsToProvinceLocations(locationByHex, hexTiles, hexCenterById, dataBounds, regions));
+      setProvinceFactions(hexOwnershipToProvinceFactions(own, hexTiles, hexCenterById, dataBounds, mapRegions));
+      setProvinceLocations(hexLocationsToProvinceLocations(locationByHex, hexTiles, hexCenterById, dataBounds, mapRegions));
     } else {
       setLayoutsByConfig((p) => ({
         ...p,
-        [configKey]: provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, regions),
+        [configKey]: provinceFactionsToHexOwnership(provinceFactions, hexTiles, dataBounds, mapRegions),
       }));
       setLocationByHex((prev) => ({
         ...prev,
-        ...provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, regions),
+        ...provinceLocationsToHexLocations(provinceLocations, hexTiles, dataBounds, mapRegions),
       }));
     }
     setCartographyMode(next);
@@ -1251,7 +1275,7 @@ export default function FantasyMap() {
         if (isEraseMode) return;
         const lid = selectedLocationId || locationOptions[0]?.id || 'unassigned';
         const next: Record<string, string> = {};
-        for (const r of regions) next[r.id] = lid;
+        for (const r of mapRegions) next[r.id] = lid;
         setProvinceLocations(next);
         return;
       }
@@ -1262,7 +1286,7 @@ export default function FantasyMap() {
         'unclaimed';
       if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
       const next: Record<string, string | null> = {};
-      for (const r of regions) next[r.id] = factionId;
+      for (const r of mapRegions) next[r.id] = factionId;
       setProvinceFactions(next);
       return;
     }
@@ -1296,7 +1320,7 @@ export default function FantasyMap() {
     if (cartographyMode === 'provinces') {
       const next: Record<string, string | null> = {};
       for (const hex of hexTiles) next[hex.id] = backendOwnership?.[hex.id] ?? null;
-      setProvinceFactions(hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, regions));
+      setProvinceFactions(hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, mapRegions));
     }
   }
 
@@ -1350,7 +1374,7 @@ export default function FantasyMap() {
     const regionFaction: Record<string, string | null> = {};
     const regionLocation: Record<string, string> = {};
     if (cartographyMode === 'provinces') {
-      for (const r of regions) {
+      for (const r of mapRegions) {
         regionFaction[r.id] = provinceFactions[r.id] ?? null;
         if (provinceLocations[r.id]) regionLocation[r.id] = provinceLocations[r.id];
       }
@@ -1360,16 +1384,16 @@ export default function FantasyMap() {
         hexTiles,
         hexCenterById,
         dataBounds,
-        regions,
+        mapRegions,
       );
       const pl = hexLocationsToProvinceLocations(
         locationByHex,
         hexTiles,
         hexCenterById,
         dataBounds,
-        regions,
+        mapRegions,
       );
-      for (const r of regions) {
+      for (const r of mapRegions) {
         regionFaction[r.id] = pf[r.id] ?? null;
         if (pl[r.id]) regionLocation[r.id] = pl[r.id];
       }
@@ -1467,7 +1491,7 @@ export default function FantasyMap() {
       setLocationByHex(loc);
       const meta = payload.layout.metadata;
       const loadedCarto: CartographyMode =
-        meta.cartographyMode === 'provinces' || meta.cartographyMode === 'hex'
+        meta?.cartographyMode === 'provinces' || meta?.cartographyMode === 'hex'
           ? meta.cartographyMode
           : payload.layout.regionFaction && Object.keys(payload.layout.regionFaction).length > 0
             ? 'provinces'
@@ -1475,29 +1499,29 @@ export default function FantasyMap() {
       let provF: Record<string, string | null>;
       if (payload.layout.regionFaction && typeof payload.layout.regionFaction === 'object') {
         provF = {};
-        for (const r of regions) provF[r.id] = payload.layout.regionFaction[r.id] ?? null;
+        for (const r of mapRegions) provF[r.id] = payload.layout.regionFaction[r.id] ?? null;
       } else {
-        provF = hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, regions);
+        provF = hexOwnershipToProvinceFactions(next, hexTiles, hexCenterById, dataBounds, mapRegions);
       }
       let provL: Record<string, string>;
       if (payload.layout.regionLocation && typeof payload.layout.regionLocation === 'object') {
         provL = { ...payload.layout.regionLocation };
       } else {
-        provL = hexLocationsToProvinceLocations(loc, hexTiles, hexCenterById, dataBounds, regions);
+        provL = hexLocationsToProvinceLocations(loc, hexTiles, hexCenterById, dataBounds, mapRegions);
       }
       setCartographyMode(loadedCarto);
       setProvinceFactions(provF);
       setProvinceLocations(provL);
       const draftOwn =
         loadedCarto === 'provinces'
-          ? provinceFactionsToHexOwnership(provF, hexTiles, dataBounds, regions)
+          ? provinceFactionsToHexOwnership(provF, hexTiles, dataBounds, mapRegions)
           : next;
       const draftLoc =
         loadedCarto === 'provinces'
-          ? provinceLocationsToHexLocations(provL, hexTiles, dataBounds, regions)
+          ? provinceLocationsToHexLocations(provL, hexTiles, dataBounds, mapRegions)
           : loc;
       writeMapEditorDraft(draftOwn, draftLoc, configMode, loadedCarto, provF, provL);
-      const savedHex = payload.layout.metadata.mapGrid?.hexSize;
+      const savedHex = meta?.mapGrid?.hexSize;
       if (savedHex != null && Math.abs(savedHex - HEX_SIZE) > 1e-6) {
         setMapSaveBanner({
           kind: 'err',
@@ -1558,13 +1582,34 @@ export default function FantasyMap() {
   } = mapViewport;
 
   const polSvgRef = useRef<SVGSVGElement | null>(null);
+  const politicalHoverRafRef = useRef<number | null>(null);
+  const politicalHoverPendingRef = useRef<{ clientX: number; clientY: number; svg: SVGSVGElement } | null>(null);
+
+  useEffect(
+    () => () => {
+      if (politicalHoverRafRef.current != null) cancelAnimationFrame(politicalHoverRafRef.current);
+    },
+    [],
+  );
 
   const updatePoliticalHover = useCallback((clientX: number, clientY: number, svg: SVGSVGElement) => {
-    const rect = svg.getBoundingClientRect();
-    const x = ((clientX - rect.left) / Math.max(1, rect.width)) * VIEWBOX_WIDTH;
-    const y = ((clientY - rect.top) / Math.max(1, rect.height)) * VIEWBOX_HEIGHT;
-    setHoveredRegion(findRegionAtViewPoint(x, y, regions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT));
-  }, [dataBounds]);
+    politicalHoverPendingRef.current = { clientX, clientY, svg };
+    if (politicalHoverRafRef.current != null) return;
+    politicalHoverRafRef.current = requestAnimationFrame(() => {
+      politicalHoverRafRef.current = null;
+      const pending = politicalHoverPendingRef.current;
+      if (!pending) return;
+      const rect = pending.svg.getBoundingClientRect();
+      const x = ((pending.clientX - rect.left) / Math.max(1, rect.width)) * VIEWBOX_WIDTH;
+      const y = ((pending.clientY - rect.top) / Math.max(1, rect.height)) * VIEWBOX_HEIGHT;
+      const hit = findRegionAtViewPoint(x, y, mapRegions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
+      setHoveredRegion((prev) => {
+        if (!hit && !prev) return prev;
+        if (hit && prev && hit.id === prev.id) return prev;
+        return hit;
+      });
+    });
+  }, [dataBounds, mapRegions]);
 
   const politicalFill = useCallback(
     (r: RegionDefinition) => {
@@ -1582,7 +1627,8 @@ export default function FantasyMap() {
   );
 
   return (
-    <div className="fantasy-map-shell">
+    <div className={embedMode ? 'fantasy-map-shell fantasy-map-shell--embed' : 'fantasy-map-shell'}>
+      {!embedMode && (
       <aside className="fantasy-map-sidebar">
         <div className="fantasy-map-sidebar__inner" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
           <p className="fantasy-map-sidebar__eyebrow">Strategic cartography</p>
@@ -1959,6 +2005,7 @@ export default function FantasyMap() {
           </div>
         </div>
       </aside>
+      )}
 
       <section className="fantasy-map-stage fantasy-map-stage--atlas" style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div className="fantasy-map-frame fantasy-map-frame--atlas" style={{ flex: 1, minHeight: 0, height: '100%' }}>
@@ -2014,12 +2061,12 @@ export default function FantasyMap() {
                     const x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * VIEWBOX_WIDTH;
                     const y = ((e.clientY - rect.top) / Math.max(1, rect.height)) * VIEWBOX_HEIGHT;
                     setSelectedRegion(
-                      findRegionAtViewPoint(x, y, regions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT),
+                      findRegionAtViewPoint(x, y, mapRegions, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT),
                     );
                   }}
                   style={{ pointerEvents: cartographyMode === 'provinces' || !showStrategicHex ? 'auto' : 'none' }}
                 >
-                  {regions.map((r) => {
+                  {mapRegions.map((r) => {
                     const d = regionPathD(r, dataBounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
                     const isH = hoveredRegion?.id === r.id;
                     const isS = selectedRegion?.id === r.id;
@@ -2040,16 +2087,16 @@ export default function FantasyMap() {
                     const fill = paintFill ?? (showPoliticalTints ? simFill : 'transparent');
                     const fillOpacity = paintFill
                       ? isS
-                        ? 0.58
+                        ? 0.62
                         : isH
-                          ? 0.52
+                          ? 0.55
                           : paintBaseOp
                       : showPoliticalTints
                         ? isS
-                          ? 0.55
+                          ? 0.58
                           : isH
-                            ? 0.5
-                            : 0.34
+                            ? 0.52
+                            : 0.4
                         : 0;
                     const stroke = (() => {
                       if (cartographyMode === 'provinces') {

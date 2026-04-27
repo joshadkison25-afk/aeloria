@@ -1049,6 +1049,7 @@
   .home-atlas-frame {
     position: absolute;
     inset: 0;
+    pointer-events: auto;
   }
 
   .home-atlas-map {
@@ -1059,6 +1060,17 @@
     object-fit: cover;
     object-position: center;
     filter: saturate(0.96) contrast(1.04) brightness(0.8);
+  }
+
+  .home-atlas-embed {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #05060b;
+    filter: saturate(0.96) contrast(1.04) brightness(0.92);
   }
 
 
@@ -1799,7 +1811,7 @@
     pointer-events: none;
     overflow: hidden;
     mix-blend-mode: screen;
-    opacity: 0.85;
+    opacity: 0.425;
   }
   .epic-shafts svg {
     width: 100%;
@@ -1815,8 +1827,8 @@
   .epic-shaft:nth-child(4) { animation-delay: 0.6s; animation-duration: 10s; }
 
   @keyframes epicShaftBreathe {
-    from { opacity: 0.42; transform: scaleY(0.96) translateY(-1%); }
-    to   { opacity: 0.78; transform: scaleY(1.04) translateY(0); }
+    from { opacity: 0.21; transform: scaleY(0.96) translateY(-1%); }
+    to   { opacity: 0.39; transform: scaleY(1.04) translateY(0); }
   }
 
   /* ── Ambient dust motes (canvas, full screen) ─────────────── */
@@ -1963,7 +1975,7 @@
     z-index: 5;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 60% 22% at 50% -2%, rgba(255, 215, 150, 0.10), transparent 70%);
+      radial-gradient(ellipse 60% 22% at 50% -2%, rgba(255, 215, 150, 0.05), transparent 70%);
     mix-blend-mode: screen;
   }
   .home-map-stage::after {
@@ -2296,7 +2308,18 @@
     <section class="home-map-stage" aria-label="World map canvas">
       <div class="home-map-background" aria-hidden="true">
         <div class="home-atlas-frame">
-          <img class="home-atlas-map" src="/static/illustrations/ui/aeloria-lore-map-labeled.png?v=20260424-mapfit-1" alt="Lore-labeled map of Aeloria">
+          {% if home_interactive_map %}
+          <iframe
+            class="home-atlas-embed"
+            src="{{ home_map_iframe_url }}"
+            title="Interactive realm map"
+            loading="eager"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="fullscreen"
+          ></iframe>
+          {% else %}
+          <img class="home-atlas-map" src="{{ home_atlas_url }}?v=20260427-home-atlas" alt="Realm map">
+          {% endif %}
           <div class="home-atlas-tone-layer"></div>
         </div>
       </div>
@@ -4446,8 +4469,16 @@ async function loadHome() {
   } catch (error) {
     console.error('renderHome failed:', error);
   }
-  bindActions();
-  startHomeRefresh();
+  try {
+    bindActions();
+  } catch (error) {
+    console.error('bindActions failed:', error);
+  }
+  try {
+    startHomeRefresh();
+  } catch (error) {
+    console.error('startHomeRefresh failed:', error);
+  }
 }
 
 function startHomeRefresh() {
@@ -5002,21 +5033,25 @@ function bindActions() {
   if (window.__homeBound) return;
   window.__homeBound = true;
 
+  const intentInput = document.getElementById('intent-input');
+  const intentSubmit = document.getElementById('intent-submit');
   document.querySelectorAll('[data-intent]').forEach(button => {
     button.addEventListener('click', () => {
       activeIntent = button.dataset.intent;
       document.querySelectorAll('[data-intent]').forEach(item => item.classList.toggle('active', item === button));
       const form = document.getElementById('intent-form');
       const input = document.getElementById('intent-input');
-      input.value = '';
-      input.placeholder = INTENT_HINTS[activeIntent] || '';
-      form.classList.toggle('active', activeIntent !== 'continue');
+      if (input) {
+        input.value = '';
+        input.placeholder = INTENT_HINTS[activeIntent] || '';
+      }
+      if (form) form.classList.toggle('active', activeIntent !== 'continue');
       if (activeIntent === 'continue') handleIntent();
     });
   });
 
-  document.getElementById('intent-submit').addEventListener('click', handleIntent);
-  document.getElementById('intent-input').addEventListener('keydown', event => {
+  intentSubmit?.addEventListener('click', handleIntent);
+  intentInput?.addEventListener('keydown', event => {
     if (event.key === 'Enter') handleIntent();
   });
 
@@ -5108,7 +5143,8 @@ function closeCenterModal(storeDismissal = true) {
 }
 
 async function handleIntent() {
-  const input = document.getElementById('intent-input').value.trim();
+  const inputEl = document.getElementById('intent-input');
+  const input = (inputEl?.value || '').trim();
   const primary = getPrimaryThread(worldState);
   const secondary = getSecondaryThread(worldState);
   const ctx = getSeerContext(worldState);
@@ -5383,6 +5419,7 @@ function escapeHtml(value) {
 
 function showToast(message) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2200);
@@ -5499,8 +5536,8 @@ loadHome();
         lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0');
         lg.setAttribute('x2', '0'); lg.setAttribute('y2', '1');
         var stops = [
-          { o: 0,    c: 'rgba(255,220,160,0.42)' },
-          { o: 0.45, c: 'rgba(255,200,120,0.18)' },
+          { o: 0,    c: 'rgba(255,220,160,0.21)' },
+          { o: 0.45, c: 'rgba(255,200,120,0.09)' },
           { o: 1,    c: 'rgba(255,180,90,0.0)'  }
         ];
         stops.forEach(function (st) {
