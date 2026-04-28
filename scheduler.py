@@ -7332,6 +7332,17 @@ def run_tick():
             send_tick_notification(new_state)
             logger.info(f"Tick {new_state['tick']} complete - {new_state.get('world_date')}")
 
+            # Notify SSE subscribers (world map live updates)
+            try:
+                import tick_bus
+                tick_bus.notify_tick({
+                    "type": "tick",
+                    "tick": new_state.get("tick"),
+                    "world_date": new_state.get("world_date"),
+                })
+            except Exception as _bus_err:
+                logger.warning("tick_bus notify failed: %s", _bus_err)
+
             chronicle = _generate_chronicle(new_state)
             if chronicle:
                 new_state["chronicle"] = chronicle

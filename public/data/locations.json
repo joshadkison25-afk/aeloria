@@ -1,0 +1,392 @@
+[
+  {
+    "id": "loc_1777345620109_zmw9f",
+    "label": "Eldoria",
+    "type": "city",
+    "faction": "twin_cities",
+    "x": 49.84375,
+    "y": 47.84879866236211,
+    "createdAt": "2026-04-28T03:07:00.110Z",
+    "house": "lefleur"
+  },
+  {
+    "id": "loc_1777346192393_tyih6",
+    "label": "Frostvale",
+    "type": "faction_capital",
+    "faction": "frostvale",
+    "x": 48.125,
+    "y": 7.327136743107713,
+    "createdAt": "2026-04-28T03:16:32.394Z",
+    "house": "adkison"
+  },
+  {
+    "id": "loc_1777348090797_i2nc3",
+    "label": "Widows Bay",
+    "type": "port",
+    "faction": "dreadwind",
+    "x": 93.10018903591683,
+    "y": 50.3367202268431,
+    "createdAt": "2026-04-28T03:48:10.797Z",
+    "house": "blacktide"
+  },
+  {
+    "id": "loc_1777348112934_4rj58",
+    "label": "Vilefin",
+    "type": "faction_capital",
+    "faction": "vilefin",
+    "x": 82.64020163831128,
+    "y": 79.63728733459358,
+    "createdAt": "2026-04-28T03:48:32.934Z",
+    "house": "bloodware"
+  },
+  {
+    "id": "loc_1777348179009_hej4s",
+    "label": "Lostfeld",
+    "type": "faction_capital",
+    "faction": "lostfeld",
+    "x": 30.970384373030875,
+    "y": 34.83577504725898,
+    "createdAt": "2026-04-28T03:49:39.010Z",
+    "house": "goldfinger_duke"
+  },
+  {
+    "id": "loc_1777348193680_90cab",
+    "label": "Stonebreak",
+    "type": "city",
+    "faction": "stonebreak",
+    "x": 25.04725897920605,
+    "y": 55.6297258979206,
+    "createdAt": "2026-04-28T03:49:53.680Z",
+    "house": "stonebreak_order"
+  },
+  {
+    "id": "loc_1777348211367_r6rww",
+    "label": "Tidefall",
+    "type": "faction_capital",
+    "faction": "tidefall",
+    "x": 40.92627599243856,
+    "y": 80.77150283553875,
+    "createdAt": "2026-04-28T03:50:11.367Z",
+    "house": "ver_meer"
+  },
+  {
+    "id": "loc_1777348237914_ogna3",
+    "label": "Eresteron",
+    "type": "faction_capital",
+    "faction": "twin_cities",
+    "x": 42.18651543793321,
+    "y": 45.23275047258979,
+    "createdAt": "2026-04-28T03:50:37.914Z",
+    "house": "aurand"
+  },
+  {
+    "id": "loc_1777348272862_b30y3",
+    "label": "Mythralen",
+    "type": "faction_capital",
+    "faction": "glenwood",
+    "x": 17.737870195337113,
+    "y": 75.66753308128544,
+    "createdAt": "2026-04-28T03:51:12.862Z",
+    "house": "darkleaf"
+  },
+  {
+    "id": "loc_1777348295796_8o92e",
+    "label": "Farrock",
+    "type": "faction_capital",
+    "faction": "varkuun",
+    "x": 62.350346565847516,
+    "y": 53.92840264650284,
+    "createdAt": "2026-04-28T03:51:35.796Z",
+    "house": "van_cleave"
+  },
+  {
+    "id": "loc_1777348314891_57m0p",
+    "label": "Vel’tharyn",
+    "type": "faction_capital",
+    "faction": "faerwood",
+    "x": 14.46124763705104,
+    "y": 14.987003780718336,
+    "createdAt": "2026-04-28T03:51:54.892Z",
+    "house": "verlorn"
+  },
+  {
+    "id": "loc_1777348348911_xjvhd",
+    "label": "Dur Khadur",
+    "type": "faction_capital",
+    "faction": "dur_khadur",
+    "x": 69.53371140516697,
+    "y": 34.26866729678639,
+    "createdAt": "2026-04-28T03:52:28.912Z",
+    "house": "gross"
+  },
+  {
+    "id": "loc_1777348374606_isxwd",
+    "label": "Gilgeth",
+    "type": "faction_capital",
+    "faction": "gilgeth_clans",
+    "x": 73.56647763074984,
+    "y": 16.688327032136105,
+    "createdAt": "2026-04-28T03:52:54.606Z",
+    "house": "ironhide"
+  },
+  {
+    "id": "loc_1777348393100_6qdaj",
+    "label": "Groth",
+    "type": "faction_capital",
+    "faction": "groth_clans",
+    "x": 83.648393194707,
+    "y": 6.102315689981096,
+    "createdAt": "2026-04-28T03:53:13.100Z",
+    "house": "mijid"
+  },
+  {
+    "id": "loc_1777349794470_n1god",
+    "label": "Lethyra Vale",
+    "type": "house_seat",
+    "faction": "glenwood",
+    "house": "wood",
+    "x": 11.688720856962824,
+    "y": 37.10420604914934,
+    "createdAt": "2026-04-28T04:16:34.472Z"
+  },
+  {
+    "id": "loc_1777349872946_iydki",
+    "label": "Sylvaenor",
+    "type": "house_seat",
+    "faction": "glenwood",
+    "house": "mistafae",
+    "x": 13.80858087278777,
+    "y": 52.13183503874224,
+    "createdAt": "2026-04-28T04:17:52.946Z"
+  },
+  {
+    "id": "loc_1777350029334_hlpsq",
+    "label": "Westmarch",
+    "type": "house_seat",
+    "faction": "twin_cities",
+    "house": "braafhart",
+    "x": 46.228568372766944,
+    "y": 25.565075317243107,
+    "createdAt": "2026-04-28T04:20:29.335Z"
+  },
+  {
+    "id": "loc_1777350135580_0zrlw",
+    "label": "Ravensguard",
+    "type": "house_seat",
+    "faction": "twin_cities",
+    "house": "aurand",
+    "x": 41.792366793371585,
+    "y": 34.59702335239357,
+    "createdAt": "2026-04-28T04:22:15.580Z"
+  },
+  {
+    "id": "loc_1777350197978_ztbic",
+    "label": "Southgate",
+    "type": "house_seat",
+    "faction": "twin_cities",
+    "house": "lefleur",
+    "x": 50.74080655375525,
+    "y": 58.48363882402098,
+    "createdAt": "2026-04-28T04:23:17.978Z"
+  },
+  {
+    "id": "loc_1777350310359_cxb12",
+    "label": "Du Duhuar",
+    "type": "house_seat",
+    "faction": "dur_khadur",
+    "house": "galfazzar",
+    "x": 69.40120601669003,
+    "y": 25.722816991036947,
+    "createdAt": "2026-04-28T04:25:10.361Z"
+  },
+  {
+    "id": "loc_1777350353954_japfb",
+    "label": "Durcenti",
+    "type": "house_seat",
+    "faction": "dur_khadur",
+    "house": "delonious",
+    "x": 63.399526698395356,
+    "y": 32.235277527909865,
+    "createdAt": "2026-04-28T04:25:53.954Z"
+  },
+  {
+    "id": "loc_1777350402049_hm4zv",
+    "label": "Durtide",
+    "type": "port",
+    "faction": "dur_khadur",
+    "house": "vercenti",
+    "x": 78.21218203716515,
+    "y": 36.1619081457303,
+    "createdAt": "2026-04-28T04:26:42.050Z"
+  },
+  {
+    "id": "loc_1777350454652_445iq",
+    "label": "Gronderoth",
+    "type": "house_seat",
+    "faction": "groth_clans",
+    "house": "ashfang",
+    "x": 69.36580148359285,
+    "y": 5.05857007019613,
+    "createdAt": "2026-04-28T04:27:34.652Z"
+  },
+  {
+    "id": "loc_1777350796397_aa5xw",
+    "label": "Gor’Mak",
+    "type": "house_seat",
+    "faction": "groth_clans",
+    "house": "syncar",
+    "x": 73.89898479847497,
+    "y": 10.038686951334249,
+    "createdAt": "2026-04-28T04:33:16.398Z"
+  },
+  {
+    "id": "loc_1777350847116_i0hc9",
+    "label": "Grimkar",
+    "type": "house_seat",
+    "faction": "gilgeth_clans",
+    "house": "blackblood",
+    "x": 66.30111417212325,
+    "y": 12.528745391903309,
+    "createdAt": "2026-04-28T04:34:07.117Z"
+  },
+  {
+    "id": "loc_1777350900405_jkfh4",
+    "label": "Drakgor",
+    "type": "house_seat",
+    "faction": "gilgeth_clans",
+    "house": "redtusk",
+    "x": 81.81609368643814,
+    "y": 15.306118267922644,
+    "createdAt": "2026-04-28T04:35:00.405Z"
+  },
+  {
+    "id": "loc_1777351059989_2jv1h",
+    "label": "Stormhaven",
+    "type": "port",
+    "faction": "tidefall",
+    "house": "fish",
+    "x": 51.52436131048393,
+    "y": 74.49957721066791,
+    "createdAt": "2026-04-28T04:37:39.990Z"
+  },
+  {
+    "id": "loc_1777351112385_x69pz",
+    "label": "Harbormere",
+    "type": "house_seat",
+    "faction": "tidefall",
+    "house": "highland_dusken",
+    "x": 30.739259567838932,
+    "y": 70.65450190305702,
+    "createdAt": "2026-04-28T04:38:32.385Z"
+  },
+  {
+    "id": "loc_1777351160176_vz1jj",
+    "label": "Deepwake",
+    "type": "house_seat",
+    "faction": "tidefall",
+    "house": "mcgowan",
+    "x": 25.89479838096935,
+    "y": 90.31735302165532,
+    "createdAt": "2026-04-28T04:39:20.176Z"
+  },
+  {
+    "id": "loc_1777351273622_n41ay",
+    "label": "Winteron",
+    "type": "house_seat",
+    "faction": "frostvale",
+    "house": "mcintosh",
+    "x": 37.390051581986825,
+    "y": 15.740966043001048,
+    "createdAt": "2026-04-28T04:41:13.622Z"
+  },
+  {
+    "id": "loc_1777351382854_8i3ci",
+    "label": "Icefell",
+    "type": "house_seat",
+    "faction": "frostvale",
+    "house": "duval",
+    "x": 51.763986150401756,
+    "y": 13.908010318373673,
+    "createdAt": "2026-04-28T04:43:02.854Z"
+  },
+  {
+    "id": "loc_1777351521676_rjbgb",
+    "label": "Snowpeak",
+    "type": "house_seat",
+    "faction": "frostvale",
+    "house": "adkison",
+    "x": 27.55911039046392,
+    "y": 5.611744548075569,
+    "createdAt": "2026-04-28T04:45:21.676Z"
+  },
+  {
+    "id": "loc_1777351559693_xjm4t",
+    "label": "Dreadmark",
+    "type": "house_seat",
+    "faction": "frostvale",
+    "house": "holter",
+    "x": 40.41013757465443,
+    "y": 8.103750088875245,
+    "createdAt": "2026-04-28T04:45:59.693Z"
+  },
+  {
+    "id": "loc_1777351685318_sd6jv",
+    "label": "Runesdeep",
+    "type": "house_seat",
+    "faction": "lostfeld",
+    "house": "runewarden",
+    "x": 29.520598672664118,
+    "y": 23.26579659131099,
+    "createdAt": "2026-04-28T04:48:05.318Z"
+  },
+  {
+    "id": "loc_1777351744951_q2bfa",
+    "label": "Irongate",
+    "type": "house_seat",
+    "faction": "lostfeld",
+    "house": "ironmaul",
+    "x": 30.586326863371948,
+    "y": 41.05013577374789,
+    "createdAt": "2026-04-28T04:49:04.951Z"
+  },
+  {
+    "id": "loc_1777352040091_8lflr",
+    "label": "Veyl’thas",
+    "type": "house_seat",
+    "faction": "faerwood",
+    "house": "nightborn",
+    "x": 11.443518682045612,
+    "y": 24.4973240862716,
+    "createdAt": "2026-04-28T04:54:00.092Z"
+  },
+  {
+    "id": "loc_1777352072196_z8434",
+    "label": "Draelith",
+    "type": "house_seat",
+    "faction": "faerwood",
+    "house": "shadowveil",
+    "x": 22.70826565782736,
+    "y": 19.46175838517711,
+    "createdAt": "2026-04-28T04:54:32.196Z"
+  },
+  {
+    "id": "loc_1777352212812_acicr",
+    "label": "Cogtooth",
+    "type": "house_seat",
+    "faction": "vilefin",
+    "house": "cogtooth",
+    "x": 62.17415867373614,
+    "y": 82.54357335542208,
+    "createdAt": "2026-04-28T04:56:52.813Z"
+  },
+  {
+    "id": "loc_1777352269222_06xm2",
+    "label": "Grimehold",
+    "type": "house_seat",
+    "faction": "vilefin",
+    "house": "rustfang",
+    "x": 78.5505643434289,
+    "y": 53.091109077020526,
+    "createdAt": "2026-04-28T04:57:49.222Z"
+  }
+]

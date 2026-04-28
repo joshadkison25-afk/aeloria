@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Next is used for `/map` and API proxies; the playable game UI is Flask (`/` on port 5000). */
+/** Next home redirects to the strategy map; Flask home iframe uses `/worldmap` (see HOME_MAP_IFRAME_URL in app.py). */
 export default function Home() {
   redirect('/map');
 }

@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, redirect, render_template, request, send_from_directory, stream_with_context
 
 from aeloria_llm import complete_chat_anthropic_format
 
@@ -35,6 +35,12 @@ CHARACTER_PORTRAIT_JOBS_FILE = BASE_DIR / "character_portrait_jobs.json"
 CODEX_IMAGE_JOBS_FILE = BASE_DIR / "codex_image_jobs.json"
 IMAGE_GENERATION_STATE_FILE = BASE_DIR / "image_generation_state.json"
 MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/map")
+# Flask home + /enter iframe: Next world map editor (`/worldmap`). Defaults to same host as MAP_PUBLIC_URL.
+_mp = urlsplit(MAP_PUBLIC_URL)
+HOME_MAP_IFRAME_URL = os.getenv(
+    "HOME_MAP_IFRAME_URL",
+    urlunsplit((_mp.scheme, _mp.netloc, "/worldmap", "", "")),
+)
 # Same image as Next `/map` by default (files under ./public). Override with NEXT_PUBLIC_MAP_ATLAS_URL or HOME_ATLAS_URL.
 HOME_ATLAS_URL = (
     os.getenv("HOME_ATLAS_URL")
@@ -80,13 +86,27 @@ def _map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
     return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
 
 
+def _home_map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
+    """Next `/worldmap` URL for Flask home /enter iframe (WorldMapEditor cache-buster)."""
+    try:
+        map_ts = int((BASE_DIR / "components" / "WorldMapEditor.tsx").stat().st_mtime)
+    except OSError:
+        map_ts = 0
+    parsed = urlsplit(HOME_MAP_IFRAME_URL)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query["cb"] = str(map_ts)
+    if extra_query:
+        query.update(extra_query)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+
+
 @app.context_processor
 def _inject_map_public_url():
     return {
         "map_public_url": MAP_PUBLIC_URL,
         "home_atlas_url": HOME_ATLAS_URL,
         "map_iframe_url": _map_iframe_url(),
-        "home_map_iframe_url": _map_iframe_url({"embed": "1"}),
+        "home_map_iframe_url": _home_map_iframe_url({"embed": "1"}),
         "home_interactive_map": HOME_INTERACTIVE_MAP,
     }
 
@@ -1302,6 +1322,40 @@ def latest_audio():
         return jsonify({"url": None})
     latest = files[-1]
     return jsonify({"url": f"/static/audio/{latest.name}", "tick": int(latest.stem.split("_")[1])})
+
+
+# ── SSE tick stream ───────────────────────────────────────────────────────────
+
+@app.route("/api/events")
+def sse_events():
+    """Server-Sent Events stream — emits a JSON message after every world tick."""
+    import tick_bus
+
+    q = tick_bus.subscribe()
+
+    def _stream():
+        # Send an initial heartbeat so the browser knows the connection is alive
+        yield "data: {\"type\":\"connected\"}\n\n"
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=30)          # block until tick or 30s
+                    yield f"data: {msg}\n\n"
+                except Exception:
+                    # Heartbeat — keeps proxy/nginx from closing the connection
+                    yield ": heartbeat\n\n"
+        finally:
+            tick_bus.unsubscribe(q)
+
+    return Response(
+        stream_with_context(_stream()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 # Public files (Next basemap PNGs, etc.) — registered last so this catch-all cannot shadow /api/* or pages.
