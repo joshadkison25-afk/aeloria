@@ -9,7 +9,7 @@ import {
   regionPathD,
   findRegionAtViewPoint,
   worldStateKeyForRegion,
-  pointInPolygon,
+  pointInRegion,
   toViewBox,
   type MapBounds,
 } from '@/lib/mapGeography';
@@ -18,9 +18,6 @@ import { buildHexLandMask } from '@/lib/mapLandMask';
 type HexTile = { id: string; x: number; y: number; row: number; col: number };
 type ConfigMode = 'core' | 'optional' | 'custom';
 type CartographyMode = 'provinces' | 'hex';
-type LoreSpeciesOption = { id: string; name: string };
-type LoreLocation = { id: string; species: LoreSpeciesOption[] };
-type LoreResponse = { locations?: LoreLocation[] };
 type WorldRegionRow = {
   name?: string;
   controller?: string;
@@ -59,37 +56,52 @@ type SavedMapLayout = {
 type MapLocation = { id: string; name: string; centerX: number; centerY: number; radius: number };
 type LocationOption = { id: string; name: string };
 type LocationAssignment = string | null;
+type AtlasView = 'houses' | 'realms';
 
 const VIEWBOX_WIDTH = 100;
 const VIEWBOX_HEIGHT = 100;
-/** Flat/pointy-hex “width”. Smaller = denser territory cells (CK3-style). */
-const HEX_SIZE = 0.55;
+/**
+ * Flat/pointy-hex “width”. Smaller = denser cells but each hex is one SVG polygon; ~0.55
+ * produced 50k+ nodes and froze browsers. 1.2–1.5 is a practical range for the painter.
+ */
+const HEX_SIZE = 1.5;
 const HEX_WIDTH = HEX_SIZE;
 const HEX_HEIGHT = HEX_SIZE;
 const HEX_HORIZONTAL_STEP = HEX_WIDTH * 0.75;
 const HEX_VERTICAL_STEP = HEX_HEIGHT * 0.866;
 
 const MAP_LOCATIONS: MapLocation[] = [
-  { id: 'faerwood', name: 'Faerwood', centerX: 20, centerY: 28, radius: 16 },
-  { id: 'frostvale', name: 'Frostvale', centerX: 50, centerY: 16, radius: 13 },
-  { id: 'farrock', name: 'Farrock', centerX: 79, centerY: 28, radius: 16 },
-  { id: 'glenhaven', name: 'Glenhaven', centerX: 50, centerY: 42, radius: 16 },
-  { id: 'twin-cities', name: 'Twin Cities', centerX: 52, centerY: 44, radius: 8 },
-  { id: 'lostfeld', name: 'Lostfeld', centerX: 20, centerY: 72, radius: 16 },
-  { id: 'vilefin', name: 'Vilefin', centerX: 58, centerY: 70, radius: 14 },
-  { id: 'tidefall', name: 'Tidefall', centerX: 82, centerY: 68, radius: 15 },
-  { id: 'orc-dominion', name: 'Orc Dominion', centerX: 88, centerY: 48, radius: 12 },
+  { id: 'frostvale',      name: 'Frostvale',      centerX: 46, centerY: 10, radius: 18 },
+  { id: 'lostfeld',       name: 'Lostfeld',        centerX: 44, centerY: 24, radius: 13 },
+  { id: 'farrock',        name: 'Farrock',          centerX: 66, centerY: 33, radius: 13 },
+  { id: 'faerwood',       name: 'Faerwood',         centerX: 18, centerY: 52, radius: 16 },
+  { id: 'eldoria',        name: 'Eldoria',          centerX: 41, centerY: 44, radius: 12 },
+  { id: 'gilgeth',        name: 'Gilgeth',          centerX: 36, centerY: 56, radius: 12 },
+  { id: 'twin-cities',    name: 'Twin Cities',      centerX: 50, centerY: 52, radius: 10 },
+  { id: 'eresteron',      name: 'Eresteron',        centerX: 58, centerY: 52, radius: 10 },
+  { id: 'groth',          name: 'Groth',            centerX: 28, centerY: 66, radius: 12 },
+  { id: 'vilefin',        name: 'Vilefin',          centerX: 20, centerY: 78, radius: 12 },
+  { id: 'dur-khadur',     name: 'Dur Khadur',       centerX: 77, centerY: 78, radius: 14 },
+  { id: 'glenwood',       name: 'Glenwood',         centerX: 72, centerY: 67, radius: 12 },
+  { id: 'tidefall',       name: 'Tidefall',         centerX: 80, centerY: 58, radius: 14 },
+  { id: 'dreadwind-isles', name: 'Dreadwind Isles', centerX: 92, centerY: 50, radius: 10 },
 ];
 
 const locationColors: Record<string, string> = {
-  'twin-cities': '#facc15',
-  faerwood: '#5b21b6',
-  frostvale: '#93c5fd',
-  farrock: '#92400e',
-  lostfeld: '#6b7280',
-  tidefall: '#0ea5e9',
-  vilefin: '#4ade80',
-  'orc-dominion': '#7c2d12',
+  frostvale:        '#93c5fd',
+  lostfeld:         '#6b7280',
+  farrock:          '#92400e',
+  faerwood:         '#5b21b6',
+  eldoria:          '#c28b65',
+  gilgeth:          '#5c5145',
+  'twin-cities':    '#facc15',
+  eresteron:        '#b9a263',
+  groth:            '#884633',
+  vilefin:          '#8c7d3d',
+  'dur-khadur':     '#c28e54',
+  glenwood:         '#4d7e4c',
+  tidefall:         '#0ea5e9',
+  'dreadwind-isles':'#687b91',
 };
 
 const MAP_EDITOR_DRAFT_STORAGE_KEY = 'aeloria-map-editor-draft-v1';
@@ -136,7 +148,62 @@ function colorForFaction(factionId: string): string {
   return `hsl(${Math.abs(hash) % 360}, 58%, 50%)`;
 }
 
+const KINGDOM_COLORS: Record<string, string> = {
+  Frostvale: '#c7dce3',
+  Lostfeld: '#7b858b',
+  Farrock: '#966142',
+  Eldoria: '#c28b65',
+  Faerwood: '#3f6b3c',
+  Gilgeth: '#5c5145',
+  'Twin Cities': '#c6ad65',
+  Eresteron: '#b9a263',
+  Groth: '#884633',
+  Vilefin: '#8c7d3d',
+  'Dur Khadur': '#c28e54',
+  Glenwood: '#4d7e4c',
+  Tidefall: '#6d98a2',
+  'Dreadwind Isles': '#687b91',
+};
+
+function hexToRgb(hex: string): [number, number, number] {
+  const raw = hex.replace('#', '');
+  return [
+    Number.parseInt(raw.slice(0, 2), 16),
+    Number.parseInt(raw.slice(2, 4), 16),
+    Number.parseInt(raw.slice(4, 6), 16),
+  ];
+}
+
+function rgbToHex(rgb: [number, number, number]): string {
+  return `#${rgb
+    .map((value) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+function mixColor(hex: string, target: 'white' | 'black', amount: number): string {
+  const base = hexToRgb(hex);
+  const dest: [number, number, number] = target === 'white' ? [255, 255, 255] : [0, 0, 0];
+  return rgbToHex(base.map((value, i) => value + (dest[i] - value) * amount) as [number, number, number]);
+}
+
+function colorForHouseOwner(ownerId: string): string {
+  const kingdomId = kingdomIdForHouseId(ownerId);
+  const base = kingdomId ? KINGDOM_COLORS[kingdomId] : null;
+  if (!base) return colorForFaction(ownerId);
+  let hash = 0;
+  for (let i = 0; i < ownerId.length; i += 1) hash = ownerId.charCodeAt(i) + ((hash << 5) - hash);
+  const shadeSteps = [-0.18, -0.1, 0, 0.11, 0.2];
+  const shade = shadeSteps[Math.abs(hash) % shadeSteps.length];
+  return shade < 0 ? mixColor(base, 'black', Math.abs(shade)) : mixColor(base, 'white', shade);
+}
+
 function hexPoints(x: number, y: number, width: number, height: number): string {
+  return hexVertices(x, y, width, height)
+    .map(([px, py]) => `${px},${py}`)
+    .join(' ');
+}
+
+function hexVertices(x: number, y: number, width: number, height: number): [number, number][] {
   const x0 = x + width * 0.5;
   const y0 = y;
   const x1 = x + width;
@@ -149,7 +216,125 @@ function hexPoints(x: number, y: number, width: number, height: number): string 
   const y4 = y + height * 0.75;
   const x5 = x;
   const y5 = y + height * 0.25;
-  return `${x0},${y0} ${x1},${y1} ${x2},${y2} ${x3},${y3} ${x4},${y4} ${x5},${y5}`;
+  return [
+    [x0, y0],
+    [x1, y1],
+    [x2, y2],
+    [x3, y3],
+    [x4, y4],
+    [x5, y5],
+  ];
+}
+
+function edgeKey(a: [number, number], b: [number, number]): string {
+  const pa = `${a[0].toFixed(4)},${a[1].toFixed(4)}`;
+  const pb = `${b[0].toFixed(4)},${b[1].toFixed(4)}`;
+  return pa < pb ? `${pa}|${pb}` : `${pb}|${pa}`;
+}
+
+function pointKey(point: [number, number]): string {
+  return `${point[0].toFixed(4)},${point[1].toFixed(4)}`;
+}
+
+function smoothPathD(points: [number, number][]): string {
+  if (points.length < 3) return '';
+  const ring = points.slice(0, -1);
+  if (ring.length < 3) return '';
+  const commands: string[] = [];
+  for (let i = 0; i < ring.length; i += 1) {
+    const current = ring[i];
+    const next = ring[(i + 1) % ring.length];
+    const mid: [number, number] = [(current[0] + next[0]) / 2, (current[1] + next[1]) / 2];
+    if (i === 0) {
+      commands.push(`M ${mid[0]} ${mid[1]}`);
+    }
+    commands.push(`Q ${next[0]} ${next[1]} ${(next[0] + ring[(i + 2) % ring.length][0]) / 2} ${(next[1] + ring[(i + 2) % ring.length][1]) / 2}`);
+  }
+  return `${commands.join(' ')} Z`;
+}
+
+function kingdomIdForHouseId(ownerId: string | null | undefined): string | null {
+  if (!ownerId) return null;
+  const normalized = ownerId.toLowerCase();
+  if (normalized.startsWith('frostvale-')) return 'Frostvale';
+  if (normalized.startsWith('faerwood-')) return 'Faerwood';
+  if (normalized.startsWith('eldoria-')) return 'Eldoria';
+  if (normalized.startsWith('twin-')) return 'Twin Cities';
+  if (normalized.startsWith('eresteron-')) return 'Eresteron';
+  if (normalized.startsWith('farrock-')) return 'Farrock';
+  if (normalized.startsWith('gilgeth-')) return 'Gilgeth';
+  if (normalized.startsWith('groth-')) return 'Groth';
+  if (normalized.startsWith('vilefin-')) return 'Vilefin';
+  if (normalized.startsWith('lostfeld-')) return 'Lostfeld';
+  if (normalized.startsWith('dur-')) return 'Dur Khadur';
+  if (normalized.startsWith('glen-')) return 'Glenwood';
+  if (normalized.startsWith('tide-')) return 'Tidefall';
+  if (normalized.startsWith('dreadwind-')) return 'Dreadwind Isles';
+  return normalizeKey(ownerId);
+}
+
+function buildHexRegionPaths(
+  hexTiles: HexTile[],
+  ownerByHex: Record<string, string | null>,
+): { ownerId: string; d: string }[] {
+  const edgesByOwner = new Map<string, { a: [number, number]; b: [number, number] }[]>();
+  const edgeOwners = new Map<string, string[]>();
+
+  for (const hex of hexTiles) {
+    const owner = ownerByHex[hex.id];
+    if (!owner) continue;
+    const vertices = hexVertices(hex.x, hex.y, HEX_WIDTH, HEX_HEIGHT);
+    for (let i = 0; i < vertices.length; i += 1) {
+      const key = edgeKey(vertices[i], vertices[(i + 1) % vertices.length]);
+      const owners = edgeOwners.get(key) || [];
+      owners.push(owner);
+      edgeOwners.set(key, owners);
+    }
+  }
+
+  for (const hex of hexTiles) {
+    const owner = ownerByHex[hex.id];
+    if (!owner) continue;
+    const vertices = hexVertices(hex.x, hex.y, HEX_WIDTH, HEX_HEIGHT);
+    for (let i = 0; i < vertices.length; i += 1) {
+      const a = vertices[i];
+      const b = vertices[(i + 1) % vertices.length];
+      const owners = edgeOwners.get(edgeKey(a, b)) || [];
+      const sameOwnerCount = owners.filter((edgeOwner) => edgeOwner === owner).length;
+      if (sameOwnerCount > 1) continue;
+      const list = edgesByOwner.get(owner) || [];
+      list.push({ a, b });
+      edgesByOwner.set(owner, list);
+    }
+  }
+
+  return Array.from(edgesByOwner.entries()).flatMap(([ownerId, edges]) => {
+    const remaining = edges.slice();
+    const paths: string[] = [];
+    while (remaining.length > 0) {
+      const first = remaining.pop();
+      if (!first) break;
+      const ring: [number, number][] = [first.a, first.b];
+      let current = first.b;
+
+      for (let guard = 0; guard < edges.length + 8; guard += 1) {
+        if (pointKey(current) === pointKey(ring[0])) break;
+        const nextIndex = remaining.findIndex((edge) => pointKey(edge.a) === pointKey(current));
+        const reverseIndex =
+          nextIndex >= 0 ? -1 : remaining.findIndex((edge) => pointKey(edge.b) === pointKey(current));
+        const index = nextIndex >= 0 ? nextIndex : reverseIndex;
+        if (index < 0) break;
+        const [next] = remaining.splice(index, 1);
+        current = nextIndex >= 0 ? next.b : next.a;
+        ring.push(current);
+      }
+
+      const d = smoothPathD(ring);
+      if (d) paths.push(d);
+    }
+
+    return paths.length > 0 ? [{ ownerId, d: paths.join(' ') }] : [];
+  });
 }
 
 function buildHexGrid(): HexTile[] {
@@ -194,7 +379,7 @@ function hexCentersInRegion(
   for (const h of hexTiles) {
     const p = hexCenterById.get(h.id);
     if (!p) continue;
-    if (pointInPolygon(p.cx, p.cy, r.coordinates, bounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT)) out.push(h);
+    if (pointInRegion(p.cx, p.cy, r, bounds, VIEWBOX_WIDTH, VIEWBOX_HEIGHT)) out.push(h);
   }
   return out;
 }
@@ -485,14 +670,11 @@ function locationForHex(x: number, y: number): MapLocation | null {
 }
 
 /**
- * Basemap in `public/`. Default: your paint reference (`aeloria-basemap-paint.png`). Override with
- * `NEXT_PUBLIC_MAP_ATLAS_URL` (e.g. `/aeloria-basemap-isometric.png` or OpenAI output).
+ * Basemap in `public/`. Default is generated from public/data/map.geojson so
+ * the visible realm/province image matches the editable atlas paint data.
  */
-const MAP_ATLAS_SRC =
-  process.env.NEXT_PUBLIC_MAP_ATLAS_URL ||
-  (process.env.NEXT_PUBLIC_USE_LORE_HOUSE_MAP === '1'
-    ? '/aeloria-lore-houses-basemap.svg'
-    : '/aeloria-basemap-paint.png');
+const HOUSE_ATLAS_SRC = process.env.NEXT_PUBLIC_MAP_ATLAS_URL || '/aeloria-house-preview.svg';
+const REALM_ATLAS_SRC = '/aeloria-kingdom-preview.svg';
 
 function readMapEmbedMode(): boolean {
   if (typeof window === 'undefined') return false;
@@ -785,8 +967,9 @@ export default function FantasyMap() {
   const hexTiles = useMemo(() => buildHexGrid(), []);
   const dataBounds = useMemo(() => getDataBounds(mapRegions), [mapRegions]);
   const [embedMode] = useState(() => readMapEmbedMode());
-  /** On by default in hex mode; province (CK3) mode uses shapes and keeps the grid visual-only. */
-  const [showStrategicHex, setShowStrategicHex] = useState(() => !readMapEmbedMode());
+  const [atlasView, setAtlasView] = useState<AtlasView>('houses');
+  /** Off by default so the generated continent basemap is visible without paint overlays. */
+  const [showStrategicHex, setShowStrategicHex] = useState(false);
   /** Province polygons vs hex-cell painting. */
   const [cartographyMode, setCartographyMode] = useState<CartographyMode>('provinces');
   const [provinceFactions, setProvinceFactions] = useState<Record<string, string | null>>({});
@@ -797,7 +980,6 @@ export default function FantasyMap() {
   const [selectedRegion, setSelectedRegion] = useState<RegionDefinition | null>(null);
   const [world, setWorld] = useState<WorldResponse | null>(null);
   const [worldFetchSettled, setWorldFetchSettled] = useState(false);
-  const [loreLocations, setLoreLocations] = useState<LoreLocation[]>([]);
   const [configMode, setConfigMode] = useState<ConfigMode>('core');
   const [layoutsByConfig, setLayoutsByConfig] = useState<Record<string, Record<string, string | null>>>({});
   const [savedMapFiles, setSavedMapFiles] = useState<string[]>([]);
@@ -821,6 +1003,7 @@ export default function FantasyMap() {
   /** After localStorage draft restore runs (or skips); avoids debounce overwriting draft before hydrate. */
   const [mapDraftHydrated, setMapDraftHydrated] = useState(false);
   const [mapSaveBanner, setMapSaveBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const atlasImageSrc = atlasView === 'realms' ? REALM_ATLAS_SRC : HOUSE_ATLAS_SRC;
 
   useEffect(() => {
     if (!embedMode) return;
@@ -842,39 +1025,23 @@ export default function FantasyMap() {
   }, [world, hexTiles]);
   const configKey = useMemo(() => `lore::${configMode}`, [configMode]);
 
-  const allLoreFactions = useMemo(() => loreLocations.flatMap((location) => location.species || []), [loreLocations]);
   const worldFactions = useMemo(() => extractWorldFactions(world), [world]);
-  const allSpeciesOptions = useMemo(() => {
-    const unique = new Map<string, string>();
-    for (const location of loreLocations) {
-      for (const species of location.species || []) {
-        if (!species?.id) continue;
-        if (!unique.has(species.id)) unique.set(species.id, species.name || species.id);
-      }
-    }
-    return Array.from(unique.entries()).map(([id, name]) => ({ id, name }));
-  }, [loreLocations]);
-  /** Lore species + current sim factions (for painting and labels). */
-  const allPaintFactionOptions = useMemo(() => {
-    const m = new Map<string, { id: string; name: string }>();
-    for (const w of worldFactions) m.set(w.id, w);
-    for (const s of allSpeciesOptions) {
-      if (!m.has(s.id)) m.set(s.id, s);
-    }
-    return Array.from(m.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [worldFactions, allSpeciesOptions]);
+  /** Sim factions (for painting and labels). */
+  const allPaintFactionOptions = useMemo(
+    () => [...worldFactions].sort((a, b) => a.name.localeCompare(b.name)),
+    [worldFactions],
+  );
   const factionNameById = useMemo(() => {
     const map = new Map<string, string>();
-    for (const faction of allLoreFactions) map.set(faction.id, faction.name);
     for (const w of worldFactions) {
       map.set(w.id, w.name);
     }
     return map;
-  }, [allLoreFactions, worldFactions]);
+  }, [worldFactions]);
 
   const locationOptions = useMemo<LocationOption[]>(
-    () => loreLocations.map((item) => ({ id: item.id, name: item.id.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase()) })),
-    [loreLocations],
+    () => MAP_LOCATIONS.map((item) => ({ id: item.id, name: item.name })),
+    [],
   );
 
   const activeLocationId = useMemo(() => {
@@ -908,23 +1075,11 @@ export default function FantasyMap() {
     return locationOptions.find((item) => item.id === activeLocationId)?.name || activeLocationId;
   }, [activeLocationId, locationOptions]);
 
-  const speciesByLocation = useMemo(() => {
-    const byLocation = new Map<string, Array<{ id: string; name: string }>>();
-    for (const location of loreLocations) byLocation.set(normalizeKey(location.id), (location.species || []).slice(0, 5));
-    return byLocation;
-  }, [loreLocations]);
-
-  const locationFactionOptions = useMemo(() => {
-    if (!activeLocationId) return [];
-    return speciesByLocation.get(normalizeKey(activeLocationId)) || [];
-  }, [activeLocationId, speciesByLocation]);
-
   useEffect(() => {
-    // Auto-select a paint faction when nothing is selected (lore for this location, else any).
     if (!selectedFactionId) {
-      setSelectedFactionId(locationFactionOptions[0]?.id || allPaintFactionOptions[0]?.id || '');
+      setSelectedFactionId(allPaintFactionOptions[0]?.id || '');
     }
-  }, [locationFactionOptions, allPaintFactionOptions, selectedFactionId]);
+  }, [allPaintFactionOptions, selectedFactionId]);
 
   useEffect(() => {
     if (!selectedLocationId && locationOptions.length > 0) {
@@ -1157,6 +1312,17 @@ export default function FantasyMap() {
     for (const h of hexTiles) m.set(h.id, hexPoints(h.x, h.y, HEX_WIDTH, HEX_HEIGHT));
     return m;
   }, [hexTiles]);
+  const houseRegionPaths = useMemo(
+    () => buildHexRegionPaths(hexTiles, factionByHex),
+    [hexTiles, factionByHex],
+  );
+  const kingdomRegionPaths = useMemo(() => {
+    const ownerByHex: Record<string, string | null> = {};
+    for (const hex of hexTiles) {
+      ownerByHex[hex.id] = kingdomIdForHouseId(factionByHex[hex.id]);
+    }
+    return buildHexRegionPaths(hexTiles, ownerByHex);
+  }, [hexTiles, factionByHex]);
   function updateActiveLayout(mutator: (current: Record<string, string | null>) => Record<string, string | null>) {
     setLayoutsByConfig((prev) => {
       const current = prev[configKey] || effectiveOwnership;
@@ -1223,9 +1389,7 @@ export default function FantasyMap() {
       });
       return;
     }
-    const speciesForLocation = resolvedLocationId ? speciesByLocation.get(normalizeKey(resolvedLocationId)) || [] : [];
-    const factionId =
-      selectedFactionId || speciesForLocation[0]?.id || allPaintFactionOptions[0]?.id || 'unclaimed';
+    const factionId = selectedFactionId || allPaintFactionOptions[0]?.id || 'unclaimed';
     if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
     setProvinceFactions((prev) => ({ ...prev, [region.id]: factionId }));
   }
@@ -1270,9 +1434,7 @@ export default function FantasyMap() {
         });
         return;
       }
-      const speciesForLocation = resolvedLocationId ? speciesByLocation.get(normalizeKey(resolvedLocationId)) || [] : [];
-      const factionId =
-        selectedFactionId || speciesForLocation[0]?.id || allPaintFactionOptions[0]?.id || 'unclaimed';
+      const factionId = selectedFactionId || allPaintFactionOptions[0]?.id || 'unclaimed';
       if (!selectedFactionId && factionId) setSelectedFactionId(factionId);
       setFactionByHex((prev) => {
         const next = { ...prev };
@@ -1383,18 +1545,6 @@ export default function FantasyMap() {
       console.error('Could not load /api/world:', error);
     } finally {
       setWorldFetchSettled(true);
-    }
-  }
-
-  async function loadLoreData() {
-    try {
-      const response = await fetch('/api/lore', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Failed to load lore data.');
-      const payload = (await response.json()) as LoreResponse;
-      const locations = payload.locations || [];
-      setLoreLocations(locations);
-    } catch (error) {
-      console.error('Could not load lore data:', error);
     }
   }
 
@@ -1588,7 +1738,6 @@ export default function FantasyMap() {
   useEffect(() => {
     void loadWorld();
     if (embedMode) return;
-    void loadLoreData();
     void listSavedMaps();
   }, [embedMode]);
 
@@ -1602,7 +1751,7 @@ export default function FantasyMap() {
     setLandMaskStatus('loading');
     void (async () => {
       try {
-        const map = await buildHexLandMask(MAP_ATLAS_SRC, hexTiles, VIEWBOX_WIDTH, VIEWBOX_HEIGHT, {
+        const map = await buildHexLandMask(atlasImageSrc, hexTiles, VIEWBOX_WIDTH, VIEWBOX_HEIGHT, {
           hexW: HEX_WIDTH,
           hexH: HEX_HEIGHT,
           maxSampleWidth: 860,
@@ -1623,7 +1772,7 @@ export default function FantasyMap() {
     return () => {
       cancelled = true;
     };
-  }, [hexTiles, embedMode]);
+  }, [hexTiles, embedMode, atlasImageSrc]);
 
   const markEmbedAtlasSurfaceReady = useCallback(() => {
     if (!embedMode) return;
@@ -1767,6 +1916,103 @@ export default function FantasyMap() {
   return (
     <div className={embedMode ? 'fantasy-map-shell fantasy-map-shell--embed' : 'fantasy-map-shell'}>
       {!embedMode && (
+        <aside className="fantasy-map-sidebar">
+          <div className="fantasy-map-sidebar__inner" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
+            <p className="fantasy-map-sidebar__eyebrow">Aeloria atlas</p>
+            <h2 className="fantasy-map-sidebar__title" style={{ fontSize: '1.5rem' }}>
+              House territory map
+            </h2>
+            <p className="fantasy-map-sidebar__description" style={{ fontSize: '0.88rem' }}>
+              Read-only view of the generated CK3-style territory map. Scroll to zoom, middle-drag to pan, and select
+              a territory to inspect it.
+            </p>
+
+            <div className="fantasy-map-sidebar__card" style={{ marginTop: 8 }}>
+              <h3 className="fantasy-map-sidebar__label" style={{ marginTop: 0 }}>
+                Selected territory
+              </h3>
+              {selectedRegion ? (
+                <div style={{ fontSize: '0.86rem', lineHeight: 1.5 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    <strong>{selectedRegion.name}</strong>
+                    <button
+                      type="button"
+                      className="fantasy-map-sidebar__item"
+                      style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                      onClick={() => setSelectedRegion(null)}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div style={{ marginTop: 6, color: 'rgba(246,235,209,0.75)' }}>{selectedRegion.description}</div>
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ color: 'rgba(246,235,209,0.6)' }}>Controller: </span>
+                    {regionControllerLabel(world, selectedRegion)}
+                  </div>
+                </div>
+              ) : (
+                <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.86rem' }}>
+                  {hoveredRegion ? `Hovering ${hoveredRegion.name}` : 'Select a house or clan territory on the map.'}
+                </p>
+              )}
+            </div>
+
+            <div className="fantasy-map-sidebar__card" style={{ marginTop: 8 }}>
+              <h3 className="fantasy-map-sidebar__label" style={{ marginTop: 0 }}>
+                Map layers
+              </h3>
+              <label style={{ display: 'grid', gap: 6, color: 'rgba(246,235,209,0.9)', fontSize: '0.86rem', marginBottom: 10 }}>
+                View
+                <select
+                  value={atlasView}
+                  onChange={(e) => {
+                    setSelectedRegion(null);
+                    setHoveredRegion(null);
+                    setAtlasView(e.target.value as AtlasView);
+                  }}
+                  style={{
+                    border: '1px solid rgba(250,233,197,0.2)',
+                    borderRadius: 6,
+                    padding: '8px 10px',
+                    background: 'rgba(20,17,26,0.9)',
+                    color: '#f6ebd1',
+                  }}
+                >
+                  <option value="houses">Houses and clans</option>
+                  <option value="realms">Realms</option>
+                </select>
+              </label>
+              <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.9rem' }}>
+                Territories: <strong>{atlasView === 'realms' ? 14 : mapRegions.length}</strong> · View:{' '}
+                <strong>{atlasView === 'realms' ? 'generated realm map' : 'generated house/clan map'}</strong>
+              </p>
+              <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.82rem' }}>
+                The hex system still exists underneath for data generation, but this page is now for viewing the map we
+                are building.
+              </p>
+            </div>
+
+            <div className="fantasy-map-sidebar__card">
+              <h3 className="fantasy-map-sidebar__label">Controls</h3>
+              <div className="fantasy-map-sidebar__list">
+                <button type="button" onClick={() => nudgeZoom(1)} className="fantasy-map-sidebar__item">
+                  <span>Zoom in</span>
+                  <span>+</span>
+                </button>
+                <button type="button" onClick={() => nudgeZoom(-1)} className="fantasy-map-sidebar__item">
+                  <span>Zoom out</span>
+                  <span>−</span>
+                </button>
+                <button type="button" onClick={resetMapView} className="fantasy-map-sidebar__item">
+                  <span>Reset view</span>
+                  <span>⌂</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      )}
+      {false && !embedMode && (
       <aside className="fantasy-map-sidebar">
         <div className="fantasy-map-sidebar__inner" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
           <p className="fantasy-map-sidebar__eyebrow">Strategic cartography</p>
@@ -1811,7 +2057,7 @@ export default function FantasyMap() {
               className="fantasy-map-sidebar__item"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 6 }}
             >
-              <span>Strategic hex grid (paint)</span>
+              <span>Strategic hex grid (paint overlay)</span>
               <input
                 type="checkbox"
                 checked={showStrategicHex}
@@ -1922,9 +2168,6 @@ export default function FantasyMap() {
                   <option value="custom">Custom combinations</option>
                 </select>
               </label>
-              <button type="button" onClick={() => void loadLoreData()} className="fantasy-map-sidebar__item" style={{ padding: '0.6rem' }}>
-                Reload Lore
-              </button>
               <label style={{ display: 'grid', gap: 4, color: 'rgba(246,235,209,0.9)', fontSize: '0.86rem' }}>
                 Paint location
                 <select
@@ -1932,7 +2175,6 @@ export default function FantasyMap() {
                   onChange={(e) => setSelectedLocationId(e.target.value)}
                   style={{ border: '1px solid rgba(250,233,197,0.2)', borderRadius: 6, padding: '8px 10px', background: 'rgba(20,17,26,0.9)', color: '#f6ebd1' }}
                 >
-                  {locationOptions.length === 0 && <option value="">No locations loaded</option>}
                   {locationOptions.map((location) => (
                     <option key={location.id} value={location.id}>
                       {location.name}
@@ -1944,38 +2186,17 @@ export default function FantasyMap() {
           </div>
 
           <div className="fantasy-map-sidebar__card">
-            <h3 className="fantasy-map-sidebar__label">Location species (lore)</h3>
+            <h3 className="fantasy-map-sidebar__label">Paint faction</h3>
             <div style={{ display: 'grid', gap: 8 }}>
               <label style={{ display: 'grid', gap: 4, color: 'rgba(246,235,209,0.9)', fontSize: '0.86rem' }}>
-                Paint faction
+                Faction (from world sim)
                 <select
                   value={selectedFactionId}
                   onChange={(e) => setSelectedFactionId(e.target.value)}
                   disabled={!isEditMode}
                   style={{ border: '1px solid rgba(250,233,197,0.2)', borderRadius: 6, padding: '6px 8px', background: 'rgba(20,17,26,0.9)', color: '#f6ebd1' }}
                 >
-                  {locationFactionOptions.length === 0 && allPaintFactionOptions.length === 0 && <option value="">Load lore or world</option>}
-                  {locationFactionOptions.length > 0
-                    ? locationFactionOptions.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
-                        </option>
-                      ))
-                    : allPaintFactionOptions.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
-                        </option>
-                      ))}
-                </select>
-              </label>
-              <label style={{ display: 'grid', gap: 4, color: 'rgba(246,235,209,0.9)', fontSize: '0.86rem' }}>
-                All (lore + sim)
-                <select
-                  value={selectedFactionId}
-                  onChange={(e) => setSelectedFactionId(e.target.value)}
-                  style={{ border: '1px solid rgba(250,233,197,0.2)', borderRadius: 6, padding: '6px 8px', background: 'rgba(20,17,26,0.9)', color: '#f6ebd1' }}
-                >
-                  {allPaintFactionOptions.length === 0 && <option value="">No factions — run Load from world + lore</option>}
+                  {allPaintFactionOptions.length === 0 && <option value="">No factions — use Load from world</option>}
                   {allPaintFactionOptions.map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}
@@ -1984,12 +2205,14 @@ export default function FantasyMap() {
                 </select>
               </label>
               <div style={{ display: 'grid', gap: 6, maxHeight: 120, overflow: 'auto' }}>
-                {locationFactionOptions.map((f) => (
+                {allPaintFactionOptions.map((f) => (
                   <div key={f.id} style={{ fontSize: '0.86rem' }}>
                     <code>{f.id}</code> — {f.name}
                   </div>
                 ))}
-                {locationFactionOptions.length === 0 && <div style={{ fontSize: '0.86rem', opacity: 0.7 }}>Hover a hex to resolve species for this area.</div>}
+                {allPaintFactionOptions.length === 0 && (
+                  <div style={{ fontSize: '0.86rem', opacity: 0.7 }}>Load from world to list factions from the running sim.</div>
+                )}
               </div>
             </div>
           </div>
@@ -2128,18 +2351,10 @@ export default function FantasyMap() {
           </div>
 
           <div className="fantasy-map-sidebar__card" style={{ borderStyle: 'dashed', borderColor: 'rgba(250,233,197,0.2)' }}>
-            <h3 className="fantasy-map-sidebar__label">Debug (lore)</h3>
+            <h3 className="fantasy-map-sidebar__label">Debug</h3>
             <p className="fantasy-map-sidebar__empty" style={{ fontSize: '0.8rem' }}>
-              locationId: <code>{activeLocationId || 'none'}</code> · locations loaded: {loreLocations.length}
+              Active location: <code>{activeLocationId || 'none'}</code> · factions: {allPaintFactionOptions.length}
             </p>
-            <div style={{ display: 'grid', gap: 4, maxHeight: 100, overflow: 'auto' }}>
-              {locationFactionOptions.length === 0 && <div style={{ opacity: 0.7 }}>No species for current region.</div>}
-              {locationFactionOptions.map((item) => (
-                <div key={item.id} style={{ fontSize: '0.8rem' }}>
-                  <code>{item.id}</code> — {item.name}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </aside>
@@ -2167,7 +2382,7 @@ export default function FantasyMap() {
                 </div>
                 <img
                   ref={atlasImgRef}
-                  src={MAP_ATLAS_SRC}
+                  src={atlasImageSrc}
                   alt="Aeloria territory map, top down"
                   className="fantasy-map-terrain"
                   draggable={false}
@@ -2186,9 +2401,6 @@ export default function FantasyMap() {
                   viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
                   preserveAspectRatio="none"
                   className="fantasy-map-political"
-                  onPointerDown={(e) => {
-                    if (cartographyMode === 'provinces' && e.button === 0) paintButtonHeldRef.current = true;
-                  }}
                   onPointerMove={(e) => {
                     if (embedMode) return;
                     if (cartographyMode !== 'provinces' && showStrategicHex) return;
@@ -2249,13 +2461,9 @@ export default function FantasyMap() {
                         : 0;
                     const stroke = (() => {
                       if (cartographyMode === 'provinces') {
-                        return isS
-                          ? 'rgba(255,250,220,0.9)'
-                          : isH
-                            ? 'rgba(200,220,255,0.78)'
-                            : embedMode
-                              ? 'rgba(18,22,34,0.78)'
-                              : 'rgba(0,0,0,0.4)';
+                        if (isS) return 'rgba(255,250,220,0.9)';
+                        if (isH) return 'rgba(200,220,255,0.78)';
+                        return 'transparent';
                       }
                       return showPoliticalTints
                         ? isS
@@ -2270,8 +2478,7 @@ export default function FantasyMap() {
                             : 'transparent';
                     })();
                     const strokeW = (() => {
-                      if (cartographyMode === 'provinces')
-                        return isH || isS ? 0.42 : embedMode ? 0.48 : 0.3;
+                      if (cartographyMode === 'provinces') return isH || isS ? 0.42 : 0;
                       return showPoliticalTints && !isH && !isS ? 0.28 : isH || isS || showPoliticalTints ? 0.4 : 0;
                     })();
                     return (
@@ -2283,24 +2490,20 @@ export default function FantasyMap() {
                         stroke={stroke}
                         strokeWidth={strokeW}
                         vectorEffect="non-scaling-stroke"
+                        pointerEvents="all"
                         style={{
                           transition: embedMode ? undefined : 'fill-opacity 0.12s, stroke 0.12s',
-                          cursor: cartographyMode === 'provinces' ? 'pointer' : undefined,
-                        }}
-                        onPointerEnter={() => {
-                          if (cartographyMode !== 'provinces') return;
-                          if (paintButtonHeldRef.current) handleProvincePaint(r);
+                          cursor: 'pointer',
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedRegion(r);
-                          if (cartographyMode === 'provinces') handleProvincePaint(r);
                         }}
                       />
                     );
                   })}
                 </svg>
-                {showStrategicHex ? (
+                {showStrategicHex && cartographyMode === 'hex' ? (
                   <svg
                     viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
                     preserveAspectRatio="none"
@@ -2309,13 +2512,36 @@ export default function FantasyMap() {
                       if (e.button === 0 && cartographyMode === 'hex') paintButtonHeldRef.current = true;
                     }}
                     style={{
-                      pointerEvents: showStrategicHex && cartographyMode === 'hex' ? 'auto' : 'none',
-                      zIndex: cartographyMode === 'provinces' ? 1 : 2,
+                      pointerEvents: 'auto',
+                      zIndex: 2,
                     }}
                   >
+                    {houseRegionPaths.map((region) => (
+                      <path
+                        key={`house-region-${region.ownerId}`}
+                        d={region.d}
+                        fill={colorForHouseOwner(region.ownerId)}
+                        fillOpacity={1}
+                        stroke="rgba(22, 17, 10, 0.36)"
+                        strokeWidth={0.08}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                        pointerEvents="none"
+                      />
+                    ))}
+                    {kingdomRegionPaths.map((region) => (
+                      <path
+                        key={`kingdom-region-${region.ownerId}`}
+                        d={region.d}
+                        fill="none"
+                        stroke="rgba(8, 6, 4, 0.62)"
+                        strokeWidth={0.14}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                        pointerEvents="none"
+                      />
+                    ))}
                     {hexTiles.map((hex) => {
-                      const isSea = landByHex != null && landByHex[hex.id] === false;
-                      const isHovered = hoveredHexId === hex.id;
                       const factionId = factionByHex?.[hex.id] ?? null;
                       const hasManualLocation = Object.prototype.hasOwnProperty.call(effectiveLocationByHex, hex.id);
                       const manualLocation = hasManualLocation ? effectiveLocationByHex[hex.id] : null;
@@ -2328,41 +2554,14 @@ export default function FantasyMap() {
                       const locationFill = resolvedLocationId
                         ? locationColors[resolvedLocationId] || colorForFaction(`location-${resolvedLocationId}`)
                         : null;
-                      // Land vs sea is cosmetic (stroke); faction/location paint must show on the whole grid including ocean.
-                      const baseFill = factionFill || locationFill || 'transparent';
-                      const baseOp = factionFill ? 1 : locationFill ? 0.5 : 0;
-                      const rawFillOpacity = baseOp;
-                      const isEmpty = rawFillOpacity < 0.001;
-                      // SVG hit-testing: fill-opacity 0 / transparent often misses pointer events; only
-                      // the hairline stroke hits. A nearly invisible face makes click + drag paint reliable.
-                      const fill = isEmpty ? 'rgba(5, 6, 11, 0.08)' : baseFill;
-                      const fillOpacity = isEmpty
-                        ? 1
-                        : isHovered
-                          ? Math.min(rawFillOpacity + 0.12, 1)
-                          : rawFillOpacity;
-                      const stroke = (() => {
-                        if (isHovered) {
-                          return isSea ? 'rgba(160, 210, 255, 0.7)' : 'rgba(188, 240, 255, 0.9)';
-                        }
-                        if (isEmpty) {
-                          // Land + water: same grid weight so ocean isn’t a dead zone
-                          return isSea
-                            ? 'rgba(200, 220, 255, 0.34)'
-                            : 'rgba(210, 218, 240, 0.36)';
-                        }
-                        if (isSea) return 'rgba(150, 195, 240, 0.45)';
-                        return 'rgba(200, 215, 255, 0.38)';
-                      })();
+                      const fill = factionFill || locationFill || '#000000';
                       return (
                         <polygon
                           key={hex.id}
                           points={pointsByHexId.get(hex.id) ?? ''}
-                          fill={fill}
-                          fillOpacity={fillOpacity}
-                          stroke={stroke}
-                          strokeWidth={0.038}
-                          vectorEffect="non-scaling-stroke"
+                          fill="transparent"
+                          fillOpacity={0}
+                          stroke="none"
                           style={{ cursor: 'pointer', pointerEvents: 'auto' }}
                           onPointerEnter={() => {
                             setHoveredHexId(hex.id);

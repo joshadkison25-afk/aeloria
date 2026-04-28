@@ -332,10 +332,11 @@ a {
   position: absolute;
   inset: -2px;
   background:
-    radial-gradient(ellipse 78% 70% at 50% 42%, rgba(0, 0, 0, 0) 0%, rgba(18, 12, 28, 0.22) 52%, rgba(4, 2, 10, 0.62) 100%),
-    radial-gradient(ellipse 120% 90% at 50% 100%, rgba(42, 28, 14, 0.18), transparent 55%);
+    radial-gradient(ellipse 62% 50% at 45% 34%, rgba(255, 229, 170, 0.12), transparent 46%),
+    radial-gradient(ellipse 78% 70% at 50% 42%, rgba(0, 0, 0, 0) 0%, rgba(18, 12, 28, 0.18) 52%, rgba(4, 2, 10, 0.68) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 100%, rgba(42, 28, 14, 0.2), transparent 55%);
   mix-blend-mode: multiply;
-  opacity: 0.88;
+  opacity: 0.82;
 }
 
 .fantasy-map-terrain {
@@ -345,8 +346,8 @@ a {
   height: auto;
   display: block;
   pointer-events: none;
-  filter: contrast(1.05) saturate(1.06) brightness(0.97)
-    drop-shadow(0 3px 18px rgba(0, 0, 0, 0.5));
+  filter: contrast(1.08) saturate(1.12) brightness(0.98)
+    drop-shadow(0 8px 26px rgba(0, 0, 0, 0.58));
   border-radius: 2px;
 }
 
@@ -1290,22 +1291,18 @@ a {
 .static-map-grid {
   position: absolute;
   inset: 0;
+  display: none;
   pointer-events: none;
 }
 
 .static-map-ink {
-  background:
-    linear-gradient(90deg, rgba(21, 81, 78, 0.08), transparent 34%, transparent 58%, rgba(112, 28, 18, 0.12)),
-    radial-gradient(circle at 50% 52%, transparent 0 42%, rgba(3, 7, 10, 0.1) 68%, rgba(3, 7, 10, 0.5) 100%);
-  mix-blend-mode: multiply;
+  background: none;
+  mix-blend-mode: normal;
 }
 
 .static-map-grid {
-  opacity: 0.15;
-  background-image:
-    linear-gradient(rgba(125, 214, 255, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125, 214, 255, 0.18) 1px, transparent 1px);
-  background-size: 7rem 7rem;
+  opacity: 0;
+  background-image: none;
 }
 
 .static-atlas-compass {
@@ -1714,6 +1711,17 @@ body:has(.strategy-map-root) {
   color: rgba(232, 220, 196, 0.42);
   pointer-events: none;
   text-align: right;
+}
+
+.strategy-map-legend__link {
+  pointer-events: auto;
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.strategy-map-legend__link:hover {
+  color: #e8dcc4;
 }
 
 .strategy-map-hud {

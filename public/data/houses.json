@@ -1,128 +1,57 @@
 {
-  "version": 1,
+  "version": 2,
   "factionColors": {
-    "The Wintermark": "hsl(63, 52%, 42%)",
-    "Shadow Court": "hsl(181, 52%, 42%)",
-    "Glenhaven": "hsl(88, 52%, 42%)",
-    "Lostfeld": "hsl(117, 52%, 42%)",
-    "Stonebreak Monastery": "hsl(272, 52%, 42%)",
-    "Twin Cities": "hsl(327, 52%, 42%)",
-    "Groth Clans": "hsl(5, 52%, 42%)",
-    "Gilgeth Clans": "hsl(57, 52%, 42%)",
-    "Dur Khadur": "hsl(172, 52%, 42%)",
-    "Tidefall": "hsl(71, 52%, 42%)",
-    "Varkuun": "hsl(250, 52%, 42%)",
-    "Vilefin": "hsl(159, 52%, 42%)",
-    "Dreadwind Isles": "hsl(94, 52%, 42%)"
+    "The Wintermark":  "hsl(200, 40%, 55%)",
+    "Shadow Court":    "hsl(265, 38%, 40%)",
+    "Glenhaven":       "hsl(130, 38%, 38%)",
+    "Lostfeld":        "hsl(210, 22%, 48%)",
+    "Twin Cities":     "hsl(38,  52%, 52%)",
+    "Groth Clans":     "hsl(10,  52%, 42%)",
+    "Gilgeth Clans":   "hsl(32,  38%, 36%)",
+    "Dur Khadur":      "hsl(30,  48%, 52%)",
+    "Tidefall":        "hsl(198, 48%, 48%)",
+    "Varkuun":         "hsl(248, 38%, 44%)",
+    "Vilefin":         "hsl(75,  38%, 42%)",
+    "Dreadwind Isles": "hsl(220, 32%, 42%)"
   },
   "houses": [
-    {
-      "id": "verlorn",
-      "name": "House Verlorn",
-      "faction_id": "Shadow Court",
-      "region_id": "Faerwood"
-    },
-    {
-      "id": "nightborn",
-      "name": "House Nightborn",
-      "faction_id": "Shadow Court",
-      "region_id": "Faerwood"
-    },
-    {
-      "id": "shadowveil",
-      "name": "House Shadowveil",
-      "faction_id": "Shadow Court",
-      "region_id": "Faerwood"
-    },
-    {
-      "id": "aurand",
-      "name": "House Aurand",
-      "faction_id": "Twin Cities",
-      "region_id": "Eresteron"
-    },
-    {
-      "id": "braafhart",
-      "name": "House Braafhart",
-      "faction_id": "Twin Cities",
-      "region_id": "Eresteron"
-    },
-    {
-      "id": "lefleur",
-      "name": "House LeFleur",
-      "faction_id": "Twin Cities",
-      "region_id": "Eldoria"
-    },
-    {
-      "id": "wood",
-      "name": "House Wood",
-      "faction_id": "Glenhaven",
-      "region_id": "Glenhaven"
-    },
-    {
-      "id": "darkleaf",
-      "name": "House Darkleaf",
-      "faction_id": "Glenhaven",
-      "region_id": "Glenhaven"
-    },
-    {
-      "id": "mistafae",
-      "name": "House Mistafae",
-      "faction_id": "Glenhaven",
-      "region_id": "Glenhaven"
-    },
-    {
-      "id": "ver-meer",
-      "name": "House Ver Meer",
-      "faction_id": "Tidefall",
-      "region_id": "Tidefall"
-    },
-    {
-      "id": "van-cleave",
-      "name": "House Van Cleave",
-      "faction_id": "Varkuun",
-      "region_id": "Varkuun"
-    },
-    {
-      "id": "gross",
-      "name": "House Gross",
-      "faction_id": "Dur Khadur",
-      "region_id": "Dur Khadur"
-    },
-    {
-      "id": "adkison",
-      "name": "House Adkison",
-      "faction_id": "The Wintermark",
-      "region_id": "Wintermark"
-    },
-    {
-      "id": "blacktide",
-      "name": "House Blacktide",
-      "faction_id": "Dreadwind Isles",
-      "region_id": "Dreadwind Isles"
-    },
-    {
-      "id": "goldfinger",
-      "name": "Clan Goldfinger-Duke",
-      "faction_id": "Lostfeld",
-      "region_id": "Lostfeld"
-    },
-    {
-      "id": "mijid",
-      "name": "Clan Mijid",
-      "faction_id": "Groth Clans",
-      "region_id": "Groth"
-    },
-    {
-      "id": "blackblood",
-      "name": "Clan Blackblood",
-      "faction_id": "Gilgeth Clans",
-      "region_id": "Gilgeth"
-    },
-    {
-      "id": "bloodware",
-      "name": "Clan Bloodware",
-      "faction_id": "Vilefin",
-      "region_id": "Vilefin"
-    }
+    { "id": "frostvale-adkison",      "name": "House Adkison",        "faction_id": "The Wintermark", "region_id": "Frostvale" },
+    { "id": "frostvale-mcintosh",     "name": "House McIntosh",       "faction_id": "The Wintermark", "region_id": "Frostvale" },
+    { "id": "frostvale-holter",       "name": "House Holter",         "faction_id": "The Wintermark", "region_id": "Frostvale" },
+    { "id": "frostvale-duval",        "name": "House Duval",          "faction_id": "The Wintermark", "region_id": "Frostvale" },
+    { "id": "faerwood-verlorn",       "name": "House Verlorn",        "faction_id": "Shadow Court",   "region_id": "Faerwood" },
+    { "id": "faerwood-nightborn",     "name": "House Nightborn",      "faction_id": "Shadow Court",   "region_id": "Faerwood" },
+    { "id": "faerwood-shadowveil",    "name": "House Shadowveil",     "faction_id": "Shadow Court",   "region_id": "Faerwood" },
+    { "id": "eldoria-lefleur",        "name": "House LeFleur",        "faction_id": "Twin Cities",    "region_id": "Eldoria" },
+    { "id": "eldoria-bower",          "name": "House Bower",          "faction_id": "Twin Cities",    "region_id": "Eldoria" },
+    { "id": "eldoria-binx",           "name": "House Binx",           "faction_id": "Twin Cities",    "region_id": "Eldoria" },
+    { "id": "eldoria-dale",           "name": "House Dale",           "faction_id": "Twin Cities",    "region_id": "Eldoria" },
+    { "id": "twin-aurand",            "name": "House Aurand",         "faction_id": "Twin Cities",    "region_id": "Twin Cities" },
+    { "id": "eresteron-braafhart",    "name": "House Braafhart",      "faction_id": "Twin Cities",    "region_id": "Eresteron" },
+    { "id": "farrock-van-cleave",     "name": "House Van Cleave",     "faction_id": "Varkuun",        "region_id": "Farrock" },
+    { "id": "gilgeth-blackblood",     "name": "Clan Blackblood",      "faction_id": "Gilgeth Clans",  "region_id": "Gilgeth" },
+    { "id": "gilgeth-ironhide",       "name": "Clan Ironhide",        "faction_id": "Gilgeth Clans",  "region_id": "Gilgeth" },
+    { "id": "gilgeth-redtusk",        "name": "Clan Redtusk",         "faction_id": "Gilgeth Clans",  "region_id": "Gilgeth" },
+    { "id": "groth-mijid",            "name": "Clan Mijid",           "faction_id": "Groth Clans",    "region_id": "Groth" },
+    { "id": "groth-ashfang",          "name": "Clan Ashfang",         "faction_id": "Groth Clans",    "region_id": "Groth" },
+    { "id": "groth-syncar",           "name": "Clan Syncar",          "faction_id": "Groth Clans",    "region_id": "Groth" },
+    { "id": "vilefin-bloodware",      "name": "Clan Bloodware",       "faction_id": "Vilefin",        "region_id": "Vilefin" },
+    { "id": "vilefin-cogtooth",       "name": "Clan Cogtooth",        "faction_id": "Vilefin",        "region_id": "Vilefin" },
+    { "id": "vilefin-rustfang",       "name": "Clan Rustfang",        "faction_id": "Vilefin",        "region_id": "Vilefin" },
+    { "id": "lostfeld-goldfinger-duke", "name": "Clan Goldfinger-Duke", "faction_id": "Lostfeld",    "region_id": "Lostfeld" },
+    { "id": "lostfeld-runewarden",    "name": "Clan Runewarden",      "faction_id": "Lostfeld",       "region_id": "Lostfeld" },
+    { "id": "lostfeld-ironmaul",      "name": "Clan Ironmaul",        "faction_id": "Lostfeld",       "region_id": "Lostfeld" },
+    { "id": "dur-gross",              "name": "House Gross",          "faction_id": "Dur Khadur",     "region_id": "Dur Khadur" },
+    { "id": "dur-delonious",          "name": "House Delonious",      "faction_id": "Dur Khadur",     "region_id": "Dur Khadur" },
+    { "id": "dur-galfazzar",          "name": "House Galfazzar",      "faction_id": "Dur Khadur",     "region_id": "Dur Khadur" },
+    { "id": "dur-vercenti",           "name": "House Vercenti",       "faction_id": "Dur Khadur",     "region_id": "Dur Khadur" },
+    { "id": "glen-wood",              "name": "House Wood",           "faction_id": "Glenhaven",      "region_id": "Glenwood" },
+    { "id": "glen-darkleaf",          "name": "House Darkleaf",       "faction_id": "Glenhaven",      "region_id": "Glenwood" },
+    { "id": "glen-mistafae",          "name": "House Mistafae",       "faction_id": "Glenhaven",      "region_id": "Glenwood" },
+    { "id": "tide-ver-meer",          "name": "House Ver Meer",       "faction_id": "Tidefall",       "region_id": "Tidefall" },
+    { "id": "tide-highland-dusken",   "name": "House Highland-Dusken","faction_id": "Tidefall",       "region_id": "Tidefall" },
+    { "id": "tide-fish",              "name": "House Fish",           "faction_id": "Tidefall",       "region_id": "Tidefall" },
+    { "id": "tide-mcgowan",           "name": "House McGowan",        "faction_id": "Tidefall",       "region_id": "Tidefall" },
+    { "id": "dreadwind-blacktide",    "name": "House Blacktide",      "faction_id": "Dreadwind Isles","region_id": "Dreadwind Isles" }
   ]
 }

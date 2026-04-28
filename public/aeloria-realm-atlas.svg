@@ -1,40 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
   <defs>
-    <radialGradient id="ocean" cx="45%" cy="40%" r="70%">
-      <stop offset="0%" stop-color="#0c1828"/>
-      <stop offset="50%" stop-color="#122438"/>
-      <stop offset="100%" stop-color="#0a1018"/>
-    </radialGradient>
-    <linearGradient id="landBase" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1e3d2a"/>
-      <stop offset="35%" stop-color="#2d4a32"/>
-      <stop offset="70%" stop-color="#3a5238"/>
-      <stop offset="100%" stop-color="#4a4c36"/>
-    </linearGradient>
-    <radialGradient id="snow" cx="30%" cy="20%" r="0.4">
-      <stop offset="0%" stop-color="rgba(200, 220, 240, 0.75)"/>
-      <stop offset="100%" stop-color="rgba(200, 220, 240, 0)"/>
-    </radialGradient>
-    <filter id="soft" x="-5%" y="-5%" width="110%" height="110%">
-      <feGaussianBlur stdDeviation="1.2" result="b"/>
-      <feMerge>
-        <feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="paper">
-      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="n"/>
-      <feDiffuseLighting in="n" surfaceScale="1.1" result="d">
-        <feDistantLight azimuth="45" elevation="55"/>
-      </feDiffuseLighting>
-      <feBlend in="SourceGraphic" in2="d" mode="multiply" result="m"/>
-    </filter>
   </defs>
-  <rect width="100%" height="100%" fill="url(#ocean)"/>
-  <g filter="url(#soft)">
+  <rect width="100%" height="100%" fill="#143247"/>
+  <g>
     <path
       id="main-isle"
-      fill="url(#landBase)"
+      fill="#3a5238"
       stroke="#0d1a14"
       stroke-width="1.2"
       d="M 280 120
@@ -58,23 +29,5 @@
          C 600 480 540 500 520 520 Z
     "/>
   </g>
-  <rect width="100%" height="100%" fill="url(#snow)" style="pointer-events: none" opacity="0.85"/>
-  <g opacity="0.25" style="pointer-events: none" stroke="#2a1810" stroke-width="0.4" fill="none">
-    <path d="M 200 200 Q 300 150 400 200 T 600 180"/>
-    <path d="M 250 400 Q 350 360 500 400"/>
-    <path d="M 400 200 Q 450 300 500 400 Q 450 500 400 600"/>
-  </g>
-  <g opacity="0.15" style="pointer-events: none" fill="none" stroke="rgba(255, 245, 220, 0.12)" stroke-width="0.6">
-    <path d="M 0 0 L 800 800 M 800 0 L 0 800 M 0 400 H 800 M 400 0 V 800"/>
-  </g>
-  <g opacity="0.4" style="pointer-events: none" filter="url(#paper)">
-    <rect width="100%" height="100%" fill="transparent"/>
-  </g>
-  <rect width="100%" height="100%" fill="url(#radial)" opacity="0" style="display:none"/>
   <rect width="100%" height="100%" fill="none" stroke="rgba(214, 188, 120, 0.15)" stroke-width="2" rx="0"/>
-  <radialGradient id="vign" cx="50%" cy="45%" r="0.7">
-    <stop offset="50%" stop-color="transparent"/>
-    <stop offset="100%" stop-color="rgba(0,0,0,0.45)"/>
-  </radialGradient>
-  <rect width="100%" height="100%" fill="url(#vign)" style="pointer-events: none"/>
 </svg>

@@ -3,7 +3,7 @@
  *   - public/data/map_layout.json (realm centers + lore geography from design_principles)
  *   - public/data/realm_houses.json (house_id, faction_id per realm — same source as territory build)
  *
- * One bounded Voronoi cell per house: 44 non-overlapping polygons tiling [0,1000]², shared borders, no gaps.
+ * One bounded Voronoi cell per house: non-overlapping polygons tiling [0,1000]², shared borders, no gaps.
  * Spatial layout follows the reference “AI readable” faction map and map_layout neighbor logic (y = north).
  *
  * Note: lore_docs/maps/map_core.json is a separate hex editor save (ownership TBD); authoritative layout text
@@ -121,4 +121,5 @@ const fc = { type: 'FeatureCollection', features };
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(fc, null, 2), 'utf8');
-console.log('Wrote', OUT, 'features', features.length, '(expected 44)');
+const totalHouses = Object.values(realmHouses).reduce((s, h) => s + h.length, 0);
+console.log(`Wrote ${OUT} — ${features.length} features (${totalHouses} houses in realm_houses.json)`);

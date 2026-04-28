@@ -6,6 +6,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { normalizeMapLibreColor } from '@/lib/strategyMapColors';
 import {
+  featureCollectionLooksLikeGameSpace,
+  projectGameFeatureCollectionToMapLibre,
+} from '@/lib/strategyMapProjection';
+import {
   type RawTerrain,
   coastlinesToGeoJson,
   TERRAIN_LAYER_FILL,
@@ -64,13 +68,17 @@ const COAST_LINE_LAYER = 'terrain-coast';
 const FILL_LAYER = 'regions-fill';
 const LINE_LAYER = 'regions-line';
 
+type GeoJSONGeometry =
+  | { type: 'Polygon'; coordinates: number[][][] }
+  | { type: 'MultiPolygon'; coordinates: number[][][][] };
+
 type GeoJSONFeatureCollection = {
   type: 'FeatureCollection';
   features: Array<{
     type: 'Feature';
     id?: string | number;
-    properties: Record<string, string | undefined | string[]>;
-    geometry: { type: 'Polygon' | 'MultiPolygon'; coordinates: number[][][] | number[][][][] };
+    properties: Record<string, string | undefined>;
+    geometry: GeoJSONGeometry;
   }>;
 };
 
@@ -185,8 +193,14 @@ export default function StrategyMap() {
 
   const [selectionHud, setSelectionHud] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
-  const embedMode = typeof window !== 'undefined' && readEmbedMode();
-  const minimalUi = typeof window !== 'undefined' && (readEmbedMode() || readBareMapMode());
+  /** URL flags — default false so SSR and first client paint match (avoids hydration errors). */
+  const [embedMode, setEmbedMode] = useState(false);
+  const [minimalUi, setMinimalUi] = useState(false);
+
+  useEffect(() => {
+    setEmbedMode(readEmbedMode());
+    setMinimalUi(readEmbedMode() || readBareMapMode());
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -312,8 +326,9 @@ export default function StrategyMap() {
         const byRegion: Record<string, string[]> = {};
         for (const f of geojson.features) {
           const fac = String(f.properties.faction_id || 'Unclaimed');
+          const rawFill = f.properties.default_fill;
           f.properties.default_fill = normalizeMapLibreColor(
-            f.properties.default_fill,
+            typeof rawFill === 'string' ? rawFill : undefined,
             fac,
           );
           const rid = String(f.properties.region_id || f.properties.realm_id || '');
@@ -330,12 +345,23 @@ export default function StrategyMap() {
         }
         housesByRegionRef.current = byRegion;
 
+        if (featureCollectionLooksLikeGameSpace(geojson as Parameters<typeof featureCollectionLooksLikeGameSpace>[0])) {
+          geojson = projectGameFeatureCollectionToMapLibre(
+            geojson as Parameters<typeof projectGameFeatureCollectionToMapLibre>[0],
+          ) as GeoJSONFeatureCollection;
+        }
+
         if (terrainRes.ok) {
           try {
             const terrainJson = (await terrainRes.json()) as RawTerrain;
-            const terrainFills = terrainFillsToGeoJson(terrainJson);
+            let terrainFills = terrainFillsToGeoJson(terrainJson);
+            if (featureCollectionLooksLikeGameSpace(terrainFills as Parameters<typeof featureCollectionLooksLikeGameSpace>[0])) {
+              terrainFills = projectGameFeatureCollectionToMapLibre(
+                terrainFills as Parameters<typeof projectGameFeatureCollectionToMapLibre>[0],
+              ) as unknown as typeof terrainFills;
+            }
             if (terrainFills.features.length > 0) {
-              map.addSource(TERRAIN_SOURCE, { type: 'geojson', data: terrainFills });
+              map.addSource(TERRAIN_SOURCE, { type: 'geojson', data: terrainFills as unknown as maplibregl.GeoJSONSourceSpecification['data'] });
               map.addLayer({
                 id: TERRAIN_FILL_LAYER,
                 type: 'fill',
@@ -360,9 +386,14 @@ export default function StrategyMap() {
                 },
               });
             }
-            const coastGj = coastlinesToGeoJson(terrainJson);
+            let coastGj = coastlinesToGeoJson(terrainJson);
+            if (featureCollectionLooksLikeGameSpace(coastGj as Parameters<typeof featureCollectionLooksLikeGameSpace>[0])) {
+              coastGj = projectGameFeatureCollectionToMapLibre(
+                coastGj as Parameters<typeof coastGj>,
+              ) as unknown as typeof coastGj;
+            }
             if (coastGj.features.length > 0) {
-              map.addSource(COAST_SOURCE, { type: 'geojson', data: coastGj });
+              map.addSource(COAST_SOURCE, { type: 'geojson', data: coastGj as unknown as maplibregl.GeoJSONSourceSpecification['data'] });
               map.addLayer({
                 id: COAST_LINE_LAYER,
                 type: 'line',
@@ -576,7 +607,6 @@ export default function StrategyMap() {
 
   return (
     <div
-      suppressHydrationWarning
       className={`strategy-map-root${embedMode ? ' strategy-map-root--embed' : ''}${
         minimalUi ? ' strategy-map-root--minimal' : ''
       }`}
@@ -586,7 +616,11 @@ export default function StrategyMap() {
       {!minimalUi && (
         <p className="strategy-map-legend">
           2D vector map: terrain and coast under faction parcels (MapLibre). No satellite tiles—pan and zoom to
-          explore.
+          explore.{' '}
+          <a href="/atlas" className="strategy-map-legend__link">
+            Open map builder
+          </a>{' '}
+          (hex / province pointing and paint).
         </p>
       )}
       <div ref={containerRef} className="strategy-map-canvas" />

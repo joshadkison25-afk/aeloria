@@ -1,7 +1,10 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-/** Ordered: explicit override → lore_docs/maps → repo lore/maps. */
+/**
+ * Atlas map JSON (hex ownership, etc.). LORE_DOCS_PATH is only required for
+ * `<path>/maps` unless AELORIA_MAPS_SAVE_DIR or repo lore/maps is used.
+ */
 export function getMapSaveDirCandidates(): string[] {
   const unique = new Set<string>();
   const add = (p: string | undefined) => {

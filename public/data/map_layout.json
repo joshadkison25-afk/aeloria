@@ -96,14 +96,14 @@
     },
     {
       "region_id": "Glenwood",
-      "center_x": 750,
+      "center_x": 720,
       "center_y": 325,
       "terrain_type": "deep_forest",
       "neighbors": ["Eresteron", "Tidefall", "Dur Khadur"]
     },
     {
       "region_id": "Tidefall",
-      "center_x": 860,
+      "center_x": 800,
       "center_y": 420,
       "terrain_type": "coastal_ports",
       "neighbors": ["Eresteron", "Glenwood", "Dur Khadur", "Dreadwind Isles"]

@@ -12,23 +12,18 @@
   ],
   "Eldoria": [
     { "house_id": "eldoria-lefleur", "faction_id": "Twin Cities" },
-    { "house_id": "eldoria-vaelith", "faction_id": "Twin Cities" },
-    { "house_id": "eldoria-duskcourt", "faction_id": "Twin Cities" }
+    { "house_id": "eldoria-bower", "faction_id": "Twin Cities" },
+    { "house_id": "eldoria-binx", "faction_id": "Twin Cities" },
+    { "house_id": "eldoria-dale", "faction_id": "Twin Cities" }
   ],
   "Twin Cities": [
-    { "house_id": "twin-bower", "faction_id": "Twin Cities" },
-    { "house_id": "twin-binx", "faction_id": "Twin Cities" },
-    { "house_id": "twin-dale", "faction_id": "Twin Cities" }
+    { "house_id": "twin-aurand", "faction_id": "Twin Cities" }
   ],
   "Eresteron": [
-    { "house_id": "eresteron-aurand", "faction_id": "Twin Cities" },
-    { "house_id": "eresteron-braafhart", "faction_id": "Twin Cities" },
-    { "house_id": "eresteron-goldvale", "faction_id": "Twin Cities" }
+    { "house_id": "eresteron-braafhart", "faction_id": "Twin Cities" }
   ],
   "Farrock": [
-    { "house_id": "farrock-ember", "faction_id": "Varkuun" },
-    { "house_id": "farrock-ironmarch", "faction_id": "Varkuun" },
-    { "house_id": "farrock-vanward", "faction_id": "Varkuun" }
+    { "house_id": "farrock-van-cleave", "faction_id": "Varkuun" }
   ],
   "Gilgeth": [
     { "house_id": "gilgeth-blackblood", "faction_id": "Gilgeth Clans" },
@@ -46,12 +41,13 @@
     { "house_id": "vilefin-rustfang", "faction_id": "Vilefin" }
   ],
   "Lostfeld": [
-    { "house_id": "lostfeld-goldfinger", "faction_id": "Lostfeld" },
+    { "house_id": "lostfeld-goldfinger-duke", "faction_id": "Lostfeld" },
     { "house_id": "lostfeld-runewarden", "faction_id": "Lostfeld" },
     { "house_id": "lostfeld-ironmaul", "faction_id": "Lostfeld" }
   ],
   "Dur Khadur": [
     { "house_id": "dur-gross", "faction_id": "Dur Khadur" },
+    { "house_id": "dur-delonious", "faction_id": "Dur Khadur" },
     { "house_id": "dur-galfazzar", "faction_id": "Dur Khadur" },
     { "house_id": "dur-vercenti", "faction_id": "Dur Khadur" }
   ],
@@ -67,8 +63,6 @@
     { "house_id": "tide-mcgowan", "faction_id": "Tidefall" }
   ],
   "Dreadwind Isles": [
-    { "house_id": "dreadwind-blacktide", "faction_id": "Dreadwind Isles" },
-    { "house_id": "dreadwind-stormward", "faction_id": "Dreadwind Isles" },
-    { "house_id": "dreadwind-reef", "faction_id": "Dreadwind Isles" }
+    { "house_id": "dreadwind-blacktide", "faction_id": "Dreadwind Isles" }
   ]
 }
