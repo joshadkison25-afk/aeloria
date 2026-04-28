@@ -263,9 +263,11 @@
     "prompt": "Dark fantasy ruler portrait of High Marshal Ashali Van Cleave, Varkuun, House Van Cleave, lore accurate Aeloria aesthetic, no text, no watermark.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\characters\\ashali-van-cleave.png",
     "static_path": "/static/illustrations/characters/ashali-van-cleave.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 1,
-    "created_at": "2026-04-26T09:36:26.473305"
+    "created_at": "2026-04-26T09:36:26.473305",
+    "last_attempt_at": "2026-04-27T21:35:47.907611",
+    "error": ""
   },
   {
     "name": "Ronan Blacktide",

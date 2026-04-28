@@ -2064,10 +2064,11 @@ export default function FantasyMap() {
                 onChange={(e) => setShowStrategicHex(e.target.checked)}
               />
             </label>
-            {selectedRegion && (
+            {selectedRegion !== null && (
               <div style={{ marginTop: 10, fontSize: '0.85rem', lineHeight: 1.5 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                  <strong>{selectedRegion.name}</strong>
+                  {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                  <strong>{selectedRegion!.name}</strong>
                   <button
                     type="button"
                     className="fantasy-map-sidebar__item"
@@ -2077,15 +2078,18 @@ export default function FantasyMap() {
                     Clear
                   </button>
                 </div>
-                <div style={{ marginTop: 6, color: 'rgba(246,235,209,0.75)' }}>{selectedRegion.description}</div>
+                {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                <div style={{ marginTop: 6, color: 'rgba(246,235,209,0.75)' }}>{selectedRegion!.description}</div>
                 <div style={{ marginTop: 8 }}>
                   <span style={{ color: 'rgba(246,235,209,0.6)' }}>Controller: </span>
-                  {regionControllerLabel(world, selectedRegion)}
+                  {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                  {regionControllerLabel(world, selectedRegion!)}
                 </div>
               </div>
             )}
-            {hoveredRegion && !selectedRegion && (
-              <p style={{ marginTop: 8, fontSize: '0.8rem', opacity: 0.75 }}>Hover: {hoveredRegion.name}</p>
+            {hoveredRegion !== null && selectedRegion === null && (
+              /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
+              <p style={{ marginTop: 8, fontSize: '0.8rem', opacity: 0.75 }}>Hover: {hoveredRegion!.name}</p>
             )}
           </div>
 
@@ -2227,20 +2231,24 @@ export default function FantasyMap() {
               This browser auto-saves a draft about every second (and when you close the tab); Save layout writes the
               file on disk (hex ownership is always derived for compatibility).
             </p>
-            {mapSaveBanner && (
+            {mapSaveBanner !== null && (
               <p
                 className="fantasy-map-sidebar__empty"
                 style={{
                   fontSize: '0.78rem',
                   marginBottom: 8,
-                  color: mapSaveBanner.kind === 'ok' ? '#a7f3d0' : '#fecaca',
+                  /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
+                  color: mapSaveBanner!.kind === 'ok' ? '#a7f3d0' : '#fecaca',
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word',
                 }}
               >
-                {mapSaveBanner.kind === 'err' ? 'Save failed: ' : ''}
-                {mapSaveBanner.text}
-                {mapSaveBanner.kind === 'err'
+                {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                {mapSaveBanner!.kind === 'err' ? 'Save failed: ' : ''}
+                {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                {mapSaveBanner!.text}
+                {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                {mapSaveBanner!.kind === 'err'
                   ? ' A backup .json was downloaded — copy it into lore/maps or lore_docs/maps if needed.'
                   : ''}
               </p>

@@ -389,7 +389,7 @@ export default function StrategyMap() {
             let coastGj = coastlinesToGeoJson(terrainJson);
             if (featureCollectionLooksLikeGameSpace(coastGj as Parameters<typeof featureCollectionLooksLikeGameSpace>[0])) {
               coastGj = projectGameFeatureCollectionToMapLibre(
-                coastGj as Parameters<typeof coastGj>,
+                coastGj as Parameters<typeof projectGameFeatureCollectionToMapLibre>[0],
               ) as unknown as typeof coastGj;
             }
             if (coastGj.features.length > 0) {
@@ -412,7 +412,7 @@ export default function StrategyMap() {
 
         map.addSource(SOURCE_ID, {
           type: 'geojson',
-          data: geojson,
+          data: geojson as unknown as maplibregl.GeoJSONSourceSpecification['data'],
           promoteId: 'house_id',
         });
 
