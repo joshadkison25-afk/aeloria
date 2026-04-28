@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // ============================================================================
 // Types
@@ -61,13 +61,23 @@ interface DispatchToast {
   expires: number; // ms timestamp
 }
 
+/** Live Seer position from `/api/map-state` (world `seer_journey` resolved to a map pin). */
+interface SeerOnMap {
+  x: number;
+  y: number;
+  matchedLabel: string;
+  location: string;
+  destination: string;
+  status: string;
+}
+
 // ============================================================================
 // Constants & lookup data
 // ============================================================================
 
-/** Realm basemap — matches `REALM_ATLAS_SRC` in Map.tsx. PNG path only if you add the file under public/. */
+/** Basemap for pin layout (`public/data/locations.json`). Override with `NEXT_PUBLIC_WORLD_MAP_IMAGE`. */
 const WORLD_MAP_IMAGE_SRC =
-  process.env.NEXT_PUBLIC_WORLD_MAP_IMAGE || '/aeloria-kingdom-preview.svg';
+  process.env.NEXT_PUBLIC_WORLD_MAP_IMAGE || '/aeloria-worldmap.png';
 
 export const FACTIONS: { id: string; label: string; color: string }[] = [
   { id: 'twin_cities',    label: 'Twin Cities (High Kingdom)',  color: '#d4a017' },
@@ -186,7 +196,7 @@ const GRID_SIZES = [
   { label: '40 × 40', cols: 40, rows: 40 },
 ];
 
-const ZOOM_MIN = 0.2;
+/** Max zoom-in; min zoom is always "fit map in view" (depends on viewport). */
 const ZOOM_MAX = 8;
 const LABEL_ZOOM_THRESHOLD = 1.05; // show pin labels when zoom > this
 
@@ -382,6 +392,25 @@ function PinIcon({ type, color, px }: { type: PinType; color: string; px: number
         </svg>
       );
   }
+}
+
+/** Mystical eye — matches pin icon language; violet + gold for the Seer. */
+function SeerIcon({ px }: { px: number }) {
+  const iris = '#c4b5fd';
+  const gold = '#d4a017';
+  return (
+    <svg width={px} height={px} viewBox="0 0 24 24" overflow="visible" style={{ display: 'block' }}>
+      <ellipse cx={12} cy={12} rx={10} ry={7} fill="#03050c" />
+      <ellipse cx={12} cy={12} rx={10} ry={7} fill={iris} fillOpacity={0.38} />
+      <ellipse cx={12} cy={12} rx={7.5} ry={5.2} fill={gold} fillOpacity={0.22} />
+      <ellipse cx={12} cy={12} rx={5.5} ry={4} fill="#0a0818" />
+      <ellipse cx={12} cy={12} rx={4} ry={3.2} fill={iris} fillOpacity={0.92} />
+      <ellipse cx={12} cy={12} rx={2.2} ry={2.8} fill="#1e1538" fillOpacity={0.55} />
+      <circle cx={13.2} cy={10.8} r={1.15} fill="rgba(255,255,255,0.75)" />
+      <ellipse cx={12} cy={12} rx={10} ry={7} fill="none" stroke={gold} strokeWidth={1.15} strokeOpacity={0.95} />
+      <ellipse cx={12} cy={12} rx={10} ry={7} fill="none" stroke="#000" strokeWidth={0.45} strokeOpacity={0.5} />
+    </svg>
+  );
 }
 
 // ============================================================================
@@ -839,15 +868,15 @@ function Sidebar({
 // Main WorldMapEditor
 // ============================================================================
 
-function readWorldMapEmbedMode(): boolean {
-  if (typeof window === 'undefined') return false;
-  const v = new URLSearchParams(window.location.search).get('embed');
-  return v === '1' || v === 'true';
+/** True when running inside an iframe (e.g. Flask home). Do not use `?embed=` during SSR — it stays false after hydrate and never notifies the parent. */
+function isEmbeddedInParent(): boolean {
+  return typeof window !== 'undefined' && window.parent !== window;
 }
 
 export default function WorldMapEditor() {
-  const [embedMode] = useState(readWorldMapEmbedMode);
   const embedReadyPostedRef = useRef(false);
+  /** Flask home iframe passes `?embed=1` — map only, no toolbar/sidebar/toasts, read-only pins. */
+  const [embedUI, setEmbedUI] = useState(false);
 
   // --- Image & viewport ---
   const imgRef    = useRef<HTMLImageElement>(null);
@@ -915,6 +944,8 @@ export default function WorldMapEditor() {
   const [tooltip, setTooltip]           = useState<{
     pin: LocationPin; px: number; py: number;
   } | null>(null);
+  const [seerOnMap, setSeerOnMap]       = useState<SeerOnMap | null>(null);
+  const [seerTooltip, setSeerTooltip]   = useState<{ px: number; py: number } | null>(null);
 
   // -------------------------------------------------------------------------
   // Playback helpers
@@ -950,6 +981,35 @@ export default function WorldMapEditor() {
     }
   }
 
+  /** Keep zoom ≥ fit-scale and pan so the map always covers the viewport (no empty margin past map edges). */
+  const clampViewportUsing = useCallback((iw: number, ih: number) => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const ww = wrapper.clientWidth;
+    const wh = wrapper.clientHeight;
+    const fitZ = Math.min(ww / iw, wh / ih);
+    let z = zoomRef.current;
+    if (z < fitZ) z = fitZ;
+    if (z > ZOOM_MAX) z = ZOOM_MAX;
+    zoomRef.current = z;
+    const sw = iw * z;
+    const sh = ih * z;
+    let px = panRef.current.x;
+    let py = panRef.current.y;
+    if (sw >= ww) px = Math.min(0, Math.max(px, ww - sw));
+    else px = (ww - sw) / 2;
+    if (sh >= wh) py = Math.min(0, Math.max(py, wh - sh));
+    else py = (wh - sh) / 2;
+    panRef.current = { x: px, y: py };
+    applyTransform();
+    setZoomDisplay(z);
+  }, []);
+
+  const clampViewport = useCallback(() => {
+    if (!imgSize) return;
+    clampViewportUsing(imgSize.w, imgSize.h);
+  }, [imgSize, clampViewportUsing]);
+
   const initViewport = useCallback((w: number, h: number) => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -958,9 +1018,8 @@ export default function WorldMapEditor() {
     const fz = Math.min(ww / w, wh / h);
     zoomRef.current = fz;
     panRef.current  = { x: (ww - w * fz) / 2, y: (wh - h * fz) / 2 };
-    setZoomDisplay(fz);
-    applyTransform();
-  }, []);
+    clampViewportUsing(w, h);
+  }, [clampViewportUsing]);
 
   function fitToScreen() {
     if (imgSize) initViewport(imgSize.w, imgSize.h);
@@ -968,17 +1027,17 @@ export default function WorldMapEditor() {
 
   function zoomBy(factor: number) {
     const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper || !imgSize) return;
     const { width: ww, height: wh } = wrapper.getBoundingClientRect();
     const cx = ww / 2, cy = wh / 2;
     const oldZ = zoomRef.current;
-    const newZ = clamp(oldZ * factor, ZOOM_MIN, ZOOM_MAX);
+    const fitZ = Math.min(ww / imgSize.w, wh / imgSize.h);
+    const newZ = clamp(oldZ * factor, fitZ, ZOOM_MAX);
     const imgX = (cx - panRef.current.x) / oldZ;
     const imgY = (cy - panRef.current.y) / oldZ;
     panRef.current = { x: cx - imgX * newZ, y: cy - imgY * newZ };
     zoomRef.current = newZ;
-    applyTransform();
-    setZoomDisplay(newZ);
+    clampViewport();
   }
 
   // -------------------------------------------------------------------------
@@ -995,7 +1054,7 @@ export default function WorldMapEditor() {
 
   // Flask home /enter: dismiss atlas veil when iframe map is painted (matches Map.tsx / StrategyMap.tsx).
   useEffect(() => {
-    if (!embedMode) return;
+    if (!isEmbeddedInParent()) return;
     if (!imgSize) return;
     if (embedReadyPostedRef.current) return;
     let cancelled = false;
@@ -1005,9 +1064,7 @@ export default function WorldMapEditor() {
           if (cancelled || embedReadyPostedRef.current) return;
           embedReadyPostedRef.current = true;
           try {
-            if (typeof window !== 'undefined' && window.parent !== window) {
-              window.parent.postMessage({ type: 'aeloria-home-map-ready' }, '*');
-            }
+            window.parent.postMessage({ type: 'aeloria-home-map-ready' }, '*');
           } catch {
             /* ignore */
           }
@@ -1018,24 +1075,34 @@ export default function WorldMapEditor() {
       cancelled = true;
       cancelAnimationFrame(id);
     };
-  }, [embedMode, imgSize]);
+  }, [imgSize]);
+
+  useLayoutEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('embed');
+    setEmbedUI(q === '1' || q === 'true' || q === 'yes');
+  }, []);
+
+  useEffect(() => {
+    if (embedUI) setShowGrid(false);
+  }, [embedUI]);
 
   // -------------------------------------------------------------------------
   // Window resize
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (!imgSize) return;
-    const onResize = () => initViewport(imgSize.w, imgSize.h);
+    const onResize = () => clampViewportUsing(imgSize.w, imgSize.h);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [imgSize, initViewport]);
+  }, [imgSize, clampViewportUsing]);
 
   // -------------------------------------------------------------------------
   // Wheel zoom
   // -------------------------------------------------------------------------
   useEffect(() => {
     const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper || !imgSize) return;
+    const { w: iw, h: ih } = imgSize;
     function onWheel(e: WheelEvent) {
       e.preventDefault();
       const el = wrapperRef.current;
@@ -1044,18 +1111,18 @@ export default function WorldMapEditor() {
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
       const oldZ = zoomRef.current;
+      const fitZ = Math.min(rect.width / iw, rect.height / ih);
       const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-      const newZ = clamp(oldZ * factor, ZOOM_MIN, ZOOM_MAX);
+      const newZ = clamp(oldZ * factor, fitZ, ZOOM_MAX);
       const imgX = (mx - panRef.current.x) / oldZ;
       const imgY = (my - panRef.current.y) / oldZ;
       panRef.current = { x: mx - imgX * newZ, y: my - imgY * newZ };
       zoomRef.current = newZ;
-      applyTransform();
-      setZoomDisplay(newZ);
+      clampViewportUsing(iw, ih);
     }
     wrapper.addEventListener('wheel', onWheel, { passive: false });
     return () => wrapper.removeEventListener('wheel', onWheel);
-  }, [imgSize]);
+  }, [imgSize, clampViewportUsing]);
 
   // -------------------------------------------------------------------------
   // Load pins
@@ -1084,6 +1151,7 @@ export default function WorldMapEditor() {
         worldDate: string;
         activeEvents: { name: string; involved: string[]; severity: number; trend: string; summary?: string }[];
         primaryEvent: { name: string; severity: number; summary: string } | null;
+        seerMap: SeerOnMap | null;
       };
 
       if (!Array.isArray(data.pins)) return;
@@ -1111,34 +1179,50 @@ export default function WorldMapEditor() {
       setTickNumber(data.tick ?? null);
       setWorldDate(data.worldDate ?? '');
 
-      // Fire toasts for newly appeared active events (by name)
-      const namesNow = (data.activeEvents ?? []).map((e) => e.name as string);
-      const prevNames = prevActiveEventNamesRef.current;
-      if (prevNames.length > 0) {
-        const now = Date.now();
-        const newToasts: DispatchToast[] = (data.activeEvents ?? [])
-          .filter((e) => e.name && !prevNames.includes(e.name))
-          .slice(0, 3)
-          .map((e): DispatchToast => {
-            const involved = e.involved ?? [];
-            const faction  = involved[0] ?? '';
-            const fac      = FACTIONS.find((f) => f.label.toLowerCase().includes(faction.toLowerCase()));
-            return {
-              id:       `toast_${now}_${Math.random().toString(36).slice(2)}`,
-              header:   `${severityRoman(e.severity)} — ${e.trend?.toUpperCase() ?? 'EMERGING'}`,
-              body:     e.name,
-              severity: e.severity ?? 1,
-              color:    fac?.color ?? '#d4a017',
-              expires:  now + 8000,
-            };
-          });
-        if (newToasts.length) {
-          setToasts((prev) => [...prev, ...newToasts].slice(-4));
-        }
+      const sm = data.seerMap;
+      if (
+        sm &&
+        typeof sm.x === 'number' &&
+        typeof sm.y === 'number' &&
+        Number.isFinite(sm.x) &&
+        Number.isFinite(sm.y)
+      ) {
+        setSeerOnMap(sm);
+      } else {
+        setSeerOnMap(null);
       }
-      prevActiveEventNamesRef.current = namesNow;
+
+      if (!embedUI) {
+        const namesNow = (data.activeEvents ?? []).map((e) => e.name as string);
+        const prevNames = prevActiveEventNamesRef.current;
+        if (prevNames.length > 0) {
+          const now = Date.now();
+          const newToasts: DispatchToast[] = (data.activeEvents ?? [])
+            .filter((e) => e.name && !prevNames.includes(e.name))
+            .slice(0, 3)
+            .map((e): DispatchToast => {
+              const involved = e.involved ?? [];
+              const faction  = involved[0] ?? '';
+              const fac      = FACTIONS.find((f) => f.label.toLowerCase().includes(faction.toLowerCase()));
+              return {
+                id:       `toast_${now}_${Math.random().toString(36).slice(2)}`,
+                header:   `${severityRoman(e.severity)} — ${e.trend?.toUpperCase() ?? 'EMERGING'}`,
+                body:     e.name,
+                severity: e.severity ?? 1,
+                color:    fac?.color ?? '#d4a017',
+                expires:  now + 8000,
+              };
+            });
+          if (newToasts.length) {
+            setToasts((prev) => [...prev, ...newToasts].slice(-4));
+          }
+        }
+        prevActiveEventNamesRef.current = namesNow;
+      } else {
+        prevActiveEventNamesRef.current = (data.activeEvents ?? []).map((e) => e.name as string);
+      }
     } catch { /* offline */ }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [embedUI]);
 
   // SSE subscription
   useEffect(() => {
@@ -1212,6 +1296,10 @@ export default function WorldMapEditor() {
     return () => { if (playIntervalRef.current) clearInterval(playIntervalRef.current); };
   }, [isPlaying, playbackMode, history.length]);
 
+  useEffect(() => {
+    if (playbackMode) setSeerTooltip(null);
+  }, [playbackMode]);
+
   // -------------------------------------------------------------------------
   // Keyboard
   // -------------------------------------------------------------------------
@@ -1267,6 +1355,7 @@ export default function WorldMapEditor() {
       if (drag.moved) {
         panRef.current = { x: drag.panX + dx, y: drag.panY + dy };
         applyTransform();
+        if (imgSize) clampViewportUsing(imgSize.w, imgSize.h);
       }
     }
 
@@ -1288,6 +1377,8 @@ export default function WorldMapEditor() {
     setIsDragging(false);
     if (!drag || drag.moved) return;
     if ((e.target as HTMLElement).closest('.wme-pin-btn')) return;
+    if ((e.target as HTMLElement).closest('.wme-seer')) return;
+    if (embedUI) return;
 
     const pos = screenToImgPct(e.clientX, e.clientY);
     if (!pos) return;
@@ -1365,6 +1456,7 @@ export default function WorldMapEditor() {
 
   // Pin size stays ~24px on screen regardless of zoom
   const PIN_PX = 24 / zoomDisplay;
+  const SEER_PX = 30 / zoomDisplay;
   // Label font stays ~11px on screen
   const LABEL_PX = 11 / zoomDisplay;
   const showPinLabels = zoomDisplay > LABEL_ZOOM_THRESHOLD;
@@ -1373,11 +1465,12 @@ export default function WorldMapEditor() {
   // Render
   // -------------------------------------------------------------------------
   return (
-    <div className="wme-root">
+    <div className={`wme-root${embedUI ? ' wme-root--embed' : ''}`}>
 
       {/* ================================================================== */}
       {/* Toolbar                                                             */}
       {/* ================================================================== */}
+      {!embedUI && (
       <header className="wme-toolbar">
         <div className="wme-toolbar__brand">
           <svg width={14} height={14} viewBox="0 0 14 14" style={{ marginRight: 6, flexShrink: 0 }}>
@@ -1445,6 +1538,7 @@ export default function WorldMapEditor() {
           ☰ {pins.length}
         </button>
       </header>
+      )}
 
       {/* ================================================================== */}
       {/* Body                                                                */}
@@ -1455,7 +1549,11 @@ export default function WorldMapEditor() {
         <div
           ref={wrapperRef}
           className="wme-wrapper"
-          style={{ cursor: isDragging ? 'grabbing' : 'crosshair' }}
+          style={{
+            cursor: embedUI
+              ? (isDragging ? 'grabbing' : 'grab')
+              : (isDragging ? 'grabbing' : 'crosshair'),
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -1496,12 +1594,10 @@ export default function WorldMapEditor() {
                   `Map image failed to load (${WORLD_MAP_IMAGE_SRC}). Add the file under public/ or set NEXT_PUBLIC_WORLD_MAP_IMAGE.`,
                 );
                 setLoading(false);
-                if (embedMode && !embedReadyPostedRef.current) {
+                if (isEmbeddedInParent() && !embedReadyPostedRef.current) {
                   embedReadyPostedRef.current = true;
                   try {
-                    if (typeof window !== 'undefined' && window.parent !== window) {
-                      window.parent.postMessage({ type: 'aeloria-home-map-ready' }, '*');
-                    }
+                    window.parent.postMessage({ type: 'aeloria-home-map-ready' }, '*');
                   } catch {
                     /* ignore */
                   }
@@ -1597,14 +1693,18 @@ export default function WorldMapEditor() {
                   )}
 
                   <button
+                    type="button"
                     className="wme-pin-btn"
-                    onClick={(e) => { e.stopPropagation(); handleEdit(pin); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!embedUI) handleEdit(pin);
+                    }}
                     onContextMenu={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleDelete(pin.id);
+                      if (!embedUI) handleDelete(pin.id);
                     }}
-                    title={`${pin.label} — right-click to delete`}
+                    title={embedUI ? pin.label : `${pin.label} — right-click to delete`}
                     style={{
                       width: PIN_PX,
                       height: PIN_PX,
@@ -1651,6 +1751,57 @@ export default function WorldMapEditor() {
                 </div>
               );
             })}
+
+            {/* Layer 5: Seer (live journey → map pin); hidden during history playback */}
+            {imgSize && seerOnMap && !playbackMode && (
+              <div
+                className="wme-seer"
+                style={{
+                  position: 'absolute',
+                  left: (seerOnMap.x / 100) * imgSize.w,
+                  top: (seerOnMap.y / 100) * imgSize.h,
+                  transform: 'translate(-50%, -100%)',
+                  zIndex: 45,
+                  pointerEvents: 'auto',
+                }}
+                onMouseEnter={(e) => {
+                  const wr = wrapperRef.current?.getBoundingClientRect();
+                  if (wr) setSeerTooltip({ px: e.clientX - wr.left, py: e.clientY - wr.top });
+                }}
+                onMouseLeave={() => setSeerTooltip(null)}
+              >
+                <div
+                  className="wme-seer__icon"
+                  style={{
+                    filter: [
+                      `drop-shadow(0 0 ${6 / zoomDisplay}px #c4b5fdcc)`,
+                      `drop-shadow(0 0 ${14 / zoomDisplay}px #d4a01766)`,
+                      `drop-shadow(0 ${2 / zoomDisplay}px ${5 / zoomDisplay}px rgba(0,0,0,0.95))`,
+                    ].join(' '),
+                  }}
+                >
+                  <SeerIcon px={SEER_PX} />
+                </div>
+                {showPinLabels && (
+                  <span
+                    className="wme-pin-label"
+                    style={{
+                      color: '#d4a017',
+                      fontSize: LABEL_PX,
+                      marginTop: 2 / zoomDisplay,
+                      letterSpacing: `${0.06 / zoomDisplay}em`,
+                      textShadow: [
+                        `0 0 ${6 / zoomDisplay}px #c4b5fd99`,
+                        `0 ${1 / zoomDisplay}px ${3 / zoomDisplay}px #000`,
+                        `0 0 ${12 / zoomDisplay}px rgba(0,0,0,0.9)`,
+                      ].join(', '),
+                    }}
+                  >
+                    The Seer
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Tooltip — in wrapper space (not scaled by stage zoom) */}
@@ -1682,22 +1833,49 @@ export default function WorldMapEditor() {
                   </span>
                 )}
                 {pin.notes && <span className="wme-tooltip__notes">{pin.notes}</span>}
-                <span className="wme-tooltip__hint">click to edit · right-click to delete</span>
+                {!embedUI && (
+                  <span className="wme-tooltip__hint">click to edit · right-click to delete</span>
+                )}
               </div>
             );
           })()}
 
-          {/* Compass rose */}
-          <div className="wme-compass-wrap">
-            <CompassRose />
-          </div>
+          {seerTooltip && seerOnMap && !playbackMode && (
+            <div
+              className="wme-tooltip"
+              style={{ left: seerTooltip.px + 16, top: seerTooltip.py - 12 }}
+            >
+              <div className="wme-tooltip__name">
+                <SeerIcon px={14} />
+                <strong>The Seer</strong>
+              </div>
+              <span className="wme-tooltip__type">Map: {seerOnMap.matchedLabel}</span>
+              {seerOnMap.location && (
+                <span className="wme-tooltip__faction" style={{ color: '#c4b5fd' }}>
+                  At: {seerOnMap.location}
+                </span>
+              )}
+              {seerOnMap.destination && (
+                <span className="wme-tooltip__notes">→ {seerOnMap.destination}</span>
+              )}
+              <span className="wme-tooltip__hint" style={{ textTransform: 'capitalize' }}>
+                {seerOnMap.status}
+              </span>
+            </div>
+          )}
 
-          {/* Vignette overlay */}
-          <div className="wme-vignette" aria-hidden="true" />
+          {!embedUI && (
+            <>
+              <div className="wme-compass-wrap">
+                <CompassRose />
+              </div>
+              <div className="wme-vignette" aria-hidden="true" />
+            </>
+          )}
         </div>
 
         {/* Sidebar */}
-        {showSidebar && (
+        {showSidebar && !embedUI && (
           <Sidebar
             pins={pins}
             filterType={filterType}
@@ -1717,7 +1895,7 @@ export default function WorldMapEditor() {
       {/* ================================================================== */}
       {/* Playback toolbar                                                    */}
       {/* ================================================================== */}
-      {showPlayback && history.length > 0 && (
+      {!embedUI && showPlayback && history.length > 0 && (
         <div className="wme-playback">
           <button
             className="wme-playback__btn"
@@ -1765,6 +1943,7 @@ export default function WorldMapEditor() {
       {/* ================================================================== */}
       {/* Status bar                                                          */}
       {/* ================================================================== */}
+      {!embedUI && (
       <footer className="wme-statusbar">
         <span className="wme-statusbar__item">
           <span className="wme-statusbar__dim">zoom</span> {Math.round(zoomDisplay * 100)}%
@@ -1809,10 +1988,12 @@ export default function WorldMapEditor() {
           {history.length > 0 && <span style={{ marginLeft: 6, color: '#3d4048' }}>⏮ History</span>}
         </span>
       </footer>
+      )}
 
       {/* ================================================================== */}
       {/* Event dispatch toasts                                               */}
       {/* ================================================================== */}
+      {!embedUI && (
       <div className="wme-toasts">
         {toasts.map((toast) => (
           <div
@@ -1829,11 +2010,12 @@ export default function WorldMapEditor() {
           </div>
         ))}
       </div>
+      )}
 
       {/* ================================================================== */}
       {/* PlaceModal                                                          */}
       {/* ================================================================== */}
-      {pendingClick && (
+      {pendingClick && !embedUI && (
         <PlaceModal
           x={pendingClick.x}
           y={pendingClick.y}
@@ -1857,6 +2039,14 @@ export default function WorldMapEditor() {
           color: #ddd8cc;
           font-family: 'Georgia', serif;
           overflow: hidden;
+        }
+        .wme-root--embed {
+          height: 100%;
+          min-height: 100vh;
+        }
+        .wme-root--embed .wme-body {
+          flex: 1;
+          min-height: 0;
         }
 
         /* ---------- toolbar ---------- */
@@ -2011,6 +2201,20 @@ export default function WorldMapEditor() {
           pointer-events: none;
           line-height: 1;
           /* color, fontSize, textShadow, letterSpacing set inline per-pin */
+        }
+
+        /* ---------- Seer (live position) ---------- */
+        .wme-seer {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .wme-seer__icon {
+          animation: wme-seer-pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes wme-seer-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.92; transform: scale(1.04); }
         }
 
         /* ---------- tooltip ---------- */

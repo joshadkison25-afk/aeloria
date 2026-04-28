@@ -5,5 +5,12 @@
     "detail": "Hollowlost Bands, Forest Wanderers, Dockside Clans, Free Cities, Cultural League, Frost Nomads, Runebound Clans, War Bands, Clan Exiles, Dust Merchants, Border Mercenaries, Fortress Wardens, Marooned Brigands, Mountain Hermits",
     "lore": "A new world has been forged. 14 factions (Hollowlost Bands, Forest Wanderers, Dockside Clans, Free Cities, Cultural League, Frost Nomads, Runebound Clans, War Bands, Clan Exiles, Dust Merchants, Border Mercenaries, Fortress Wardens, Marooned Brigands, Mountain Hermits) now vie for dominance across Aeloria. The age begins \u2014 every throne is unsettled, every border unproven.",
     "timestamp": "2026-04-26T09:37:09.789978"
+  },
+  {
+    "type": "divine_omen",
+    "target": "Aeloria",
+    "detail": "blood moon over groth",
+    "lore": "Across all of Aeloria, a supernatural sign has appeared: blood moon over groth. Factions scramble to interpret its meaning.",
+    "timestamp": "2026-04-28T03:18:02.081079"
   }
 ]

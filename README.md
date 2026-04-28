@@ -12,7 +12,7 @@
    npm install
    ```
 
-3. Copy the example env and fill in your keys (the example has `FLASK_DEBUG=1` so **Flask restarts when you change `.py` files**; set `FLASK_DEBUG=0` for a single long-lived process or production). Keep `MAP_PUBLIC_URL=http://127.0.0.1:3000/map` for local dev so the home-page map iframe can reach Next.js.
+3. Copy the example env and fill in your keys (`FLASK_DEBUG=1` for local dev). **`npm run dev`** runs Flask under **nodemon** with `FLASK_SKIP_RELOADER=1` so Python restarts once per edit (no nested Werkzeug reloader — avoids flaky shutdowns on Windows). Plain `python app.py` still uses Flask’s built-in reloader when `FLASK_DEBUG=1` and skip-reloader is unset. Set `FLASK_DEBUG=0` for production. Set `MAP_PUBLIC_URL=http://127.0.0.1:3000/worldmap` (or any URL whose **host:port** is Next; the path is ignored — Flask always embeds the **pin map** at `/worldmap`).
    ```bash
    copy .env.example .env
    ```
@@ -40,7 +40,7 @@
 - **Lore drops** - `.txt` and `.md` files in `lore/` are absorbed into future ticks
 - **God panel** - queued influence flows through `pending_lore.json`
 - **Story generation** - narrative synopsis and audio can be generated from recent world history
-- **Interactive map** - the Next.js app serves the Leaflet-based map experience
+- **Interactive maps** - Next.js serves the **pin/city world map** (`/worldmap`) and the **hex strategy map** (`/map`, MapLibre)
 
 ## Key Folders
 
@@ -86,7 +86,7 @@ STYLE_GUIDE_NAME=eryndor adventure
 TICK_INTERVAL_HOURS=8
 API_MODEL=claude-sonnet-4-6
 PORT=5000
-MAP_PUBLIC_URL=/map
+MAP_PUBLIC_URL=/worldmap
 NEXT_PUBLIC_SITE_URL=https://your-domain.example
 ```
 
@@ -100,7 +100,7 @@ docker compose -f docker-compose.prod.yml up -d
 Public routing:
 
 - `/` -> Flask app
-- `/map` -> Next.js map app
+- `/map` (Flask) -> full-page embed of the pin map; Next `/map` redirects to `/worldmap`
 
 ### Health Checks
 

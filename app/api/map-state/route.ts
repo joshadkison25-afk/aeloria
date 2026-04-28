@@ -37,6 +37,69 @@ function nameToId(name: string): string | undefined {
   return slug || undefined;
 }
 
+// ── Seer journey → map pin coordinates (matches public/data/locations.json labels) ──
+type LocPinLite = { label: string; x: number; y: number; regionId?: string };
+
+const SEER_PLACE_SYNONYMS: Record<string, string> = {
+  'twin cities': 'Eldoria',
+  'high kingdom': 'Eldoria',
+  'shadow court': 'Mythralen',
+  faerwood: 'Mythralen',
+  glenhaven: 'Lethyra Vale',
+  glenwood: 'Lethyra Vale',
+  varkuun: 'Farrock',
+  farrock: 'Farrock',
+  'dreadwind isles': 'Widows Bay',
+  dreadwind: 'Widows Bay',
+  wintermark: 'Frostvale',
+  'gilgeth clans': 'Gilgeth',
+  'groth clans': 'Groth',
+  lostfeld: 'Lostfeld',
+  stonebreak: 'Stonebreak',
+  tidefall: 'Tidefall',
+  vilefin: 'Vilefin',
+  frostvale: 'Frostvale',
+  eldoria: 'Eldoria',
+  eresteron: 'Eresteron',
+  groth: 'Groth',
+  gilgeth: 'Gilgeth',
+};
+
+function normalizeSeerLocation(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function resolveSeerOnMap(rawLocation: string, pins: LocPinLite[]): { x: number; y: number; matchedLabel: string } | null {
+  if (!rawLocation?.trim()) return null;
+  const n = normalizeSeerLocation(rawLocation);
+  if (!n || n === 'unknown road' || n === 'unknown' || n === 'none') return null;
+
+  const syn = SEER_PLACE_SYNONYMS[n];
+  if (syn) {
+    const hit = pins.find((p) => p.label.toLowerCase() === syn.toLowerCase());
+    if (hit) return { x: hit.x, y: hit.y, matchedLabel: hit.label };
+  }
+
+  let best: { pin: LocPinLite; score: number } | null = null;
+  for (const p of pins) {
+    const pl = p.label.toLowerCase();
+    const rid = p.regionId?.toLowerCase() ?? '';
+    let score = 0;
+    if (pl === n) score = 100;
+    else if (n.includes(pl) || pl.includes(n)) score = 88;
+    else if (rid && (n.includes(rid) || rid.includes(n))) score = 82;
+    else {
+      const nw = n.split(' ').filter((w) => w.length > 2);
+      if (nw.some((w) => pl.includes(w) || w.includes(pl))) score = 68;
+    }
+    if (score > (best?.score ?? 0)) best = { pin: p, score };
+  }
+  if (best && best.score >= 68) {
+    return { x: best.pin.x, y: best.pin.y, matchedLabel: best.pin.label };
+  }
+  return null;
+}
+
 // ── Load world state (file → Flask fallback) ────────────────────────────────
 async function loadWorldState(): Promise<Record<string, unknown>> {
   // Try reading directly from disk first (same process, always fresh)
@@ -148,6 +211,32 @@ export async function GET() {
     return out;
   });
 
+  const seerJourney = (ws.seer_journey ?? {}) as Record<string, unknown>;
+  const locRaw = String(
+    seerJourney.current_location ?? seerJourney.location ?? ws.seer_location ?? '',
+  ).trim();
+  const destRaw = String(seerJourney.destination ?? '').trim();
+  const seerStatus = String(seerJourney.status ?? 'stationary').trim();
+
+  const locPinsLite: LocPinLite[] = pins.map((p) => ({
+    label: String(p.label ?? ''),
+    x: Number(p.x),
+    y: Number(p.y),
+    regionId: p.regionId != null ? String(p.regionId) : undefined,
+  }));
+
+  const resolved = locRaw ? resolveSeerOnMap(locRaw, locPinsLite) : null;
+  const seerMap = resolved
+    ? {
+        x: resolved.x,
+        y: resolved.y,
+        matchedLabel: resolved.matchedLabel,
+        location: locRaw,
+        destination: destRaw,
+        status: seerStatus,
+      }
+    : null;
+
   return NextResponse.json({
     pins: enriched,
     factionPower,
@@ -155,5 +244,6 @@ export async function GET() {
     worldDate,
     activeEvents,
     primaryEvent: primaryEvent ?? null,
+    seerMap,
   });
 }

@@ -240,7 +240,8 @@ export default function StrategyMap() {
     }
 
     const postEmbedReadyOnce = () => {
-      if (!readEmbedMode() || embedReadyPostedRef.current) return;
+      if (embedReadyPostedRef.current) return;
+      if (typeof window === 'undefined' || window.parent === window) return;
       embedReadyPostedRef.current = true;
       notifyParentMapReady();
     };
@@ -629,9 +630,9 @@ export default function StrategyMap() {
           <p className="strategy-map-error__title">Atlas could not load</p>
           <p className="strategy-map-error__msg">{mapError}</p>
           <p className="strategy-map-error__hint">
-            If this page is embedded from Flask, run <code>npm run dev</code> so Next serves{' '}
-            <code>/map</code> on port 3000, and set <code>MAP_PUBLIC_URL</code> in{' '}
-            <code>.env</code> to that URL (see <code>.env.example</code>).
+            Run <code>npm run dev</code> from the repo root so Next serves this hex map at <code>/map</code>. The city
+            pin map lives at <code>/worldmap</code>; Flask’s Map page embeds that when <code>MAP_PUBLIC_URL</code> ends
+            with <code>/worldmap</code> (see <code>.env.example</code>).
           </p>
         </div>
       )}

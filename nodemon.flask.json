@@ -14,6 +14,6 @@
     "*.json",
     "*.md"
   ],
-  "exec": "cross-env FLASK_DEBUG=1 python app.py",
+  "exec": "cross-env FLASK_DEBUG=1 FLASK_SKIP_RELOADER=1 python app.py",
   "delay": 500
 }

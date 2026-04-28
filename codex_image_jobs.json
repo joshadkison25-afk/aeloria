@@ -405,9 +405,11 @@
     "prompt": "Location illustration for Aeloria: The day advanced under local simulation while the prophecy engine was unavailable.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-aeloria.png",
     "static_path": "/static/illustrations/codex/place-aeloria.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 7,
-    "created_at": "2026-04-26T11:00:36.016791"
+    "created_at": "2026-04-26T11:00:36.016791",
+    "last_attempt_at": "2026-04-28T03:23:56.008319",
+    "error": ""
   },
   {
     "key": "lore:The Clock Moves Without Prophecy",
@@ -430,5 +432,16 @@
     "status": "queued",
     "created_tick": 7,
     "created_at": "2026-04-26T11:00:36.017164"
+  },
+  {
+    "key": "lore:Stabilization: Groth Clans \u2014 Groth",
+    "kind": "lore",
+    "name": "Stabilization: Groth Clans \u2014 Groth",
+    "prompt": "Major lore event illustration for Stabilization: Groth Clans \u2014 Groth: Groth Clans committed resources to stabilize Groth.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-stabilization-groth-clans-groth.png",
+    "static_path": "/static/illustrations/codex/lore-stabilization-groth-clans-groth.png",
+    "status": "queued",
+    "created_tick": 7,
+    "created_at": "2026-04-28T03:23:56.099448"
   }
 ]

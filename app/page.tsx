@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Next home redirects to the strategy map; Flask home iframe uses `/worldmap` (see HOME_MAP_IFRAME_URL in app.py). */
+/** Next `/` → pin/city world map. `/map` also redirects here. */
 export default function Home() {
-  redirect('/map');
+  redirect('/worldmap');
 }

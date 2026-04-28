@@ -103,12 +103,12 @@
       <h1 class="cine-title">The Map of Aeloria</h1>
       <div class="cine-rule">
         <span class="cine-rule-diamond"></span>
-        Hover, click, traverse
+        Cities, capitals, live pins
         <span class="cine-rule-diamond"></span>
       </div>
-      <p class="cine-flourish">A living atlas with hover states, clickable regions, zooming, and a live region sidebar.</p>
+      <p class="cine-flourish">Realm map with location pins, live ownership from the sim, and pan/zoom.</p>
       <div style="margin-top:24px">
-        <a class="btn btn-secondary" href="{{ map_iframe_url|default(map_public_url, true) }}" target="_blank" rel="noreferrer">Open In New Tab</a>
+        <a class="btn btn-secondary" href="{{ map_iframe_url|default(pin_map_public_url, true) }}" target="_blank" rel="noreferrer">Open In New Tab</a>
       </div>
     </div>
   </header>
@@ -125,7 +125,7 @@
   </div>
 
   <div class="embed-note">
-    The embedded atlas is served from <code>{{ map_public_url }}</code> (set <code>MAP_PUBLIC_URL</code> in <code>.env</code> if needed). If the frame is blank, start the Next server with <code>npm run dev</code>.
+    Pin map: <code>{{ pin_map_public_url }}</code> (iframe URL includes a cache-buster). Set <code>MAP_PUBLIC_URL</code> to your Next origin if needed. If the frame is blank, run <code>npm run dev</code>.
   </div>
 </div>
 {% endblock %}

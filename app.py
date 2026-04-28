@@ -34,14 +34,44 @@ SYNOPSIS_FILE = BASE_DIR / "narrative_synopsis.txt"
 CHARACTER_PORTRAIT_JOBS_FILE = BASE_DIR / "character_portrait_jobs.json"
 CODEX_IMAGE_JOBS_FILE = BASE_DIR / "codex_image_jobs.json"
 IMAGE_GENERATION_STATE_FILE = BASE_DIR / "image_generation_state.json"
-MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/map")
-# Flask home + /enter iframe: Next world map editor (`/worldmap`). Defaults to same host as MAP_PUBLIC_URL.
-_mp = urlsplit(MAP_PUBLIC_URL)
-HOME_MAP_IFRAME_URL = os.getenv(
-    "HOME_MAP_IFRAME_URL",
-    urlunsplit((_mp.scheme, _mp.netloc, "/worldmap", "", "")),
-)
-# Same image as Next `/map` by default (files under ./public). Override with NEXT_PUBLIC_MAP_ATLAS_URL or HOME_ATLAS_URL.
+MAP_PUBLIC_URL = os.getenv("MAP_PUBLIC_URL", "http://localhost:3000/worldmap")
+
+
+def _next_origin_for_iframe() -> tuple[str, str]:
+    """
+    Scheme + netloc of the Next.js server for iframes. Path on MAP_PUBLIC_URL is ignored — pin map is always `/worldmap`.
+    Optional HOME_MAP_IFRAME_URL may override origin only (e.g. full URL to Next); its path is ignored.
+    """
+    parsed = urlsplit(MAP_PUBLIC_URL)
+    scheme = parsed.scheme or "http"
+    netloc = parsed.netloc
+    raw = os.getenv("HOME_MAP_IFRAME_URL")
+    if raw and str(raw).strip():
+        p = urlsplit(str(raw).strip())
+        if p.netloc:
+            netloc = p.netloc
+            if p.scheme:
+                scheme = p.scheme
+    return scheme, netloc
+
+
+def _pin_map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
+    """Next.js city-pin map only: always `/worldmap` (never `/map` / StrategyMap), with cache-buster."""
+    try:
+        map_ts = int((BASE_DIR / "components" / "WorldMapEditor.tsx").stat().st_mtime)
+    except OSError:
+        map_ts = 0
+    mp = urlsplit(MAP_PUBLIC_URL)
+    query = dict(parse_qsl(mp.query, keep_blank_values=True))
+    query["cb"] = str(map_ts)
+    if extra_query:
+        query.update(extra_query)
+    q = urlencode(query)
+    scheme, netloc = _next_origin_for_iframe()
+    if netloc:
+        return urlunsplit((scheme, netloc, "/worldmap", q, ""))
+    return urlunsplit(("", "", "/worldmap", q, ""))
+# Static home fallback image (files under ./public). Override with NEXT_PUBLIC_MAP_ATLAS_URL or HOME_ATLAS_URL.
 HOME_ATLAS_URL = (
     os.getenv("HOME_ATLAS_URL")
     or os.getenv("NEXT_PUBLIC_MAP_ATLAS_URL")
@@ -62,7 +92,7 @@ def _warn_map_public_url_for_embed() -> None:
         return
     logger.warning(
         "HOME_INTERACTIVE_MAP is on and MAP_PUBLIC_URL=%r is path-only while FLASK_DEBUG is enabled. "
-        "If the home atlas iframe is wrong or nested, set MAP_PUBLIC_URL=http://127.0.0.1:3000/map for local Next on port 3000.",
+        "If the home atlas iframe is wrong or nested, set MAP_PUBLIC_URL=http://127.0.0.1:3000/worldmap for local Next on port 3000.",
         MAP_PUBLIC_URL,
     )
 
@@ -73,37 +103,22 @@ app = Flask(__name__)
 
 
 def _map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
-    """Next `/map` URL with cache-buster (StrategyMap.tsx mtime). Optional query keys merged in."""
-    try:
-        map_ts = int((BASE_DIR / "components" / "StrategyMap.tsx").stat().st_mtime)
-    except OSError:
-        map_ts = 0
-    parsed = urlsplit(MAP_PUBLIC_URL)
-    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
-    query["cb"] = str(map_ts)
-    if extra_query:
-        query.update(extra_query)
-    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+    """Flask /map page iframe — same pin world map as home (`/worldmap`)."""
+    return _pin_map_iframe_url(extra_query)
 
 
 def _home_map_iframe_url(extra_query: dict[str, str] | None = None) -> str:
-    """Next `/worldmap` URL for Flask home /enter iframe (WorldMapEditor cache-buster)."""
-    try:
-        map_ts = int((BASE_DIR / "components" / "WorldMapEditor.tsx").stat().st_mtime)
-    except OSError:
-        map_ts = 0
-    parsed = urlsplit(HOME_MAP_IFRAME_URL)
-    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
-    query["cb"] = str(map_ts)
-    if extra_query:
-        query.update(extra_query)
-    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
+    """Flask home + /enter iframe — pin map only."""
+    return _pin_map_iframe_url(extra_query)
 
 
 @app.context_processor
 def _inject_map_public_url():
+    scheme, netloc = _next_origin_for_iframe()
+    pin_page = urlunsplit((scheme, netloc, "/worldmap", "", "")) if netloc else "/worldmap"
     return {
         "map_public_url": MAP_PUBLIC_URL,
+        "pin_map_public_url": pin_page,
         "home_atlas_url": HOME_ATLAS_URL,
         "map_iframe_url": _map_iframe_url(),
         "home_map_iframe_url": _home_map_iframe_url({"embed": "1"}),
@@ -823,7 +838,7 @@ def atlas_embed():
 
 
 def _map_embed_context() -> dict:
-    """Next map URL with cache-buster for the iframe (StrategyMap.tsx mtime)."""
+    """Pin map iframe URL for /map Flask page."""
     return {
         "active_page": "map",
         "map_public_url": MAP_PUBLIC_URL,
@@ -1376,9 +1391,11 @@ if __name__ == "__main__":
     for d in ["logs", "history", "lore", "weekly_stories", "conversations", "static/audio"]:
         (BASE_DIR / d).mkdir(parents=True, exist_ok=True)
 
-    # Auto-reload on code changes: set FLASK_DEBUG=1 in .env (see .env.example) or `dev-flask.bat`
-    # Use 0 in production. With the reloader, only the Werkzeug worker runs schedulers (not the parent watch process)
-    use_flask_reloader = _env_truthy("FLASK_DEBUG", "0")
+    # Auto-reload: FLASK_DEBUG=1 enables the debugger. Werkzeug's use_reloader is optional — when `npm run dev`
+    # runs Flask under nodemon, set FLASK_SKIP_RELOADER=1 so only nodemon restarts the process (avoids double
+    # reloaders and flaky exits on Windows). Plain `python app.py` keeps the built-in reloader when FLASK_DEBUG=1.
+    flask_debug = _env_truthy("FLASK_DEBUG", "0")
+    use_flask_reloader = flask_debug and not _env_truthy("FLASK_SKIP_RELOADER", "0")
     worker_process = os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not use_flask_reloader
 
     from scheduler import start_scheduler, stop_scheduler
@@ -1392,12 +1409,14 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", "5000"))
     if use_flask_reloader:
-        logger.info(f"Aeloria on port {port} (dev: auto-reload when FLASK_DEBUG=1)")
+        logger.info(f"Aeloria on port {port} (dev: Werkzeug reloader + FLASK_DEBUG=1)")
+    elif flask_debug:
+        logger.info(f"Aeloria on port {port} (dev: FLASK_DEBUG=1, nodemon or single process)")
     else:
         logger.info(f"Aeloria starting on port {port}...")
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=use_flask_reloader,
+        debug=flask_debug,
         use_reloader=use_flask_reloader,
     )

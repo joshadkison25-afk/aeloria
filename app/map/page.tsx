@@ -1,10 +1,6 @@
-import { MapErrorBoundary } from '@/components/MapErrorBoundary';
-import StrategyMap from '@/components/StrategyMap';
+import { redirect } from 'next/navigation';
 
+/** Product map is the city-pin atlas (`/worldmap`) only. */
 export default function MapPage() {
-  return (
-    <MapErrorBoundary kind="strategy">
-      <StrategyMap />
-    </MapErrorBoundary>
-  );
+  redirect('/worldmap');
 }
