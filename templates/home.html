@@ -5392,7 +5392,7 @@ async function sendSeer(input) {
     const data = await response.json();
     const currentSeer = getSeerState(worldState || {});
     const destination = inferScope(input, worldState || {}) || input;
-    const travelLead = currentSeer.status === 'travelling'
+    const travelLead = /travel/i.test(currentSeer.status)
       ? `I am already on the road from ${currentSeer.location} toward ${currentSeer.destination}.`
       : `I depart from ${currentSeer.location}.`;
     showToast(`Seer intent queued (${data.pending_count || 0})`);

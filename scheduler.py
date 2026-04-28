@@ -1989,6 +1989,72 @@ def _clear_pending_lore():
         json.dump([], f)
 
 
+def _apply_pending_lore_mechanical(state: dict, pending_lore: list) -> None:
+    """Apply queued `/api/lore` and god-queue text after normalization.
+
+    Runs once at end of `run_tick` so `_infer_seer_journey` / `_normalize_seer_journey` inside
+    `_canonicalize_world_state` cannot overwrite player Seer orders. Applies on both LLM success
+    and fallback ticks.
+    """
+    if not state or not pending_lore:
+        return
+
+    seer = state.get("seer_journey")
+    if not isinstance(seer, dict):
+        seer = {}
+        state["seer_journey"] = seer
+
+    recent = state.get("recent_events")
+    if not isinstance(recent, list):
+        recent = []
+        state["recent_events"] = recent
+
+    for item in pending_lore:
+        if not isinstance(item, dict):
+            continue
+        text = (item.get("text") or "").strip()
+        if not text:
+            continue
+
+        if text.upper().startswith("[SEER MOVEMENT]"):
+            # Same shape as home.html sendSeer(): "... input. The Seer must travel ..."
+            bracket = text.find("]")
+            rest = text[bracket + 1 :].strip() if bracket >= 0 else text
+            user_cmd = rest.split(". The Seer must", 1)[0].strip()[:500]
+            if not user_cmd:
+                user_cmd = rest[:500]
+            loc = (
+                (seer.get("current_location") or seer.get("location") or "Unknown road").strip()
+            )
+            seer["location"] = loc
+            seer["current_location"] = loc
+            seer["destination"] = user_cmd[:240]
+            seer["purpose"] = user_cmd
+            seer["status"] = "traveling"
+            tr = int(seer.get("ticks_remaining") or 2)
+            seer["ticks_remaining"] = max(1, min(3, tr if tr else 2))
+            seer["last_outcome"] = (
+                "I set out under Your word—this road and this aim are mine for the turning of the day."
+            )
+            logger.info("Applied player Seer movement from pending_lore: %.120s", user_cmd)
+            continue
+
+        if text.upper().startswith("[DREAM SENT]"):
+            recent.insert(
+                0,
+                {"region": "Dream", "text": text[:400], "impact": "low"},
+            )
+            state["recent_events"] = recent[:15]
+            continue
+
+        # God interventions, file drops, conversations — surface as whispers for the local tick
+        recent.insert(
+            0,
+            {"region": "Divine whisper", "text": text[:500], "impact": "low"},
+        )
+        state["recent_events"] = recent[:15]
+
+
 def _save_history(state):
     HISTORY_DIR.mkdir(exist_ok=True)
     filename = f"{datetime.now().strftime('%Y-%m-%d')}_tick_{state['tick']}.json"
@@ -6746,14 +6812,22 @@ _OPENAI_TICK_TOOL_CONTINUITY = (
 def _build_simulation_user_content(prev_state, pending_lore) -> str:
     """Single tick user prompt for both Claude and OpenAI (no provider-specific lines here)."""
     pending_text = ""
+    pending_must_seer = ""
     if pending_lore:
         entries = "\n---\n".join(item.get("text", "") for item in pending_lore)
         pending_text = f"\n\nGOD LORE INJECTED THIS TICK:\n{entries}"
+        pending_must_seer = (
+            "\nYou MUST fold the GOD LORE INJECTED block into this tick's simulation. "
+            "If it includes a Seer movement command, update `seer_journey` (location, destination, "
+            "status, purpose, ticks_remaining, last_outcome) so the Seer physically acts on it; "
+            "do not ignore player-queued Seer orders.\n"
+        )
 
     if prev_state:
         return (
             f"Previous world state:\n{json.dumps(prev_state, indent=2)}"
             f"{pending_text}\n\n"
+            f"{pending_must_seer}"
             "Simulate the next day.\n"
             "Carry forward persistent events.\n"
             "Update each active event's duration, severity, stage, and trend.\n"
@@ -6786,6 +6860,7 @@ def _build_simulation_user_content(prev_state, pending_lore) -> str:
         "relationship trust/hostility, faction knowledge limits, remembered events, an initial Seer state, ruler archetypes, "
         "and the earliest seeds of belief and interpretation."
         f"{pending_text}"
+        f"{pending_must_seer}"
     )
 
 
@@ -7265,6 +7340,7 @@ def run_tick():
                 )
                 prev_state = {}
             pending_lore = _load_pending_lore()
+            pending_lore_snapshot = list(pending_lore) if pending_lore else []
 
             _prov = resolve_aeloria_llm_provider()
             logger.info("Aeloria LLM provider: %s", _prov)
@@ -7325,6 +7401,8 @@ def run_tick():
             _ensure_character_portraits(new_state)
             _ensure_codex_images(new_state)
             new_state = _canonicalize_world_state(prev_state, new_state)
+            # After canonicalize so _infer_seer_journey does not stomp player-queued Seer movement
+            _apply_pending_lore_mechanical(new_state, pending_lore)
             _save_world_state(new_state)
             _save_history(new_state)
             _clear_pending_lore()
@@ -7347,6 +7425,7 @@ def run_tick():
             if chronicle:
                 new_state["chronicle"] = chronicle
                 new_state = _canonicalize_world_state(prev_state, new_state)
+                _apply_pending_lore_mechanical(new_state, pending_lore_snapshot)
                 _save_world_state(new_state)
 
             _generate_tick_voice(chronicle, new_state["tick"])

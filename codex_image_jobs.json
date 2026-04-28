@@ -418,9 +418,11 @@
     "prompt": "Major lore event illustration for The Clock Moves Without Prophecy: A quiet day passes without fresh divine insight. Existing tensions and political momentum continue shaping Aeloria.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-the-clock-moves-without-prophecy.png",
     "static_path": "/static/illustrations/codex/lore-the-clock-moves-without-prophecy.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 7,
-    "created_at": "2026-04-26T11:00:36.017107"
+    "created_at": "2026-04-26T11:00:36.017107",
+    "last_attempt_at": "2026-04-28T03:40:17.028173",
+    "error": ""
   },
   {
     "key": "lore:Stabilization: Dreadwind Isles \u2014 Open Sea",
@@ -440,8 +442,23 @@
     "prompt": "Major lore event illustration for Stabilization: Groth Clans \u2014 Groth: Groth Clans committed resources to stabilize Groth.",
     "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\lore-stabilization-groth-clans-groth.png",
     "static_path": "/static/illustrations/codex/lore-stabilization-groth-clans-groth.png",
-    "status": "queued",
+    "status": "completed",
     "created_tick": 7,
-    "created_at": "2026-04-28T03:23:56.099448"
+    "created_at": "2026-04-28T03:23:56.099448",
+    "last_attempt_at": "2026-04-28T03:55:04.713071",
+    "error": ""
+  },
+  {
+    "key": "place:Divine whisper",
+    "kind": "place",
+    "name": "Divine whisper",
+    "prompt": "Location illustration for Divine whisper: Across all of Aeloria, a supernatural sign has appeared: blood moon over groth. Factions scramble to interpret its meaning.",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-divine-whisper.png",
+    "static_path": "/static/illustrations/codex/place-divine-whisper.png",
+    "status": "completed",
+    "created_tick": 9,
+    "created_at": "2026-04-28T03:47:40.551184",
+    "last_attempt_at": "2026-04-28T03:48:19.726669",
+    "error": ""
   }
 ]
