@@ -96,4 +96,8 @@ def _send_email(world_state: dict, chronicle: str):
 def _log_to_console(world_state: dict):
     logger.info(f"=== TICK {world_state.get('tick')} | {world_state.get('world_date')} ===")
     for event in world_state.get("recent_events", [])[:3]:
-        logger.info(f"  [{event['region']}] {event['text']}")
+        if not isinstance(event, dict):
+            continue
+        region = event.get("region") or event.get("type") or "?"
+        text   = event.get("text") or event.get("description") or event.get("summary") or str(event)
+        logger.info(f"  [{region}] {text}")

@@ -6809,6 +6809,141 @@ _OPENAI_TICK_TOOL_CONTINUITY = (
 )
 
 
+_STRIP_KEYS = {
+    # Internal engine bookkeeping — never needed by LLM
+    "_engine_tick", "_death_lifecycle_tick", "_house_lifecycle_tick", "_faction_lifecycle_tick",
+    "decision_log", "tick_lifecycle", "faction_lifecycle_report",
+    "siege_grain_drain_by_faction", "siege_import_mult", "siege_stress_add",
+    "war_targets", "war_outcomes",
+    "economic_disruption_price_mult", "sabotage_price_stress", "military_weather_attrition_mult",
+    "engine_character_deaths", "pending_character_deaths",
+    # Image / portrait state — URL mappings useless to LLM
+    "portrait_cache", "codex_images",
+    # Verbose per-tick decision logs already summarised in decisions[]
+    "military_faction_decisions", "economic_pressure_decisions",
+    "diplomatic_faction_decisions", "intrigue_decisions",
+    "economic_pressure_decisions",
+}
+
+_KEEP_CORE_ROLES = {
+    "leader", "heir", "ruler", "general", "spymaster", "admiral",
+    "warlord", "high priest", "regent", "champion", "chancellor",
+}
+
+
+def _trim_world_for_llm(state: dict) -> dict:
+    """Return a slimmed copy of world state that fits inside LLM context windows.
+
+    Targets ~80-100k tokens vs the raw ~448k. Full state is preserved on disk;
+    only the slice sent to the LLM is reduced.
+    """
+    import copy
+
+    out: dict = {}
+
+    for key, val in state.items():
+        if key in _STRIP_KEYS:
+            continue
+
+        # Skip empty collections — zero information value
+        if isinstance(val, (list, dict)) and not val:
+            continue
+
+        if key == "tick_history":
+            out[key] = _trim_tick_history(val)
+        elif key == "house_characters":
+            out[key] = _trim_house_characters(val)
+        elif key == "spy_networks":
+            out[key] = _trim_spy_networks(val)
+        elif key == "intrigue_actions":
+            # Keep only the last 5 actions
+            out[key] = val[-5:] if isinstance(val, list) else val
+        else:
+            out[key] = val
+
+    return out
+
+
+def _trim_tick_history(history: list) -> list:
+    """Keep last 3 ticks; strip verbose sub-reports from each."""
+    _TICK_STRIP = {
+        "military_faction_decisions", "economic_pressure_decisions",
+        "diplomatic_faction_decisions", "family_politics", "legitimacy_report",
+        "dynastic_report", "faction_lifecycle_report", "tributary_report",
+        "faction_lifecycle_tick",
+    }
+    recent = history[-3:] if len(history) > 3 else history
+    trimmed = []
+    for entry in recent:
+        if not isinstance(entry, dict):
+            trimmed.append(entry)
+            continue
+        slim = {k: v for k, v in entry.items() if k not in _TICK_STRIP}
+        # Trim decisions to action + summary only
+        if "decisions" in slim and isinstance(slim["decisions"], list):
+            slim["decisions"] = [
+                {"faction": d.get("faction"), "action": d.get("action"), "summary": d.get("summary")}
+                for d in slim["decisions"]
+            ]
+        trimmed.append(slim)
+    return trimmed
+
+
+def _trim_house_characters(chars: list) -> list:
+    """Keep top-50 by influence + all key-role characters; strip redundant relationship data."""
+    if not chars:
+        return chars
+
+    # Always keep key-role characters regardless of score
+    key_role = [c for c in chars if isinstance(c, dict)
+                and (c.get("coreRole") or "").lower().strip() in _KEEP_CORE_ROLES]
+    key_names = {c.get("name") for c in key_role}
+
+    # Top 50 by influence score, excluding already-kept key roles
+    others = sorted(
+        [c for c in chars if isinstance(c, dict) and c.get("name") not in key_names],
+        key=lambda c: int(c.get("influenceScore", 0)),
+        reverse=True,
+    )[:50]
+
+    selected = key_role + others
+    result = []
+    for c in selected:
+
+        slim = {k: v for k, v in c.items() if k != "relationship_signals"}
+
+        # Trim full relationships dict → top 4 by emotional magnitude
+        rels = slim.get("relationships")
+        if isinstance(rels, dict) and len(rels) > 4:
+            def _importance(pair):
+                trust = float(pair[1].get("trust", 50))
+                fear  = float(pair[1].get("fear",  0))
+                resp  = float(pair[1].get("respect", 50))
+                return abs(trust - 50) + fear + abs(resp - 50)
+            top = sorted(rels.items(), key=_importance, reverse=True)[:4]
+            slim["relationships"] = dict(top)
+
+        # Cap arrays
+        if isinstance(slim.get("recentActions"), list):
+            slim["recentActions"] = slim["recentActions"][-3:]
+        if isinstance(slim.get("memory"), list):
+            slim["memory"] = slim["memory"][-5:]
+        if isinstance(slim.get("event_pressure"), list):
+            slim["event_pressure"] = slim["event_pressure"][-2:]
+
+        result.append(slim)
+    return result
+
+
+def _trim_spy_networks(networks: list) -> list:
+    """Keep only the essential fields per spy network entry."""
+    _KEEP = {"faction_id", "target_faction", "network_strength"}
+    return [
+        {k: v for k, v in n.items() if k in _KEEP}
+        for n in networks if isinstance(n, dict)
+    ]
+
+
 def _build_simulation_user_content(prev_state, pending_lore) -> str:
     """Single tick user prompt for both Claude and OpenAI (no provider-specific lines here)."""
     pending_text = ""
@@ -6825,7 +6960,7 @@ def _build_simulation_user_content(prev_state, pending_lore) -> str:
 
     if prev_state:
         return (
-            f"Previous world state:\n{json.dumps(prev_state, indent=2)}"
+            f"Previous world state:\n{json.dumps(_trim_world_for_llm(prev_state), indent=2)}"
             f"{pending_text}\n\n"
             f"{pending_must_seer}"
             "Simulate the next day.\n"
@@ -6986,7 +7121,10 @@ def _generate_narrative_synopsis(state):
         current_tick = state.get("tick", 0)
         world_date = state.get("world_date", "")
         tensions = state.get("active_tensions", [])
-        tension_text = "\n".join(f"- {item['factions']}: {item['description']}" for item in tensions)
+        tension_text = "\n".join(
+            f"- {item.get('factions', item.get('faction', '?'))}: {item.get('description', item.get('summary', str(item)))}"
+            for item in tensions if isinstance(item, dict)
+        )
 
         prompt = f"""You are the narrator of Aeloria, a living fantasy world now in tick {current_tick} ({world_date}).
 
@@ -7314,6 +7452,9 @@ def updateWorld(world, prev_world=None):
     from family_politics import run_family_politics
     run_family_politics(world)
 
+    from character_agency import run_character_agency
+    run_character_agency(world)
+
     from legitimacy_system import run_legitimacy_system
     run_legitimacy_system(world)
 
@@ -7398,8 +7539,9 @@ def run_tick():
                 new_state["recent_events"] = [fallback_note] + existing_recent[:11]
             updateWorld(new_state, prev_world=prev_state)
             new_state = _canonicalize_world_state(prev_state, new_state)
-            _ensure_character_portraits(new_state)
-            _ensure_codex_images(new_state)
+            if not os.getenv("PAUSE_IMAGE_GEN", "0").strip().lower() in ("1", "true", "yes"):
+                _ensure_character_portraits(new_state)
+                _ensure_codex_images(new_state)
             new_state = _canonicalize_world_state(prev_state, new_state)
             # After canonicalize so _infer_seer_journey does not stomp player-queued Seer movement
             _apply_pending_lore_mechanical(new_state, pending_lore)

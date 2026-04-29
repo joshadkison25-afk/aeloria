@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 // ============================================================================
 // Types
@@ -873,8 +873,92 @@ function isEmbeddedInParent(): boolean {
   return typeof window !== 'undefined' && window.parent !== window;
 }
 
+interface PinMarkerProps {
+  pin: LocationPin;
+  left: number; top: number;
+  color: string;
+  isNew: boolean; isHov: boolean;
+  hasConflict: boolean;
+  portrait: string | undefined;
+  pinPx: number; labelPx: number;
+  showPinLabels: boolean;
+  zoomDisplay: number;
+  embedUI: boolean;
+  onMouseEnter: (id: string, e: React.MouseEvent) => void;
+  onMouseLeave: () => void;
+  onEdit: (pin: LocationPin) => void;
+  onDelete: (id: string) => void;
+}
+
+const PinMarker = React.memo(function PinMarker({
+  pin, left, top, color, isNew, isHov, hasConflict, portrait,
+  pinPx, labelPx, showPinLabels, zoomDisplay, embedUI,
+  onMouseEnter, onMouseLeave, onEdit, onDelete,
+}: PinMarkerProps) {
+  return (
+    <div
+      className={`wme-pin${isNew ? ' wme-pin--new' : ''}${isHov ? ' wme-pin--hov' : ''}`}
+      style={{ position: 'absolute', left, top, transform: 'translate(-50%, -100%)', zIndex: isHov ? 30 : 10, pointerEvents: 'auto' }}
+      onMouseEnter={(e) => onMouseEnter(pin.id, e)}
+      onMouseLeave={onMouseLeave}
+    >
+      {hasConflict && (
+        <div className="wme-conflict-ring" style={{ width: pinPx + 10, height: pinPx + 10, borderColor: '#f59e0b' }} />
+      )}
+      <button
+        type="button"
+        className="wme-pin-btn"
+        onClick={(e) => { e.stopPropagation(); if (!embedUI) onEdit(pin); }}
+        onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); if (!embedUI) onDelete(pin.id); }}
+        title={embedUI ? pin.label : `${pin.label} — right-click to delete`}
+        style={{
+          width: pinPx, height: pinPx,
+          filter: [
+            `drop-shadow(0 0 ${5 / zoomDisplay}px ${color}dd)`,
+            `drop-shadow(0 0 ${10 / zoomDisplay}px ${color}55)`,
+            `drop-shadow(0 ${2 / zoomDisplay}px ${5 / zoomDisplay}px rgba(0,0,0,0.95))`,
+          ].join(' '),
+          transition: 'filter 0.5s ease',
+        }}
+      >
+        <PinIcon type={pin.type} color={color} px={pinPx} />
+      </button>
+      {portrait && zoomDisplay >= 1.2 && pin.type === 'faction_capital' && (
+        <img
+          src={`/api/game-static${portrait.startsWith('/') ? portrait : `/${portrait}`}`}
+          alt=""
+          className="wme-portrait"
+          style={{ width: pinPx + 4, height: pinPx + 4, borderColor: color }}
+        />
+      )}
+      {showPinLabels && (
+        <span
+          className="wme-pin-label"
+          style={{
+            color, fontSize: labelPx, marginTop: 2 / zoomDisplay,
+            letterSpacing: `${0.06 / zoomDisplay}em`,
+            textShadow: [
+              `0 0 ${6 / zoomDisplay}px ${color}99`,
+              `0 ${1 / zoomDisplay}px ${3 / zoomDisplay}px #000`,
+              `0 0 ${12 / zoomDisplay}px rgba(0,0,0,0.9)`,
+            ].join(', '),
+            transition: 'color 0.5s ease',
+          }}
+        >
+          {pin.label}
+        </span>
+      )}
+    </div>
+  );
+});
+
+import React from 'react';
+
 export default function WorldMapEditor() {
   const embedReadyPostedRef = useRef(false);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cursorRafRef = useRef<number | null>(null);
+  const showGridRef = useRef(true);
   /** Flask home iframe passes `?embed=1` — map only, no toolbar/sidebar/toasts, read-only pins. */
   const [embedUI, setEmbedUI] = useState(false);
 
@@ -1086,6 +1170,12 @@ export default function WorldMapEditor() {
     if (embedUI) setShowGrid(false);
   }, [embedUI]);
 
+  useEffect(() => { showGridRef.current = showGrid; }, [showGrid]);
+
+  useEffect(() => {
+    return () => { if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current); };
+  }, []);
+
   // -------------------------------------------------------------------------
   // Window resize
   // -------------------------------------------------------------------------
@@ -1140,10 +1230,13 @@ export default function WorldMapEditor() {
   // -------------------------------------------------------------------------
   // Live map-state refresh
   // -------------------------------------------------------------------------
+  const embedUIRef = useRef(embedUI);
+  useEffect(() => { embedUIRef.current = embedUI; }, [embedUI]);
+
   const refreshMapState = useCallback(async () => {
     try {
       const res = await fetch('/api/map-state');
-      if (!res.ok) return;
+      if (!res.ok) { setSseStatus('offline'); return; }
       const data = await res.json() as {
         pins: LivePin[];
         factionPower: FactionPowerEntry[];
@@ -1192,7 +1285,7 @@ export default function WorldMapEditor() {
         setSeerOnMap(null);
       }
 
-      if (!embedUI) {
+      if (!embedUIRef.current) {
         const namesNow = (data.activeEvents ?? []).map((e) => e.name as string);
         const prevNames = prevActiveEventNamesRef.current;
         if (prevNames.length > 0) {
@@ -1221,8 +1314,8 @@ export default function WorldMapEditor() {
       } else {
         prevActiveEventNamesRef.current = (data.activeEvents ?? []).map((e) => e.name as string);
       }
-    } catch { /* offline */ }
-  }, [embedUI]);
+    } catch { setSseStatus('offline'); }
+  }, []);
 
   // SSE subscription
   useEffect(() => {
@@ -1310,7 +1403,7 @@ export default function WorldMapEditor() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pendingClick]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pendingClick, fitToScreen]);
 
   // -------------------------------------------------------------------------
   // Mouse: drag-to-pan + click-to-place
@@ -1359,15 +1452,21 @@ export default function WorldMapEditor() {
       }
     }
 
-    // Cursor cell indicator
-    const pos = screenToImgPct(e.clientX, e.clientY);
-    if (pos) {
-      setCursorPct(pos);
-      if (showGrid) setCursorCell(getCellLabel(pos.x, pos.y));
-      else setCursorCell(null);
-    } else {
-      setCursorPct(null);
-      setCursorCell(null);
+    // Cursor cell indicator — throttled to one state update per animation frame
+    const cx = e.clientX;
+    const cy = e.clientY;
+    if (!cursorRafRef.current) {
+      cursorRafRef.current = requestAnimationFrame(() => {
+        cursorRafRef.current = null;
+        const pos = screenToImgPct(cx, cy);
+        if (pos) {
+          setCursorPct(pos);
+          setCursorCell(showGridRef.current ? getCellLabel(pos.x, pos.y) : null);
+        } else {
+          setCursorPct(null);
+          setCursorCell(null);
+        }
+      });
     }
   }
 
@@ -1399,6 +1498,13 @@ export default function WorldMapEditor() {
   // -------------------------------------------------------------------------
   const handleSave = useCallback(
     async (partial: Omit<LocationPin, 'id' | 'createdAt'>) => {
+      const _errToast = (msg: string) => {
+        const now = Date.now();
+        setToasts((prev) => [...prev, {
+          id: `toast_err_${now}`, header: 'ERROR', body: msg,
+          severity: 5, color: '#e05c5c', expires: now + 5000,
+        }].slice(-4));
+      };
       if (editingPin) {
         const res = await fetch('/api/locations', {
           method: 'PATCH',
@@ -1408,6 +1514,9 @@ export default function WorldMapEditor() {
         if (res.ok) {
           const updated: LocationPin = await res.json();
           setPins((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+        } else {
+          _errToast('Failed to save pin');
+          return;
         }
       } else {
         const res = await fetch('/api/locations', {
@@ -1419,7 +1528,10 @@ export default function WorldMapEditor() {
           const created: LocationPin = await res.json();
           setPins((prev) => [...prev, created]);
           setFlashPinId(created.id);
-          setTimeout(() => setFlashPinId(null), 900);
+          flashTimeoutRef.current = setTimeout(() => setFlashPinId(null), 900);
+        } else {
+          _errToast('Failed to create pin');
+          return;
         }
       }
       setPendingClick(null);
@@ -1429,7 +1541,15 @@ export default function WorldMapEditor() {
   );
 
   const handleDelete = useCallback(async (id: string) => {
-    await fetch(`/api/locations?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    const res = await fetch(`/api/locations?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const now = Date.now();
+      setToasts((prev) => [...prev, {
+        id: `toast_err_${now}`, header: 'ERROR', body: 'Failed to delete pin',
+        severity: 5, color: '#e05c5c', expires: now + 5000,
+      }].slice(-4));
+      return;
+    }
     setPins((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
@@ -1439,15 +1559,29 @@ export default function WorldMapEditor() {
     setShowSidebar(false);
   }, []);
 
+  const handlePinMouseEnter = useCallback((id: string, e: React.MouseEvent) => {
+    setHoveredPin(id);
+    const wr = wrapperRef.current?.getBoundingClientRect();
+    if (wr) {
+      const pin = pinsRef.current.find((p) => p.id === id);
+      if (pin) setTooltip({ pin, px: e.clientX - wr.left, py: e.clientY - wr.top });
+    }
+  }, []);
+  const handlePinMouseLeave = useCallback(() => { setHoveredPin(null); setTooltip(null); }, []);
+
+  // Keep a ref to pins so the hover callback can look up the pin without being in its deps
+  const pinsRef = useRef<LocationPin[]>([]);
+  useEffect(() => { pinsRef.current = pins; }, [pins]);
+
   // -------------------------------------------------------------------------
   // Derived
   // -------------------------------------------------------------------------
-  const displayedPins = pins.filter((p) => {
+  const displayedPins = useMemo(() => pins.filter((p) => {
     if (filterType    && p.type    !== filterType)    return false;
     if (filterFaction && p.faction !== filterFaction) return false;
     if (zoomDisplay < (PIN_ZOOM_THRESHOLD[p.type] ?? 0))  return false;
     return true;
-  });
+  }), [pins, filterType, filterFaction, zoomDisplay]);
 
   const gridSize = GRID_SIZES[gridSizeIdx];
   const pendingCellLabel = pendingClick
@@ -1657,98 +1791,27 @@ export default function WorldMapEditor() {
               const effectiveFaction = playbackMode
                 ? getPlaybackFaction(pin)
                 : (liveOwnership[pin.id] ?? pin.faction);
-              const color      = factionColor(effectiveFaction);
-              const left       = (pin.x / 100) * imgSize.w;
-              const top        = (pin.y / 100) * imgSize.h;
-              const isNew      = pin.id === flashPinId;
-              const isHov      = pin.id === hoveredPin;
-              const hasConflict = !playbackMode && !!conflictEvents[pin.id];
-              const portrait    = !playbackMode ? portraits[pin.id] : undefined;
-
               return (
-                <div
+                <PinMarker
                   key={pin.id}
-                  className={`wme-pin${isNew ? ' wme-pin--new' : ''}${isHov ? ' wme-pin--hov' : ''}`}
-                  style={{
-                    position: 'absolute',
-                    left,
-                    top,
-                    transform: 'translate(-50%, -100%)',
-                    zIndex: isHov ? 30 : 10,
-                    pointerEvents: 'auto',
-                  }}
-                  onMouseEnter={(e) => {
-                    setHoveredPin(pin.id);
-                    const wr = wrapperRef.current?.getBoundingClientRect();
-                    if (wr) setTooltip({ pin, px: e.clientX - wr.left, py: e.clientY - wr.top });
-                  }}
-                  onMouseLeave={() => { setHoveredPin(null); setTooltip(null); }}
-                >
-                  {/* Conflict ring */}
-                  {hasConflict && (
-                    <div
-                      className="wme-conflict-ring"
-                      style={{ width: PIN_PX + 10, height: PIN_PX + 10, borderColor: '#f59e0b' }}
-                    />
-                  )}
-
-                  <button
-                    type="button"
-                    className="wme-pin-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!embedUI) handleEdit(pin);
-                    }}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (!embedUI) handleDelete(pin.id);
-                    }}
-                    title={embedUI ? pin.label : `${pin.label} — right-click to delete`}
-                    style={{
-                      width: PIN_PX,
-                      height: PIN_PX,
-                      filter: [
-                        `drop-shadow(0 0 ${5 / zoomDisplay}px ${color}dd)`,
-                        `drop-shadow(0 0 ${10 / zoomDisplay}px ${color}55)`,
-                        `drop-shadow(0 ${2 / zoomDisplay}px ${5 / zoomDisplay}px rgba(0,0,0,0.95))`,
-                      ].join(' '),
-                      transition: 'filter 0.5s ease',
-                    }}
-                  >
-                    <PinIcon type={pin.type} color={color} px={PIN_PX} />
-                  </button>
-
-                  {/* Leader portrait on capitals */}
-                  {portrait && zoomDisplay >= 1.2 && pin.type === 'faction_capital' && (
-                    <img
-                      src={`/api/game-static${portrait.startsWith('/') ? portrait : `/${portrait}`}`}
-                      alt=""
-                      className="wme-portrait"
-                      style={{ width: PIN_PX + 4, height: PIN_PX + 4, borderColor: color }}
-                    />
-                  )}
-
-                  {showPinLabels && (
-                    <span
-                      className="wme-pin-label"
-                      style={{
-                        color,
-                        fontSize: LABEL_PX,
-                        marginTop: 2 / zoomDisplay,
-                        letterSpacing: `${0.06 / zoomDisplay}em`,
-                        textShadow: [
-                          `0 0 ${6 / zoomDisplay}px ${color}99`,
-                          `0 ${1 / zoomDisplay}px ${3 / zoomDisplay}px #000`,
-                          `0 0 ${12 / zoomDisplay}px rgba(0,0,0,0.9)`,
-                        ].join(', '),
-                        transition: 'color 0.5s ease',
-                      }}
-                    >
-                      {pin.label}
-                    </span>
-                  )}
-                </div>
+                  pin={pin}
+                  left={(pin.x / 100) * imgSize.w}
+                  top={(pin.y / 100) * imgSize.h}
+                  color={factionColor(effectiveFaction)}
+                  isNew={pin.id === flashPinId}
+                  isHov={pin.id === hoveredPin}
+                  hasConflict={!playbackMode && !!conflictEvents[pin.id]}
+                  portrait={!playbackMode ? portraits[pin.id] : undefined}
+                  pinPx={PIN_PX}
+                  labelPx={LABEL_PX}
+                  showPinLabels={showPinLabels}
+                  zoomDisplay={zoomDisplay}
+                  embedUI={embedUI}
+                  onMouseEnter={handlePinMouseEnter}
+                  onMouseLeave={handlePinMouseLeave}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               );
             })}
 

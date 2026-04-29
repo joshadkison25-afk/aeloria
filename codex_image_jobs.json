@@ -460,5 +460,18 @@
     "created_at": "2026-04-28T03:47:40.551184",
     "last_attempt_at": "2026-04-28T03:48:19.726669",
     "error": ""
+  },
+  {
+    "key": "place:Dream",
+    "kind": "place",
+    "name": "Dream",
+    "prompt": "Location illustration for Dream: [DREAM SENT] High Lord Kaelen Adkison dreams: he is being crowned emporor of all aeloria",
+    "target_file": "C:\\Users\\Josh\\Desktop\\aeloria\\static\\illustrations\\codex\\place-dream.png",
+    "static_path": "/static/illustrations/codex/place-dream.png",
+    "status": "completed",
+    "created_tick": 12,
+    "created_at": "2026-04-28T12:06:45.375486",
+    "last_attempt_at": "2026-04-28T12:10:54.935695",
+    "error": ""
   }
 ]
