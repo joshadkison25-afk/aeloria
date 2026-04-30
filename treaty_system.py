@@ -9,6 +9,8 @@ from __future__ import annotations
 import hashlib
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 TREATY_TYPES = frozenset({"alliance", "non_aggression", "trade", "military_pact"})
 
 
@@ -348,6 +350,63 @@ def _merge_treaty_tick_history(state: dict) -> None:
             break
 
 
+def _record_treaty_cause(
+    state: dict,
+    treaty: dict,
+    *,
+    decision: str,
+    status: str,
+    breach_event: dict | None = None,
+) -> None:
+    tid = str(treaty.get("treaty_id") or "treaty-unspecified")
+    ttype = str(treaty.get("type") or "treaty")
+    participants = _participants(treaty)
+    actor = participants[0] if participants else "Treaty Order"
+    affected = [*participants, tid]
+    severity = 5
+    confidence = 0.92
+
+    if status == "broken":
+        breach_event = breach_event or {}
+        actor = str(breach_event.get("breacher") or treaty.get("breached_by") or actor)
+        victim = str(breach_event.get("victim") or "")
+        kind = str(breach_event.get("kind") or "breach")
+        pressure = (
+            f"treaty breach; type={ttype}; treaty_id={tid}; breach={kind}; "
+            f"victim={victim or 'unknown'}; world_treaty_order={state.get('world_treaty_order', 100)}"
+        )
+        belief = "treaty partners judge the breach through trust and reputation"
+        outcome = (
+            f"{actor} broke {ttype} treaty {tid}"
+            + (f" with {victim}" if victim else "")
+            + "; trust and diplomatic standing fell."
+        )
+        severity = 10
+        decision = decision or "break_treaty"
+    else:
+        pressure = (
+            f"treaty duration elapsed; type={ttype}; treaty_id={tid}; "
+            f"participants={', '.join(participants)}"
+        )
+        belief = "formal obligations end when duration expires"
+        outcome = f"{ttype} treaty {tid} expired between {', '.join(participants) or 'unknown parties'}."
+        decision = decision or "expire_treaty"
+
+    record_cause(
+        state,
+        domain="treaty",
+        actor=actor,
+        pressure=pressure,
+        belief=belief,
+        decision=decision,
+        outcome=outcome,
+        affected=affected,
+        severity=severity,
+        confidence=confidence,
+        source="treaty_system",
+    )
+
+
 def run_treaty_system(state: dict) -> None:
     """
     Update treaty statuses, expire old treaties, apply breach consequences.
@@ -407,6 +466,7 @@ def run_treaty_system(state: dict) -> None:
                     "trust_changes": [],
                 }
             )
+            _record_treaty_cause(state, t, decision="expire_treaty", status="expired")
             continue
 
         parts = set(_participants(t))
@@ -443,6 +503,14 @@ def run_treaty_system(state: dict) -> None:
                     "status": "broken",
                     "trust_changes": tc,
                 }
+            )
+            breach_event = tc[0].get("breach_event") if tc and isinstance(tc[0], dict) else None
+            _record_treaty_cause(
+                state,
+                t,
+                decision="break_treaty",
+                status="broken",
+                breach_event=breach_event,
             )
             break
 

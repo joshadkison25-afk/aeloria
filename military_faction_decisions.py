@@ -11,6 +11,8 @@ from typing import Any, Dict, List
 
 from economy_simulation import army_manpower_total, list_faction_ids
 from econ_trade_routes import _is_at_war  # type: ignore[attr-defined]
+from engine.beliefs import belief_summary, dominant_belief
+from engine.causality import record_cause
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:
@@ -318,6 +320,60 @@ def _merge_military_faction_decisions_history(state: dict) -> None:
             break
 
 
+def _military_decision_severity(decision: dict) -> int:
+    action = decision.get("action", "")
+    band = decision.get("priority_tier", "")
+    if action == "retreat_to_safety":
+        return 12
+    if action == "attack_weaker_target":
+        return 11
+    if action == "reinforce_siege":
+        return 10
+    if action == "protect_supply_lines":
+        return 8
+    if action == "defend_key_regions":
+        return 7
+    return 4 if band == "defense" else 5
+
+
+def _record_military_causes(state: dict, decisions: List[dict]) -> None:
+    for decision in decisions:
+        action = decision.get("action", "")
+        reason = decision.get("reason", "")
+        if action == "hold_position" and reason in ("peace", "assess"):
+            continue
+        faction = decision.get("faction", "")
+        if not faction:
+            continue
+
+        meta = decision.get("meta") or {}
+        affected = [faction]
+        for key in ("target_faction", "siege_location", "weakest_enemy"):
+            if meta.get(key):
+                affected.append(str(meta[key]))
+
+        pressure = (
+            f"{decision.get('priority_tier', 'military')} military pressure; "
+            f"reason={reason}; "
+            f"supply={meta.get('min_supply_level', meta.get('worst_supply_status', 'unknown'))}; "
+            f"strength_ratio={meta.get('strength_ratio_vs_weakest', 'unknown')}"
+        )
+        belief = belief_summary(dominant_belief(state, faction))
+        record_cause(
+            state,
+            domain="military",
+            actor=faction,
+            pressure=pressure,
+            belief=belief,
+            decision=action,
+            outcome=decision.get("summary", ""),
+            affected=affected,
+            severity=_military_decision_severity(decision),
+            confidence=0.84,
+            source="military_faction_decisions",
+        )
+
+
 def run_military_faction_decisions(state: dict) -> None:
     """Populate state['military_faction_decisions'] with one record per faction."""
     t = int(state.get("tick", 0) or 0)
@@ -358,6 +414,7 @@ def run_military_faction_decisions(state: dict) -> None:
             }
         )
     state["military_faction_decisions"] = out
+    _record_military_causes(state, out)
     _merge_military_faction_decisions_history(state)
 
 

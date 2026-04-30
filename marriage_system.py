@@ -18,6 +18,8 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 __all__ = ["run_marriage_system", "DEFAULT_MARRIAGE_CONFIG"]
 
 DEFAULT_MARRIAGE_CONFIG = {
@@ -356,6 +358,43 @@ def _snapshot(ch: dict) -> dict:
     }
 
 
+def _record_marriage_cause(state: dict, event: dict, tick: int) -> None:
+    spouse_a = event.get("spouse_a") or {}
+    spouse_b = event.get("spouse_b") or {}
+    effects = event.get("faction_effects") or {}
+    if not isinstance(spouse_a, dict) or not isinstance(spouse_b, dict) or not isinstance(effects, dict):
+        return
+
+    name_a = str(spouse_a.get("name") or "").strip()
+    name_b = str(spouse_b.get("name") or "").strip()
+    facs = [str(f).strip() for f in effects.get("factions", []) if str(f).strip()]
+    actor = facs[0] if facs else str(spouse_a.get("faction") or spouse_b.get("faction") or "Noble Houses")
+    mtype = str(effects.get("type") or "internal")
+    marriage_id = str(effects.get("marriage_id") or "")
+    houses = [str(spouse_a.get("house") or "").strip(), str(spouse_b.get("house") or "").strip()]
+    trust_delta = effects.get("trust_delta", 0)
+    legitimacy = effects.get("dynastic_legitimacy_bump", {})
+    severity = 7 if mtype == "political" and len(set(facs)) > 1 else 5
+
+    record_cause(
+        state,
+        domain="dynasty",
+        actor=actor,
+        pressure=(
+            f"dynastic marriage pressure; type={mtype}; marriage_id={marriage_id}; "
+            f"houses={', '.join(h for h in houses if h)}; trust_delta={trust_delta}; "
+            f"legitimacy_bump={legitimacy}; tick={tick}"
+        ),
+        belief="marriage can convert family ties into legitimacy, trust, and future claims",
+        decision="formalize_marriage",
+        outcome=f"{name_a} and {name_b} marry, binding {', '.join(facs) if facs else 'their houses'} through {mtype} union.",
+        affected=[item for item in [*facs, *houses, marriage_id] if item],
+        severity=severity,
+        confidence=0.9,
+        source="marriage_system",
+    )
+
+
 def _apply_pending(
     state: dict, cfg: dict, tick: int, married: Set[str]
 ) -> List[dict]:
@@ -428,6 +467,8 @@ def run_marriage_system(state: dict) -> None:
     allowed_more = int(cfg.get("max_marriages_per_tick", 1) or 1) - len(events)
     if allowed_more <= 0:
         state["marriage_events"] = events
+        for event in events:
+            _record_marriage_cause(state, event, t)
         for h in reversed(state.get("tick_history", []) or []):
             if h.get("tick") == t:
                 h["marriage_events"] = events
@@ -478,6 +519,8 @@ def run_marriage_system(state: dict) -> None:
         )
 
     state["marriage_events"] = events
+    for event in events:
+        _record_marriage_cause(state, event, t)
     for h in reversed(state.get("tick_history", []) or []):
         if h.get("tick") == t:
             h["marriage_events"] = events

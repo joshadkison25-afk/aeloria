@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Tuple
 
 from economy_simulation import list_faction_ids
 from econ_trade_routes import _is_at_war  # type: ignore[attr-defined]
+from engine.beliefs import belief_summary, dominant_belief
+from engine.causality import record_cause
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:
@@ -359,6 +361,68 @@ def _merge_diplomacy_history(state: dict) -> None:
             break
 
 
+def _diplomacy_decision_severity(decision: dict) -> int:
+    action = decision.get("action", "")
+    band = decision.get("priority_tier", "")
+    if action == "support_foreign_claimant":
+        return 12
+    if action == "demand_tribute":
+        return 11
+    if action == "treaty_exit_intent":
+        return 10
+    if action in ("alliance_proposal", "marriage_diplomacy"):
+        return 8 if band in ("survival", "stability") else 6
+    if action == "treaty_renegotiation":
+        return 7
+    return 4
+
+
+def _record_diplomatic_causes(state: dict, decisions: List[dict]) -> None:
+    for decision in decisions:
+        action = str(decision.get("action") or "")
+        if action in ("quiet_diplomacy", "reaffirm_treaties"):
+            continue
+        faction = str(decision.get("faction") or "").strip()
+        if not faction:
+            continue
+
+        meta = decision.get("meta") or {}
+        affected = [faction]
+        for key in ("target_faction", "partner_faction"):
+            if meta.get(key):
+                affected.append(str(meta[key]))
+        if meta.get("claimant"):
+            affected.append(str(meta["claimant"]))
+        if meta.get("coercion_source_faction"):
+            affected.append(str(meta["coercion_source_faction"]))
+
+        pressure = (
+            f"{decision.get('priority_tier', 'diplomatic')} diplomatic pressure; "
+            f"reason={decision.get('reason', '')}; "
+            f"legitimacy={meta.get('legitimacy', 'unknown')}; "
+            f"stability={meta.get('stability', 'unknown')}; "
+            f"resource_stress={meta.get('resource_stress', 'unknown')}"
+        )
+        record_cause(
+            state,
+            domain="diplomacy",
+            actor=faction,
+            pressure=pressure,
+            belief=belief_summary(dominant_belief(state, faction)),
+            decision=action,
+            outcome=str(decision.get("summary") or ""),
+            affected=list(dict.fromkeys(affected)),
+            hidden=(
+                "Diplomatic posture is shaped by active blackmail coercion."
+                if meta.get("coercion_hold")
+                else ""
+            ),
+            severity=_diplomacy_decision_severity(decision),
+            confidence=0.78,
+            source="diplomatic_faction_decisions",
+        )
+
+
 def run_diplomatic_faction_decisions(state: dict) -> None:
     """Set state['diplomatic_faction_decisions'] to one record per faction (capped)."""
     try:
@@ -423,6 +487,7 @@ def run_diplomatic_faction_decisions(state: dict) -> None:
                 )
         out.append(row)
     state["diplomatic_faction_decisions"] = out
+    _record_diplomatic_causes(state, out)
     _merge_diplomacy_history(state)
 
 

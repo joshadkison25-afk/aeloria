@@ -15,6 +15,8 @@ import hashlib
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 __all__ = [
     "run_marriage_succession_tick",
     "bump_marriage_trust",
@@ -208,6 +210,82 @@ def _merge_dynastic_history(state: dict) -> None:
             break
 
 
+def _record_dynastic_claim_causes(
+    state: dict,
+    claims: List[dict],
+    potential_conflicts: List[dict],
+) -> None:
+    """Record major claim pressure without changing claim resolution."""
+    for claim in claims[:3]:
+        if not isinstance(claim, dict):
+            continue
+        strength = float(claim.get("claim_strength", 0) or 0)
+        trigger = str(claim.get("trigger") or "")
+        if strength < 35 and trigger not in {"succession_pressure", "no_clear_heir"}:
+            continue
+        target = str(claim.get("target_faction") or "")
+        claimant = str(claim.get("claimant") or "Unknown claimant")
+        claimant_house = str(claim.get("claimant_house") or "")
+        ruling_house = str(claim.get("ruling_house") or "")
+        foreign = str(claim.get("foreign_affines_faction") or "")
+        severity = 7
+        if strength >= 55:
+            severity = 10
+        if trigger == "succession_pressure":
+            severity = max(severity, 11)
+        if foreign:
+            severity = max(severity, 12)
+
+        record_cause(
+            state,
+            domain="dynasty",
+            actor=target or claimant_house or "Dynastic Order",
+            pressure=(
+                f"succession claim pressure; target={target}; claimant={claimant}; "
+                f"claimant_house={claimant_house}; ruling_house={ruling_house}; "
+                f"claim_strength={round(strength, 1)}; trigger={trigger}; "
+                f"foreign_affines={foreign or 'none'}"
+            ),
+            belief="lineage proximity, prestige, and faction weakness shape who is seen as a lawful claimant",
+            decision="assert_dynastic_claim",
+            outcome=f"{claimant} gains a {round(strength, 1)} strength claim on {target}.",
+            affected=[item for item in [target, claimant, claimant_house, ruling_house, foreign] if item],
+            severity=severity,
+            confidence=0.87,
+            source="marriage_succession",
+        )
+
+    for conflict in potential_conflicts[:2]:
+        if not isinstance(conflict, dict):
+            continue
+        instability = float(conflict.get("instability", 0) or 0)
+        if instability < 35:
+            continue
+        target = str(conflict.get("target_faction") or "")
+        outcome_type = str(conflict.get("outcome_type") or "succession_pressure")
+        severity = 11 if outcome_type == "contested_succession" else 9
+        if outcome_type == "foreign_intervention":
+            severity = 13
+        record_cause(
+            state,
+            domain="dynasty",
+            actor=target or "Dynastic Order",
+            pressure=(
+                f"dynastic conflict pressure; target={target}; outcome_type={outcome_type}; "
+                f"claim_count={conflict.get('claim_count', 0)}; instability={round(instability, 1)}; "
+                f"top_claim_strength={conflict.get('top_claim_strength', 0)}; "
+                f"second_claim_strength={conflict.get('second_claim_strength', None)}"
+            ),
+            belief="multiple credible heirs create succession instability",
+            decision="flag_dynastic_conflict",
+            outcome=f"{target} faces {outcome_type.replace('_', ' ')} risk from competing claims.",
+            affected=[target],
+            severity=severity,
+            confidence=0.84,
+            source="marriage_succession",
+        )
+
+
 def run_marriage_succession_tick(state: dict) -> None:
     """
     Enrich dynastic data, apply marriage trust, evaluate succession pressure.
@@ -382,11 +460,11 @@ def run_marriage_succession_tick(state: dict) -> None:
             }
         )
 
+    potential = sorted(potential, key=lambda x: -float(x.get("instability", 0) or 0))[:16]
     state["dynastic_report"] = {
         "marriages": marriage_rows,
         "claims": claims_out,
-        "potential_conflicts": sorted(potential, key=lambda x: -float(x.get("instability", 0) or 0))[
-            :16
-        ],
+        "potential_conflicts": potential,
     }
+    _record_dynastic_claim_causes(state, claims_out, potential)
     _merge_dynastic_history(state)

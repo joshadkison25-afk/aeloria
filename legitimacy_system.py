@@ -12,6 +12,9 @@ from __future__ import annotations
 import random
 from typing import Dict, List, Optional
 
+from engine.beliefs import belief_summary, dominant_belief
+from engine.causality import record_cause
+
 __all__ = ["run_legitimacy_system", "risk_label_for_legitimacy", "composite_legitimacy_score"]
 
 
@@ -209,6 +212,31 @@ def _append_legitimacy_loc_event(
     )
 
 
+def _record_legitimacy_cause(
+    state: dict,
+    *,
+    faction: str,
+    event_type: str,
+    severity: int,
+    summary: str,
+    legitimacy: float,
+    risk: str,
+) -> None:
+    record_cause(
+        state,
+        domain="legitimacy",
+        actor=faction,
+        pressure=f"legitimacy crisis; legitimacy={round(legitimacy, 1)}; risk={risk}",
+        belief=belief_summary(dominant_belief(state, faction)),
+        decision=event_type,
+        outcome=summary,
+        affected=[faction],
+        severity=severity,
+        confidence=0.86,
+        source="legitimacy_system",
+    )
+
+
 def _maybe_events(
     faction: str, leg: float, risk: str, state: dict
 ) -> None:
@@ -224,8 +252,16 @@ def _maybe_events(
             "severity": 10,
         }
         ev.append(e)
-        _append_legitimacy_loc_event(
-            loc_ev, t, faction, "Military overthrow: regime legitimacy collapsed"
+        summary = "Military overthrow: regime legitimacy collapsed"
+        _append_legitimacy_loc_event(loc_ev, t, faction, summary)
+        _record_legitimacy_cause(
+            state,
+            faction=faction,
+            event_type="military_overthrow",
+            severity=10,
+            summary=summary,
+            legitimacy=leg,
+            risk=risk,
         )
     elif leg < 30 and r < 0.08:
         e = {
@@ -235,8 +271,16 @@ def _maybe_events(
             "severity": 8,
         }
         ev.append(e)
-        _append_legitimacy_loc_event(
-            loc_ev, t, faction, "Noble houses move against a discredited crown"
+        summary = "Noble houses move against a discredited crown"
+        _append_legitimacy_loc_event(loc_ev, t, faction, summary)
+        _record_legitimacy_cause(
+            state,
+            faction=faction,
+            event_type="noble_rebellion",
+            severity=8,
+            summary=summary,
+            legitimacy=leg,
+            risk=risk,
         )
     elif leg < 50 and r < 0.05:
         e = {
@@ -246,8 +290,16 @@ def _maybe_events(
             "severity": 6,
         }
         ev.append(e)
-        _append_legitimacy_loc_event(
-            loc_ev, t, faction, "A pretender with dynastic color presses a formal claim"
+        summary = "A pretender with dynastic color presses a formal claim"
+        _append_legitimacy_loc_event(loc_ev, t, faction, summary)
+        _record_legitimacy_cause(
+            state,
+            faction=faction,
+            event_type="claimant_arises",
+            severity=6,
+            summary=summary,
+            legitimacy=leg,
+            risk=risk,
         )
     state["legitimacy_events"] = ev[-24:]
     state["location_events"] = list(loc_ev)[-30:]

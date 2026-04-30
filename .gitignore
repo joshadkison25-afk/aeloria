@@ -11,6 +11,7 @@ __pycache__/
 
 logs/
 *.log
+clock_state.json
 
 tsconfig.tsbuildinfo
 

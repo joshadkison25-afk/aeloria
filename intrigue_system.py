@@ -24,6 +24,8 @@ from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from economy_simulation import list_faction_ids
+from engine.beliefs import belief_summary, dominant_belief
+from engine.causality import record_cause
 
 __all__ = ["run_intrigue_system", "DEFAULT_INTRIGUE_CONFIG"]
 
@@ -1876,6 +1878,87 @@ def _flatten_spy_networks(rows: List[dict], cfg: dict) -> List[dict]:
     )[:200]
 
 
+def _intrigue_action_severity(action: dict) -> int:
+    kind = str(action.get("action") or "")
+    outcome = str(action.get("outcome") or "")
+    base = {
+        "assassination": 14,
+        "sabotage": 10,
+        "blackmail": 9,
+        "spy_network_expansion": 5,
+        "information_gathering": 4,
+    }.get(kind, 4)
+    if outcome == "success":
+        return base
+    if outcome == "detected":
+        return base + 2
+    if outcome == "failed_traced":
+        return max(6, base - 1)
+    if outcome == "failed":
+        return max(4, base - 3)
+    return base
+
+
+def _intrigue_outcome_text(action: dict) -> str:
+    kind = str(action.get("action") or "operation")
+    outcome = str(action.get("outcome") or "resolved")
+    source = str(action.get("source_faction") or "Unknown actor")
+    target = str(action.get("target_faction") or "Unknown target")
+    actor = str(action.get("actor") or "operative")
+    victim = str(action.get("target_character") or "")
+    if kind == "assassination":
+        if outcome == "success" and victim:
+            return f"{source} assassinates {victim} of {target} through {actor}."
+        return f"{source} assassination attempt against {target} resolves as {outcome}."
+    if kind == "sabotage":
+        sabotage_kind = str(action.get("sabotage_kind") or "sabotage")
+        return f"{source} carries out {sabotage_kind} against {target}; outcome: {outcome}."
+    if kind == "blackmail":
+        if victim:
+            return f"{source} blackmail against {victim} of {target} resolves as {outcome}."
+        return f"{source} blackmail against {target} resolves as {outcome}."
+    if kind == "spy_network_expansion":
+        return f"{source} expands spy networks inside {target}; outcome: {outcome}."
+    if kind == "information_gathering":
+        return f"{source} gathers intelligence on {target}; outcome: {outcome}."
+    return f"{source} covert operation against {target} resolves as {outcome}."
+
+
+def _record_intrigue_causes(state: dict, actions: List[dict]) -> None:
+    for action in actions:
+        if not isinstance(action, dict) or "outcome" not in action:
+            continue
+        source = str(action.get("source_faction") or "").strip()
+        target = str(action.get("target_faction") or "").strip()
+        if not source or not target:
+            continue
+        outcome = str(action.get("outcome") or "")
+        hidden = ""
+        if outcome == "success":
+            hidden = "Source involvement remains covert unless later exposed by knowledge systems."
+        pressure = (
+            f"covert pressure; action={action.get('action', '')}; "
+            f"intelligence={action.get('intelligence_used', 'unknown')}; "
+            f"network_strength={action.get('network_strength_versus_target', 'unknown')}; "
+            f"exposure={action.get('exposure', 'unknown')}; "
+            f"detection_risk={action.get('target_detection_risk', 'unknown')}"
+        )
+        record_cause(
+            state,
+            domain="intrigue",
+            actor=source,
+            pressure=pressure,
+            belief=belief_summary(dominant_belief(state, source)),
+            decision=str(action.get("action") or "covert_operation"),
+            outcome=_intrigue_outcome_text(action),
+            affected=[source, target],
+            hidden=hidden,
+            severity=_intrigue_action_severity(action),
+            confidence=0.7 if outcome in ("detected", "failed_traced") else 0.55,
+            source="intrigue_system",
+        )
+
+
 def run_intrigue_system(state: dict) -> None:
     t = int(state.get("tick", 0) or 0)
     if state.get("_intrigue_system_tick") == t:
@@ -2105,6 +2188,7 @@ def run_intrigue_system(state: dict) -> None:
     state["faction_intrigue"] = out_rows
     state["intrigue_actions"] = this_tick[:80]
     state["spy_networks"] = _flatten_spy_networks(out_rows, cfg)
+    _record_intrigue_causes(state, state["intrigue_actions"])
 
     for h in reversed(state.get("tick_history") or []):
         if h.get("tick") == t:

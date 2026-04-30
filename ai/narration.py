@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import re
@@ -50,63 +49,180 @@ def _llm_prose_user_message(prompt: str, max_tokens: int) -> str:
     return (response.content[0].text or "").strip()
 
 
+def _build_chronicle_context(state: dict) -> dict:
+    """Extract structured engine outputs for narration. Pure function — no LLM calls."""
+    tick = int(state.get("tick", 0) or 0)
+    world_date = str(state.get("world_date") or f"Day {tick}")
+
+    primary = state.get("primary_event") or {}
+    if not isinstance(primary, dict):
+        primary = {}
+
+    supporting = [
+        e for e in (state.get("supporting_events") or [])
+        if isinstance(e, dict) and e.get("name")
+    ][:3]
+
+    ledger = state.get("causality_ledger") or []
+    tick_causes = sorted(
+        [r for r in ledger if isinstance(r, dict) and int(r.get("tick", -1) or -1) == tick],
+        key=lambda r: int(r.get("severity", 1) or 1),
+        reverse=True,
+    )[:6]
+
+    council = state.get("council_report") or {}
+    top_risks = [
+        r for r in (council.get("top_risks") or [])
+        if isinstance(r, dict) and r.get("title")
+    ][:4]
+
+    dominant_beliefs = []
+    for row in (state.get("faction_beliefs") or [])[:4]:
+        if not isinstance(row, dict):
+            continue
+        faction = str(row.get("faction") or "").strip()
+        candidates = [b for b in (row.get("beliefs") or []) if isinstance(b, dict)]
+        if faction and candidates:
+            top = max(candidates, key=lambda b: float(b.get("confidence", 0) or 0))
+            dominant_beliefs.append({
+                "faction": faction,
+                "claim": str(top.get("claim") or ""),
+                "confidence": float(top.get("confidence", 0) or 0),
+            })
+
+    active_events = [
+        e for e in (state.get("active_events") or [])
+        if isinstance(e, dict) and e.get("name")
+    ][:4]
+
+    return {
+        "tick": tick,
+        "world_date": world_date,
+        "primary_event": primary,
+        "supporting_events": supporting,
+        "tick_causes": tick_causes,
+        "top_risks": top_risks,
+        "dominant_beliefs": dominant_beliefs,
+        "active_events": active_events,
+    }
+
+
+def _format_chronicle_prompt(ctx: dict) -> str:
+    """Build the narration prompt from a chronicle context dict."""
+    lines = [
+        f"You are the narrator of Aeloria, a living fantasy world. This is {ctx['world_date']} (tick {ctx['tick']}).",
+        "",
+        "Write 2-3 paragraphs of literary prose narrating what happened today.",
+        "Past tense. Dark, cinematic tone. Specific names. No bullet points.",
+        "Narrate from the engine truth below — do not invent events that contradict it.",
+        "",
+    ]
+
+    primary = ctx["primary_event"]
+    if primary.get("name"):
+        lines.append(f"PRIMARY EVENT: {primary['name']}")
+        if primary.get("summary"):
+            lines.append(f"  {primary['summary']}")
+        lines.append("")
+
+    if ctx["supporting_events"]:
+        lines.append("SUPPORTING EVENTS:")
+        for e in ctx["supporting_events"]:
+            lines.append(f"  - {e.get('summary') or e.get('name', '')}")
+        lines.append("")
+
+    if ctx["tick_causes"]:
+        lines.append("CAUSAL RECORD (what happened and why):")
+        for c in ctx["tick_causes"]:
+            actor = c.get("actor", "Unknown")
+            decision = str(c.get("decision") or "acted").replace("_", " ")
+            outcome = c.get("outcome", "")
+            pressure = c.get("pressure", "")
+            parts = [f"{actor} {decision}"]
+            if pressure:
+                parts.append(f"under {pressure}")
+            if outcome:
+                parts.append(f"— {outcome}")
+            lines.append(f"  - {' '.join(parts)}")
+        lines.append("")
+
+    if ctx["top_risks"]:
+        lines.append("COUNCIL CONCERNS:")
+        for r in ctx["top_risks"]:
+            lines.append(f"  - {r['title']}: {r.get('summary', '')}")
+        lines.append("")
+
+    if ctx["dominant_beliefs"]:
+        lines.append("WHAT FACTIONS BELIEVE (shapes their choices, may be wrong):")
+        for b in ctx["dominant_beliefs"]:
+            lines.append(f"  - {b['faction']}: {b['claim']}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def _format_synopsis_prompt(state: dict, chronicle_context: str) -> str:
+    """Build the synopsis prompt from engine outputs."""
+    tick = int(state.get("tick", 0) or 0)
+    world_date = str(state.get("world_date") or f"Day {tick}")
+
+    council = state.get("council_report") or {}
+    top_risks = [
+        r for r in (council.get("top_risks") or [])
+        if isinstance(r, dict) and r.get("title")
+    ][:5]
+    risk_text = "\n".join(f"- {r['title']}: {r.get('summary', '')}" for r in top_risks)
+
+    active_events = [
+        e for e in (state.get("active_events") or [])
+        if isinstance(e, dict) and e.get("name")
+    ][:5]
+    event_text = "\n".join(
+        f"- {e['name']} (severity {e.get('severity', '?')}): {e.get('summary', '')}"
+        for e in active_events
+    )
+
+    return (
+        f"You are the narrator of Aeloria, a living fantasy world now in tick {tick} ({world_date}).\n\n"
+        f"RECENT CHRONICLE ENTRIES:\n{chronicle_context}\n\n"
+        f"ENGINE TOP RISKS:\n{risk_text or '(none)'}\n\n"
+        f"ACTIVE EVENTS:\n{event_text or '(none)'}\n\n"
+        "Write a 2-3 paragraph narrative synopsis capturing the main story arc as it stands now.\n"
+        "Find the narrative spine: the core conflict, the key players, the question the world is asking.\n"
+        "Dark, literary, present-tense voice. End on the defining tension of this moment."
+    )
+
+
 def _generate_narrative_synopsis(state):
     try:
         chronicles = []
         if HISTORY_DIR.exists():
             for file in sorted(HISTORY_DIR.glob("chronicle_*.txt"))[-5:]:
                 chronicles.append(file.read_text(encoding="utf-8"))
-
         chronicle_context = "\n\n---\n\n".join(chronicles) if chronicles else ""
-        current_tick = state.get("tick", 0)
-        world_date = state.get("world_date", "")
-        tensions = state.get("active_tensions", [])
-        tension_text = "\n".join(
-            f"- {item.get('factions', item.get('faction', '?'))}: {item.get('description', item.get('summary', str(item)))}"
-            for item in tensions if isinstance(item, dict)
-        )
 
-        prompt = f"""You are the narrator of Aeloria, a living fantasy world now in tick {current_tick} ({world_date}).
-
-RECENT CHRONICLE ENTRIES:
-{chronicle_context}
-
-CURRENT ACTIVE TENSIONS:
-{tension_text}
-
-Write a 2-3 paragraph narrative synopsis that captures the main story arc of Aeloria as it stands right now.
-This is the story so far: the central thread a reader needs to understand what this world is about and where it is heading.
-
-Do not list every event. Find the narrative spine: the core conflict, the key players, the question the world is currently asking.
-Write in a dark, literary, present-tense voice.
-Use specific character and place names. End on the tension that defines this moment in history."""
-
+        prompt = _format_synopsis_prompt(state, chronicle_context)
         text = _llm_prose_user_message(prompt, 800)
         SYNOPSIS_FILE.write_text(text, encoding="utf-8")
-        logger.info(f"Narrative synopsis updated for tick {current_tick}")
+        logger.info("Narrative synopsis updated for tick %s", state.get("tick", 0))
         return text
     except Exception as exc:
-        logger.error(f"Narrative synopsis generation failed: {exc}")
+        logger.error("Narrative synopsis generation failed: %s", exc)
         return ""
 
 
 def _generate_chronicle(state):
     try:
-        prompt = (
-            "You are the narrator of Aeloria. Write 2-3 evocative paragraphs describing what happened "
-            "this day in the world. Write in past tense, literary prose, as if narrating an epic fantasy novel. "
-            f"Draw from these events: {json.dumps(state, indent=2)}. "
-            "Do not use bullet points. Be specific with character names and place names. "
-            "Write in a dark, cinematic tone."
-        )
+        ctx = _build_chronicle_context(state)
+        prompt = _format_chronicle_prompt(ctx)
         text = _llm_prose_user_message(prompt, 1200)
         HISTORY_DIR.mkdir(exist_ok=True)
         chronicle_path = HISTORY_DIR / f"chronicle_{state['tick']}.txt"
         chronicle_path.write_text(text, encoding="utf-8")
-        logger.info(f"Chronicle written for tick {state['tick']}")
+        logger.info("Chronicle written for tick %s", state["tick"])
         return text
     except Exception as exc:
-        logger.error(f"Chronicle generation failed: {exc}")
+        logger.error("Chronicle generation failed: %s", exc)
         return ""
 
 

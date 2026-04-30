@@ -71,6 +71,182 @@ interface SeerOnMap {
   status: string;
 }
 
+interface ClockState {
+  paused: boolean;
+  speed: number;
+  current_tick: number;
+  world_date: string;
+  next_tick_eta: string;
+  seconds_until_next_tick?: number | null;
+  is_processing: boolean;
+  last_error?: string;
+}
+
+type CouncilAdvisor = 'chancellor' | 'marshal' | 'steward' | 'spymaster' | 'chronicler';
+
+interface CouncilItem {
+  kind: string;
+  title: string;
+  summary: string;
+  severity: number;
+  faction?: string;
+  source?: string;
+}
+
+interface CouncilWatchItem {
+  faction: string;
+  overall: number;
+  dominant_pressure: string;
+  summary?: string;
+}
+
+interface CouncilReport {
+  tick: number;
+  world_date: string;
+  top_risks: CouncilItem[];
+  watchlist: CouncilWatchItem[];
+  advisor_briefings?: Record<CouncilAdvisor, {
+    advisor: string;
+    status: string;
+    summary: string;
+    focus: string;
+    severity: number;
+  }>;
+  strategic_questions?: CouncilItem[];
+  advisor_reports: Record<CouncilAdvisor, CouncilItem[]>;
+}
+
+interface ExplainabilityItem {
+  id: string;
+  tick: number;
+  world_date: string;
+  domain: string;
+  actor: string;
+  severity: number;
+  confidence: number;
+  public_status: string;
+  affected: string[];
+  source: string;
+  pipeline: {
+    pressure: string;
+    belief: string;
+    decision: string;
+    outcome: string;
+    hidden_outcome: string;
+  };
+  knowledge_spread: {
+    known_by: string[];
+    rumored_by: string[];
+    suspected_by: string[];
+    misread_by: string[];
+  };
+}
+
+interface ExplainabilityReport {
+  tick: number;
+  world_date: string;
+  domain_counts: Record<string, number>;
+  explanations: ExplainabilityItem[];
+}
+
+interface FactionIntelRow {
+  faction: string;
+  overall_pressure: number;
+  dominant_pressure: string;
+  pressure_summary: string;
+  pressure_domains: { domain: string; score: number; reasons: string[] }[];
+  dominant_belief_summary: string;
+  beliefs: { id?: string; claim: string; confidence: number; source: string; bias: string }[];
+  knowledge_counts: Record<string, number>;
+  knowledge: {
+    known_facts: string[];
+    rumors: string[];
+    suspicions: string[];
+    false_beliefs: string[];
+    blind_spots: string[];
+  };
+}
+
+interface FactionIntelReport {
+  tick: number;
+  world_date: string;
+  selected_faction: string;
+  factions: FactionIntelRow[];
+}
+
+interface AutopsyCauseRecord {
+  id: string;
+  tick: number;
+  world_date?: string;
+  domain: string;
+  actor: string;
+  pressure: string;
+  belief: string;
+  decision: string;
+  outcome: string;
+  affected: string[];
+  hidden_outcome?: string;
+  severity: number;
+  confidence?: number;
+  source?: string;
+}
+
+interface AutopsyPressure {
+  faction: string;
+  overall: number;
+  dominant_pressure: string;
+  summary?: string;
+  domains?: Record<string, { score: number; reasons: string[] }>;
+}
+
+interface AutopsyBelief {
+  faction: string;
+  dominant_pressure: string;
+  overall_pressure: number;
+  beliefs: { id?: string; subject?: string; claim: string; confidence: number; source: string; bias: string }[];
+}
+
+interface AutopsyKnowledgeUpdate {
+  cause_id: string;
+  domain: string;
+  actor: string;
+  spread: {
+    known_by: string[];
+    rumored_by: string[];
+    suspected_by: string[];
+    misread_by: string[];
+  };
+}
+
+interface AutopsySurfacedEvent {
+  surface: string;
+  name?: string;
+  summary?: string;
+  text?: string;
+  action?: string;
+  cause_id?: string;
+  domain?: string;
+  severity?: number;
+  involved?: string[];
+}
+
+interface LastTickAutopsy {
+  tick: number;
+  world_date: string;
+  pressures: AutopsyPressure[];
+  beliefs: AutopsyBelief[];
+  decisions: { source: string; faction: string; action: string; summary: string; meta?: Record<string, unknown> }[];
+  outcomes: { cause_id: string; domain: string; actor: string; decision: string; outcome: string; severity: number; source: string }[];
+  causality_records: AutopsyCauseRecord[];
+  knowledge_updates: AutopsyKnowledgeUpdate[];
+  surfaced_events: AutopsySurfacedEvent[];
+}
+
+interface LastTickAutopsyResponse {
+  last_tick_autopsy: LastTickAutopsy | Record<string, never>;
+  recent_causality_records: AutopsyCauseRecord[];
+}
+
 // ============================================================================
 // Constants & lookup data
 // ============================================================================
@@ -998,6 +1174,19 @@ export default function WorldMapEditor() {
   const [sseStatus, setSseStatus]             = useState<'connecting' | 'live' | 'offline'>('connecting');
   const [worldDate, setWorldDate]             = useState<string>('');
   const [tickNumber, setTickNumber]           = useState<number | null>(null);
+  const [clock, setClock]                     = useState<ClockState | null>(null);
+  const [clockBusy, setClockBusy]             = useState(false);
+  const [council, setCouncil]                 = useState<CouncilReport | null>(null);
+  const [showCouncil, setShowCouncil]         = useState(false);
+  const [activeAdvisor, setActiveAdvisor]     = useState<CouncilAdvisor>('chancellor');
+  const [explainability, setExplainability]   = useState<ExplainabilityReport | null>(null);
+  const [showExplainability, setShowExplainability] = useState(false);
+  const [selectedCauseId, setSelectedCauseId] = useState<string | null>(null);
+  const [intel, setIntel]                     = useState<FactionIntelReport | null>(null);
+  const [showIntel, setShowIntel]             = useState(false);
+  const [selectedIntelFaction, setSelectedIntelFaction] = useState<string | null>(null);
+  const [autopsy, setAutopsy]                 = useState<LastTickAutopsyResponse | null>(null);
+  const [showAutopsy, setShowAutopsy]         = useState(false);
   const sseRef = useRef<EventSource | null>(null);
 
   // --- Historical playback ---
@@ -1317,9 +1506,117 @@ export default function WorldMapEditor() {
     } catch { setSseStatus('offline'); }
   }, []);
 
+  const refreshClock = useCallback(async () => {
+    try {
+      const res = await fetch('/api/clock', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json() as ClockState;
+      setClock(data);
+      if (typeof data.current_tick === 'number') setTickNumber(data.current_tick);
+      if (data.world_date) setWorldDate(data.world_date);
+    } catch {
+      // Clock state is secondary to the map itself; SSE status handles backend availability.
+    }
+  }, []);
+
+  const postClock = useCallback(async (path: string, body?: unknown) => {
+    setClockBusy(true);
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => null) as ClockState | { clock?: ClockState } | null;
+      if (res.ok && data) {
+        const nextClock = 'clock' in data && data.clock ? data.clock : data as ClockState;
+        setClock(nextClock);
+        if (nextClock.current_tick != null) setTickNumber(nextClock.current_tick);
+        if (nextClock.world_date) setWorldDate(nextClock.world_date);
+        if (path.endsWith('/step')) refreshMapState();
+      }
+    } catch {
+      setSseStatus('offline');
+    } finally {
+      setClockBusy(false);
+    }
+  }, [refreshMapState]);
+
+  const toggleClockPaused = useCallback(() => {
+    if (!clock || clockBusy) return;
+    postClock(clock.paused ? '/api/clock/resume' : '/api/clock/pause');
+  }, [clock, clockBusy, postClock]);
+
+  const setClockSpeed = useCallback((speed: number) => {
+    if (clockBusy) return;
+    postClock('/api/clock/speed', { speed });
+  }, [clockBusy, postClock]);
+
+  const stepClock = useCallback(() => {
+    if (clockBusy || clock?.is_processing) return;
+    postClock('/api/clock/step');
+  }, [clock, clockBusy, postClock]);
+
+  const refreshCouncil = useCallback(async () => {
+    try {
+      const res = await fetch('/api/council', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json() as CouncilReport;
+      setCouncil(data);
+    } catch {
+      // Council is an intelligence surface; the live map can continue without it.
+    }
+  }, []);
+
+  const refreshExplainability = useCallback(async () => {
+    try {
+      const res = await fetch('/api/explainability?limit=18', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json() as ExplainabilityReport;
+      setExplainability(data);
+      setSelectedCauseId((current) => {
+        if (current && data.explanations.some((item) => item.id === current)) return current;
+        return data.explanations[0]?.id ?? null;
+      });
+    } catch {
+      // Explainability is an overlay; the map remains usable without it.
+    }
+  }, []);
+
+  const refreshIntel = useCallback(async () => {
+    try {
+      const res = await fetch('/api/faction-intel?limit=18', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json() as FactionIntelReport;
+      setIntel(data);
+      setSelectedIntelFaction((current) => {
+        if (current && data.factions.some((row) => row.faction === current)) return current;
+        return data.factions[0]?.faction ?? null;
+      });
+    } catch {
+      // Intel is a read-only overlay; the map can run without it.
+    }
+  }, []);
+
+  const refreshAutopsy = useCallback(async () => {
+    try {
+      const res = await fetch('/api/axiom/last-tick', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json() as LastTickAutopsyResponse;
+      setAutopsy(data);
+    } catch {
+      // Autopsy is a debug surface; the map remains usable without it.
+    }
+  }, []);
+
   // SSE subscription
   useEffect(() => {
     refreshMapState();
+    refreshClock();
+    refreshCouncil();
+    refreshExplainability();
+    refreshIntel();
+    refreshAutopsy();
 
     let retryMs = 1000;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1332,11 +1629,31 @@ export default function WorldMapEditor() {
 
       es.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data) as { type: string; tick?: number };
+          const data = JSON.parse(event.data) as { type: string; tick?: number; world_date?: string; clock?: ClockState };
           if (data.type === 'offline') { setSseStatus('offline'); return; }
-          if (data.type === 'tick' || data.type === 'connected') {
+          if (data.clock) {
+            setClock(data.clock);
+            if (typeof data.clock.current_tick === 'number') setTickNumber(data.clock.current_tick);
+            if (data.clock.world_date) setWorldDate(data.clock.world_date);
+          }
+          if (typeof data.tick === 'number') setTickNumber(data.tick);
+          if (data.world_date) setWorldDate(data.world_date);
+          if (
+            data.type === 'tick' ||
+            data.type === 'tick_completed' ||
+            data.type === 'tick_started' ||
+            data.type === 'tick_failed' ||
+            data.type === 'clock' ||
+            data.type === 'connected'
+          ) {
             setSseStatus('live');
-            if (data.type === 'tick') refreshMapState();
+            if (data.type === 'tick' || data.type === 'tick_completed') {
+              refreshMapState();
+              refreshCouncil();
+              refreshExplainability();
+              refreshIntel();
+              refreshAutopsy();
+            }
           }
         } catch { /* ignore bad frames */ }
       };
@@ -1354,7 +1671,7 @@ export default function WorldMapEditor() {
       sseRef.current?.close();
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [refreshMapState]);
+  }, [refreshAutopsy, refreshClock, refreshCouncil, refreshExplainability, refreshIntel, refreshMapState]);
 
   // Load history snapshots
   useEffect(() => {
@@ -1594,6 +1911,47 @@ export default function WorldMapEditor() {
   // Label font stays ~11px on screen
   const LABEL_PX = 11 / zoomDisplay;
   const showPinLabels = zoomDisplay > LABEL_ZOOM_THRESHOLD;
+  const advisorTabs: { id: CouncilAdvisor; label: string }[] = [
+    { id: 'chancellor', label: 'Chancellor' },
+    { id: 'marshal', label: 'Marshal' },
+    { id: 'steward', label: 'Steward' },
+    { id: 'spymaster', label: 'Spymaster' },
+    { id: 'chronicler', label: 'Chronicler' },
+  ];
+  const activeCouncilItems = council?.advisor_reports?.[activeAdvisor] ?? [];
+  const topCouncilRisk = council?.top_risks?.[0];
+  const activeCouncilBriefing = council?.advisor_briefings?.[activeAdvisor];
+  const topExplanation = explainability?.explanations?.[0];
+  const selectedCause =
+    explainability?.explanations.find((item) => item.id === selectedCauseId)
+    ?? topExplanation
+    ?? null;
+  const explanationDomains = explainability
+    ? Object.entries(explainability.domain_counts).sort((a, b) => b[1] - a[1])
+    : [];
+  const selectedIntel =
+    intel?.factions.find((item) => item.faction === selectedIntelFaction)
+    ?? intel?.factions[0]
+    ?? null;
+  const topIntel = intel?.factions[0] ?? null;
+  const lastAutopsy =
+    autopsy?.last_tick_autopsy && 'tick' in autopsy.last_tick_autopsy
+      ? autopsy.last_tick_autopsy as LastTickAutopsy
+      : null;
+  const recentAutopsyRecords = autopsy?.recent_causality_records ?? [];
+  const topAutopsyCause =
+    lastAutopsy?.causality_records?.[0]
+    ?? recentAutopsyRecords[recentAutopsyRecords.length - 1]
+    ?? null;
+  const topAutopsyPressure = lastAutopsy?.pressures?.[0] ?? null;
+  const topAutopsyBelief =
+    topAutopsyCause && lastAutopsy
+      ? lastAutopsy.beliefs.find((row) => row.faction === topAutopsyCause.actor)?.beliefs?.[0] ?? null
+      : lastAutopsy?.beliefs?.[0]?.beliefs?.[0] ?? null;
+  const topAutopsySurface =
+    topAutopsyCause && lastAutopsy
+      ? lastAutopsy.surfaced_events.find((event) => event.cause_id === topAutopsyCause.id) ?? null
+      : lastAutopsy?.surfaced_events?.[0] ?? null;
 
   // -------------------------------------------------------------------------
   // Render
@@ -2032,6 +2390,107 @@ export default function WorldMapEditor() {
             {worldDate && !playbackMode && <span style={{ marginLeft: 4, color: '#6b7280' }}>{worldDate}</span>}
           </span>
         )}
+        {clock && !playbackMode && (
+          <span className="wme-statusbar__item wme-clock">
+            <button
+              type="button"
+              className="wme-clock__btn wme-clock__btn--main"
+              onClick={toggleClockPaused}
+              disabled={clockBusy}
+              title={clock.paused ? 'Resume Axiom clock' : 'Pause Axiom clock'}
+            >
+              {clock.paused ? 'Play' : 'Pause'}
+            </button>
+            {[1, 2, 3, 4, 5].map((speed) => (
+              <button
+                key={speed}
+                type="button"
+                className={`wme-clock__btn ${clock.speed === speed ? 'wme-clock__btn--active' : ''}`}
+                onClick={() => setClockSpeed(speed)}
+                disabled={clockBusy}
+                title={`Set Axiom speed ${speed}`}
+              >
+                {speed}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="wme-clock__btn"
+              onClick={stepClock}
+              disabled={clockBusy || clock.is_processing}
+              title="Run one Axiom tick"
+            >
+              Step
+            </button>
+            <span className="wme-clock__state">
+              {clock.is_processing
+                ? 'processing'
+                : clock.paused
+                  ? 'paused'
+                  : `next ${clock.seconds_until_next_tick ?? 0}s`}
+            </span>
+          </span>
+        )}
+        {council && !playbackMode && (
+          <span className="wme-statusbar__item wme-council-status">
+            <button
+              type="button"
+              className={`wme-council-status__btn ${showCouncil ? 'wme-council-status__btn--active' : ''}`}
+              onClick={() => setShowCouncil((v) => !v)}
+              title={topCouncilRisk ? topCouncilRisk.summary : 'Open council report'}
+            >
+              Council
+            </button>
+            <span className="wme-council-status__risk">
+              {topCouncilRisk ? `${topCouncilRisk.severity.toFixed(0)} ${topCouncilRisk.title}` : 'clear'}
+            </span>
+          </span>
+        )}
+        {explainability && !playbackMode && (
+          <span className="wme-statusbar__item wme-council-status">
+            <button
+              type="button"
+              className={`wme-council-status__btn ${showExplainability ? 'wme-council-status__btn--active' : ''}`}
+              onClick={() => setShowExplainability((v) => !v)}
+              title={topExplanation ? topExplanation.pipeline.outcome : 'Open causality inspector'}
+            >
+              Why
+            </button>
+            <span className="wme-council-status__risk">
+              {topExplanation ? `${topExplanation.severity} ${topExplanation.domain}` : 'no causes'}
+            </span>
+          </span>
+        )}
+        {intel && !playbackMode && (
+          <span className="wme-statusbar__item wme-council-status">
+            <button
+              type="button"
+              className={`wme-council-status__btn ${showIntel ? 'wme-council-status__btn--active' : ''}`}
+              onClick={() => setShowIntel((v) => !v)}
+              title={topIntel ? topIntel.pressure_summary : 'Open faction intel'}
+            >
+              Intel
+            </button>
+            <span className="wme-council-status__risk">
+              {topIntel ? `${topIntel.overall_pressure.toFixed(0)} ${topIntel.faction}` : 'quiet'}
+            </span>
+          </span>
+        )}
+        {lastAutopsy && !playbackMode && (
+          <span className="wme-statusbar__item wme-council-status">
+            <button
+              type="button"
+              className={`wme-council-status__btn ${showAutopsy ? 'wme-council-status__btn--active' : ''}`}
+              onClick={() => setShowAutopsy((v) => !v)}
+              title={topAutopsyCause ? topAutopsyCause.outcome : 'Open latest tick autopsy'}
+            >
+              Autopsy
+            </button>
+            <span className="wme-council-status__risk">
+              {topAutopsyCause ? `${topAutopsyCause.severity} ${topAutopsyCause.decision}` : `tick ${lastAutopsy.tick}`}
+            </span>
+          </span>
+        )}
         <span className="wme-statusbar__spacer" />
         <span className="wme-statusbar__item">
           {displayedPins.length !== pins.length
@@ -2051,6 +2510,350 @@ export default function WorldMapEditor() {
           {history.length > 0 && <span style={{ marginLeft: 6, color: '#3d4048' }}>⏮ History</span>}
         </span>
       </footer>
+      )}
+
+      {/* ================================================================== */}
+      {/* Council / intel drawer                                              */}
+      {/* ================================================================== */}
+      {!embedUI && showCouncil && council && (
+        <aside className="wme-council" aria-label="Council report">
+          <div className="wme-council__header">
+            <div>
+              <div className="wme-council__kicker">Axiom Council</div>
+              <strong>Tick {council.tick}</strong>
+              {council.world_date && <span className="wme-council__date">{council.world_date}</span>}
+            </div>
+            <button className="wme-council__close" type="button" onClick={() => setShowCouncil(false)}>
+              Close
+            </button>
+          </div>
+
+          <div className="wme-council__section">
+            <div className="wme-council__section-title">Top Risks</div>
+            {council.top_risks.length ? council.top_risks.slice(0, 4).map((item, idx) => (
+              <div className="wme-council__risk" key={`${item.title}-${idx}`}>
+                <span className="wme-council__sev">{item.severity.toFixed(0)}</span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.summary}</p>
+                </div>
+              </div>
+            )) : (
+              <div className="wme-council__empty">No urgent risks reported.</div>
+            )}
+          </div>
+
+          {council.strategic_questions && council.strategic_questions.length > 0 && (
+            <div className="wme-council__section">
+              <div className="wme-council__section-title">Strategic Questions</div>
+              {council.strategic_questions.slice(0, 3).map((item, idx) => (
+                <div className="wme-council__question" key={`${item.title}-${idx}`}>
+                  <strong>{item.title}</strong>
+                  <p>{item.summary}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="wme-council__tabs">
+            {advisorTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`wme-council__tab ${activeAdvisor === tab.id ? 'wme-council__tab--active' : ''}`}
+                onClick={() => setActiveAdvisor(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeCouncilBriefing && (
+            <div className={`wme-council__brief wme-council__brief--${activeCouncilBriefing.status}`}>
+              <div>
+                <span>{activeCouncilBriefing.status}</span>
+                <strong>{activeCouncilBriefing.focus || activeAdvisor}</strong>
+              </div>
+              <p>{activeCouncilBriefing.summary}</p>
+            </div>
+          )}
+
+          <div className="wme-council__section wme-council__scroll">
+            {activeCouncilItems.length ? activeCouncilItems.map((item, idx) => (
+              <div className="wme-council__item" key={`${activeAdvisor}-${item.title}-${idx}`}>
+                <div className="wme-council__item-head">
+                  <strong>{item.title}</strong>
+                  <span>{item.severity.toFixed(1)}</span>
+                </div>
+                {item.faction && <div className="wme-council__meta">{item.faction}</div>}
+                <p>{item.summary}</p>
+                {item.source && <div className="wme-council__source">{item.source}</div>}
+              </div>
+            )) : (
+              <div className="wme-council__empty">No active notes for this advisor.</div>
+            )}
+          </div>
+
+          {council.watchlist.length > 0 && (
+            <div className="wme-council__section">
+              <div className="wme-council__section-title">Watchlist</div>
+              <div className="wme-council__watchlist">
+                {council.watchlist.slice(0, 5).map((item) => (
+                  <div className="wme-council__watch" key={item.faction}>
+                    <strong>{item.faction}</strong>
+                    <span>{item.overall.toFixed(1)} / {item.dominant_pressure}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      )}
+
+      {!embedUI && showExplainability && explainability && (
+        <aside className="wme-council wme-why" aria-label="Causality inspector">
+          <div className="wme-council__header">
+            <div>
+              <div className="wme-council__kicker">Axiom Why</div>
+              <strong>Tick {explainability.tick}</strong>
+              {explainability.world_date && <span className="wme-council__date">{explainability.world_date}</span>}
+            </div>
+            <button className="wme-council__close" type="button" onClick={() => setShowExplainability(false)}>
+              Close
+            </button>
+          </div>
+
+          <div className="wme-council__section">
+            <div className="wme-council__section-title">Cause Domains</div>
+            <div className="wme-why__domains">
+              {explanationDomains.length ? explanationDomains.map(([domain, count]) => (
+                <span className="wme-why__chip" key={domain}>{domain} {count}</span>
+              )) : (
+                <span className="wme-why__chip">no records</span>
+              )}
+            </div>
+          </div>
+
+          <div className="wme-council__section wme-council__scroll">
+            {explainability.explanations.length ? explainability.explanations.map((item) => (
+              <button
+                type="button"
+                className={`wme-why__cause ${selectedCause?.id === item.id ? 'wme-why__cause--active' : ''}`}
+                key={item.id}
+                onClick={() => setSelectedCauseId(item.id)}
+              >
+                <span className="wme-council__sev">{item.severity}</span>
+                <span>
+                  <strong>{item.actor}</strong>
+                  <small>{item.domain} / {item.public_status}</small>
+                  <span>{item.pipeline.decision}</span>
+                </span>
+              </button>
+            )) : (
+              <div className="wme-council__empty">No cause records for this tick.</div>
+            )}
+          </div>
+
+          {selectedCause && (
+            <div className="wme-council__section wme-why__detail">
+              <div className="wme-council__section-title">Pipeline</div>
+              <div className="wme-why__row"><span>Pressure</span><p>{selectedCause.pipeline.pressure || 'Unspecified'}</p></div>
+              <div className="wme-why__row"><span>Belief</span><p>{selectedCause.pipeline.belief || 'No dominant belief recorded'}</p></div>
+              <div className="wme-why__row"><span>Decision</span><p>{selectedCause.pipeline.decision || 'No decision label'}</p></div>
+              <div className="wme-why__row"><span>Outcome</span><p>{selectedCause.pipeline.outcome || 'No outcome text'}</p></div>
+              {selectedCause.pipeline.hidden_outcome && (
+                <div className="wme-why__row"><span>Hidden</span><p>{selectedCause.pipeline.hidden_outcome}</p></div>
+              )}
+              <div className="wme-why__row">
+                <span>Knowledge</span>
+                <p>
+                  Known {selectedCause.knowledge_spread.known_by.length} /
+                  Rumored {selectedCause.knowledge_spread.rumored_by.length} /
+                  Suspected {selectedCause.knowledge_spread.suspected_by.length}
+                </p>
+              </div>
+              {selectedCause.affected.length > 0 && (
+                <div className="wme-why__affected">
+                  {selectedCause.affected.slice(0, 6).map((name) => <span key={name}>{name}</span>)}
+                </div>
+              )}
+            </div>
+          )}
+        </aside>
+      )}
+
+      {!embedUI && showIntel && intel && (
+        <aside className="wme-council wme-intel" aria-label="Faction intel inspector">
+          <div className="wme-council__header">
+            <div>
+              <div className="wme-council__kicker">Faction Intel</div>
+              <strong>Tick {intel.tick}</strong>
+              {intel.world_date && <span className="wme-council__date">{intel.world_date}</span>}
+            </div>
+            <button className="wme-council__close" type="button" onClick={() => setShowIntel(false)}>
+              Close
+            </button>
+          </div>
+
+          <div className="wme-council__section wme-intel__factions">
+            {intel.factions.length ? intel.factions.map((row) => (
+              <button
+                type="button"
+                key={row.faction}
+                className={`wme-intel__faction ${selectedIntel?.faction === row.faction ? 'wme-intel__faction--active' : ''}`}
+                onClick={() => setSelectedIntelFaction(row.faction)}
+              >
+                <strong>{row.faction}</strong>
+                <span>{row.overall_pressure.toFixed(1)} / {row.dominant_pressure}</span>
+              </button>
+            )) : (
+              <div className="wme-council__empty">No faction intel available.</div>
+            )}
+          </div>
+
+          {selectedIntel && (
+            <div className="wme-council__section wme-council__scroll">
+              <div className="wme-intel__hero">
+                <strong>{selectedIntel.faction}</strong>
+                <span>{selectedIntel.pressure_summary || 'No dominant pressure recorded'}</span>
+              </div>
+
+              <div className="wme-council__section-title">Pressure</div>
+              {selectedIntel.pressure_domains.slice(0, 4).map((domain) => (
+                <div className="wme-intel__domain" key={domain.domain}>
+                  <div><strong>{domain.domain}</strong><span>{domain.score.toFixed(1)}</span></div>
+                  {domain.reasons.length > 0 && <p>{domain.reasons.join(', ')}</p>}
+                </div>
+              ))}
+
+              <div className="wme-council__section-title">Dominant Belief</div>
+              <div className="wme-intel__belief">
+                {selectedIntel.dominant_belief_summary || 'No belief has risen above the noise.'}
+              </div>
+
+              <div className="wme-council__section-title">Beliefs</div>
+              {selectedIntel.beliefs.length ? selectedIntel.beliefs.slice(0, 5).map((belief, idx) => (
+                <div className="wme-intel__belief" key={belief.id || `${belief.claim}-${idx}`}>
+                  <span>{belief.source} {belief.confidence.toFixed(2)} / {belief.bias}</span>
+                  <p>{belief.claim}</p>
+                </div>
+              )) : (
+                <div className="wme-council__empty">No current beliefs recorded.</div>
+              )}
+
+              <div className="wme-council__section-title">Knowledge</div>
+              {([
+                ['known_facts', 'Known'],
+                ['suspicions', 'Suspicions'],
+                ['rumors', 'Rumors'],
+                ['false_beliefs', 'False Beliefs'],
+                ['blind_spots', 'Blind Spots'],
+              ] as const).map(([key, label]) => {
+                const values = selectedIntel.knowledge[key] ?? [];
+                return (
+                  <div className="wme-intel__knowledge" key={key}>
+                    <strong>{label} <span>{selectedIntel.knowledge_counts[key] ?? values.length}</span></strong>
+                    {values.length ? values.slice(0, 4).map((text) => <p key={text}>{text}</p>) : <p>None recorded.</p>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </aside>
+      )}
+
+      {!embedUI && showAutopsy && lastAutopsy && (
+        <aside className="wme-council wme-autopsy" aria-label="Latest tick autopsy">
+          <div className="wme-council__header">
+            <div>
+              <div className="wme-council__kicker">Axiom Autopsy</div>
+              <strong>Tick {lastAutopsy.tick}</strong>
+              {lastAutopsy.world_date && <span className="wme-council__date">{lastAutopsy.world_date}</span>}
+            </div>
+            <button className="wme-council__close" type="button" onClick={() => setShowAutopsy(false)}>
+              Close
+            </button>
+          </div>
+
+          <div className="wme-council__section">
+            <div className="wme-council__section-title">Primary Chain</div>
+            <div className="wme-autopsy__chain">
+              <div className="wme-autopsy__node">
+                <span>Pressure</span>
+                <strong>{topAutopsyPressure?.faction ?? topAutopsyCause?.actor ?? 'No pressure'}</strong>
+                <p>{topAutopsyPressure?.summary ?? topAutopsyCause?.pressure ?? 'No pressure recorded.'}</p>
+              </div>
+              <div className="wme-autopsy__node">
+                <span>Belief</span>
+                <strong>{topAutopsyBelief?.subject ?? topAutopsyCause?.actor ?? 'No belief'}</strong>
+                <p>{topAutopsyBelief?.claim ?? topAutopsyCause?.belief ?? 'No belief recorded.'}</p>
+              </div>
+              <div className="wme-autopsy__node">
+                <span>Decision</span>
+                <strong>{topAutopsyCause?.actor ?? 'No actor'}</strong>
+                <p>{topAutopsyCause?.decision ?? 'No decision recorded.'}</p>
+              </div>
+              <div className="wme-autopsy__node">
+                <span>Outcome</span>
+                <strong>{topAutopsyCause?.domain ?? 'No domain'}</strong>
+                <p>{topAutopsyCause?.outcome ?? 'No outcome recorded.'}</p>
+              </div>
+              <div className="wme-autopsy__node">
+                <span>Surfaced</span>
+                <strong>{topAutopsySurface?.surface ?? 'Not surfaced'}</strong>
+                <p>{topAutopsySurface?.summary ?? topAutopsySurface?.text ?? topAutopsySurface?.action ?? 'No surfaced event matched this cause.'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="wme-council__section wme-autopsy__metrics">
+            <div className="wme-autopsy__metric">
+              <strong>{lastAutopsy.pressures.length}</strong>
+              <span>pressures</span>
+            </div>
+            <div className="wme-autopsy__metric">
+              <strong>{lastAutopsy.beliefs.length}</strong>
+              <span>belief states</span>
+            </div>
+            <div className="wme-autopsy__metric">
+              <strong>{lastAutopsy.decisions.length}</strong>
+              <span>decisions</span>
+            </div>
+            <div className="wme-autopsy__metric">
+              <strong>{lastAutopsy.causality_records.length}</strong>
+              <span>causes</span>
+            </div>
+          </div>
+
+          <div className="wme-council__section wme-council__scroll">
+            <div className="wme-council__section-title">Causality Records</div>
+            {lastAutopsy.causality_records.length ? lastAutopsy.causality_records.slice(0, 8).map((cause) => {
+              const update = lastAutopsy.knowledge_updates.find((row) => row.cause_id === cause.id);
+              const surfaced = lastAutopsy.surfaced_events.find((event) => event.cause_id === cause.id);
+              return (
+                <div className="wme-autopsy__record" key={cause.id}>
+                  <div className="wme-council__item-head">
+                    <strong>{cause.actor}</strong>
+                    <span>{cause.severity}</span>
+                  </div>
+                  <div className="wme-council__meta">{cause.domain} / {cause.decision} / {cause.id}</div>
+                  <p>{cause.outcome}</p>
+                  {cause.belief && <p><span>Belief:</span> {cause.belief}</p>}
+                  {update && (
+                    <div className="wme-autopsy__spread">
+                      <span>known {update.spread.known_by.length}</span>
+                      <span>rumored {update.spread.rumored_by.length}</span>
+                      <span>suspected {update.spread.suspected_by.length}</span>
+                    </div>
+                  )}
+                  {surfaced && <div className="wme-council__source">surfaced as {surfaced.surface}</div>}
+                </div>
+              );
+            }) : (
+              <div className="wme-council__empty">No causality records in the latest tick.</div>
+            )}
+          </div>
+        </aside>
       )}
 
       {/* ================================================================== */}
@@ -2364,6 +3167,539 @@ export default function WorldMapEditor() {
         .wme-statusbar__item:last-child  { border-right: none; }
         .wme-statusbar__dim  { color: #3d4048; margin-right: 4px; }
         .wme-statusbar__spacer { flex: 1; }
+        .wme-clock {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .wme-clock__btn {
+          height: 22px;
+          min-width: 22px;
+          padding: 0 6px;
+          border: 1px solid #292d3f;
+          border-radius: 4px;
+          background: #141722;
+          color: #8d94a8;
+          font-size: 0.66rem;
+          font-family: inherit;
+          cursor: pointer;
+          line-height: 1;
+        }
+        .wme-clock__btn:hover:not(:disabled) {
+          border-color: #d4a017;
+          color: #f5d36d;
+        }
+        .wme-clock__btn:disabled {
+          opacity: 0.45;
+          cursor: default;
+        }
+        .wme-clock__btn--main {
+          min-width: 48px;
+          color: #d4a017;
+        }
+        .wme-clock__btn--active {
+          background: #2c2414;
+          border-color: #d4a017;
+          color: #f5d36d;
+        }
+        .wme-clock__state {
+          margin-left: 4px;
+          color: #6b7280;
+        }
+        .wme-council-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          max-width: 360px;
+        }
+        .wme-council-status__btn {
+          height: 22px;
+          padding: 0 8px;
+          border: 1px solid #292d3f;
+          border-radius: 4px;
+          background: #141722;
+          color: #d4a017;
+          font-size: 0.66rem;
+          font-family: inherit;
+          cursor: pointer;
+        }
+        .wme-council-status__btn:hover,
+        .wme-council-status__btn--active {
+          border-color: #d4a017;
+          background: #2c2414;
+          color: #f5d36d;
+        }
+        .wme-council-status__risk {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: #7f8796;
+        }
+
+        /* ---------- council drawer ---------- */
+        .wme-council {
+          position: fixed;
+          right: 14px;
+          top: 62px;
+          bottom: 42px;
+          width: min(420px, calc(100vw - 28px));
+          z-index: 90;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 12px;
+          background: rgba(10, 12, 20, 0.96);
+          border: 1px solid #292d3f;
+          box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+          color: #c8ccd6;
+          font-size: 0.78rem;
+          font-family: 'Courier New', monospace;
+        }
+        .wme-council__header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid #1f2334;
+        }
+        .wme-council__kicker {
+          color: #d4a017;
+          font-size: 0.66rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .wme-council__date {
+          margin-left: 8px;
+          color: #6b7280;
+        }
+        .wme-council__close,
+        .wme-council__tab {
+          border: 1px solid #292d3f;
+          border-radius: 4px;
+          background: #141722;
+          color: #9ca3af;
+          font-family: inherit;
+          font-size: 0.7rem;
+          cursor: pointer;
+        }
+        .wme-council__close {
+          padding: 4px 8px;
+        }
+        .wme-council__close:hover,
+        .wme-council__tab:hover,
+        .wme-council__tab--active {
+          border-color: #d4a017;
+          color: #f5d36d;
+        }
+        .wme-council__tabs {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 4px;
+        }
+        .wme-council__tab {
+          min-width: 0;
+          padding: 5px 3px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wme-council__section {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .wme-council__section-title {
+          color: #6b7280;
+          font-size: 0.68rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .wme-council__scroll {
+          min-height: 0;
+          overflow-y: auto;
+          padding-right: 2px;
+        }
+        .wme-council__risk,
+        .wme-council__item,
+        .wme-council__watch,
+        .wme-council__question,
+        .wme-council__brief {
+          border: 1px solid #1f2334;
+          background: #0f1320;
+          border-radius: 6px;
+        }
+        .wme-council__risk {
+          display: grid;
+          grid-template-columns: 30px minmax(0, 1fr);
+          gap: 8px;
+          padding: 8px;
+        }
+        .wme-council__sev {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #2c2414;
+          color: #f5d36d;
+          font-weight: bold;
+        }
+        .wme-council__risk strong,
+        .wme-council__item strong,
+        .wme-council__watch strong,
+        .wme-council__question strong,
+        .wme-council__brief strong {
+          color: #e5e7eb;
+        }
+        .wme-council__risk p,
+        .wme-council__item p,
+        .wme-council__question p,
+        .wme-council__brief p {
+          margin: 4px 0 0;
+          color: #9ca3af;
+          line-height: 1.35;
+          white-space: normal;
+        }
+        .wme-council__item {
+          padding: 8px;
+        }
+        .wme-council__item-head,
+        .wme-council__watch {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .wme-council__item-head span {
+          color: #d4a017;
+        }
+        .wme-council__meta,
+        .wme-council__source {
+          margin-top: 4px;
+          color: #6b7280;
+          font-size: 0.68rem;
+        }
+        .wme-council__empty {
+          padding: 10px;
+          border: 1px dashed #292d3f;
+          color: #6b7280;
+        }
+        .wme-council__watchlist {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .wme-council__watch {
+          padding: 6px 8px;
+          color: #7f8796;
+        }
+        .wme-council__question,
+        .wme-council__brief {
+          padding: 8px;
+        }
+        .wme-council__brief {
+          border-color: #292d3f;
+        }
+        .wme-council__brief--watch {
+          border-color: #7c5f1d;
+          background: #17140e;
+        }
+        .wme-council__brief--critical {
+          border-color: #7f1d1d;
+          background: #1a1012;
+        }
+        .wme-council__brief div {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .wme-council__brief span {
+          color: #d4a017;
+          text-transform: uppercase;
+          font-size: 0.66rem;
+          letter-spacing: 0.08em;
+        }
+        .wme-why {
+          right: auto;
+          left: 14px;
+        }
+        .wme-why__domains,
+        .wme-why__affected {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .wme-why__chip,
+        .wme-why__affected span {
+          display: inline-flex;
+          align-items: center;
+          min-height: 20px;
+          padding: 2px 6px;
+          border: 1px solid #292d3f;
+          border-radius: 4px;
+          background: #111827;
+          color: #9ca3af;
+          font-size: 0.66rem;
+        }
+        .wme-why__cause {
+          display: grid;
+          grid-template-columns: 30px minmax(0, 1fr);
+          gap: 8px;
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #1f2334;
+          border-radius: 6px;
+          background: #0f1320;
+          color: #c8ccd6;
+          font-family: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+        .wme-why__cause:hover,
+        .wme-why__cause--active {
+          border-color: #d4a017;
+          background: #151723;
+        }
+        .wme-why__cause strong,
+        .wme-why__cause small,
+        .wme-why__cause span span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wme-why__cause strong {
+          color: #e5e7eb;
+        }
+        .wme-why__cause small {
+          margin: 2px 0;
+          color: #6b7280;
+          font-size: 0.66rem;
+        }
+        .wme-why__detail {
+          max-height: 46%;
+          overflow-y: auto;
+          padding-top: 8px;
+          border-top: 1px solid #1f2334;
+        }
+        .wme-why__row {
+          border: 1px solid #1f2334;
+          border-radius: 6px;
+          padding: 7px;
+          background: #0f1320;
+        }
+        .wme-why__row span {
+          display: block;
+          margin-bottom: 3px;
+          color: #d4a017;
+          font-size: 0.66rem;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+        }
+        .wme-why__row p {
+          margin: 0;
+          color: #aeb4c0;
+          line-height: 1.35;
+          white-space: normal;
+        }
+        @media (max-width: 900px) {
+          .wme-why {
+            left: 14px;
+            right: 14px;
+            width: auto;
+          }
+        }
+        .wme-intel {
+          right: 14px;
+          left: auto;
+        }
+        .wme-intel__factions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 5px;
+        }
+        .wme-intel__faction {
+          min-width: 0;
+          padding: 7px;
+          border: 1px solid #1f2334;
+          border-radius: 6px;
+          background: #0f1320;
+          color: #9ca3af;
+          font-family: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+        .wme-intel__faction:hover,
+        .wme-intel__faction--active {
+          border-color: #d4a017;
+          color: #f5d36d;
+          background: #151723;
+        }
+        .wme-intel__faction strong,
+        .wme-intel__faction span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wme-intel__faction span {
+          margin-top: 3px;
+          color: #6b7280;
+          font-size: 0.66rem;
+        }
+        .wme-intel__hero,
+        .wme-intel__domain,
+        .wme-intel__belief,
+        .wme-intel__knowledge {
+          border: 1px solid #1f2334;
+          border-radius: 6px;
+          background: #0f1320;
+          padding: 8px;
+        }
+        .wme-intel__hero strong {
+          display: block;
+          color: #e5e7eb;
+        }
+        .wme-intel__hero span {
+          display: block;
+          margin-top: 4px;
+          color: #9ca3af;
+          white-space: normal;
+        }
+        .wme-intel__domain div,
+        .wme-intel__knowledge strong {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          color: #e5e7eb;
+        }
+        .wme-intel__domain span,
+        .wme-intel__knowledge span,
+        .wme-intel__belief span {
+          color: #d4a017;
+        }
+        .wme-intel__domain p,
+        .wme-intel__belief p,
+        .wme-intel__knowledge p {
+          margin: 5px 0 0;
+          color: #aeb4c0;
+          line-height: 1.35;
+          white-space: normal;
+        }
+        .wme-intel__belief {
+          color: #aeb4c0;
+          white-space: normal;
+        }
+        @media (max-width: 900px) {
+          .wme-intel {
+            left: 14px;
+            right: 14px;
+            width: auto;
+          }
+          .wme-intel__factions {
+            grid-template-columns: 1fr;
+          }
+        }
+        .wme-autopsy {
+          left: 50%;
+          right: auto;
+          transform: translateX(-50%);
+          width: min(520px, calc(100vw - 28px));
+        }
+        .wme-autopsy__chain {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+        .wme-autopsy__node,
+        .wme-autopsy__record,
+        .wme-autopsy__metric {
+          border: 1px solid #1f2334;
+          border-radius: 6px;
+          background: #0f1320;
+        }
+        .wme-autopsy__node {
+          padding: 8px;
+        }
+        .wme-autopsy__node span,
+        .wme-autopsy__record p span {
+          display: block;
+          margin-bottom: 3px;
+          color: #d4a017;
+          font-size: 0.66rem;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+        }
+        .wme-autopsy__node strong {
+          display: block;
+          color: #e5e7eb;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wme-autopsy__node p,
+        .wme-autopsy__record p {
+          margin: 4px 0 0;
+          color: #aeb4c0;
+          line-height: 1.35;
+          white-space: normal;
+        }
+        .wme-autopsy__metrics {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 6px;
+        }
+        .wme-autopsy__metric {
+          min-width: 0;
+          padding: 8px 6px;
+          text-align: center;
+        }
+        .wme-autopsy__metric strong,
+        .wme-autopsy__metric span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wme-autopsy__metric strong {
+          color: #f5d36d;
+          font-size: 1rem;
+        }
+        .wme-autopsy__metric span {
+          margin-top: 3px;
+          color: #6b7280;
+          font-size: 0.65rem;
+        }
+        .wme-autopsy__record {
+          padding: 8px;
+        }
+        .wme-autopsy__spread {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          margin-top: 6px;
+        }
+        .wme-autopsy__spread span {
+          display: inline-flex;
+          align-items: center;
+          min-height: 20px;
+          padding: 2px 6px;
+          border: 1px solid #292d3f;
+          border-radius: 4px;
+          background: #111827;
+          color: #9ca3af;
+          font-size: 0.66rem;
+        }
+        @media (max-width: 900px) {
+          .wme-autopsy {
+            left: 14px;
+            right: 14px;
+            transform: none;
+            width: auto;
+          }
+          .wme-autopsy__metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
 
         /* ---------- modal backdrop ---------- */
         .wme-modal-backdrop {

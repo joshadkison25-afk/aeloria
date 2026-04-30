@@ -1,0 +1,123 @@
+{
+  "tick": 0,
+  "world_date": "Day 0",
+  "primary_event": {},
+  "supporting_events": [],
+  "active_events": [],
+  "recent_events": [],
+  "faction_power_state": [
+    {
+      "faction": "Ironmark",
+      "militaryPower": 62,
+      "economicPower": 38,
+      "politicalInfluence": 50
+    },
+    {
+      "faction": "Thornhaven",
+      "militaryPower": 48,
+      "economicPower": 65,
+      "politicalInfluence": 60
+    },
+    {
+      "faction": "Silver Coast",
+      "militaryPower": 35,
+      "economicPower": 32,
+      "politicalInfluence": 40
+    }
+  ],
+  "faction_economy": [
+    {
+      "faction": "Ironmark",
+      "resources": {
+        "grain": { "production": 40.0, "stockpile": 30, "storage_capacity": 300, "consumption": 100 },
+        "iron":  { "production": 60.0, "stockpile": 180, "storage_capacity": 250, "consumption": 20 }
+      },
+      "shortage_effects": {
+        "grain": { "severity": 0.75 },
+        "iron":  { "severity": 0.0 }
+      }
+    },
+    {
+      "faction": "Thornhaven",
+      "resources": {
+        "grain": { "production": 90.0, "stockpile": 220, "storage_capacity": 300, "consumption": 80 }
+      },
+      "shortage_effects": {
+        "grain": { "severity": 0.0 }
+      }
+    },
+    {
+      "faction": "Silver Coast",
+      "resources": {
+        "grain": { "production": 50.0, "stockpile": 55, "storage_capacity": 200, "consumption": 70 }
+      },
+      "shortage_effects": {
+        "grain": { "severity": 0.28 }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "faction_a": "Ironmark",
+      "faction_b": "Thornhaven",
+      "type": "war",
+      "hostility": 88,
+      "trust": 5,
+      "war_ticks": 2
+    },
+    {
+      "faction_a": "Ironmark",
+      "faction_b": "Silver Coast",
+      "type": "neutral",
+      "hostility": 35,
+      "trust": 45
+    },
+    {
+      "faction_a": "Thornhaven",
+      "faction_b": "Silver Coast",
+      "type": "alliance",
+      "hostility": 10,
+      "trust": 72
+    }
+  ],
+  "locations": [
+    {
+      "name": "Iron Hold",
+      "controller": "Ironmark",
+      "stability": 52,
+      "control": 58,
+      "region_type": "capital",
+      "value": 80
+    },
+    {
+      "name": "Borderlands",
+      "controller": "Ironmark",
+      "stability": 32,
+      "control": 38,
+      "region_type": "frontier",
+      "value": 30
+    },
+    {
+      "name": "Thorngate",
+      "controller": "Thornhaven",
+      "stability": 72,
+      "control": 78,
+      "region_type": "capital",
+      "value": 90
+    },
+    {
+      "name": "Saltmouth",
+      "controller": "Silver Coast",
+      "stability": 42,
+      "control": 44,
+      "region_type": "port",
+      "value": 55
+    }
+  ],
+  "ruler_legitimacy_scores": {
+    "Ironmark": 50,
+    "Thornhaven": 72,
+    "Silver Coast": 44
+  },
+  "tick_history": []
+}

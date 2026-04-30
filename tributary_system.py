@@ -14,6 +14,8 @@ import hashlib
 import random
 from typing import Dict, List, Optional
 
+from engine.causality import record_cause
+
 __all__ = [
     "run_tributary_system",
     "pact_id_for",
@@ -309,6 +311,62 @@ def _merge_tributary_history(state: dict) -> None:
             break
 
 
+def _record_tributary_cause(
+    state: dict,
+    pact: dict,
+    *,
+    decision: str,
+    outcome: str,
+    severity: int,
+    reason: str = "",
+    moved: Dict[str, float] | None = None,
+) -> None:
+    dom = str(pact.get("dominant_faction") or "")
+    sub = str(pact.get("subordinate_faction") or "")
+    tid = str(pact.get("tributary_id") or "tributary-unspecified")
+    ttype = str(pact.get("tribute_type") or "tribute")
+    resentment = float((state.get("tributary_resentment") or {}).get(sub, 0) or 0)
+    actor = sub if decision == "break_tributary_pact" else dom
+    affected = [item for item in [dom, sub, tid] if item]
+
+    if decision == "pay_tribute":
+        moved_text = ", ".join(f"{res}={round(amount, 2)}" for res, amount in (moved or {}).items())
+        pressure = (
+            f"tributary obligation; type={ttype}; payment_per_tick={pact.get('payment_per_tick', 0)}; "
+            f"resentment={round(resentment, 2)}"
+        )
+        belief = "tribute obligations preserve protection at the cost of resentment"
+        outcome = outcome or f"{sub} paid tribute to {dom}: {moved_text or 'no resources moved'}."
+    elif decision == "break_tributary_pact":
+        pressure = (
+            f"tributary burden/default; type={ttype}; reason={reason or 'unknown'}; "
+            f"resentment={round(resentment, 2)}"
+        )
+        belief = "tribute burden outweighs submission"
+        outcome = outcome or f"{sub} broke tributary pact {tid} with {dom}."
+    else:
+        pressure = (
+            f"tributary duration elapsed; type={ttype}; tributary_id={tid}; "
+            f"dominant={dom}; subordinate={sub}"
+        )
+        belief = "tribute obligations end when the pact duration expires"
+        outcome = outcome or f"Tributary pact {tid} between {sub} and {dom} expired."
+
+    record_cause(
+        state,
+        domain="tributary",
+        actor=actor or "Tributary Order",
+        pressure=pressure,
+        belief=belief,
+        decision=decision,
+        outcome=outcome,
+        affected=affected,
+        severity=severity,
+        confidence=0.88,
+        source="tributary_system",
+    )
+
+
 def run_tributary_system(state: dict) -> None:
     """
     Process tribute payments, apply political/economic effects, handle breaks, AI hints.
@@ -349,6 +407,14 @@ def run_tributary_system(state: dict) -> None:
         st, dur = int(p.get("start_tick", 0) or 0), int(p.get("duration", 1) or 1)
         if tick >= st + dur:
             p["status"] = "expired"
+            _record_tributary_cause(
+                state,
+                p,
+                decision="expire_tributary_pact",
+                outcome=f"Tributary pact {p.get('tributary_id')} between {sub} and {dom} expired.",
+                severity=5,
+                reason="duration_elapsed",
+            )
             continue
         pay_amt = int(p.get("payment_per_tick", 0) or 0)
         ttype = p.get("tribute_type", "gold")
@@ -357,6 +423,14 @@ def run_tributary_system(state: dict) -> None:
         if pay_amt > 0 and sum(moved.values()) < pay_amt * 0.15 and pay_amt > 5:
             _on_break_tribute(state, str(dom), str(sub), "payment_default", may_war=True)
             p["status"] = "broken"
+            _record_tributary_cause(
+                state,
+                p,
+                decision="break_tributary_pact",
+                outcome=f"{sub} defaulted on tribute to {dom}; the tributary pact broke.",
+                severity=12,
+                reason="payment_default",
+            )
             continue
         ress[sub] = ress.get(sub, 0.0) + 0.22 + (pay_amt * 0.0008) * 0.15
         ress[sub] = float(_clamp(ress[sub], 0, 100))
@@ -389,10 +463,26 @@ def run_tributary_system(state: dict) -> None:
         if rr > 88 and random.random() < 0.08 + (rr - 88) * 0.01:
             _on_break_tribute(state, str(dom), str(sub), "resentment_breach", may_war=True)
             p["status"] = "broken"
+            _record_tributary_cause(
+                state,
+                p,
+                decision="break_tributary_pact",
+                outcome=f"{sub} rejected tributary submission to {dom} as resentment boiled over.",
+                severity=13,
+                reason="resentment_breach",
+            )
             continue
         if rr > 52 and dom_m < 34 and random.random() < 0.12:
             _on_break_tribute(state, str(dom), str(sub), "opportunistic_rebellion", may_war=True)
             p["status"] = "broken"
+            _record_tributary_cause(
+                state,
+                p,
+                decision="break_tributary_pact",
+                outcome=f"{sub} rebelled against {dom}'s tributary rule while the dominant power was weak.",
+                severity=13,
+                reason="opportunistic_rebellion",
+            )
             continue
 
         rel = _ensure_rel(state, str(dom), str(sub))
@@ -410,6 +500,16 @@ def run_tributary_system(state: dict) -> None:
                 "tribute_type": ttype,
             }
         )
+        if moved:
+            moved_text = ", ".join(f"{res} {round(amount, 2)}" for res, amount in moved.items())
+            _record_tributary_cause(
+                state,
+                p,
+                decision="pay_tribute",
+                outcome=f"{sub} paid tribute to {dom}: {moved_text}.",
+                severity=4,
+                moved=moved,
+            )
         active_rows.append(
             {
                 **p,

@@ -1,3 +1,11 @@
+"""Legacy AI world-state simulation module.
+
+This module is quarantined from the runtime tick path. Axiom's deterministic
+engine owns world truth; AI may only be used after surfacing for narration,
+reports, rumors, voice, and other flavor. Keep this file available for
+compatibility while its prompts/tools are retired or rewritten.
+"""
+
 import json
 import logging
 import os
@@ -1726,8 +1734,9 @@ def _call_claude(prev_state, pending_lore):
     return _finalize_llm_state(prev_state, raw_input)
 
 def _finalize_llm_state(prev_state, raw_input):
-    import scheduler as _sched  # lazy: avoid circular import; update to world_state.normalize in Phase 6
-    result = _sched._normalize_state(prev_state, raw_input)
+    from world_state.normalize import _normalize_state
+
+    result = _normalize_state(prev_state, raw_input)
     result["real_timestamp"] = datetime.now().isoformat()
     return result
 

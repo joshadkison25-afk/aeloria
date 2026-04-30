@@ -13,6 +13,8 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
+from engine.causality import record_cause
+
 __all__ = [
     "run_birth_system",
     "DEFAULT_BIRTH_CONFIG",
@@ -306,6 +308,35 @@ def _make_child(
     return w
 
 
+def _record_birth_cause(state: dict, event: dict) -> None:
+    child = event.get("child") or {}
+    parents = [str(p).strip() for p in event.get("parents", []) if str(p).strip()]
+    if not isinstance(child, dict) or not child:
+        return
+    child_name = str(child.get("name") or "Unnamed child").strip()
+    faction = str(child.get("faction") or "Noble Houses").strip()
+    house = str(child.get("house") or "").strip()
+    role = str(child.get("coreRole") or "Minor").strip()
+    severity = 8 if role in {"Heir", "Leader"} else 5
+
+    record_cause(
+        state,
+        domain="dynasty",
+        actor=faction,
+        pressure=(
+            f"dynastic continuity pressure; house={house}; parents={', '.join(parents)}; "
+            f"child_role={role}; inherited_traits={child.get('traits', [])}"
+        ),
+        belief="birth extends the ruling line and alters future succession pressure",
+        decision="record_dynastic_birth",
+        outcome=f"{child_name} is born to {', '.join(parents) or 'unknown parents'}, extending {house or faction}.",
+        affected=[item for item in [faction, house, child_name, *parents] if item],
+        severity=severity,
+        confidence=0.9,
+        source="birth_system",
+    )
+
+
 def run_birth_system(state: dict) -> None:
     t = int(state.get("tick", 0) or 0)
     if state.get("_birth_system_tick") == t:
@@ -370,8 +401,9 @@ def run_birth_system(state: dict) -> None:
 
     state["house_characters"] = hc
     state["birth_events"] = events
+    for event in events:
+        _record_birth_cause(state, event)
     for h in reversed(state.get("tick_history", []) or []):
         if h.get("tick") == t:
             h["birth_events"] = events
             break
-

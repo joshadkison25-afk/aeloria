@@ -22,6 +22,7 @@ from economy_simulation import (
     list_faction_ids,
     _population_aggregates,  # type: ignore
 )
+from engine.causality import record_cause
 from siege_blockade import _is_allied, _is_at_war
 
 # Supply / morale / desertion (tunable)
@@ -421,6 +422,69 @@ def _shortage(state: dict, fid: str, res: str) -> float:
     return 0.0
 
 
+def _record_logistics_cause(
+    state: dict,
+    army: dict,
+    row: dict,
+    *,
+    desertion_loss: int = 0,
+    supply_collapse: bool = False,
+) -> None:
+    fid = _faction_id(army)
+    if not fid:
+        return
+    attrition_loss = int(row.get("loss", 0) or 0)
+    total_loss = max(0, attrition_loss + max(0, int(desertion_loss or 0)))
+    before = int(row.get("manpower_before", 0) or 0)
+    if not supply_collapse and total_loss < max(30, int(before * 0.03)):
+        return
+
+    army_id = str(army.get("army_id") or "")
+    loc = str(army.get("location") or "unknown ground")
+    supply_status = str(row.get("supply_status") or army.get("supply_status") or "unknown")
+    reason = str(row.get("supply_line_reason") or army.get("supply_line_reason") or "unknown")
+    terrain = str(row.get("terrain") or "unknown")
+    severity = 8
+    decision = "endure_campaign_attrition"
+    if desertion_loss >= attrition_loss and desertion_loss > 0:
+        decision = "desert_under_logistics_pressure"
+        severity = 10
+    if supply_collapse:
+        decision = "supply_collapse"
+        severity = 13
+    elif total_loss >= max(120, int(before * 0.12)):
+        severity = 11
+    elif supply_status == "cut":
+        severity = max(severity, 9)
+
+    pressure = (
+        f"army logistics pressure; supply_status={supply_status}; reason={reason}; "
+        f"supply_factor={row.get('supply_factor', 'unknown')}; terrain={terrain}; "
+        f"campaign_ticks_hostile={row.get('campaign_ticks_hostile', 0)}"
+    )
+    belief = "campaign logistics decide whether field forces can keep fighting"
+    outcome = (
+        f"{fid} lost {total_loss} troops near {loc}"
+        f" ({attrition_loss} attrition, {max(0, int(desertion_loss or 0))} desertion)."
+    )
+    if supply_collapse:
+        outcome = f"{fid}'s army suffered a supply collapse near {loc}; {outcome}"
+
+    record_cause(
+        state,
+        domain="war_attrition",
+        actor=fid,
+        pressure=pressure,
+        belief=belief,
+        decision=decision,
+        outcome=outcome,
+        affected=[item for item in [fid, army_id, loc] if item],
+        severity=severity,
+        confidence=0.86,
+        source="military_simulation",
+    )
+
+
 def run_military_after_economy_tick(state: dict, prev_state: Optional[dict] = None) -> None:
     del prev_state
     tick = int(state.get("tick", 0) or 0)
@@ -530,6 +594,8 @@ def run_military_after_economy_tick(state: dict, prev_state: Optional[dict] = No
         row["tick"] = tick
         row["supply_status"] = sstat
         row["supply_line_reason"] = sreason
+        row["manpower_before"] = int(mnp)
+        row["manpower_after"] = int(a.get("manpower", 0) or 0)
         attrition_report.append(row)
         sup = int(a.get("supply_level", 50) or 50)
         mor = int(a.get("morale", 50) or 50)
@@ -560,6 +626,13 @@ def run_military_after_economy_tick(state: dict, prev_state: Optional[dict] = No
         a["morale"] = _clamp_i(mor, 0, 100)
         a["manpower"] = mnp
         a["discipline"] = _clamp_i(disc, 0, 100)
+        _record_logistics_cause(
+            state,
+            a,
+            row,
+            desertion_loss=int(a.get("_last_desertion", 0) or 0),
+            supply_collapse=bool(a.get("_supply_collapse")),
+        )
         if a.get("manpower", 0) < 1:
             continue
         updated.append(a)

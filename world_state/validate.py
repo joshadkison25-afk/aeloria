@@ -79,8 +79,9 @@ def ensure_world_structure(world: dict, previous_world: dict) -> dict:
 
 def _canonicalize_world_state(prev_state, state):
     """Return API-safe, normalized world state for persistence and responses."""
-    import scheduler as _sched  # lazy: _normalize_state moves to world_state.normalize in Phase 6
-    normalized = _sched._normalize_state(prev_state or {}, state or {})
+    from world_state.normalize import _normalize_state
+
+    normalized = _normalize_state(prev_state or {}, state or {})
     normalized = ensure_world_structure(normalized, prev_state or {})
     if not is_valid_world(normalized):
         logger.error("canonicalize: normalized world failed validation; returning previous state")

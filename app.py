@@ -358,6 +358,131 @@ def get_tick(tick_number):
     return jsonify({"error": f"Tick {tick_number} not found"}), 404
 
 
+@app.route("/api/causality")
+def get_causality():
+    from engine.causality import get_tick_causes
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    try:
+        tick = request.args.get("tick", type=int)
+    except Exception:
+        tick = None
+    causes = get_tick_causes(state, tick=tick)
+    return jsonify({
+        "tick": int(state.get("tick", 0) if tick is None else tick),
+        "causes": causes,
+    })
+
+
+@app.route("/api/axiom/last-tick")
+def get_axiom_last_tick():
+    state = _read_json(WORLD_STATE_FILE, {})
+    ledger = state.get("causality_ledger", [])
+    if not isinstance(ledger, list):
+        ledger = []
+    return jsonify({
+        "last_tick_autopsy": state.get("last_tick_autopsy") or {},
+        "recent_causality_records": [
+            row for row in ledger[-20:] if isinstance(row, dict)
+        ],
+    })
+
+
+@app.route("/api/explainability")
+def get_explainability():
+    from engine.explainability import build_explainability_report
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    try:
+        tick = request.args.get("tick", type=int)
+    except Exception:
+        tick = None
+    try:
+        limit = int(request.args.get("limit", 24) or 24)
+    except Exception:
+        limit = 24
+    return jsonify(build_explainability_report(
+        state,
+        tick=tick,
+        domain=(request.args.get("domain") or "").strip(),
+        faction=(request.args.get("faction") or "").strip(),
+        limit=limit,
+    ))
+
+
+@app.route("/api/knowledge")
+def get_knowledge():
+    from engine.knowledge import get_faction_knowledge, normalize_faction_knowledge_rows
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    faction = (request.args.get("faction") or "").strip()
+    if faction:
+        return jsonify(get_faction_knowledge(state, faction))
+    return jsonify({
+        "tick": int(state.get("tick", 0) or 0),
+        "faction_knowledge": normalize_faction_knowledge_rows(state.get("faction_knowledge", [])),
+    })
+
+
+@app.route("/api/pressure")
+def get_pressure():
+    from engine.pressure import compute_faction_pressure, compute_pressure_report
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    faction = (request.args.get("faction") or "").strip()
+    if faction:
+        return jsonify(compute_faction_pressure(state, faction))
+    return jsonify({
+        "tick": int(state.get("tick", 0) or 0),
+        "pressure_report": compute_pressure_report(state),
+    })
+
+
+@app.route("/api/beliefs")
+def get_beliefs():
+    from engine.beliefs import build_faction_beliefs, update_beliefs
+    from engine.pressure import compute_faction_pressure, compute_pressure_report
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    faction = (request.args.get("faction") or "").strip()
+    if faction:
+        return jsonify(build_faction_beliefs(state, faction, compute_faction_pressure(state, faction)))
+    state["pressure_report"] = compute_pressure_report(state)
+    return jsonify({
+        "tick": int(state.get("tick", 0) or 0),
+        "faction_beliefs": update_beliefs(state),
+    })
+
+
+@app.route("/api/faction-intel")
+def get_faction_intel():
+    from engine.intel import build_intel_report
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    try:
+        limit = int(request.args.get("limit", 18) or 18)
+    except Exception:
+        limit = 18
+    return jsonify(build_intel_report(
+        state,
+        faction=(request.args.get("faction") or "").strip(),
+        limit=limit,
+    ))
+
+
+@app.route("/api/council")
+def get_council():
+    from engine.beliefs import update_beliefs
+    from engine.council import build_council_report
+    from engine.pressure import compute_pressure_report
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    state["pressure_report"] = state.get("pressure_report") or compute_pressure_report(state)
+    if not state.get("faction_beliefs"):
+        update_beliefs(state)
+    return jsonify(build_council_report(state))
+
+
 # ── Lore & tick control ──────────────────────────────────────────────────────
 
 @app.route("/api/lore", methods=["POST"])
@@ -377,10 +502,84 @@ def force_tick():
     from scheduler import run_tick
     try:
         new_state = run_tick()
-        return jsonify({"status": "ok", "tick": new_state.get("tick"), "world_date": new_state.get("world_date")})
+        from axiom_clock import get_clock_state
+
+        return jsonify({
+            "status": "ok",
+            "tick": new_state.get("tick"),
+            "world_date": new_state.get("world_date"),
+            "clock": get_clock_state(),
+        })
     except Exception as e:
         logger.error(f"Forced tick failed: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+def _broadcast_clock_state(state: dict) -> None:
+    try:
+        import tick_bus
+
+        tick_bus.notify_tick({"type": "clock", "clock": state})
+    except Exception as exc:
+        logger.warning("Clock broadcast failed: %s", exc)
+
+
+@app.route("/api/clock")
+def get_clock():
+    from axiom_clock import get_clock_state
+
+    return jsonify(get_clock_state())
+
+
+@app.route("/api/clock/pause", methods=["POST"])
+def pause_clock_api():
+    from axiom_clock import get_clock_state
+    from scheduler import pause_ticks
+
+    pause_ticks()
+    return jsonify(get_clock_state())
+
+
+@app.route("/api/clock/resume", methods=["POST"])
+def resume_clock_api():
+    from axiom_clock import get_clock_state
+    from scheduler import resume_ticks
+
+    resume_ticks()
+    return jsonify(get_clock_state())
+
+
+@app.route("/api/clock/speed", methods=["POST"])
+def set_clock_speed_api():
+    from axiom_clock import set_clock_speed
+
+    body = request.get_json(silent=True) or {}
+    try:
+        speed = int(body.get("speed", 3))
+    except Exception:
+        return jsonify({"error": "speed must be an integer from 1 to 5"}), 400
+    state = set_clock_speed(speed)
+    _broadcast_clock_state(state)
+    return jsonify(state)
+
+
+@app.route("/api/clock/step", methods=["POST"])
+def step_clock_api():
+    from axiom_clock import get_clock_state
+    from scheduler import pause_ticks, run_tick
+
+    pause_ticks()
+    try:
+        new_state = run_tick()
+        return jsonify({
+            "status": "ok",
+            "tick": new_state.get("tick"),
+            "world_date": new_state.get("world_date"),
+            "clock": get_clock_state(),
+        })
+    except Exception as e:
+        logger.error(f"Clock step failed: {e}", exc_info=True)
+        return jsonify({"error": str(e), "clock": get_clock_state()}), 500
 
 
 @app.route("/api/pending_lore")

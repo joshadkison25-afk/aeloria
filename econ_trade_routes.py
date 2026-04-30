@@ -11,6 +11,8 @@ import hashlib
 import random
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 # Keep independent of import order relative to economy_simulation
 CORE_RES: Tuple[str, ...] = ("grain", "iron", "timber", "gold")
 
@@ -335,6 +337,37 @@ def _instability_touched(state: dict, fids: Set[str], bump: int) -> None:
                 break
 
 
+def _record_trade_disruption_cause(state: dict, route: dict) -> None:
+    origin = str(route.get("origin") or "Unknown origin")
+    destination = str(route.get("destination") or "Unknown destination")
+    route_id = str(route.get("id") or _route_key(origin, destination, str(route.get("kind", "land"))))
+    kind = str(route.get("kind") or "land")
+    risk = round(float(route.get("risk", 0.0) or 0.0), 3)
+    capacity = int(route.get("capacity", 0) or 0)
+    remaining = int(route.get("disrupted_remaining", 0) or 0)
+    piracy = bool(route.get("piracy_flag"))
+    cause = "piracy" if piracy else "route instability"
+    severity = 10 if piracy else (8 if kind == "sea" else 7)
+
+    record_cause(
+        state,
+        domain="economy",
+        actor=origin,
+        pressure=(
+            f"trade route disruption; route_id={route_id}; kind={kind}; "
+            f"risk={risk}; capacity={capacity}; disrupted_remaining={remaining}; cause={cause}"
+        ),
+        belief="trade networks are vulnerable to piracy, blockade pressure, and local instability",
+        decision="disrupt_trade_route",
+        outcome=f"{kind.title()} trade route {route_id} from {origin} to {destination} was disrupted by {cause}.",
+        affected=[origin, destination, route_id],
+        hidden=None,
+        severity=severity,
+        confidence=0.82,
+        source="econ_trade_routes",
+    )
+
+
 def process_economic_trade_routes(state: dict, prev_state: Optional[dict] = None) -> None:
     prev = prev_state or {}
     from economy_simulation import list_faction_ids  # type: ignore
@@ -415,6 +448,9 @@ def process_economic_trade_routes(state: dict, prev_state: Optional[dict] = None
         if str(r.get("status")) != "active" and str(r.get("kind")) == "sea"
     )
     piracy_n = int(sum(1 for r in newly_disrupted if r.get("piracy_flag")))
+
+    for rt in newly_disrupted[:4]:
+        _record_trade_disruption_cause(state, rt)
 
     total_flow: Dict[str, float] = {k: 0.0 for k in CORE_RES}
     route_out: List[dict] = []

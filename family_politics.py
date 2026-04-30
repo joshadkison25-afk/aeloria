@@ -13,6 +13,8 @@ import random
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 __all__ = ["run_family_politics", "DEFAULT_FAMILY_POLITICS_CONFIG"]
 
 DEFAULT_FAMILY_POLITICS_CONFIG = {
@@ -314,6 +316,64 @@ def _risk_level(
     return int(max(0, min(cap, r)))
 
 
+def _record_family_politics_cause(
+    state: dict,
+    *,
+    faction: str,
+    ruling_house: str,
+    family_size: int,
+    heir_count: int,
+    rival_pairs: int,
+    risk: int,
+    cfg: dict,
+) -> None:
+    if risk < 35:
+        return
+    many_heirs_at = int(cfg.get("many_heirs_at", 3) or 3)
+    large_at = int(cfg.get("large_family_at", 6) or 6)
+    pressure_bits = [
+        f"family_size={family_size}",
+        f"heir_count={heir_count}",
+        f"rival_sibling_pairs={rival_pairs}",
+        f"risk_level={risk}",
+    ]
+    if heir_count == 0:
+        decision = "flag_no_clear_heir"
+        outcome = f"{faction}'s {ruling_house or 'ruling house'} lacks a clear heir, inviting cadet and external claims."
+        severity = 11
+        pressure_bits.append("no_clear_heir=True")
+    elif heir_count >= many_heirs_at:
+        decision = "flag_heir_crowding"
+        outcome = f"{faction}'s {ruling_house or 'ruling house'} has too many plausible heirs, raising succession risk."
+        severity = 9
+        pressure_bits.append("many_heirs=True")
+    elif rival_pairs > 0:
+        decision = "flag_sibling_rivalry"
+        outcome = f"Rival branches within {faction}'s {ruling_house or 'ruling house'} clash over precedence."
+        severity = 8
+        pressure_bits.append("sibling_rivalry=True")
+    else:
+        decision = "flag_large_house_strain"
+        outcome = f"{faction}'s large {ruling_house or 'ruling house'} strains court order and appointments."
+        severity = 7
+        pressure_bits.append(f"large_house_at={large_at}")
+    severity = max(severity, min(14, 5 + risk // 10))
+
+    record_cause(
+        state,
+        domain="dynasty",
+        actor=faction,
+        pressure="family politics pressure; " + "; ".join(pressure_bits),
+        belief="house structure changes succession expectations and internal loyalty",
+        decision=decision,
+        outcome=outcome,
+        affected=[item for item in [faction, ruling_house] if item],
+        severity=severity,
+        confidence=0.85,
+        source="family_politics",
+    )
+
+
 def run_family_politics(state: dict) -> None:
     t = int(state.get("tick", 0) or 0)
     if state.get("_family_politics_tick") == t:
@@ -362,6 +422,16 @@ def run_family_politics(state: dict) -> None:
             _apply_no_heir(state, fac, rh, cfg, t, rh)
         _apply_many_heir_risk(state, fac, heir_count, cfg)
         _sibling_rival_tensions(state, fac, rh, members, rivals, cfg)
+        _record_family_politics_cause(
+            state,
+            faction=fac,
+            ruling_house=rh,
+            family_size=family_size,
+            heir_count=heir_count,
+            rival_pairs=rivals,
+            risk=risk,
+            cfg=cfg,
+        )
 
     by_faction.sort(key=lambda r: -int(r.get("risk_level", 0) or 0))
     worst = by_faction[0] if by_faction else None
@@ -382,4 +452,3 @@ def run_family_politics(state: dict) -> None:
         if h.get("tick") == t:
             h["family_politics"] = state["family_politics"]
             break
-

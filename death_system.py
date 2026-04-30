@@ -89,7 +89,7 @@ def _norm_race(r: str) -> str:
 
 
 def _elder_exp_risk(age: float, race: str, cfg: dict) -> float:
-    from scheduler import RACE_LIFESPAN
+    from engine.characters import RACE_LIFESPAN
 
     r = _norm_race(race)
     span = RACE_LIFESPAN.get(r, RACE_LIFESPAN["Human"])
@@ -296,6 +296,63 @@ def _emit_major_event(state: dict, dead: dict, cause: str, succession: bool) -> 
         }
 
 
+def _record_death_causality(state: dict, dead: dict, cause: str, succession: bool) -> None:
+    from engine.causality import record_cause
+
+    name = (dead.get("name") or "").strip()
+    faction = (dead.get("faction") or "").strip()
+    if not name or not faction:
+        return
+
+    succession_event = {}
+    if succession:
+        for row in reversed(state.get("succession_events") or []):
+            if isinstance(row, dict):
+                succession_event = row
+                break
+
+    new_ruler = succession_event.get("new_ruler") if isinstance(succession_event, dict) else {}
+    new_ruler_name = (new_ruler or {}).get("name") or ""
+    crisis = succession_event.get("crisis_outcome", "") if isinstance(succession_event, dict) else ""
+    risk = succession_event.get("conflict_risk", "") if isinstance(succession_event, dict) else ""
+
+    if succession:
+        pressure = (
+            f"ruler death; cause={_cause_label(cause)}; legitimacy shock; "
+            f"succession_outcome={crisis}; conflict_risk={risk}"
+        )
+        decision = "resolve_succession"
+        outcome = f"{name} died and {new_ruler_name or 'a regency'} now rules {faction}."
+        if crisis:
+            outcome += f" Succession outcome: {crisis}."
+        affected = [faction, name]
+        if new_ruler_name:
+            affected.append(str(new_ruler_name))
+        domain = "succession"
+        severity = 15 if crisis in {"contested_claim", "foreign_intervention", "succession_crisis"} else 12
+    else:
+        pressure = f"character death; cause={_cause_label(cause)}; political continuity holds"
+        decision = "register_death"
+        outcome = f"{name} of {faction} died from {_cause_label(cause)}."
+        affected = [faction, name]
+        domain = "character"
+        severity = 8 if _important_character(dead, state) else 4
+
+    record_cause(
+        state,
+        domain=domain,
+        actor=faction,
+        pressure=pressure,
+        belief="succession law and claimant strength determine the new ruler" if succession else "",
+        decision=decision,
+        outcome=outcome,
+        affected=affected,
+        severity=severity,
+        confidence=0.95,
+        source="death_system",
+    )
+
+
 def _death_probability_for_char(
     ch: dict,
     state: dict,
@@ -304,7 +361,7 @@ def _death_probability_for_char(
     pending: Dict[str, str],
     cfg: dict,
 ) -> Tuple[float, str]:
-    from scheduler import (
+    from engine.characters import (
         _critical_health_death_chance,
         _health_death_modifier,
         _natural_death_chance,
@@ -330,7 +387,7 @@ def _death_probability_for_char(
         return p, _CAUSE_ILLNESS
     if h < 22:
         return p, _CAUSE_ILLNESS
-    from scheduler import RACE_LIFESPAN
+    from engine.characters import RACE_LIFESPAN
 
     span = RACE_LIFESPAN.get(_norm_race(race), RACE_LIFESPAN["Human"])
     onset = max(12.0, min(float(span["natural"]) * 0.69, float(span["natural"]) - 1.0))
@@ -399,6 +456,7 @@ def run_death_system(state: dict) -> None:
         _apply_legitimacy_penalty(state, fac, leg_mode, cfg)
         if is_ruler or succ or _important_character(ch, state):
             _emit_major_event(state, ch, _cause_label(cause), succ)
+            _record_death_causality(state, ch, cause, succ)
 
         events.append(
             {

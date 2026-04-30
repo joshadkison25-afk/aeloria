@@ -11,6 +11,8 @@ import random
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
+from engine.causality import record_cause
+
 # --- Resource model ---------------------------------------------------------------------------
 
 CORE_RESOURCES: Tuple[str, ...] = ("grain", "iron", "timber", "gold")
@@ -165,18 +167,46 @@ def _effect_grain(faction: str, severity: float, state: dict) -> None:
         return
     pop_state = state.setdefault("population_state", [])
     regions = _controlled_region_names(faction, state)
+    affected_regions: List[str] = []
+    total_loss = 0
+    max_pressure_after = 0
     for row in pop_state:
         r = row.get("region", "")
         if regions and r not in regions:
             continue
         p = int(row.get("pressure", 50))
         row["pressure"] = int(_clamp(p + 2 + 8 * severity * SHORTAGE_STRENGTH, 0, 100))
+        max_pressure_after = max(max_pressure_after, int(row.get("pressure", 0) or 0))
         pop = int(row.get("population", 0))
         if pop > 0:
             loss = max(1, int(pop * 0.0015 * severity * SHORTAGE_STRENGTH))
             row["population"] = max(0, pop - loss)
+            total_loss += max(0, pop - int(row["population"]))
+        if r:
+            affected_regions.append(str(r))
         g = float(row.get("growthRate", 0.0)) - 0.0001 * severity * SHORTAGE_STRENGTH
         row["growthRate"] = g
+    if affected_regions and (severity >= 0.35 or total_loss >= 5 or max_pressure_after >= 75):
+        record_cause(
+            state,
+            domain="population",
+            actor=faction,
+            pressure=(
+                f"grain shortage social stress; severity={round(float(severity), 3)}; "
+                f"population_loss={total_loss}; max_pressure={max_pressure_after}"
+            ),
+            belief="food scarcity is straining households and weakening local order",
+            decision="population_food_unrest",
+            outcome=(
+                f"Food scarcity raises unrest across {faction}'s population centers "
+                f"and displaces {total_loss} people."
+            ),
+            affected=[faction, *affected_regions[:6]],
+            hidden=None,
+            severity=int(_clamp(6 + severity * 6 + min(3, total_loss / 20), 6, 12)),
+            confidence=0.88,
+            source="economy_simulation",
+        )
 
 
 def _effect_timber(faction: str, severity: float, state: dict) -> None:
@@ -251,6 +281,69 @@ def _apply_disruption_to_prices(
     return out
 
 
+def _record_market_shock_cause(
+    state: dict,
+    *,
+    prices: Dict[str, float],
+    aggregate_supply: Dict[str, float],
+    aggregate_demand: Dict[str, float],
+    price_spike_mult: float,
+) -> None:
+    pressure_by_resource: Dict[str, float] = {}
+    for res in MARKET_TRADABLE:
+        base = max(0.01, float(BASE_PRICE.get(res, 1.0)))
+        price_mult = float(prices.get(res, base)) / base
+        demand_pressure = float(aggregate_demand.get(res, 0.0) or 0.0) / max(
+            1.0, float(aggregate_supply.get(res, 0.0) or 0.0)
+        )
+        pressure_by_resource[res] = max(price_mult, demand_pressure)
+
+    if not pressure_by_resource:
+        return
+
+    resource, pressure_score = max(pressure_by_resource.items(), key=lambda item: item[1])
+    spike = float(price_spike_mult or 1.0)
+    if spike < 1.12 and pressure_score < 1.75:
+        return
+
+    affected: List[str] = []
+    for row in state.get("faction_economy", []) or []:
+        faction = row.get("faction_id") or row.get("faction")
+        if not faction:
+            continue
+        shortage = float(
+            ((row.get("shortage_effects") or {}).get(resource) or {}).get("severity", 0.0)
+            or 0.0
+        )
+        trades = row.get("trades") or []
+        touched_market = any(t.get("resource") == resource for t in trades if isinstance(t, dict))
+        if shortage >= 0.15 or touched_market:
+            affected.append(str(faction))
+    if not affected:
+        affected = [str(row.get("faction_id") or row.get("faction")) for row in state.get("faction_economy", []) or [] if row.get("faction_id") or row.get("faction")]
+
+    severity = int(_clamp(5 + (spike - 1.0) * 18 + max(0.0, pressure_score - 1.0) * 2, 5, 10))
+    record_cause(
+        state,
+        domain="economy",
+        actor="World Market",
+        pressure=(
+            f"{resource} market shock; price_mult={round(float(prices.get(resource, BASE_PRICE[resource])) / BASE_PRICE[resource], 3)}; "
+            f"demand={round(float(aggregate_demand.get(resource, 0.0) or 0.0), 2)}; "
+            f"supply={round(float(aggregate_supply.get(resource, 0.0) or 0.0), 2)}; "
+            f"disruption_mult={round(spike, 3)}"
+        ),
+        belief="scarcity and disrupted trade are pushing market prices into political danger",
+        decision="market_price_shock",
+        outcome=f"{resource.title()} prices surged under shortage and trade disruption pressure.",
+        affected=affected[:8],
+        hidden=None,
+        severity=severity,
+        confidence=0.86,
+        source="economy_simulation",
+    )
+
+
 def _run_resource_market(state: dict) -> None:
     """Set global market prices, then have each faction buy shortfalls and sell surpluses (for gold)."""
     rows: List[dict] = list(state.get("faction_economy") or [])
@@ -274,6 +367,13 @@ def _run_resource_market(state: dict) -> None:
         "aggregate_supply": {r: round(float(S[r]), 2) for r in CORE_RESOURCES},
         "aggregate_demand": {r: round(float(D[r]), 2) for r in CORE_RESOURCES},
     }
+    _record_market_shock_cause(
+        state,
+        prices=prices,
+        aggregate_supply=S,
+        aggregate_demand=D,
+        price_spike_mult=sp,
+    )
 
     for row in rows:
         resmap = row.setdefault("resources", {})

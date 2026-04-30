@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from econ_trade_routes import TIDEFALL, _is_at_war  # type: ignore[attr-defined]
 from economy_simulation import list_faction_ids
+from engine.beliefs import belief_summary, dominant_belief, get_faction_belief_state
+from engine.causality import record_cause
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:
@@ -88,6 +90,19 @@ def _pick_raid_victim(faction: str, state: dict) -> str:
         if not _is_at_war(faction, o, state):
             return o
     return others[0] if others else ""
+
+
+def _raid_target_from_beliefs(faction: str, state: dict) -> str:
+    belief_state = get_faction_belief_state(state, faction)
+    for belief in belief_state.get("beliefs", []) or []:
+        if not isinstance(belief, dict):
+            continue
+        claim = str(belief.get("claim") or "").lower()
+        if "vulnerable" in claim and "provisioning raid" in claim:
+            target = str(belief.get("subject") or "").strip()
+            if target and target != faction:
+                return target
+    return ""
 
 
 def _pick_iron_invasion_target(faction: str, state: dict) -> str:
@@ -168,6 +183,15 @@ def _decide_one(
         main: str, s: str, priority: Optional[str] = None
     ) -> Tuple[str, str, str, Dict[str, Any]]:
         return (priority or tier, main, s, meta)
+
+    raid_target = _raid_target_from_beliefs(faction, state)
+    if (tier == "survival" or g > 0.22) and raid_target and g > 0.12:
+        meta["target_faction"] = raid_target
+        return _r(
+            "raid_for_provisions",
+            f"{faction} raiders strike {raid_target} for food after reading weakness across the border.",
+            "survival",
+        )
 
     # Flavor: Vilefin raids when starving
     if (tier == "survival" or g > 0.22) and "Vilefin" in faction and g > 0.12:
@@ -257,6 +281,56 @@ def _merge_into_tick_history(state: dict) -> None:
             break
 
 
+def _economic_decision_severity(decision: dict) -> int:
+    tier = decision.get("priority_tier", "")
+    metrics = decision.get("metrics") or {}
+    shortage = metrics.get("shortage") or {}
+    max_shortage = max([float(v or 0) for v in shortage.values()] or [0.0])
+    if tier == "survival":
+        return 8 + min(5, int(max_shortage * 8))
+    if tier == "economy":
+        return 5 + min(4, int(max_shortage * 6))
+    return 4 + min(4, int(max_shortage * 5))
+
+
+def _record_economic_causes(state: dict, decisions: List[dict]) -> None:
+    for decision in decisions:
+        action = decision.get("action", "")
+        if action == "seek_trade_partners" and decision.get("priority_tier") == "economy":
+            continue
+        faction = decision.get("faction", "")
+        if not faction:
+            continue
+        metrics = decision.get("metrics") or {}
+        shortage = metrics.get("shortage") or {}
+        trade_dep = metrics.get("trade_dependency", 0)
+        mil_need = metrics.get("military_need", 0)
+        food_signal = "; food shortage" if float(shortage.get("grain", 0) or 0) > 0 else ""
+        pressure = (
+            f"{decision.get('priority_tier', 'economic')} economic pressure{food_signal}; "
+            f"shortage={shortage}; trade_dependency={trade_dep}; military_need={mil_need}"
+        )
+        belief = belief_summary(dominant_belief(state, faction))
+        affected = [faction]
+        meta = decision.get("meta") or {}
+        for key in ("target_faction", "focus", "seeking"):
+            if meta.get(key):
+                affected.append(str(meta[key]))
+        record_cause(
+            state,
+            domain="economy",
+            actor=faction,
+            pressure=pressure,
+            belief=belief,
+            decision=action,
+            outcome=decision.get("summary", ""),
+            affected=affected,
+            severity=_economic_decision_severity(decision),
+            confidence=0.82,
+            source="economic_pressure_decisions",
+        )
+
+
 def run_economic_pressure_decisions(state: dict) -> None:
     tick = int(state.get("tick", 0) or 0)
     if state.get("_economic_pressure_decisions_tick") == tick:
@@ -309,6 +383,7 @@ def run_economic_pressure_decisions(state: dict) -> None:
         )
 
     state["economic_pressure_decisions"] = out
+    _record_economic_causes(state, out)
     _merge_into_tick_history(state)
 
 
