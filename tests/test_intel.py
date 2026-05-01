@@ -1,5 +1,5 @@
-from engine.intel import build_faction_intel, build_intel_report
-from engine.knowledge import record_rumor, record_suspicion
+from axiom.engine.intel import build_faction_intel, build_intel_report
+from axiom.engine.knowledge import record_rumor, record_suspicion
 
 
 def test_build_faction_intel_combines_pressure_belief_and_knowledge():

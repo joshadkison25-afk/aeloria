@@ -328,10 +328,16 @@ def process_player_actions(world_state: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def queue_player_action(world_state: dict[str, Any], action: dict[str, Any]) -> int:
-    """Append one action to the pending queue. Returns new queue length."""
+    """Append one action to the pending queue. Returns new queue length.
+
+    Normalises the "type" key to "action" so callers can use either.
+    """
     queue = world_state.setdefault("pending_player_actions", [])
     if not isinstance(queue, list):
         queue = []
         world_state["pending_player_actions"] = queue
-    queue.append(action)
+    normalised = dict(action)
+    if "action" not in normalised and "type" in normalised:
+        normalised["action"] = normalised.pop("type")
+    queue.append(normalised)
     return len(queue)

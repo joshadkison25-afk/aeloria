@@ -26,7 +26,9 @@ DECAY_RATES: dict[str, float] = {
     "legitimacy":       0.94,
     "treaty":           0.93,
     "tributary":        0.93,
+    "health":           0.93,
     "population":       0.93,
+    "stability":        0.94,
     "military":         0.92,
     "diplomacy":        0.91,
     "economy":          0.90,
@@ -44,7 +46,9 @@ _DOMAIN_TO_PRESSURE: dict[str, str] = {
     "succession":       "legitimacy",
     "character":        "legitimacy",
     "economy":          "economic",
+    "health":           "stability",
     "population":       "stability",
+    "stability":        "stability",
     "tributary":        "economic",
     "diplomacy":        "diplomatic",
     "treaty":           "diplomatic",
@@ -199,3 +203,6 @@ def memory_beliefs(world_state: dict[str, Any], faction: str) -> list[dict[str, 
             "source": "memory",
             "bias": str(mem.get("domain") or "historical"),
         })
+        if len(beliefs) >= 4:
+            break
+    return beliefs

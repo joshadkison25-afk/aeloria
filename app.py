@@ -360,7 +360,7 @@ def get_tick(tick_number):
 
 @app.route("/api/causality")
 def get_causality():
-    from engine.causality import get_tick_causes
+    from axiom.engine.causality import get_tick_causes
 
     state = _read_json(WORLD_STATE_FILE, {})
     try:
@@ -390,7 +390,7 @@ def get_axiom_last_tick():
 
 @app.route("/api/explainability")
 def get_explainability():
-    from engine.explainability import build_explainability_report
+    from axiom.engine.explainability import build_explainability_report
 
     state = _read_json(WORLD_STATE_FILE, {})
     try:
@@ -412,7 +412,7 @@ def get_explainability():
 
 @app.route("/api/knowledge")
 def get_knowledge():
-    from engine.knowledge import get_faction_knowledge, normalize_faction_knowledge_rows
+    from axiom.engine.knowledge import get_faction_knowledge, normalize_faction_knowledge_rows
 
     state = _read_json(WORLD_STATE_FILE, {})
     faction = (request.args.get("faction") or "").strip()
@@ -426,7 +426,7 @@ def get_knowledge():
 
 @app.route("/api/pressure")
 def get_pressure():
-    from engine.pressure import compute_faction_pressure, compute_pressure_report
+    from axiom.engine.pressure import compute_faction_pressure, compute_pressure_report
 
     state = _read_json(WORLD_STATE_FILE, {})
     faction = (request.args.get("faction") or "").strip()
@@ -440,8 +440,8 @@ def get_pressure():
 
 @app.route("/api/beliefs")
 def get_beliefs():
-    from engine.beliefs import build_faction_beliefs, update_beliefs
-    from engine.pressure import compute_faction_pressure, compute_pressure_report
+    from axiom.engine.beliefs import build_faction_beliefs, update_beliefs
+    from axiom.engine.pressure import compute_faction_pressure, compute_pressure_report
 
     state = _read_json(WORLD_STATE_FILE, {})
     faction = (request.args.get("faction") or "").strip()
@@ -456,7 +456,7 @@ def get_beliefs():
 
 @app.route("/api/faction-intel")
 def get_faction_intel():
-    from engine.intel import build_intel_report
+    from axiom.engine.intel import build_intel_report
 
     state = _read_json(WORLD_STATE_FILE, {})
     try:
@@ -472,9 +472,9 @@ def get_faction_intel():
 
 @app.route("/api/council")
 def get_council():
-    from engine.beliefs import update_beliefs
-    from engine.council import build_council_report
-    from engine.pressure import compute_pressure_report
+    from axiom.engine.beliefs import update_beliefs
+    from axiom.engine.council import build_council_report
+    from axiom.engine.pressure import compute_pressure_report
 
     state = _read_json(WORLD_STATE_FILE, {})
     state["pressure_report"] = state.get("pressure_report") or compute_pressure_report(state)
@@ -495,6 +495,36 @@ def post_lore():
     pending.append({"text": text, "source_file": "api", "received_at": datetime.now().isoformat()})
     _write_json(PENDING_LORE_FILE, pending)
     return jsonify({"status": "queued", "pending_count": len(pending)})
+
+
+@app.route("/api/player-action", methods=["POST"])
+def post_player_action():
+    """Queue a player action to be processed on the next engine tick.
+
+    Body: { "type": "send_aid"|"spread_rumor"|"fund_faction"|"reveal_secret"|"support_claimant"|"impose_embargo",
+            ... action-specific fields ... }
+    """
+    from axiom.engine.player_actions import queue_player_action, _VALID_ACTIONS
+
+    body = request.get_json(silent=True) or {}
+    action_type = (body.get("type") or "").strip()
+    if not action_type:
+        return jsonify({"error": "type is required"}), 400
+    if action_type not in _VALID_ACTIONS:
+        return jsonify({"error": f"unknown action type '{action_type}'", "valid": sorted(_VALID_ACTIONS)}), 400
+
+    state = _read_json(WORLD_STATE_FILE, {})
+    position = queue_player_action(state, {"type": action_type, **body})
+    _write_json(WORLD_STATE_FILE, state)
+    return jsonify({"status": "queued", "position": position, "type": action_type})
+
+
+@app.route("/api/player-actions/pending")
+def get_pending_player_actions():
+    state = _read_json(WORLD_STATE_FILE, {})
+    pending = state.get("pending_player_actions") or []
+    last = state.get("last_player_actions") or []
+    return jsonify({"pending": pending, "last_results": last})
 
 
 @app.route("/api/tick", methods=["POST"])

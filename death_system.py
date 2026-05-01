@@ -89,7 +89,7 @@ def _norm_race(r: str) -> str:
 
 
 def _elder_exp_risk(age: float, race: str, cfg: dict) -> float:
-    from engine.characters import RACE_LIFESPAN
+    from axiom.engine.characters import RACE_LIFESPAN
 
     r = _norm_race(race)
     span = RACE_LIFESPAN.get(r, RACE_LIFESPAN["Human"])
@@ -297,7 +297,7 @@ def _emit_major_event(state: dict, dead: dict, cause: str, succession: bool) -> 
 
 
 def _record_death_causality(state: dict, dead: dict, cause: str, succession: bool) -> None:
-    from engine.causality import record_cause
+    from axiom.engine.causality import record_cause
 
     name = (dead.get("name") or "").strip()
     faction = (dead.get("faction") or "").strip()
@@ -361,7 +361,7 @@ def _death_probability_for_char(
     pending: Dict[str, str],
     cfg: dict,
 ) -> Tuple[float, str]:
-    from engine.characters import (
+    from axiom.engine.characters import (
         _critical_health_death_chance,
         _health_death_modifier,
         _natural_death_chance,
@@ -387,7 +387,7 @@ def _death_probability_for_char(
         return p, _CAUSE_ILLNESS
     if h < 22:
         return p, _CAUSE_ILLNESS
-    from engine.characters import RACE_LIFESPAN
+    from axiom.engine.characters import RACE_LIFESPAN
 
     span = RACE_LIFESPAN.get(_norm_race(race), RACE_LIFESPAN["Human"])
     onset = max(12.0, min(float(span["natural"]) * 0.69, float(span["natural"]) - 1.0))

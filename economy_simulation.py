@@ -11,7 +11,7 @@ import random
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 # --- Resource model ---------------------------------------------------------------------------
 
@@ -169,7 +169,9 @@ def _effect_grain(faction: str, severity: float, state: dict) -> None:
     regions = _controlled_region_names(faction, state)
     affected_regions: List[str] = []
     total_loss = 0
+    total_health_loss = 0
     max_pressure_after = 0
+    min_health_after = 100
     for row in pop_state:
         r = row.get("region", "")
         if regions and r not in regions:
@@ -184,6 +186,14 @@ def _effect_grain(faction: str, severity: float, state: dict) -> None:
             total_loss += max(0, pop - int(row["population"]))
         if r:
             affected_regions.append(str(r))
+        health_key = "health" if "health" in row else ("healthIndex" if "healthIndex" in row else "")
+        if health_key:
+            before_health = int(_clamp(float(row.get(health_key, 75) or 75), 0, 100))
+            health_loss = max(1, int(1 + severity * 4 * SHORTAGE_STRENGTH))
+            after_health = int(_clamp(before_health - health_loss, 0, 100))
+            row[health_key] = after_health
+            total_health_loss += max(0, before_health - after_health)
+            min_health_after = min(min_health_after, after_health)
         g = float(row.get("growthRate", 0.0)) - 0.0001 * severity * SHORTAGE_STRENGTH
         row["growthRate"] = g
     if affected_regions and (severity >= 0.35 or total_loss >= 5 or max_pressure_after >= 75):
@@ -205,6 +215,24 @@ def _effect_grain(faction: str, severity: float, state: dict) -> None:
             hidden=None,
             severity=int(_clamp(6 + severity * 6 + min(3, total_loss / 20), 6, 12)),
             confidence=0.88,
+            source="economy_simulation",
+        )
+    if affected_regions and (severity >= 0.5 or total_health_loss >= 3 or min_health_after <= 55):
+        record_cause(
+            state,
+            domain="health",
+            actor=faction,
+            pressure=(
+                f"food scarcity health stress; severity={round(float(severity), 3)}; "
+                f"health_loss={total_health_loss}; min_health={min_health_after}"
+            ),
+            belief="scarcity and malnutrition are weakening public health",
+            decision="food_health_crisis",
+            outcome=f"Food scarcity damages public health across {faction}'s population centers.",
+            affected=[faction, *affected_regions[:6]],
+            hidden=None,
+            severity=int(_clamp(5 + severity * 6 + min(3, total_health_loss), 5, 12)),
+            confidence=0.86,
             source="economy_simulation",
         )
 

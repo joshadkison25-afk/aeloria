@@ -2,6 +2,8 @@
 import random
 from typing import Optional
 
+from axiom.engine.causality import record_cause
+
 try:
     from map_data import (
         load_pins, faction_capital, location_to_pin,
@@ -13,6 +15,7 @@ except ImportError:
 
 _MAX_CHARS_PER_TICK  = 30
 _MAX_RECENT_ACTIONS  = 3
+_MAX_CAUSAL_ACTIONS  = 5
 
 
 # ── World state accessors ──────────────────────────────────────────────────────
@@ -372,6 +375,114 @@ def _execute_action(char: dict, action: str, ctx: dict, pins: list[dict]) -> dic
     return {"updates": updates, "description": description, "action": action}
 
 
+def _clamp_relationship_value(value: float) -> float:
+    return round(max(0.0, min(100.0, float(value))), 1)
+
+
+def _relationship_for(char: dict, target: str) -> dict:
+    relationships = char.setdefault("relationships", {})
+    rel = relationships.get(target)
+    if not isinstance(rel, dict):
+        rel = {"trust": 40.0, "fear": 20.0, "respect": 35.0}
+        relationships[target] = rel
+    rel.setdefault("trust", 40.0)
+    rel.setdefault("fear", 20.0)
+    rel.setdefault("respect", 35.0)
+    return rel
+
+
+def _add_character_memory(char: dict, mem_type: str, target: str, impact: float, description: str, tick: int) -> None:
+    memories = list(char.get("memory") or [])
+    for memory in memories:
+        if memory.get("type") == mem_type and memory.get("target") == target:
+            memory["impact"] = round(max(-100.0, min(100.0, float(memory.get("impact", 0)) + impact * 0.5)), 2)
+            memory["description"] = description or memory.get("description", "")
+            memory["tick"] = tick
+            char["memory"] = memories
+            return
+
+    memories.append({
+        "type": mem_type,
+        "target": target,
+        "impact": round(float(impact), 2),
+        "tick": tick,
+        "description": description,
+    })
+    if len(memories) > 12:
+        memories.sort(key=lambda m: abs(float(m.get("impact", 0) or 0)))
+        memories = memories[1:]
+    char["memory"] = memories
+
+
+def _apply_character_relationship_effect(world: dict, char: dict, action: str, ctx: dict, description: str) -> None:
+    target = str(ctx.get("target") or "")
+    if action != "plot_against_rival" or not target:
+        return
+
+    rel = _relationship_for(char, target)
+    rel["trust"] = _clamp_relationship_value(float(rel.get("trust", 40.0)) - 12.0)
+    rel["fear"] = _clamp_relationship_value(float(rel.get("fear", 20.0)) + 4.0)
+    rel["respect"] = _clamp_relationship_value(float(rel.get("respect", 35.0)) - 3.0)
+    _add_character_memory(
+        char,
+        "betrayal",
+        target,
+        -24.0,
+        description,
+        int(world.get("tick", 0) or 0),
+    )
+
+
+def _record_character_agency_cause(world: dict, char: dict, action: str, description: str, ctx: dict) -> None:
+    if not description or action == "lay_low":
+        return
+    tick = int(world.get("tick", 0) or 0)
+    recorded_this_tick = sum(
+        1
+        for cause in world.get("causality_ledger", []) or []
+        if cause.get("source") == "character_agency" and int(cause.get("tick", 0) or 0) == tick
+    )
+    if recorded_this_tick >= _MAX_CAUSAL_ACTIONS:
+        return
+
+    name = str(char.get("name") or "Unknown")
+    faction = str(char.get("faction") or "")
+    house = str(char.get("house") or "")
+    target = str(ctx.get("target") or ctx.get("target_faction") or "")
+    severity_by_action = {
+        "plot_against_rival": 9,
+        "spy_mission": 8,
+        "rally_troops": 7,
+        "support_ruler": 7,
+        "diplomatic_mission": 6,
+        "seek_alliance": 6,
+        "seek_resources": 6,
+        "travel_to_ally": 5,
+        "pilgrimage": 5,
+    }
+    pressure = (
+        f"character agency; action={action}; ambition={char.get('ambition', 50)}; "
+        f"loyalty={char.get('loyalty', 50)}; influence={char.get('influenceScore', 0)}"
+    )
+    if target:
+        pressure = f"{pressure}; target={target}"
+
+    record_cause(
+        world,
+        domain="character",
+        actor=name,
+        pressure=pressure,
+        belief=f"{name}'s traits and current goal made {action.replace('_', ' ')} attractive",
+        decision=action,
+        outcome=description,
+        affected=[item for item in [faction, house, name, target] if item],
+        hidden=description if action in {"plot_against_rival", "spy_mission"} else None,
+        severity=severity_by_action.get(action, 5),
+        confidence=0.78,
+        source="character_agency",
+    )
+
+
 def _home_location(char: dict, pins: list[dict]) -> str:
     loc = char.get("location", "")
     if loc:
@@ -457,6 +568,8 @@ def run_character_agency(world: dict) -> None:
 
         desc = result["description"]
         if desc:
+            _apply_character_relationship_effect(world, char, result["action"], ctx, desc)
+
             actions_list = char.setdefault("recentActions", [])
             actions_list.append(desc)
             if len(actions_list) > _MAX_RECENT_ACTIONS:
@@ -470,6 +583,7 @@ def run_character_agency(world: dict) -> None:
                 "description": desc,
                 "tick":        tick,
             })
+            _record_character_agency_cause(world, char, result["action"], desc, ctx)
 
     if len(character_updates) > 50:
         world["character_updates"] = character_updates[-50:]

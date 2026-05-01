@@ -16,9 +16,9 @@ from axiom_clock import (
     resume_clock,
 )
 from audio_pipeline import generate_weekly_story
-from engine.tick import run_tick as _engine_run_tick
+from axiom.engine.tick import run_tick as _engine_run_tick
 from notifier import send_tick_notification
-from world_state.io import (
+from axiom.world_state.io import (
     WORLD_STATE_FILE,
     _apply_pending_lore_mechanical,
     _clear_pending_lore,
@@ -29,7 +29,7 @@ from world_state.io import (
     rollback_last_save,
     safe_save_world,
 )
-from world_state.validate import _canonicalize_world_state, ensure_world_structure, is_valid_world
+from axiom.world_state.validate import _canonicalize_world_state, ensure_world_structure, is_valid_world
 
 logger = logging.getLogger(__name__)
 

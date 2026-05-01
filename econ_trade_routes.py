@@ -11,7 +11,7 @@ import hashlib
 import random
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 # Keep independent of import order relative to economy_simulation
 CORE_RES: Tuple[str, ...] = ("grain", "iron", "timber", "gold")

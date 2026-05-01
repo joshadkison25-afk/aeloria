@@ -1734,7 +1734,7 @@ def _call_claude(prev_state, pending_lore):
     return _finalize_llm_state(prev_state, raw_input)
 
 def _finalize_llm_state(prev_state, raw_input):
-    from world_state.normalize import _normalize_state
+    from axiom.world_state.normalize import _normalize_state
 
     result = _normalize_state(prev_state, raw_input)
     result["real_timestamp"] = datetime.now().isoformat()

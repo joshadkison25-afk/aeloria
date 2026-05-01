@@ -15,7 +15,7 @@ import hashlib
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 __all__ = [
     "run_marriage_succession_tick",

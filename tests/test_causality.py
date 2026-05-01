@@ -1,4 +1,4 @@
-from engine.causality import get_tick_causes, record_cause, summarize_cause
+from axiom.engine.causality import get_tick_causes, record_cause, summarize_cause
 
 
 def test_record_cause_appends_bounded_structured_record():

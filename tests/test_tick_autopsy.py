@@ -2,13 +2,13 @@ from pathlib import Path
 
 from economic_pressure_decisions import run_economic_pressure_decisions
 from death_system import run_death_system
-from engine.autopsy import build_tick_autopsy
-from engine.beliefs import update_beliefs
-from engine.causality import get_tick_causes
-from engine.event_surfacer import surface_events
-from engine.knowledge import update_knowledge_from_causes
-from engine.pressure import compute_pressure_report
-from engine.tick import run_tick
+from axiom.engine.autopsy import build_tick_autopsy
+from axiom.engine.beliefs import update_beliefs
+from axiom.engine.causality import get_tick_causes
+from axiom.engine.event_surfacer import surface_events
+from axiom.engine.knowledge import update_knowledge_from_causes
+from axiom.engine.pressure import compute_pressure_report
+from axiom.engine.tick import run_tick
 
 
 def _food_shortage_world():
@@ -94,8 +94,67 @@ def test_last_tick_autopsy_exists_after_run_tick():
         "outcomes",
         "causality_records",
         "knowledge_updates",
+        "relationship_changes",
+        "memory_changes",
         "surfaced_events",
     }
+
+
+def test_tick_autopsy_reports_character_relationship_and_memory_changes():
+    prev_world = {
+        "tick": 80,
+        "world_date": "Day 80",
+        "house_characters": [
+            {
+                "name": "Mira Aurand",
+                "faction": "Twin Cities",
+                "house": "House Aurand",
+                "relationships": {
+                    "Lord Tideborn": {"trust": 45, "fear": 20, "respect": 40}
+                },
+                "memory": [],
+            }
+        ],
+    }
+    world = {
+        "tick": 81,
+        "world_date": "Day 81",
+        "house_characters": [
+            {
+                "name": "Mira Aurand",
+                "faction": "Twin Cities",
+                "house": "House Aurand",
+                "relationships": {
+                    "Lord Tideborn": {"trust": 33, "fear": 24, "respect": 37}
+                },
+                "memory": [
+                    {
+                        "type": "betrayal",
+                        "target": "Lord Tideborn",
+                        "impact": -24,
+                        "tick": 81,
+                        "description": "Mira Aurand begins weaving a quiet plot against Lord Tideborn",
+                    }
+                ],
+            }
+        ],
+    }
+
+    autopsy = build_tick_autopsy(world, prev_world=prev_world)
+
+    relationship = autopsy["relationship_changes"][0]
+    assert relationship["character"] == "Mira Aurand"
+    assert relationship["target"] == "Lord Tideborn"
+    assert relationship["changes"]["trust"]["delta"] == -12
+    assert relationship["changes"]["fear"]["delta"] == 4
+    assert relationship["changes"]["respect"]["delta"] == -3
+
+    memory = autopsy["memory_changes"][0]
+    assert memory["character"] == "Mira Aurand"
+    assert memory["type"] == "betrayal"
+    assert memory["target"] == "Lord Tideborn"
+    assert memory["new"] is True
+    assert memory["impact"] == -24
 
 
 def test_food_shortage_raid_vertical_slice_records_knowledge_and_surface():

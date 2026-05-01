@@ -22,7 +22,7 @@ from economy_simulation import (
     list_faction_ids,
     _population_aggregates,  # type: ignore
 )
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 from siege_blockade import _is_allied, _is_at_war
 
 # Supply / morale / desertion (tunable)

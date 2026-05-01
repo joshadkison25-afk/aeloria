@@ -12,8 +12,8 @@ from __future__ import annotations
 import random
 from typing import Dict, List, Optional
 
-from engine.beliefs import belief_summary, dominant_belief
-from engine.causality import record_cause
+from axiom.engine.beliefs import belief_summary, dominant_belief
+from axiom.engine.causality import record_cause
 
 __all__ = ["run_legitimacy_system", "risk_label_for_legitimacy", "composite_legitimacy_score"]
 

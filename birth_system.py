@@ -13,7 +13,7 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 __all__ = [
     "run_birth_system",

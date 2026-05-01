@@ -8,3 +8,4 @@ requests
 pdfplumber
 gunicorn
 pytest>=7.0
+-e ../axiom-engine

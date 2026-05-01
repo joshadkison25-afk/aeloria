@@ -1244,25 +1244,31 @@ def _update_location_stability(new_state):
         controller      = loc.get("controller", "")
         owner           = loc.get("owner", "")
         stability       = int(loc.get("stability", 50))
+        original_stability = stability
         control         = int(loc.get("control",   50))
         name            = loc.get("name", "")
         active_fighting = loc.get("active_fighting", False)
         already_rebel   = loc.get("in_rebellion", False)
         territory_type  = loc.get("territory_type", "wild")
+        stability_reasons = []
 
         # ── WILD ENTROPY ──────────────────────────────────────────────────────
         # Frontier and ungoverned land is naturally unstable
         if territory_type == "wild" and not already_rebel:
             stability = max(0, stability - 1)
+            stability_reasons.append("frontier entropy")
 
         # ── ECONOMY MODIFIER ─────────────────────────────────────────────────
         eco = eco_by_faction.get(controller, 50)
         if eco < 30:
             stability -= 2
+            stability_reasons.append(f"economic collapse eco={eco}")
         elif eco < 50:
             stability -= 1
+            stability_reasons.append(f"economic strain eco={eco}")
         elif eco > 70:
             stability += 1
+            stability_reasons.append(f"prosperity eco={eco}")
 
         # ── LEADERSHIP MODIFIER ───────────────────────────────────────────────
         diplo   = diplo_by_faction.get(controller, 50)
@@ -1270,17 +1276,58 @@ def _update_location_stability(new_state):
 
         if diplo > 65:
             stability += 1
+            stability_reasons.append(f"competent rule diplomacy={diplo}")
         elif diplo < 35:
             stability -= 1
+            stability_reasons.append(f"misrule diplomacy={diplo}")
 
         stability = max(0, min(100, stability))
 
         if stability < 30 and warfare > 65:
             stability = min(100, stability + 1)
+            stability_reasons.append(f"military suppression warfare={warfare}")
 
         # ── THRESHOLD FLAGS ───────────────────────────────────────────────────
         unrest         = stability < 30
         rebellion_risk = stability < 15
+        stability_delta = stability - original_stability
+        crossed_unrest = original_stability >= 30 and stability < 30
+        crossed_rebellion_risk = original_stability >= 15 and stability < 15
+        serious_drift = stability_delta <= -4
+        if (
+            not already_rebel
+            and stability_delta < 0
+            and (crossed_unrest or crossed_rebellion_risk or serious_drift)
+        ):
+            reason_text = "; ".join(stability_reasons) or "local pressure"
+            location_events.append({
+                "type": "stability_drift",
+                "location": name,
+                "controller": controller,
+                "stability_before": original_stability,
+                "stability_after": stability,
+                "unrest": unrest,
+                "rebellion_risk": rebellion_risk,
+                "reasons": stability_reasons[:4],
+                "tick": current_tick,
+            })
+            record_cause(
+                new_state,
+                domain="stability",
+                actor=controller or "Local authorities",
+                pressure=(
+                    f"location stability drift in {name}; before={original_stability}; "
+                    f"after={stability}; control={control}; reasons={reason_text}"
+                ),
+                belief=_dominant_belief_text(new_state, controller),
+                decision="stability_drift",
+                outcome=f"{name}'s stability falls from {original_stability} to {stability}, raising unrest risk.",
+                affected=[item for item in [controller, owner, name] if item],
+                hidden=None,
+                severity=int(max(5, min(12, 5 + abs(stability_delta) + (2 if unrest else 0) + (2 if rebellion_risk else 0)))),
+                confidence=0.9,
+                source="location_stability",
+            )
 
         # ── REBELLION TRIGGER ─────────────────────────────────────────────────
         # Only fires if not already in rebellion; _process_rebellions handles ongoing effects
@@ -2394,8 +2441,14 @@ def _normalize_reign(row, current_tick, active=True):
         duration = max(0, current_tick - start)
         cause_end = ""
     else:
-        end = max(start, int(end if end is not None else current_tick))
-        duration = max(0, int(row.get("duration", end - start)))
+        try:
+            end = max(start, int(end)) if end is not None else current_tick
+        except (TypeError, ValueError):
+            end = current_tick
+        try:
+            duration = max(0, int(row.get("duration", end - start)))
+        except (TypeError, ValueError):
+            duration = max(0, end - start)
         cause_end = row.get("causeOfEnd") or "unknown"
     return {
         "name": name,
@@ -4009,6 +4062,42 @@ def evaluateActions(faction_name, state):
     warfare      = float(traits.get("warfare",   50))
     diplomacy    = float(traits.get("diplomacy", 50))
 
+    # ── Faction identity goal modifier ────────────────────────────────────────
+    _faction_goal = ""
+    _faction_personality = ""
+    for row in state.get("faction_identities") or []:
+        if isinstance(row, dict) and row.get("faction") == faction_name:
+            goals = row.get("goals") or []
+            _faction_goal = goals[0] if goals else ""
+            _faction_personality = str(row.get("personality") or "")
+            break
+
+    if _faction_personality == "aggressive":
+        ambition = min(100, ambition + 15)
+        warfare  = min(100, warfare  + 10)
+    elif _faction_personality == "ambitious":
+        ambition = min(100, ambition + 20)
+        warfare  = min(100, warfare  + 8)
+        loyalty  = max(0,   loyalty  - 8)
+    elif _faction_personality == "defensive":
+        ambition = max(0, ambition - 15)
+        morality = min(100, morality + 10)
+    elif _faction_personality == "pragmatic":
+        ambition = min(100, ambition + 8)
+        intelligence = min(100, intelligence + 10)
+    elif _faction_personality == "diplomatic":
+        diplomacy = min(100, diplomacy + 15)
+        loyalty   = min(100, loyalty   + 10)
+    elif _faction_personality == "secretive":
+        intelligence = min(100, intelligence + 15)
+        loyalty      = max(0,   loyalty      - 5)
+    elif _faction_personality == "zealous":
+        morality  = min(100, morality  + 10)
+        ambition  = min(100, ambition  + 8)
+    elif _faction_personality == "mercantile":
+        diplomacy = min(100, diplomacy + 10)
+        morality  = min(100, morality  + 5)
+
     mil = float(power.get("militaryPower",      50))
     eco = float(power.get("economicPower",       50))
     pol = float(power.get("politicalInfluence",  50))
@@ -4150,6 +4239,72 @@ def evaluateActions(faction_name, state):
 
     scores["do_nothing"] = round(max(3.0, nothing_score), 1)
 
+    # ── BACK CLAIMANT (legitimacy collapse → noble rebellion) ─────────────────
+    leg_score = 0.0
+    leg_pressure = 0.0
+    for pr_row in state.get("pressure_report") or []:
+        if isinstance(pr_row, dict) and pr_row.get("faction") == faction_name:
+            leg_pressure = float((pr_row.get("domains") or {}).get("legitimacy", {}).get("score", 0) or 0)
+            break
+    if leg_pressure >= 28 and not has_war:
+        leg_score = (leg_pressure - 22) * 1.3
+        leg_score += (ambition - 50) * 0.5
+        leg_score -= (loyalty  - 50) * 0.4
+        if is_aggressive: leg_score *= 1.5
+        if is_honorable:  leg_score *= 0.65  # honor dampens but doesn't kill opportunism
+    scores["back_claimant"] = round(max(0.0, leg_score), 1)
+
+    # ── TACTICAL RETREAT (military attrition → front collapse) ───────────────
+    retreat_score = 0.0
+    if has_war and mil < 45:
+        retreat_score = (45 - mil) * 1.1
+        retreat_score += max(0.0, (50 - eco)) * 0.4  # starving armies retreat
+        if is_strategic: retreat_score *= 1.5   # smart leaders cut losses
+        if is_aggressive: retreat_score *= 0.4  # aggressive leaders refuse to retreat
+        if is_warrior:    retreat_score *= 0.5
+    scores["tactical_retreat"] = round(max(0.0, retreat_score), 1)
+
+    # ── DENOUNCE TREATY (broken trust → diplomatic isolation) ────────────────
+    # Fires when any neighbor relationship has severely eroded trust (alliance OR neutral),
+    # representing a formal severing of prior agreements or mutual recognition.
+    denounce_score = 0.0
+    broken_trust_targets = [
+        p for p, r in rels.items()
+        if float(r.get("trust", 50) or 50) < 30 and float(r.get("hostility", 0) or 0) > 25
+    ]
+    if broken_trust_targets and not has_war:
+        for partner in broken_trust_targets:
+            rel = rels[partner]
+            t = float(rel.get("trust", 50) or 50)
+            h = float(rel.get("hostility", 0) or 0)
+            denounce_score += (30 - t) * 0.8 + (h - 25) * 0.3
+        denounce_score += (ambition - 50) * 0.4
+        if is_treacherous: denounce_score *= 1.8
+        if is_steadfast:   denounce_score *= 0.4
+    scores["denounce_treaty"] = round(max(0.0, denounce_score), 1)
+
+    # ── PRESS SUCCESSION CLAIM (succession weakness → instability) ───────────
+    claim_score = 0.0
+    if pol > 35 and not has_war:
+        weak_targets = [
+            p for p, r in rels.items()
+            if r.get("type") not in ("war",) and float(r.get("hostility", 0) or 0) > 20
+        ]
+        for partner, rel in (rels.items() if weak_targets else []):
+            if rel.get("type") == "war":
+                continue
+            h = float(rel.get("hostility", 0) or 0)
+            if h > 20:
+                for leg_key, leg_val in (state.get("ruler_legitimacy_scores") or {}).items():
+                    if leg_key == partner and float(leg_val or 100) < 68:
+                        claim_score += (68 - float(leg_val)) * 0.5
+                        break
+        claim_score += (ambition - 50) * 0.5
+        claim_score += (pol - 35) * 0.3
+        if is_strategic: claim_score *= 1.3
+        if is_diplomat:  claim_score *= 1.2
+    scores["press_succession_claim"] = round(max(0.0, claim_score), 1)
+
     try:
         from engine.beliefs import decision_bias_from_beliefs
 
@@ -4231,6 +4386,36 @@ def chooseAction(faction_name, state, evaluated=None):
             worst = min(unstable_locs,
                         key=lambda l: int(l.get("stability", l.get("control", 50))))
             meta["location"] = worst.get("name") or worst.get("id", "")
+
+    elif chosen_action == "denounce_treaty":
+        # Pick lowest-trust hostile neighbor as the denounced party
+        best = min(
+            ((p, r) for p, r in rels.items()
+             if float(r.get("trust", 50) or 50) < 35),
+            key=lambda x: float(x[1].get("trust", 50) or 50),
+            default=(None, {}),
+        )
+        if best[0]:
+            meta["target"] = best[0]
+        else:
+            chosen_action = "do_nothing"
+
+    elif chosen_action == "press_succession_claim":
+        # Pick the hostile neighbor with the weakest ruler legitimacy
+        leg_scores = state.get("ruler_legitimacy_scores") or {}
+        candidates = [
+            (p, r) for p, r in rels.items()
+            if r.get("type") != "war"
+            and float(r.get("hostility", 0) or 0) > 20
+        ]
+        if candidates:
+            best = min(
+                candidates,
+                key=lambda x: float(leg_scores.get(x[0], 100) or 100),
+            )
+            meta["target"] = best[0]
+        else:
+            chosen_action = "do_nothing"
 
     return chosen_action, meta
 
@@ -4318,6 +4503,27 @@ def applyDecision(action, faction_name, meta, state):
             f"{faction_name} invested in stabilizing {loc_name or 'their territory'}."
         )
 
+    elif action == "denounce_treaty" and target:
+        idx = _rel_idx(faction_name, target)
+        if idx is not None:
+            rels_list[idx]["trust"]     = _clamp(rels_list[idx].get("trust", 30) - 20)
+            rels_list[idx]["hostility"] = _clamp(rels_list[idx].get("hostility", 30) + 15)
+        if faction_name in power_map:
+            power_map[faction_name]["politicalInfluence"] = _clamp(
+                power_map[faction_name].get("politicalInfluence", 50) - 4)
+        log["summary"] = f"{faction_name} publicly denounced agreements with {target}."
+
+    elif action == "press_succession_claim" and target:
+        if target in power_map:
+            power_map[target]["politicalInfluence"] = _clamp(
+                power_map[target].get("politicalInfluence", 50) - 6)
+        if faction_name in power_map:
+            power_map[faction_name]["politicalInfluence"] = _clamp(
+                power_map[faction_name].get("politicalInfluence", 50) + 3)
+        leg_scores = state.setdefault("ruler_legitimacy_scores", {})
+        leg_scores[target] = max(0.0, float(leg_scores.get(target, 60) or 60) - 6.0)
+        log["summary"] = f"{faction_name} pressed a formal succession claim against {target}."
+
     else:
         log["summary"] = f"{faction_name} held position this tick."
 
@@ -4370,6 +4576,48 @@ _EVENT_META = {
             "The internal consolidation effort in {location} reduces unrest "
             "and strengthens {faction}'s administrative grip. "
             "Effects will compound if maintained across several ticks."
+        ),
+    },
+    # ── Vertical slice actions ────────────────────────────────────────────────
+    "back_claimant": {
+        "severity": 8,
+        "stage":    "emerging",
+        "trend":    "rising",
+        "template": "Noble houses in {faction} move to support a rival claimant.",
+        "consequences_template": (
+            "Legitimacy of the ruling house collapses further. "
+            "Court instability spreads and succession pressure intensifies."
+        ),
+    },
+    "tactical_retreat": {
+        "severity": 7,
+        "stage":    "declining",
+        "trend":    "falling",
+        "template": "{faction} forces retreat from an unsustainable front.",
+        "consequences_template": (
+            "Military overextension forced a withdrawal. "
+            "Territory pressure rises and morale suffers in the retreating army."
+        ),
+    },
+    "denounce_treaty": {
+        "severity": 8,
+        "stage":    "escalating",
+        "trend":    "rising",
+        "template": "{faction} publicly denounces a standing treaty with {target}.",
+        "consequences_template": (
+            "Trust between {faction} and {target} collapses. "
+            "Diplomatic isolation spreads as other factions reassess agreements. "
+            "Regional instability rises."
+        ),
+    },
+    "press_succession_claim": {
+        "severity": 9,
+        "stage":    "emerging",
+        "trend":    "rising",
+        "template": "{faction} presses a formal succession claim against {target}.",
+        "consequences_template": (
+            "A dynastic dispute erupts. "
+            "Both courts are drawn into a legitimacy contest that destabilises the region."
         ),
     },
 }
@@ -4440,6 +4688,8 @@ def executeEvent(event, world):
       - betray        → add instability location_event in shared border regions
       - stabilize     → add positive location_event for the named location
     """
+    from engine.causality import record_cause
+
     action  = event.get("action", "")
     faction = event.get("faction", "")
     meta    = event.get("meta", {})
@@ -4550,6 +4800,84 @@ def executeEvent(event, world):
             "tick": tick,
         })
 
+    # ── Vertical slice: new action effects ───────────────────────────────────
+    elif action == "back_claimant":
+        # Drain political influence, add instability to capital
+        for pw in world.get("faction_power_state") or []:
+            if isinstance(pw, dict) and pw.get("faction") == faction:
+                pw["politicalInfluence"] = max(0, float(pw.get("politicalInfluence", 50) or 50) - 6)
+                break
+        for loc in world.get("locations") or []:
+            if isinstance(loc, dict) and loc.get("controller") == faction:
+                if loc.get("territory_type") in ("capital", "city"):
+                    loc["stability"] = max(0, int(loc.get("stability", 50) or 50) - 8)
+                    break
+        record_cause(
+            world, domain="legitimacy", actor=faction,
+            pressure="legitimacy pressure rising — noble houses question the throne",
+            belief="the ruling house appears too weak to hold",
+            decision="back_claimant",
+            outcome="noble rebellion pressure intensifies; political influence drains",
+            affected=[faction], severity=8,
+        )
+
+    elif action == "tactical_retreat":
+        # Military power drain from retreat
+        for pw in world.get("faction_power_state") or []:
+            if isinstance(pw, dict) and pw.get("faction") == faction:
+                pw["militaryPower"] = max(0, float(pw.get("militaryPower", 50) or 50) - 8)
+                break
+        loc_events.append({
+            "type": "front_collapse", "faction": faction,
+            "detail": f"{faction} withdraws from overextended positions. Morale falls.", "tick": tick,
+        })
+        record_cause(
+            world, domain="military", actor=faction,
+            pressure="military overextension at war front",
+            belief="the front cannot be held — retreat or lose everything",
+            decision="tactical_retreat",
+            outcome="front collapsed; military power drained; morale lost",
+            affected=[faction], severity=7,
+        )
+
+    elif action == "denounce_treaty" and target:
+        # Trust collapse between parties
+        for rel in world.get("relationships") or []:
+            if not isinstance(rel, dict):
+                continue
+            a, b = rel.get("faction_a", ""), rel.get("faction_b", "")
+            if frozenset((a, b)) == frozenset((faction, target)):
+                rel["trust"] = max(0, int(rel.get("trust", 50) or 50) - 25)
+                rel["hostility"] = min(100, int(rel.get("hostility", 20) or 20) + 20)
+                rel["type"] = "hostile" if rel["hostility"] >= 65 else rel.get("type", "neutral")
+                break
+        record_cause(
+            world, domain="diplomacy", actor=faction,
+            pressure="treaty trust collapsed — alliance no longer serves interests",
+            belief=f"the alliance with {target} is hollow and dangerous to maintain",
+            decision="denounce_treaty",
+            outcome=f"treaty with {target} denounced; trust collapsed; diplomatic isolation spreads",
+            affected=[faction, target], severity=8,
+        )
+
+    elif action == "press_succession_claim" and target:
+        # Legitimacy pressure on target; political gain for actor
+        for pw in world.get("faction_power_state") or []:
+            if not isinstance(pw, dict):
+                continue
+            if pw.get("faction") == target:
+                pw["politicalInfluence"] = max(0, float(pw.get("politicalInfluence", 50) or 50) - 7)
+            elif pw.get("faction") == faction:
+                pw["politicalInfluence"] = min(100, float(pw.get("politicalInfluence", 50) or 50) + 4)
+        record_cause(
+            world, domain="legitimacy", actor=faction,
+            pressure="political strength and rival weakness create succession opportunity",
+            belief=f"{target}'s ruler has weak legitimacy — a claim can be pressed",
+            decision="press_succession_claim",
+            outcome=f"formal succession claim pressed against {target}; dynastic contest begins",
+            affected=[faction, target], severity=9,
+        )
+
 
 def _run_decision_engine(prev_state, new_state):
     """Orchestrate faction decisions for one tick with strict chaos controls.
@@ -4568,9 +4896,13 @@ def _run_decision_engine(prev_state, new_state):
 
     # ── Per-type slot trackers ────────────────────────────────────────────────
     slot_used = {
-        "declare_war":       False,
-        "betray":            False,
-        "form_alliance":     False,
+        "declare_war":           False,
+        "betray":                False,
+        "press_succession_claim": False,
+        "denounce_treaty":       False,
+        "back_claimant":         False,
+        "tactical_retreat":      False,
+        "form_alliance":         False,
         "stabilize_territory": 0,   # counts (up to 2 if no other action used a slot)
     }
     STAB_LIMIT = 2          # stabilize slots available when nothing else fires
@@ -4598,12 +4930,11 @@ def _run_decision_engine(prev_state, new_state):
 
         # ── Slot-based suppression ────────────────────────────────────────────
         # Zero out actions whose type slot is already consumed this tick
-        if slot_used["declare_war"]:
-            evaluated["declare_war"] = 0
-        if slot_used["betray"]:
-            evaluated["betray"] = 0
-        if slot_used["form_alliance"]:
-            evaluated["form_alliance"] = 0
+        for _single_slot in ("declare_war", "betray", "form_alliance",
+                             "back_claimant", "tactical_retreat",
+                             "press_succession_claim", "denounce_treaty"):
+            if slot_used.get(_single_slot):
+                evaluated[_single_slot] = 0
 
         # Alliance only fires if neither war nor betray has triggered yet
         if slot_used["declare_war"] or slot_used["betray"]:
@@ -4649,6 +4980,10 @@ def _run_decision_engine(prev_state, new_state):
 
         elif action == "stabilize_territory":
             if slot_used["stabilize_territory"] >= stab_cap:
+                action, meta = "do_nothing", {}
+
+        elif action in ("back_claimant", "tactical_retreat", "press_succession_claim", "denounce_treaty"):
+            if slot_used.get(action):
                 action, meta = "do_nothing", {}
 
         # ── Apply + emit event ────────────────────────────────────────────────
@@ -4701,6 +5036,9 @@ def _run_decision_engine(prev_state, new_state):
                 allies_this_tick.update((faction, target))
             elif action == "stabilize_territory":
                 slot_used["stabilize_territory"] += 1
+            elif action in ("back_claimant", "tactical_retreat",
+                            "press_succession_claim", "denounce_treaty"):
+                slot_used[action] = True
 
     new_state["decision_log"] = decision_log
 
@@ -5057,6 +5395,59 @@ def _apply_tick_lifecycle_report(state: dict) -> None:
             break
 
 
+def _record_character_health_crises(state: dict) -> None:
+    tick = int(state.get("tick", 0) or 0)
+    existing = {
+        str(cause.get("actor") or "")
+        for cause in state.get("causality_ledger", []) or []
+        if cause.get("source") == "character_health" and int(cause.get("tick", 0) or 0) == tick
+    }
+    candidates = []
+    for char in state.get("house_characters", []) or []:
+        if not isinstance(char, dict):
+            continue
+        status = str(char.get("status") or "alive").lower()
+        if status in {"dead", "deceased", "killed", "missing"}:
+            continue
+        name = str(char.get("name") or "").strip()
+        if not name or name in existing:
+            continue
+        health = float(char.get("health", 100) or 100)
+        wounds = list(char.get("wounds") or [])
+        role = str(char.get("coreRole") or char.get("role") or "")
+        influence = int(char.get("influenceScore", 0) or 0)
+        notable = role.lower() in {"leader", "heir", "power", "wildcard"} or influence >= 65
+        if health > 25 and not (notable and wounds and health <= 45):
+            continue
+        candidates.append((health, -influence, char))
+
+    for _, __, char in sorted(candidates, key=lambda row: (row[0], row[1]))[:3]:
+        name = str(char.get("name") or "").strip()
+        faction = str(char.get("faction") or "").strip()
+        house = str(char.get("house") or "").strip()
+        role = str(char.get("coreRole") or char.get("role") or "Notable").strip()
+        health = float(char.get("health", 100) or 100)
+        wounds = list(char.get("wounds") or [])
+        severity = int(max(6, min(12, 12 - health / 4 + min(2, len(wounds)))))
+        record_cause(
+            state,
+            domain="health",
+            actor=name,
+            pressure=(
+                f"character health crisis; health={round(health, 2)}; role={role}; "
+                f"faction={faction}; wounds={len(wounds)}"
+            ),
+            belief=_dominant_belief_text(state, faction),
+            decision="character_health_crisis",
+            outcome=f"{name}'s failing health unsettles {faction or house or 'the court'}.",
+            affected=[item for item in [faction, house, name] if item],
+            hidden=None,
+            severity=severity,
+            confidence=0.9,
+            source="character_health",
+        )
+
+
 def run_mechanical_tick(world, prev_world=None):
     """Execute one full mechanical tick on an already-normalized world state.
 
@@ -5110,7 +5501,10 @@ def run_mechanical_tick(world, prev_world=None):
         return world
     world["_engine_tick"] = tick
 
-    # Pipeline: player_actions -> pressure -> belief -> decision -> outcome -> record -> knowledge -> surfacing
+    # Pipeline: seed -> player_actions -> pressure -> belief -> decision -> outcome -> record -> knowledge -> surfacing
+    from engine.world_seed import seed_world_if_needed
+    seed_world_if_needed(world)
+
     from engine.player_actions import process_player_actions
     process_player_actions(world)
 
@@ -5161,6 +5555,7 @@ def run_mechanical_tick(world, prev_world=None):
     from intrigue_system import run_intrigue_system
     run_intrigue_system(world)
     _normalize_house_characters(prev_world or {}, world)
+    _record_character_health_crises(world)
 
     from marriage_succession import run_marriage_succession_tick
     run_marriage_succession_tick(world)
@@ -5191,6 +5586,9 @@ def run_mechanical_tick(world, prev_world=None):
 
     update_beliefs(world)
 
+    from engine.beliefs import generate_belief_currents
+    generate_belief_currents(world)
+
     from engine.event_surfacer import surface_events
     surface_events(world, prev_world or {})
 
@@ -5198,7 +5596,7 @@ def run_mechanical_tick(world, prev_world=None):
     update_council_report(world)
 
     from engine.autopsy import build_tick_autopsy
-    build_tick_autopsy(world, knowledge_updates=knowledge_updates)
+    build_tick_autopsy(world, knowledge_updates=knowledge_updates, prev_world=prev_world or {})
 
     return world
 

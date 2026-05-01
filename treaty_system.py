@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 TREATY_TYPES = frozenset({"alliance", "non_aggression", "trade", "military_pact"})
 

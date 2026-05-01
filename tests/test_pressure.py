@@ -1,5 +1,5 @@
-from engine.knowledge import record_rumor, record_suspicion
-from engine.pressure import compute_faction_pressure, compute_pressure_report, pressure_summary
+from axiom.engine.knowledge import record_rumor, record_suspicion
+from axiom.engine.pressure import compute_faction_pressure, compute_pressure_report, pressure_summary
 
 
 def test_compute_faction_pressure_detects_material_and_war_stress():

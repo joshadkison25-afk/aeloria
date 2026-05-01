@@ -76,11 +76,135 @@ def _surfaced_rows(world_state: dict[str, Any]) -> list[dict[str, Any]]:
     return rows[:80]
 
 
+def _character_key(row: dict[str, Any]) -> tuple[str, str, str]:
+    return (
+        str(row.get("faction") or ""),
+        str(row.get("house") or ""),
+        str(row.get("name") or ""),
+    )
+
+
+def _characters_by_key(world_state: dict[str, Any] | None) -> dict[tuple[str, str, str], dict[str, Any]]:
+    if not isinstance(world_state, dict):
+        return {}
+    rows: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for row in world_state.get("house_characters", []) or []:
+        if not isinstance(row, dict):
+            continue
+        key = _character_key(row)
+        if key[2]:
+            rows[key] = row
+    return rows
+
+
+def _num(value: Any, default: float) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _relationship_changes(
+    world_state: dict[str, Any],
+    prev_world: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    previous = _characters_by_key(prev_world)
+    changes: list[dict[str, Any]] = []
+    for key, char in _characters_by_key(world_state).items():
+        prev_char = previous.get(key, {})
+        current_rels = char.get("relationships") or {}
+        previous_rels = prev_char.get("relationships") or {}
+        if not isinstance(current_rels, dict) or not isinstance(previous_rels, dict):
+            continue
+
+        for target, rel in current_rels.items():
+            if not isinstance(rel, dict):
+                continue
+            prev_rel = previous_rels.get(target)
+            if not isinstance(prev_rel, dict):
+                continue
+
+            axes: dict[str, dict[str, float]] = {}
+            for axis, default in (("trust", 40.0), ("fear", 20.0), ("respect", 35.0)):
+                before = _num(prev_rel.get(axis), default)
+                after = _num(rel.get(axis), default)
+                delta = round(after - before, 2)
+                if abs(delta) >= 0.01:
+                    axes[axis] = {
+                        "before": round(before, 2),
+                        "after": round(after, 2),
+                        "delta": delta,
+                    }
+
+            if axes:
+                changes.append({
+                    "character": key[2],
+                    "faction": key[0],
+                    "house": key[1],
+                    "target": str(target),
+                    "changes": axes,
+                })
+    return changes[:80]
+
+
+def _memory_signature(memory: dict[str, Any]) -> tuple[str, str]:
+    return (str(memory.get("type") or ""), str(memory.get("target") or ""))
+
+
+def _memory_changes(
+    world_state: dict[str, Any],
+    prev_world: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    previous = _characters_by_key(prev_world)
+    changes: list[dict[str, Any]] = []
+    for key, char in _characters_by_key(world_state).items():
+        prev_char = previous.get(key, {})
+        current_memories = char.get("memory") or []
+        previous_memories = {
+            _memory_signature(memory): memory
+            for memory in (prev_char.get("memory") or [])
+            if isinstance(memory, dict)
+        }
+        if not isinstance(current_memories, list):
+            continue
+
+        for memory in current_memories:
+            if not isinstance(memory, dict):
+                continue
+            signature = _memory_signature(memory)
+            prev_memory = previous_memories.get(signature)
+            current_impact = _num(memory.get("impact"), 0.0)
+            previous_impact = _num(prev_memory.get("impact"), 0.0) if isinstance(prev_memory, dict) else None
+            is_new = prev_memory is None
+            impact_delta = None if previous_impact is None else round(current_impact - previous_impact, 2)
+            description_changed = (
+                isinstance(prev_memory, dict)
+                and str(prev_memory.get("description") or "") != str(memory.get("description") or "")
+            )
+            if not is_new and impact_delta == 0 and not description_changed:
+                continue
+
+            changes.append({
+                "character": key[2],
+                "faction": key[0],
+                "house": key[1],
+                "type": signature[0],
+                "target": signature[1],
+                "impact": round(current_impact, 2),
+                "impact_delta": impact_delta,
+                "new": is_new,
+                "tick": int(memory.get("tick", 0) or 0),
+                "description": str(memory.get("description") or ""),
+            })
+    return changes[:80]
+
+
 def build_tick_autopsy(
     world_state: dict[str, Any],
     *,
     tick: int | None = None,
     knowledge_updates: list[dict[str, Any]] | None = None,
+    prev_world: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build and store ``last_tick_autopsy`` for the latest deterministic tick."""
     target_tick = _current_tick(world_state, tick)
@@ -116,6 +240,8 @@ def build_tick_autopsy(
             for cause in updates
             if isinstance(cause, dict)
         ],
+        "relationship_changes": _relationship_changes(world_state, prev_world),
+        "memory_changes": _memory_changes(world_state, prev_world),
         "surfaced_events": _surfaced_rows(world_state),
     }
     world_state["last_tick_autopsy"] = autopsy

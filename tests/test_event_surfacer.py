@@ -1,5 +1,5 @@
-from engine.causality import record_cause
-from engine.event_surfacer import surface_events
+from axiom.engine.causality import record_cause
+from axiom.engine.event_surfacer import surface_events
 
 
 def test_surface_events_promotes_highest_cause_to_primary_event():

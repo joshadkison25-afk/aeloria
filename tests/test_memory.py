@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from engine.memory import (
+from axiom.engine.memory import (
     MAX_MEMORIES_PER_FACTION,
     MIN_WEIGHT,
     SEVERITY_THRESHOLD,
@@ -14,7 +14,7 @@ from engine.memory import (
     memory_pressure_delta,
     update_faction_memories,
 )
-from engine.tick import run_tick
+from axiom.engine.tick import run_tick
 
 
 # ---------------------------------------------------------------------------
@@ -244,7 +244,7 @@ def test_run_tick_populates_faction_memories_from_fixture():
     fixture = Path(__file__).parent / "fixtures" / "minimal_world.json"
     world = json.loads(fixture.read_text(encoding="utf-8"))
 
-    from engine.harness import _prepare
+    from axiom.engine.harness import _prepare
     world = _prepare(world)
     result = run_tick(world, prev_world={})
 
@@ -257,7 +257,7 @@ def test_memories_accumulate_and_decay_over_10_ticks():
     fixture = Path(__file__).parent / "fixtures" / "minimal_world.json"
     world = json.loads(fixture.read_text(encoding="utf-8"))
 
-    from engine.harness import run_ticks
+    from axiom.engine.harness import run_ticks
     summary = run_ticks(world, 10)
     final = summary["final_world"]
 

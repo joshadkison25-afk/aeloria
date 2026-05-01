@@ -12,8 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from econ_trade_routes import TIDEFALL, _is_at_war  # type: ignore[attr-defined]
 from economy_simulation import list_faction_ids
-from engine.beliefs import belief_summary, dominant_belief, get_faction_belief_state
-from engine.causality import record_cause
+from axiom.engine.beliefs import belief_summary, dominant_belief, get_faction_belief_state
+from axiom.engine.causality import record_cause
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:

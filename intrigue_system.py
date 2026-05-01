@@ -24,8 +24,8 @@ from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from economy_simulation import list_faction_ids
-from engine.beliefs import belief_summary, dominant_belief
-from engine.causality import record_cause
+from axiom.engine.beliefs import belief_summary, dominant_belief
+from axiom.engine.causality import record_cause
 
 __all__ = ["run_intrigue_system", "DEFAULT_INTRIGUE_CONFIG"]
 

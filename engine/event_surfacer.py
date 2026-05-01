@@ -17,7 +17,9 @@ DOMAIN_WEIGHTS = {
     "war_attrition": 4.0,
     "territory": 3.8,
     "tributary": 3.2,
+    "health": 3.3,
     "population": 3.1,
+    "stability": 3.4,
     "character": 2.0,
     "legitimacy": 3.5,
     "dynasty": 3.0,
@@ -30,15 +32,18 @@ DOMAIN_WEIGHTS = {
 }
 
 ACTION_DOMAINS = {
+    "character",
     "diplomacy",
     "dynasty",
     "economy",
     "faction_decision",
     "intrigue",
     "legitimacy",
+    "health",
     "military",
     "population",
     "rebellion",
+    "stability",
     "succession",
     "territory",
     "treaty",
@@ -66,7 +71,7 @@ def _stage_for_severity(severity: int) -> str:
 
 
 def _trend_for_domain(domain: str) -> str:
-    if domain in {"war_attrition", "rebellion", "intrigue", "legitimacy", "population"}:
+    if domain in {"war_attrition", "rebellion", "intrigue", "legitimacy", "population", "stability", "health"}:
         return "rising"
     if domain in {"faction_decision", "diplomacy", "economy"}:
         return "stable"

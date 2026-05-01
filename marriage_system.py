@@ -18,7 +18,7 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 __all__ = ["run_marriage_system", "DEFAULT_MARRIAGE_CONFIG"]
 

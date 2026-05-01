@@ -14,7 +14,7 @@ import hashlib
 import random
 from typing import Dict, List, Optional
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 __all__ = [
     "run_tributary_system",

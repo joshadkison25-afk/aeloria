@@ -1,6 +1,6 @@
-from engine.causality import record_cause
-from engine.council import build_council_report, update_council_report
-from engine.knowledge import record_suspicion
+from axiom.engine.causality import record_cause
+from axiom.engine.council import build_council_report, update_council_report
+from axiom.engine.knowledge import record_suspicion
 
 
 def test_council_report_routes_pressure_to_advisors():

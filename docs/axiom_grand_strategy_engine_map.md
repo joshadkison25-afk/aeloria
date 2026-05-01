@@ -333,81 +333,42 @@ surfacing
 
 ### Phase 1: Clock and Engine Control
 
-Status: started.
+Status: **complete**.
 
-Goals:
-
-- pausable realtime clock
-- speed controls
-- step control
-- no overlapping ticks
+- pausable realtime clock with speed controls
+- step control, no overlapping ticks
 - SSE clock events
 - persisted local clock state
-
-Next hardening:
-
-- add backend unit tests for pause/resume/speed/due behavior
-- skip or defer heavy narration/images at high speed
-- expose tick ETA and processing state in all status surfaces
+- APScheduler tick loop, Flask SSE broadcast
 
 ### Phase 2: Causality Ledger
 
-Create `engine/causality.py`.
+Status: **complete**.
 
-Minimum interface:
+`engine/causality.py` — `record_cause`, `get_tick_causes`.
 
-```python
-def record_cause(world_state, *, domain, actor, pressure, decision, outcome, affected=None, hidden=None, severity=1):
-    ...
+Integrated into: faction decisions, economic pressure, military decisions, intrigue, player actions, all vertical slice actions.
 
-def get_tick_causes(world_state, tick=None):
-    ...
-```
-
-Storage target in world state:
-
-```json
-"causality_ledger": [
-  {
-    "id": "cause_000001",
-    "tick": 21,
-    "domain": "economy",
-    "actor": "Groth Clans",
-    "pressure": "food shortage",
-    "decision": "raise raids",
-    "outcome": "border violence increases",
-    "severity": 3
-  }
-]
-```
-
-First integrations:
-
-- faction decisions
-- economic pressure decisions
-- military decisions
-- rebellions
-- intrigue outcomes
+Storage: `world_state["causality_ledger"]` — bounded list of structured cause records with id, tick, domain, actor, pressure, belief, decision, outcome, affected, severity, confidence, source.
 
 ### Phase 3: Event Surfacer
 
-Create `engine/event_surfacer.py`.
+Status: **complete**.
 
-Purpose:
+`engine/event_surfacer.py` — reads causality ledger, ranks severity, populates `primary_event`, `supporting_events`, `recent_events`, `active_events`, `faction_actions`.
 
-- read causality ledger and subsystem outputs
-- rank severity
-- populate `primary_event`, `supporting_events`, `recent_events`, `faction_actions`
-- stop relying on LLM world-state event creation
-
-This is the bridge toward AI-flavor-only.
+AI narration receives surfaced truth and writes flavor only.
 
 ### Phase 4: Knowledge Model
 
-Create faction knowledge state:
+Status: **complete**.
+
+`engine/knowledge.py` — `record_fact`, `record_rumor`, `record_suspicion`.
+
+Per-faction knowledge state in `world_state["faction_knowledge"]`:
 
 ```json
-"faction_knowledge": {
+{
   "Glenwood": {
     "known_facts": [],
     "suspicions": [],
@@ -417,63 +378,58 @@ Create faction knowledge state:
 }
 ```
 
-Integrate with:
-
-- intrigue
-- diplomacy
-- war declarations
-- propaganda
-- council reports
+Knowledge distributes automatically on player actions and faction events.
 
 ### Phase 5: Pressure Model
 
-Create shared pressure scoring:
+Status: **complete**.
 
-```text
-economic pressure
-military pressure
-legitimacy pressure
-succession pressure
-religious pressure
-relationship pressure
-external threat pressure
-```
+`engine/pressure.py` — `compute_pressure_report`, `compute_faction_pressure`, `pressure_summary`.
 
-Actors choose actions from pressure, traits, knowledge, and goals.
+Domains: economic, military, legitimacy, succession, diplomacy, religious, external threat.
+
+Pressure feeds directly into decision scoring via `evaluateActions`.
 
 ### Phase 5.5: Belief Model
 
-Create faction belief state:
+Status: **complete**.
 
-```json
-"faction_beliefs": [
-  {
-    "faction": "Glenwood",
-    "dominant_pressure": "diplomatic",
-    "overall_pressure": 42,
-    "beliefs": [
-      {
-        "id": "belief_glenwood_001",
-        "subject": "Shadow Court",
-        "claim": "Shadow Court may be funding border unrest",
-        "confidence": 0.58,
-        "source": "suspicion",
-        "bias": "uncertain"
-      }
-    ]
-  }
-]
-```
+`engine/beliefs.py` — `build_faction_beliefs`, `update_beliefs`, `dominant_belief`, `belief_summary`, `decision_bias_from_beliefs`, `generate_belief_currents`.
 
-Belief is the bridge between objective world state and actor decisions.
-Decision scoring consumes belief-derived bias conservatively; beliefs nudge
-action weights but do not override hard viability rules.
+Belief generators: legitimacy collapse, treaty distrust, military collapse.
+
+Belief currents: high-pressure beliefs promote into spreading cultural movements tracked in `world_state["belief_currents"]` with follower counts, stage (rumor → doctrine → institution), and decay.
+
+Belief bias nudges action weights in `evaluateActions` without overriding hard viability rules.
+
+### Phase 5.75: World Seeding + Player Actions
+
+Status: **complete**.
+
+`engine/world_seed.py` — deterministic relationship seeding (78 pairs from geographic adjacency + active tensions) and faction identity seeding (13 factions with personality, goals, traits). Uses stable RNG seeded from MD5 hash of faction names. Auto-runs at start of tick pipeline.
+
+`engine/player_actions.py` — player intervention layer. 6 actions: `send_aid`, `spread_rumor`, `fund_faction`, `reveal_secret`, `support_claimant`, `impose_embargo`. Each mutates world state, records causality, distributes knowledge. Queue: `world_state["pending_player_actions"]`. HTTP: POST `/api/player-action`, GET `/api/player-actions/pending`.
+
+### Phase 5.8: Vertical Slices
+
+Status: **complete**.
+
+Four end-to-end causal chains verified firing and producing causality records across multi-tick runs:
+
+- `back_claimant` — legitimacy collapse → noble rebellion (domain: legitimacy)
+- `tactical_retreat` — military attrition → front collapse (domain: military)
+- `denounce_treaty` — broken trust → diplomatic isolation (domain: diplomacy)
+- `press_succession_claim` — succession weakness → dynastic instability (domain: legitimacy)
+
+Each has scoring in `evaluateActions`, target selection in `chooseAction`, mechanical mutation in `applyDecision`, secondary effects in `executeEvent`, and a causality record.
 
 ### Phase 6: Council/Intel UI
 
-Add map and dashboard panels:
+Status: partial.
 
-Engine-owned report:
+Engine outputs pressure, beliefs, causality, knowledge, and surfaced events. Frontend reads these. Formal `council_report` structure and advisor views not yet built.
+
+Target:
 
 ```json
 "council_report": {
@@ -490,22 +446,13 @@ Engine-owned report:
 }
 ```
 
-`engine.council` owns `council_report`. It reads pressure, beliefs,
-causality, knowledge, relationships, and surfaced events. It does not decide
-truth or mutate mechanics.
-
-- why this happened
-- upcoming risks
-- faction intent
-- supply crisis
-- rebellion likelihood
-- diplomatic flashpoints
-
-This is where Axiom becomes readable and not just complex.
+`engine.council` will own `council_report`. It reads pressure, beliefs, causality, knowledge, relationships, and surfaced events. It does not decide truth or mutate mechanics.
 
 ### Phase 7: Data-Driven Game SDK
 
-Move Aeloria-specific setup into `games/aeloria`.
+Status: **not started**.
+
+Move Aeloria-specific setup out of Python into `games/aeloria/`.
 
 Add:
 
@@ -515,37 +462,57 @@ Add:
 - mod loading
 - new-game creation
 
+Target directory split:
+
+```text
+axiom/        (engine, reusable)
+games/
+  aeloria/
+    factions.json
+    locations.json
+    cultures.json
+    religions.json
+    resources.json
+    starting_relationships.json
+    scenarios/
+```
+
 ### Phase 8: AI Flavor-Only
 
-Remove LLM authority over world truth.
+Status: partial.
 
-AI receives:
+AI narration is separated from mechanics in the tick pipeline. Some coupling remains. Target is full separation where AI receives only structured truth and outputs only prose.
 
-- canonical world state
-- causality ledger
-- surfaced events
-- faction knowledge perspectives
+AI receives: canonical world state, causality ledger, surfaced events, faction knowledge perspectives.
 
-AI outputs:
+AI outputs: chronicle prose, seer text, character voice lines, council report language, rumor phrasing.
 
-- chronicle prose
-- seer text
-- character voice lines
-- council report language
-- rumor phrasing
+## Current Engine File Map
 
-## Immediate Next Build Slice
+```text
+engine/
+  _core.py          — tick pipeline, decision engine, all faction systems
+  pressure.py       — pressure scoring per faction per domain
+  beliefs.py        — belief state, belief currents, decision bias
+  causality.py      — causality ledger record/query
+  knowledge.py      — faction knowledge distribution
+  event_surfacer.py — event ranking and surfacing
+  world_seed.py     — deterministic world initialization
+  player_actions.py — player intervention queue and handlers
+  autopsy.py        — tick autopsy and diff reporting
+  memory.py         — faction memory persistence
+```
 
-The next concrete implementation should be Phase 2: the causality ledger.
+## Next Build Target
 
-Smallest safe version:
+Phase 7: Data-Driven Game SDK.
 
-1. Add `engine/causality.py`.
-2. Add helpers for appending/querying cause records.
-3. Integrate one or two low-risk systems first:
-   - `_run_decision_engine`
-   - `_advance_war_attrition`
-4. Add tests for ledger shape and bounded history size.
-5. Show recent cause records in a debug/API endpoint.
+Load Aeloria factions, locations, relationships, and starting conditions from JSON config files instead of hardcoded Python. The engine should be able to start a new game from a `games/aeloria/` folder without touching engine code.
 
-This gives Axiom its defining foundation: the engine can explain itself.
+Minimum:
+
+1. `games/aeloria/factions.json` — faction list with names, personalities, starting power
+2. `games/aeloria/locations.json` — location list with adjacency, controllers, terrain
+3. `games/aeloria/starting_relationships.json` — initial relationship graph (overrides seed)
+4. `engine/loader.py` — reads game config and populates world state
+5. `app.py` new-game endpoint uses loader, not hardcoded defaults

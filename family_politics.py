@@ -13,7 +13,7 @@ import random
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Set, Tuple
 
-from engine.causality import record_cause
+from axiom.engine.causality import record_cause
 
 __all__ = ["run_family_politics", "DEFAULT_FAMILY_POLITICS_CONFIG"]
 

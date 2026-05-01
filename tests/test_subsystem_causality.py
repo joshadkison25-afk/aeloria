@@ -1,12 +1,14 @@
 from economic_pressure_decisions import run_economic_pressure_decisions
 from diplomatic_faction_decisions import run_diplomatic_faction_decisions
 from birth_system import run_birth_system
+from character_agency import run_character_agency
 from death_system import run_death_system
 from econ_trade_routes import process_economic_trade_routes
-from economy_simulation import _run_resource_market
-from engine._core import _process_rebellions, _update_location_control
-from engine.event_surfacer import surface_events
-from engine.knowledge import update_knowledge_from_causes
+from economy_simulation import _effect_grain, _run_resource_market
+from axiom.engine._core import _process_rebellions, _update_location_control, _update_location_stability
+from axiom.engine._core import _record_character_health_crises
+from axiom.engine.event_surfacer import surface_events
+from axiom.engine.knowledge import update_knowledge_from_causes
 from intrigue_system import run_intrigue_system
 from family_politics import run_family_politics
 from legitimacy_system import run_legitimacy_system
@@ -1006,5 +1008,267 @@ def test_market_price_shock_records_economy_causality_and_surfaces():
     assert "Twin Cities" in records[0]["affected"]
     assert "Tidefall" in records[0]["affected"]
     assert world["resource_market"]["price_spike_mult"] == 1.25
+    assert world["faction_knowledge"]
+    assert world["primary_event"]["cause_id"] == records[0]["id"]
+
+
+def test_grain_shortage_records_population_unrest_causality_and_surfaces():
+    world = {
+        "tick": 70,
+        "world_date": "Day 70",
+        "locations": [
+            {
+                "name": "Lowmarket",
+                "controller": "Twin Cities",
+                "region_type": "urban",
+                "stability": 38,
+            }
+        ],
+        "population_state": [
+            {
+                "region": "Lowmarket",
+                "culture": "Twin Cities",
+                "population": 10000,
+                "capacity": 15000,
+                "growthRate": 0.01,
+                "health": 80,
+                "pressure": 82,
+                "navalAllocation": 0,
+            }
+        ],
+        "tick_history": [{"tick": 70}],
+    }
+
+    _effect_grain("Twin Cities", 0.8, world)
+    update_knowledge_from_causes(world)
+    surface_events(world, {})
+
+    records = [
+        c
+        for c in world.get("causality_ledger", [])
+        if c.get("source") == "economy_simulation" and c.get("domain") == "population"
+    ]
+    assert len(records) == 1
+    assert records[0]["decision"] == "population_food_unrest"
+    assert "population_loss=" in records[0]["pressure"]
+    assert "Lowmarket" in records[0]["affected"]
+    assert world["population_state"][0]["population"] < 10000
+    assert world["population_state"][0]["health"] < 80
+    assert world["population_state"][0]["pressure"] > 82
+    assert world["faction_knowledge"]
+
+    health_records = [
+        c
+        for c in world.get("causality_ledger", [])
+        if c.get("source") == "economy_simulation" and c.get("domain") == "health"
+    ]
+    assert len(health_records) == 1
+    assert health_records[0]["decision"] == "food_health_crisis"
+    assert "health_loss=" in health_records[0]["pressure"]
+    assert "Lowmarket" in health_records[0]["affected"]
+    surfaced_ids = {
+        world["primary_event"]["cause_id"],
+        *(event.get("cause_id") for event in world.get("supporting_events", [])),
+    }
+    assert records[0]["id"] in surfaced_ids
+    assert health_records[0]["id"] in surfaced_ids
+
+
+def test_location_stability_drift_records_causality_before_rebellion():
+    world = {
+        "tick": 71,
+        "world_date": "Day 71",
+        "faction_power_state": [
+            {
+                "faction": "Twin Cities",
+                "economicPower": 20,
+            }
+        ],
+        "leadership_state": [
+            {
+                "faction": "Twin Cities",
+                "currentRuler": {
+                    "name": "Eldaric Aurand III",
+                    "diplomacy": 20,
+                    "warfare": 40,
+                },
+            }
+        ],
+        "locations": [
+            {
+                "name": "Lowmarket",
+                "owner": "Twin Cities",
+                "controller": "Twin Cities",
+                "territory_type": "city",
+                "stability": 31,
+                "control": 70,
+            }
+        ],
+        "tick_history": [{"tick": 71}],
+    }
+
+    _update_location_stability(world)
+    update_knowledge_from_causes(world)
+    surface_events(world, {})
+
+    records = [
+        c
+        for c in world.get("causality_ledger", [])
+        if c.get("source") == "location_stability" and c.get("domain") == "stability"
+    ]
+    assert len(records) == 1
+    assert records[0]["decision"] == "stability_drift"
+    assert "before=31" in records[0]["pressure"]
+    assert "after=28" in records[0]["pressure"]
+    assert "economic collapse" in records[0]["pressure"]
+    assert "misrule" in records[0]["pressure"]
+    assert "Lowmarket" in records[0]["affected"]
+    assert world["locations"][0]["stability"] == 28
+    assert world["locations"][0]["unrest"] is True
+    assert any(event.get("type") == "stability_drift" for event in world["location_events"])
+    assert world["faction_knowledge"]
+    assert world["primary_event"]["cause_id"] == records[0]["id"]
+
+
+def test_character_health_crisis_records_causality_and_surfaces():
+    world = {
+        "tick": 72,
+        "world_date": "Day 72",
+        "house_characters": [
+            {
+                "name": "Eldaric Aurand III",
+                "faction": "Twin Cities",
+                "house": "House Aurand",
+                "coreRole": "Leader",
+                "status": "alive",
+                "age": 78,
+                "health": 18,
+                "wounds": ["lingering fever", "old campaign wound"],
+                "influenceScore": 85,
+            },
+            {
+                "name": "Cael Aurand",
+                "faction": "Twin Cities",
+                "house": "House Aurand",
+                "coreRole": "Secondary",
+                "status": "alive",
+                "age": 31,
+                "health": 90,
+                "wounds": [],
+                "influenceScore": 35,
+            },
+        ],
+        "tick_history": [{"tick": 72}],
+    }
+
+    _record_character_health_crises(world)
+    update_knowledge_from_causes(world)
+    surface_events(world, {})
+
+    records = [
+        c
+        for c in world.get("causality_ledger", [])
+        if c.get("source") == "character_health"
+    ]
+    assert len(records) == 1
+    assert records[0]["domain"] == "health"
+    assert records[0]["decision"] == "character_health_crisis"
+    assert "health=18.0" in records[0]["pressure"]
+    assert "Eldaric Aurand III" in records[0]["affected"]
+    assert "Twin Cities" in records[0]["affected"]
+    assert world["faction_knowledge"]
+    assert world["primary_event"]["cause_id"] == records[0]["id"]
+
+
+def test_character_agency_plot_records_causality_and_surfaces(monkeypatch):
+    world = {
+        "tick": 73,
+        "world_date": "Day 73",
+        "relationships": [
+            {
+                "faction_a": "Twin Cities",
+                "faction_b": "Tidefall",
+                "type": "rivalry",
+                "hostility": 80,
+            }
+        ],
+        "faction_resources": [
+            {"faction": "Twin Cities", "food": 70, "gold": 70, "military": 60},
+            {"faction": "Tidefall", "food": 70, "gold": 70, "military": 60},
+        ],
+        "faction_power_state": [
+            {"faction": "Twin Cities", "militaryPower": 55, "politicalInfluence": 60},
+            {"faction": "Tidefall", "militaryPower": 55, "politicalInfluence": 60},
+        ],
+        "house_characters": [
+            {
+                "name": "Mira Aurand",
+                "faction": "Twin Cities",
+                "house": "House Aurand",
+                "coreRole": "Wildcard",
+                "status": "alive",
+                "ambition": 92,
+                "loyalty": 18,
+                "morality": 18,
+                "intrigue": 88,
+                "diplomacy": 35,
+                "warfare": 40,
+                "faith": 20,
+                "influenceScore": 90,
+                "ticks_to_arrive": 0,
+                "recentActions": [],
+                "memory": [],
+                "relationships": {
+                    "Lord Tideborn": {"trust": 45, "fear": 20, "respect": 40}
+                },
+            },
+            {
+                "name": "Lord Tideborn",
+                "faction": "Tidefall",
+                "house": "House Tideborn",
+                "coreRole": "Power",
+                "status": "alive",
+                "ambition": 35,
+                "loyalty": 50,
+                "morality": 90,
+                "intrigue": 10,
+                "diplomacy": 35,
+                "warfare": 35,
+                "faith": 20,
+                "influenceScore": 75,
+                "ticks_to_arrive": 0,
+            },
+        ],
+        "tick_history": [{"tick": 73}],
+    }
+    monkeypatch.setattr("character_agency.random.random", lambda: 0.0)
+    monkeypatch.setattr("character_agency.random.gauss", lambda mu, sigma: 0.0)
+    monkeypatch.setattr("character_agency.random.choice", lambda seq: seq[0])
+
+    run_character_agency(world)
+    update_knowledge_from_causes(world)
+    surface_events(world, {})
+
+    records = [
+        c
+        for c in world.get("causality_ledger", [])
+        if c.get("source") == "character_agency"
+    ]
+    assert len(records) == 1
+    assert records[0]["domain"] == "character"
+    assert records[0]["decision"] == "plot_against_rival"
+    assert "ambition=92" in records[0]["pressure"]
+    assert "Mira Aurand" in records[0]["affected"]
+    assert "Lord Tideborn" in records[0]["affected"]
+    assert world["character_updates"][0]["action"] == "plot_against_rival"
+    mira = world["house_characters"][0]
+    tideborn_rel = mira["relationships"]["Lord Tideborn"]
+    assert tideborn_rel["trust"] < 45
+    assert tideborn_rel["fear"] > 20
+    assert tideborn_rel["respect"] < 40
+    assert any(
+        m.get("type") == "betrayal" and m.get("target") == "Lord Tideborn"
+        for m in mira.get("memory", [])
+    )
     assert world["faction_knowledge"]
     assert world["primary_event"]["cause_id"] == records[0]["id"]

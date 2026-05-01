@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from threading import Lock
 
-from world_state.io import BASE_DIR, _load_world_state
+from axiom.world_state.io import BASE_DIR, _load_world_state
 
 logger = logging.getLogger(__name__)
 

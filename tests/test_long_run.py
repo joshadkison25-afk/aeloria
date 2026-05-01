@@ -7,7 +7,7 @@ causally consistent across 10 and 100 consecutive ticks.
 import json
 from pathlib import Path
 
-from engine.harness import print_summary, run_ticks
+from axiom.engine.harness import print_summary, run_ticks
 
 _FIXTURE = Path(__file__).parent / "fixtures" / "minimal_world.json"
 

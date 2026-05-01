@@ -1,6 +1,6 @@
-from engine.causality import record_cause
-from engine.explainability import build_explainability_report
-from engine.knowledge import record_fact, record_suspicion
+from axiom.engine.causality import record_cause
+from axiom.engine.explainability import build_explainability_report
+from axiom.engine.knowledge import record_fact, record_suspicion
 
 
 def test_explainability_report_ranks_causes_and_maps_knowledge_spread():

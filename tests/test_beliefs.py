@@ -1,5 +1,5 @@
-from engine.beliefs import build_faction_beliefs, decision_bias_from_beliefs, dominant_belief, update_beliefs
-from engine.knowledge import record_rumor, record_suspicion
+from axiom.engine.beliefs import build_faction_beliefs, decision_bias_from_beliefs, dominant_belief, update_beliefs
+from axiom.engine.knowledge import record_rumor, record_suspicion
 
 
 def test_build_faction_beliefs_combines_pressure_and_knowledge():
